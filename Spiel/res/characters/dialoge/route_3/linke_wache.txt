@@ -1,0 +1,4 @@
+before
+Welcher der Wege fuehrt nur nach Alzenau? Besiege mich und finde heraus, ob dieser Weg der Richtige ist!
+no
+Und war der Weg richtig?

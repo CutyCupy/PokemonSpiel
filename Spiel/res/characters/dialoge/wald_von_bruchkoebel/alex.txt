@@ -1,0 +1,4 @@
+before
+Hallo! Ich laufe gerne durch diesen Wald und verbringe meine Freizeit mit Wuermern!
+no
+Irgendwie sind Wuermer doch nicht die Staerksten.

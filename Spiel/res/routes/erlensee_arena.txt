@@ -1,0 +1,11 @@
+Erlensee Arena
+stone
+5
+5
+M,M,C1,M,M
+M,F,F,F,M
+M,F,F,F,M
+M,F,F,F,M
+M,M,W1,M,M
+W1,erlensee,29,19
+C1,man,back,Arenaleiter Juan (Wasser),true,free

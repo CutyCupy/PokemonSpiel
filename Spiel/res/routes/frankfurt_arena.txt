@@ -1,0 +1,11 @@
+Frankfurt Arena
+stone
+5
+5
+M,M,C1,M,M
+M,F,F,F,M
+M,F,F,F,M
+M,F,F,F,M
+M,M,W1,M,M
+W1,frankfurt_am_main,35,13
+C1,woman,back,Arenaleiterin Wibke (Flug),true,free

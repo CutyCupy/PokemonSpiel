@@ -1,0 +1,11 @@
+Haus von Frostana
+stone
+5
+5
+F,F,C0,F,F
+F,F,F,F,F
+F,F,F,F,F
+F,F,F,F,F
+F,F,W0,F,F
+W0,alzenau,32,24
+C0,man,back,Georg,true,free

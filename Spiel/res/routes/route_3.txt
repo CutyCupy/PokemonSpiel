@@ -1,0 +1,52 @@
+Route 3
+grassy
+35
+30
+T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T
+T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,W0,W1,T,T,T,T,T,T
+T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,F,F,T,T,T,T,T,T
+T,T,T,F,G,G,G,G,F,F,F,F,G,G,F,G,G,F,G,F,F,F,F,F,G,G,G,T,T,T
+T,T,T,G,G,G,G,G,F,F,F,G,F,G,G,F,F,G,G,F,F,F,F,F,G,G,G,T,T,T
+T,T,T,G,G,G,G,G,F,F,F,F,F,F,G,G,G,G,F,F,F,F,F,F,G,G,G,T,T,T
+T,T,T,G,G,G,G,G,F,F,F,G,G,G,F,F,F,F,G,F,F,C0,F,F,G,G,G,T,T,T
+T,T,T,G,G,G,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T
+T,T,T,G,C1,G,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T
+T,T,T,G,G,G,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T
+T,T,T,G,G,G,G,G,F,F,F,F,F,G,F,G,F,G,F,F,F,F,F,G,G,F,G,T,T,T
+T,T,T,G,G,G,G,G,F,F,F,F,F,G,F,F,G,G,F,F,F,F,F,F,G,G,G,T,T,T
+T,T,T,G,G,G,G,G,F,F,F,F,F,F,G,G,F,G,F,F,F,F,F,F,G,F,G,T,T,T
+T,T,T,C2,F,F,T,T,T,T,T,T,T,C3,F,F,F,T,T,T,T,T,T,T,C4,F,F,T,T,T
+T,T,T,F,F,F,T,T,T,T,T,T,T,F,F,F,F,T,T,T,T,T,T,T,F,F,F,T,T,T
+T,T,T,F,F,F,T,T,T,T,T,T,T,F,F,F,F,T,T,T,T,T,T,T,F,F,F,T,T,T
+T,T,T,F,F,F,T,T,T,T,T,T,T,F,F,F,F,T,T,T,T,T,T,T,F,F,F,T,T,T
+T,T,T,G,G,G,T,T,T,T,T,T,T,G,G,G,G,T,T,T,T,T,T,T,G,G,G,T,T,T
+T,T,T,G,G,G,T,T,T,T,T,T,T,G,G,G,G,T,T,T,T,T,T,T,G,G,G,T,T,T
+T,T,T,G,G,G,T,T,T,T,T,T,T,G,G,G,G,T,T,T,T,T,T,T,G,G,G,T,T,T
+T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,G,G,G,T,T,T
+T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,G,G,G,T,T,T
+T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,G,G,G,T,T,T
+T,T,T,F,G,G,G,G,F,F,F,F,F,F,F,F,F,F,F,F,F,F,G,G,G,G,G,T,T,T
+T,T,T,G,G,G,G,G,F,F,F,F,F,F,F,F,F,F,F,F,F,F,G,G,G,G,G,T,T,T
+T,T,T,G,G,G,G,G,F,F,F,F,F,F,F,F,F,F,F,F,F,F,G,C5,G,G,G,T,T,T
+T,T,T,G,G,G,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T
+T,T,T,G,C6,G,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T
+T,T,T,G,G,G,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T
+T,T,T,G,G,G,G,G,F,F,F,F,F,F,F,F,F,C8,F,F,F,F,F,F,G,G,G,T,T,T
+T,T,T,G,G,G,G,G,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,G,G,G,C7,T,T,T
+T,T,T,F,G,G,G,G,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,F,G,G,G,T,T,T
+T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,F,F,T,T,T,T,T,T,T,T,T,T
+T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,W2,W3,T,T,T,T,T,T,T,T,T,T
+T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T
+W0,rodenbach,41,33
+W1,rodenbach,42,33
+W2,alzenau,9,1
+W3,alzenau,10,1
+C0,man,back,Ahmet,true,free
+C1,man,right,Torsten,true,grass
+C2,man,right,Linke Wache,true,free
+C3,man,right,Mittlere Wache,true,free
+C4,man,right,Rechte Wache,true,free
+C5,man,back,David,true,grass
+C6,man,right,Bernhard,true,grass
+C7,man,left,Christian,true,grass
+C8,woman,front,Gudrun,true,free
