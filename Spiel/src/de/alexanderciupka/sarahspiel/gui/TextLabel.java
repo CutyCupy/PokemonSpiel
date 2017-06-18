@@ -15,13 +15,13 @@ public class TextLabel extends JLabel implements Runnable {
 	private boolean isActive;
 	private ArrayList<String> text;
 	private long delay;
-	public static final long SLOW = 50;
+	public static final long SLOW = 30;
 	public static final long FAST = 10;
 	private boolean autoMove;
 	private After after;
-	
+
 	private boolean waiting;
-	
+
 	public TextLabel() {
 		super();
 		new Thread(this).start();
@@ -36,12 +36,12 @@ public class TextLabel extends JLabel implements Runnable {
 		this.setVerticalAlignment(SwingConstants.TOP);
 		delay = SLOW;
 	}
-	
+
 	public void setActive() {
 		try {
 			if(!text.isEmpty()) {
 				isActive = true;
-				this.setVisible(true);
+//				this.setVisible(true);
 			} else {
 				isActive = false;
 				this.setVisible(false);
@@ -50,7 +50,7 @@ public class TextLabel extends JLabel implements Runnable {
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Override
 	public void run() {
 		while(true) {
@@ -76,6 +76,8 @@ public class TextLabel extends JLabel implements Runnable {
 						e.printStackTrace();
 					}
 				}
+			} else if(waiting) {
+				setVisible(false);
 			}
 			try {
 				Thread.sleep(5);
@@ -84,7 +86,7 @@ public class TextLabel extends JLabel implements Runnable {
 			}
 		}
 	}
-	
+
 	public boolean setDelay(long delay) {
 		if(delay >= 0) {
 			this.delay = delay;
@@ -92,12 +94,12 @@ public class TextLabel extends JLabel implements Runnable {
 		}
 		return false;
 	}
-	
+
 	private void removeFirst() {
 		text.remove(0);
 		isActive = false;
 	}
-	
+
 	public void addText(String text) {
 		String[] words = text.split(" ");
 		String currentRow = "";
@@ -123,26 +125,25 @@ public class TextLabel extends JLabel implements Runnable {
 				}
 			}
 		}
-		System.out.println("added - " + currentRow + secondRow);
 		this.text.add(currentRow + secondRow);
 	}
-	
+
 	public boolean isActive() {
 		return this.isActive;
 	}
-	
+
 	public boolean isEmpty() {
 		return text.isEmpty() && !isVisible();
 	}
-	
+
 	public void setAutoMove(boolean autoMove) {
 		this.autoMove = autoMove;
 	}
-	
+
 	public void setAfter(After after) {
 		this.after = after;
 	}
-	
+
 	public After getAfter() {
 		return this.after;
 	}
@@ -150,7 +151,7 @@ public class TextLabel extends JLabel implements Runnable {
 	public void setWaiting(boolean wait) {
 		this.waiting = wait;
 	}
-	
+
 	public boolean isWaiting() {
 		return this.waiting;
 	}

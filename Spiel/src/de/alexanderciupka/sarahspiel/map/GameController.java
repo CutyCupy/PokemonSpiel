@@ -8,6 +8,7 @@ import de.alexanderciupka.sarahspiel.gui.GameFrame;
 import de.alexanderciupka.sarahspiel.gui.ReportPanel;
 import de.alexanderciupka.sarahspiel.gui.TextLabel;
 import de.alexanderciupka.sarahspiel.menu.MenuController;
+import de.alexanderciupka.sarahspiel.pokemon.Ailment;
 import de.alexanderciupka.sarahspiel.pokemon.Character;
 import de.alexanderciupka.sarahspiel.pokemon.Direction;
 import de.alexanderciupka.sarahspiel.pokemon.FightOption;
@@ -161,7 +162,7 @@ public class GameController {
 	public boolean enemyAttack() {
 		return fight.enemyAttack();
 	}
-	
+
 	public boolean enemyAttack(Move move) {
 		return fight.enemyAttack(move);
 	}
@@ -271,7 +272,7 @@ public class GameController {
 						gameFrame.addDialogue("Joy: Deine Pokemon sind geheilt!");
 						waitDialogue();
 					}
-				}	
+				}
 			}
 			interactionPause = false;
 		}
@@ -316,11 +317,12 @@ public class GameController {
 		mainCharacter.setCurrentPosition(2, 0);
 		currentBackground = new Background(mainCharacter.getCurrentRoute());
 		Pokemon player = new Pokemon(54);
-		player.getStats().generateStats((short) 5);
+		player.getStats().generateStats((short) 50);
+		player.setAilment(Ailment.CONFUSION);
 		mainCharacter.getTeam().addPokemon(player);
 		gameFrame = new GameFrame();
 	}
-	
+
 	public boolean loadGame(String path) {
 		mainCharacter = new Character();
 		mainCharacter.setCharacterImage("main", "front");
@@ -351,7 +353,7 @@ public class GameController {
 			interactionPause = false;
 		}
 	}
-	
+
 	public boolean getInteractionPause() {
 		return this.interactionPause;
 	}

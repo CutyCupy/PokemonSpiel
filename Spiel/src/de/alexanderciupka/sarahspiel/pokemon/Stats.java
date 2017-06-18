@@ -11,7 +11,7 @@ public class Stats {
 
 	private final short BASE_VALUE = 5;
 	public static final String[] STAT_NAMES = {"Angriff","Verteidigung","Spezialangriff","Spezialverteidigung","Initiative"};
-	
+
 	private Pokemon pokemon;
 	private short level;
 	// HP,ATTACK,DEFENSE,SPATTACK,SPDEFENSE,SPEED
@@ -104,7 +104,7 @@ public class Stats {
 					if(!generated) {
 						gController.getGameFrame().getFightPanel().addText(this.pokemon.getName() + " erlernt " + newMove.getName() + "!");
 					}
-					this.pokemon.addMove(newMove.getName());					
+					this.pokemon.addMove(newMove.getName());
 				} catch(Exception e) {}
 			} else {
 				if(!generated) {
@@ -120,13 +120,13 @@ public class Stats {
 			}
 		}
 	}
-	
+
 	public void evolve() {
 		if(this.pokemon.evolve(gController.getInformation().checkEvolution(this.pokemon.getId(), this.level))) {
 			newMoves();
 		}
 	}
-	
+
 	public short[] getStats() {
 		return this.stats;
 	}
@@ -164,7 +164,7 @@ public class Stats {
 		setLevelUpXP(level);
 		this.currentXP = currentXP;
 	}
-	
+
 	public void setLevelUpXP(short level) {
 		levelUpXP = calculateLevelUpXP();
 	}
@@ -172,11 +172,11 @@ public class Stats {
 	public short getLevel() {
 		return this.level;
 	}
-	
+
 	public void setAllTimeXP(int xp) {
 		this.allTimeXP = xp;
 	}
-	
+
 	public int getAllTimeXP() {
 		return this.allTimeXP;
 	}
@@ -256,32 +256,42 @@ public class Stats {
 				} else {
 					fightStats[index + 1] = (short) (fightStats[index + 1] * (4 / 5.0));
 				}
-				fightStatsChanges[index]--;				
+				fightStatsChanges[index]--;
 			}
 		}
 		return true;
 	}
 
 	public short[] getFightStats() {
-		return this.fightStats;
+		short[] result = this.fightStats.clone();
+		switch(this.pokemon.getAilment()) {
+		case BURN:
+			result[1] *= 0.5;
+			break;
+		case PARALYSIS:
+			result[5] *= 0.5;
+		default:
+			break;
+		}
+		return result;
 	}
 
 	public int getCurrentXP() {
 		return this.currentXP;
 	}
-	
+
 	public void setCurrentXP(int currentXP) {
 		this.currentXP = currentXP;
 	}
-	
+
 	public int getLevelUpXP() {
 		return levelUpXP;
 	}
-	
+
 	private int calculateLevelUpXP() {
 		return calculateLevelUpXP(level + 1) - calculateLevelUpXP(level);
 	}
-	
+
 	private int calculateLevelUpXP(int level) {
 		if(level > 1 && level < 99) {
 			return (int) (Math.pow(level, 3));
@@ -289,7 +299,7 @@ public class Stats {
 			return 0;
 		}
 	}
-	
+
 	public Color getHPColor() {
 		double life = (this.currentHP) / ((double) this.stats[0]);
 		if(life > 0.5) {
@@ -299,5 +309,5 @@ public class Stats {
 		} else {
 			return Color.RED;
 		}
-	} 
+	}
 }

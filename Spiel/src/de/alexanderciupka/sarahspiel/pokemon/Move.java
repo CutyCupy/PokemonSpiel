@@ -22,14 +22,14 @@ public class Move {
 	private DamageClass damageClass;
 	private float accuracy;
 	private HashMap<Integer,Integer> stat_changes;
-	
+
 	private Type moveType;
 
 	public Move(int id) {
 		stat_changes = new HashMap<Integer,Integer>();
 		this.id = id;
 	}
-	
+
 	public Move(String name) {
 		stat_changes = new HashMap<Integer,Integer>();
 		this.name = name;
@@ -115,16 +115,16 @@ public class Move {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
+
 	public String getName() {
 		return this.name;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		return super.equals(obj);
 	}
-	
+
 	@Override
 	public Move clone() {
 		Move newMove = new Move(this.id);
@@ -147,7 +147,7 @@ public class Move {
 		newMove.setPriority(this.priority);
 		return newMove;
 	}
-	
+
 	public void setMinHits(int minHits) {
 		this.minHits = minHits;
 	}
@@ -163,20 +163,20 @@ public class Move {
 	public void reducePP() {
 		this.currentPP--;
 	}
-	
+
 	public int getCurrentPP() {
 		return this.currentPP;
 	}
-	
+
 	public void setCurrentPP(int pp) {
 		this.currentPP = pp;
 	}
-	
+
 	public void addStatChange(int index, int change) {
 		if(index >= 0 && index < 5)
 			stat_changes.put(index, change);
 	}
-	
+
 	public boolean checkStatChange() {
 		Random rng = new Random();
 		if(rng.nextFloat() < statChance) {
@@ -184,14 +184,14 @@ public class Move {
 		}
 		return false;
 	}
-	
+
 	public boolean checkUserBuff() {
-		if(accuracy > 2) {
+		if(accuracy > 100) {
 			return true;
 		}
 		return false;
 	}
-	
+
 	public int changeStat(int index) {
 		if(stat_changes.containsKey(index)) {
 			return stat_changes.get(index);

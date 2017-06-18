@@ -18,9 +18,11 @@ public class Pokemon {
 	private Stats stats;
 
 	private Move[] moves;
-	
+
 	private Type[] types;
 	private Ailment ailment;
+
+	private Random rng;
 
 	public Pokemon(int id, String name) {
 		gController = GameController.getInstance();
@@ -32,6 +34,7 @@ public class Pokemon {
 		this.types = gController.getInformation().getTypes(id);
 		this.moves = new Move[4];
 		this.ailment = Ailment.NONE;
+		this.rng = new Random();
 	}
 
 	public Pokemon(int id) {
@@ -44,8 +47,9 @@ public class Pokemon {
 		this.spriteBack = new ImageIcon(this.getClass().getResource("/pokemon/back/" + id + ".png")).getImage();
 		this.moves = new Move[4];
 		this.ailment = Ailment.NONE;
+		this.rng = new Random();
 	}
-	
+
 	public Stats getStats() {
 		return this.stats;
 	}
@@ -66,7 +70,7 @@ public class Pokemon {
 		}
 		return null;
 	}
-	
+
 	public int getAmmountOfMoves() {
 		for(int i = 0; i < moves.length; i++) {
 			if(moves[i] == null) {
@@ -79,7 +83,7 @@ public class Pokemon {
 	public void setMoves(Move[] moves) {
 		this.moves = moves;
 	}
-	
+
 	public boolean swapMoves(int first, int second) {
 		if(this.moves[first] == null || this.moves[second] == null || first == second) {
 			return false;
@@ -134,7 +138,7 @@ public class Pokemon {
 			}
 		}
 	}
-		
+
 	public boolean addMove(String currentMove, Move replacementMove) {
 		for(int i = 0; i < 4; i++) {
 			if(moves[i].getName().equals(currentMove)) {
@@ -144,15 +148,15 @@ public class Pokemon {
 		}
 		return false;
 	}
-	
+
 	public void setTypes(Type... types) {
 		this.types = new Type[2];
 		for(int i = 0; i < Math.min(2, types.length); i++) {
 			this.types[i] = types[i];
 		}
 	}
-	
-	
+
+
 	//TODO: Change to return this.types
 	public Type[] getTypes() {
 		return this.types;
@@ -166,7 +170,7 @@ public class Pokemon {
 		}
 		return false;
 	}
-	
+
 	private void update() {
 		this.name = gController.getInformation().getName(id);
 		this.spriteFront = new ImageIcon(this.getClass().getResource("/pokemon/front/" + id + ".png")).getImage();
@@ -190,12 +194,71 @@ public class Pokemon {
 					index = i;
 					highscore = current;
 				} else if(current == highscore) {
-					if(new Random().nextFloat() >= 0.5) {
+					if(new Random().nextBoolean()) {
 						index = i;
 						highscore = current;
 					}
 				}
 		}
 		return this.getMoves()[index];
+	}
+
+	public Ailment getAilment() {
+		return ailment;
+	}
+
+	public boolean setAilment(Ailment ailment) {
+		if(Ailment.NONE.equals(this.ailment) || ailment.equals(Ailment.NONE)) {
+			this.ailment = ailment;
+			return true;
+		}
+		return false;
+	}
+
+	public String canAttack() {
+		switch(this.ailment) {
+		case FREEZE:
+			if(rng.nextFloat() < 0.2f) {
+				this.ailment = Ailment.NONE;
+				this.gController.getGameFrame().getFightPanel().updatePanels();
+				return this.name + " ist wieder aufgetaut!";
+			}
+			return this.name + " kann sich nicht bewegen!";
+		case PARALYSIS:
+			if(rng.nextFloat() < (1/3.0)) {
+				return this.name + " ist paralysiert und kann sich nicht bewegen!";
+			}
+			break;
+		case SLEEP:
+			if(rng.nextFloat() < 0.25f) {
+				this.ailment = Ailment.NONE;
+				this.gController.getGameFrame().getFightPanel().updatePanels();
+				return this.name + " ist wieder aufgewacht!";
+			}
+			return this.name + " schläft tief und fest!";
+		case CONFUSION:
+			this.gController.getGameFrame().getFightPanel().addText(this.name + " ist verwirrt!");
+			if(rng.nextFloat() < (1/3.0)) {
+				this.gController.getFight().selfAttack(this);
+				return "Es hat sich vor Verwirrung selbst verletzt!";
+			}
+		default:
+			break;
+		}
+		return null;
+	}
+
+	public void afterTurnDamage() {
+		switch(this.ailment) {
+		case BURN:
+			this.stats.loseHP((int) (this.stats.getStats()[0] * (1/16.0)));
+			break;
+		case POISON:
+			this.stats.loseHP((int) (this.stats.getStats()[0] * (1/8.0)));
+			break;
+		default:
+			break;
+		}
+		gController.getGameFrame().getFightPanel().updatePanels();
 	}
 }

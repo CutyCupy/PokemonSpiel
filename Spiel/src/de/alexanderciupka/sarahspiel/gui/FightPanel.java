@@ -46,10 +46,13 @@ public class FightPanel extends JPanel {
 	private boolean throwPokeball;
 	private TextLabel textLabel;
 	private JLabel pokeball;
-	
+
 	private HPBar playerHPBar;
 	private HPBar enemyHPBar;
-	
+
+	private AilmentLabel playerAilmentLabel;
+	private AilmentLabel enemyAilmentLabel;
+
 	private Pokemon enemy;
 	private Pokemon mine;
 
@@ -79,6 +82,10 @@ public class FightPanel extends JPanel {
 		enemyStats = new JLabel();
 		playerStatPanel = new JPanel(null);
 		enemyStatPanel = new JPanel(null);
+
+		playerAilmentLabel = new AilmentLabel();
+		enemyAilmentLabel = new AilmentLabel();
+
 		enemyStats.setBackground(Color.WHITE);
 		enemyStats.setOpaque(false);
 		ownPokemon = new JLabel();
@@ -89,11 +96,11 @@ public class FightPanel extends JPanel {
 		playerStats.setBorder(BorderFactory.createCompoundBorder(new LineBorder(Color.BLACK), new EmptyBorder(2, 10, 2, 10)));
 		enemyStats.setBorder(BorderFactory.createCompoundBorder(new LineBorder(Color.BLACK), new EmptyBorder(2, 10, 2, 10)));
 		enemyPokemon.setBounds(430, 150, 100, 100);
-		enemyStatPanel.setBounds(70, 150, 125, 40);
+		enemyStatPanel.setBounds(45, 150, 180, 40);
 		enemyStats.setLocation(0, 0);
 		enemyStats.setSize(enemyStatPanel.getSize());
 		ownPokemon.setBounds(100, 275, 100, 100);
-		playerStatPanel.setBounds(400, 275, 125, 40);
+		playerStatPanel.setBounds(375, 275, 180, 40);
 		playerStats.setLocation(0, 0);
 		playerStats.setSize(playerStatPanel.getSize());
 		background.setBounds(0, 0, 630, 430);
@@ -159,6 +166,7 @@ public class FightPanel extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				for (int i = 0; i < menu.length; i++) {
+					updateMoves();
 					menu[i].setVisible(false);
 					moves[i].setVisible(true);
 				}
@@ -202,21 +210,29 @@ public class FightPanel extends JPanel {
 								Move playerMove = mine.getMoveByName(((JButton) e.getSource()).getName());
 								Move enemyMove = enemy.getMove(mine);
 								boolean playerStarts = gController.getFight().isPlayerStart(playerMove, enemyMove);
+								boolean wholeTurn = true;
 								if (playerStarts) {
 									if(gController.playerAttack(playerMove)) {
 										gController.enemyAttack(enemyMove);
+
 									} else {
+										wholeTurn = false;
 										if(!gController.getFight().enemyDead()) {
-											setEnemy();								
+											setEnemy();
 										}
 									}
 								} else {
 									if(gController.enemyAttack(enemyMove)) {
 										gController.playerAttack(playerMove);
 									} else {
+										wholeTurn = false;
 										gController.getFight().setCurrentFightOption(FightOption.POKEMON);
 										gController.repaint();
 									}
+								}
+								if(wholeTurn) {
+									mine.afterTurnDamage();
+									enemy.afterTurnDamage();
 								}
 								updateMoves();
 								showMenu();
@@ -273,7 +289,7 @@ public class FightPanel extends JPanel {
 			}
 		});
 	}
-	
+
 	private int nextPokeballCoordinate(int x) {
 		return (int) ((0.0038170163 * Math.pow(x, 2) - 2.7835081585 * x + 656.6433566434) - 40);
 	}
@@ -287,6 +303,8 @@ public class FightPanel extends JPanel {
 		enemyStatPanel.add(enemyHPBar);
 		playerStatPanel.add(playerStats);
 		enemyStatPanel.add(enemyStats);
+		playerStatPanel.add(playerAilmentLabel);
+		enemyStatPanel.add(enemyAilmentLabel);
 		add(textLabel);
 		add(playerStatPanel);
 		add(enemyStatPanel);
@@ -295,73 +313,74 @@ public class FightPanel extends JPanel {
 		add(pokeball);
 		add(back);
 		add(background);
-		
+
 		repaint();
 	}
-	
+
 	public void setPlayer() {
 		this.mine = gController.getFight().getPlayer();
 		ownPokemon.setIcon(new ImageIcon(this.getClass().getResource("/pokemon/back/" + this.mine.getId() + ".png")));
 		updateMoves();
 		updatePanels();
 	}
-	
+
 	public void updateMoves() {
 		for (int i = 0; i < moves.length; i++) {
 			moves[i].setMove(mine.getMoves()[i]);
 		}
 	}
-	
+
 	public void setEnemy() {
 		this.enemy = gController.getFight().getEnemy();
 		enemyPokemon.setIcon(new ImageIcon(this.getClass().getResource("/pokemon/front/" + this.enemy.getId() + ".png")));
 		updatePanels();
 	}
-	
+
 	public void updatePanels() {
 //		playerStats.setHorizontalAlignment(SwingConstants.CENTER);
 //		enemyStats.setHorizontalAlignment(SwingConstants.CENTER);
 //		new Thread(new Runnable() {
 //			@Override
 //			public void run() {
-		System.out.println("call");
 				playerStats.setText(mine.getName() + " Lv.: " + mine.getStats().getLevel());
 				enemyStats.setText(enemy.getName() + " Lv.: " + enemy.getStats().getLevel());
-				
+
 				playerHPBar.setMaximum(mine.getStats().getStats()[0]);
 				enemyHPBar.setMaximum(enemy.getStats().getStats()[0]);
-			
-				System.out.println("update");
+
 				playerHPBar.updateValue(mine.getStats().getCurrentHP());
 				enemyHPBar.updateValue(enemy.getStats().getCurrentHP());
-				
+
 				while(!playerHPBar.isFinished() || !enemyHPBar.isFinished()) {
 					try {
-						System.out.println("P: " + playerHPBar.isFinished());
-						System.out.println("E: " + enemyHPBar.isFinished());
 						Thread.sleep(5);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
 				}
-				
-				System.out.println("setWaiting(false)");
+
 				stopWaiting();
-				
+
+				playerAilmentLabel.setAilment(mine.getAilment());
+				enemyAilmentLabel.setAilment(enemy.getAilment());
+
+				playerAilmentLabel.setLocation(playerStats.getWidth() - playerAilmentLabel.getWidth() - 10, 5);
+				enemyAilmentLabel.setLocation(enemyStats.getWidth() - enemyAilmentLabel.getWidth() - 10, 5);
+
 				playerHPBar.setSize(playerStats.getWidth() - 20, 10);
 				playerHPBar.setLocation(10, playerStats.getHeight() - playerHPBar.getHeight() - 7);
-				
+
 				enemyHPBar.setSize(enemyStats.getWidth() - 20, 10);
-				enemyHPBar.setLocation(10, enemyStats.getHeight() - enemyHPBar.getHeight() - 7);				
+				enemyHPBar.setLocation(10, enemyStats.getHeight() - enemyHPBar.getHeight() - 7);
 //			}
 //		}).start();
-		
-		
+
+
 //		playerHPBar.setForeground(this.mine.getStats().getHPColor());
 //		enemyHPBar.setForeground(this.enemy.getStats().getHPColor());
 	}
-	
-	
+
+
 	public void showMenu() {
 		for (int i = 0; i < menu.length; i++) {
 			menu[i].setVisible(true);
@@ -370,21 +389,21 @@ public class FightPanel extends JPanel {
 		back.setVisible(false);
 		textLabel.setVisible(false);
 	}
-	
+
 	public void checkEnemyAttack() {
 		if(enemyAttack) {
 			gController.enemyAttack();
 			enemyAttack = false;
 		}
 	}
-	
+
 	public void pause() {
 		while(!textLabel.isEmpty() && !textLabel.isWaiting()) {
 			gController.sleep(50);
 			textLabel.repaint();
 		}
 	}
-	
+
 	public void showText() {
 		for (int i = 0; i < menu.length; i++) {
 			menu[i].setVisible(false);
@@ -393,13 +412,12 @@ public class FightPanel extends JPanel {
 		back.setVisible(false);
 		textLabel.setVisible(true);
 	}
-	
+
 	public void addText(String text) {
 		this.addText(text, false);
 	}
-	
+
 	public void addText(String text, boolean wait) {
-		System.out.println("setWaiting(" + wait + ")");
 		this.textLabel.setWaiting(wait);
 		if(!textLabel.isVisible()) {
 			showText();
@@ -409,12 +427,12 @@ public class FightPanel extends JPanel {
 		pause();
 		textLabel.setAfter(After.NOTHING);
 	}
-	
-	private void stopWaiting() {
+
+	public void stopWaiting() {
 		this.textLabel.setWaiting(false);
 		pause();
 	}
-	
+
 	public TextLabel getTextLabel() {
 		return this.textLabel;
 	}

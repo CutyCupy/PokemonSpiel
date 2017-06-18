@@ -5,30 +5,30 @@ import java.awt.Color;
 import javax.swing.JProgressBar;
 
 public class HPBar extends JProgressBar implements Runnable {
-	
+
 	private static final Color FULL  = Color.GREEN;
 	private static final Color HALF  = new Color(255, 255, 0);
 	private static final Color EMPTY = Color.RED;
-	
+
 	private int nextValue = -1;
 	private static final long time = 1;
 	private static final double FPS = 60;
-	
+
 	private boolean finished = true;
-	
-	
+
+
 	@Override
 	public void setValue(int n) {
 		super.setValue(n);
 		setForeground(getHPColor());
 	}
-	
+
 	public void updateValue(int n) {
-		System.out.println(n + " - " + this.getValue());
+		setFinished(false);
 		nextValue = n;
 		new Thread(this).start();
 	}
-	
+
 	private Color getHPColor() {
 		double life = (this.getValue()) / ((double) this.getMaximum());
 		if(life > 0.5) {
@@ -42,7 +42,6 @@ public class HPBar extends JProgressBar implements Runnable {
 
 	@Override
 	public void run() {
-		setFinished(false);
 		if(nextValue != -1 && nextValue < this.getValue()) {
 			int delta = this.getValue() - nextValue;
 			double decrease = delta / (FPS * time);
@@ -56,10 +55,8 @@ public class HPBar extends JProgressBar implements Runnable {
 			}
 			this.setValue(nextValue);
 		} else if(nextValue >= this.getValue()) {
-			System.out.println("no change");
 			this.setValue(nextValue);
 		}
-		System.out.println("finished");
 		setFinished(true);
 	}
 

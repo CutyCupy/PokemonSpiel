@@ -68,7 +68,7 @@ public class PokemonInformation {
 				try {
 					currentMove.setAccuracy(currentJson.get("accuracy").getAsFloat());
 				} catch (Exception e) {
-					currentMove.setAccuracy(100.0f);
+					currentMove.setAccuracy(200.0f);
 				}
 				try {
 					currentMove.setMinHits(currentJson.get("min_hits").getAsInt());
@@ -98,7 +98,7 @@ public class PokemonInformation {
 					break;
 				default:
 					currentMove.setAilment(Ailment.NONE);
-					break;					
+					break;
 				}
 				try {
 					currentMove.setPriority(currentJson.get("priority").getAsInt());
@@ -126,14 +126,17 @@ public class PokemonInformation {
 				} catch (Exception e) {
 					currentMove.setPower(0);
 				}
-				currentMove.setAilmentChance(currentJson.get("ailment_chance").getAsFloat() / 100);
+				currentMove.setAilmentChance(currentJson.get("ailment_chance").getAsFloat());
+				if(currentJson.get("category").getAsString().equals("ailment")) {
+					currentMove.setAilmentChance(100);
+				}
 				if (!currentJson.get("category").getAsString().equals("net-good-stats")) {
-					currentMove.setStatChance(currentJson.get("stat_chance").getAsFloat() / 100);
+					currentMove.setStatChance(currentJson.get("stat_chance").getAsFloat());
 				} else {
 					currentMove.setStatChance(1.0f);
 				}
-				currentMove.setHealing(currentJson.get("healing").getAsFloat() / 100);
-				currentMove.setDrain(currentJson.get("drain").getAsFloat() / 100);
+				currentMove.setHealing(currentJson.get("healing").getAsFloat());
+				currentMove.setDrain(currentJson.get("drain").getAsFloat());
 				for (JsonElement currentStatChange : currentJson.get("stat_changes").getAsJsonArray()) {
 					int change = currentStatChange.getAsJsonObject().get("change").getAsInt();
 					String[] url = currentStatChange.getAsJsonObject().get("stat").getAsJsonObject().get("url")
@@ -177,7 +180,7 @@ public class PokemonInformation {
 			}
 			for(JsonElement element : allPokemonData) {
 				int id = element.getAsJsonObject().get("id").getAsInt();
-				Type[] currentTypes = {Type.get(element.getAsJsonObject().get("firstType").getAsString()), 
+				Type[] currentTypes = {Type.get(element.getAsJsonObject().get("firstType").getAsString()),
 						Type.get(element.getAsJsonObject().get("secondType").getAsString())};
 				allPokemonTypes.put(id, currentTypes);
 			}
@@ -231,7 +234,7 @@ public class PokemonInformation {
 			return 0;
 		}
 	}
-	
+
 	public Type[] getTypes(int id) {
 		try {
 			return allPokemonTypes.get(id).clone();

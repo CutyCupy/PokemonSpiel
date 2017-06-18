@@ -163,7 +163,7 @@ public class RouteAnalyzer {
 						if(currentCharacter.isTrainer()) {
 							currentCharacter.importTeam();
 						}
-						currentCharacter.importDialogue();							
+						currentCharacter.importDialogue();
 						currentRoute.addCharacterToEntity(currentCharacter.getCurrentPosition().x,
 								currentCharacter.getCurrentPosition().y, currentCharacter);
 					}
@@ -178,7 +178,6 @@ public class RouteAnalyzer {
 					e.printStackTrace();
 				}
 				currentRoute.createMap();
-				System.out.println("IMPORTED " + routeID);
 				loadedRoutes.put(routeID, currentRoute);
 				warps.clear();
 			}
@@ -188,7 +187,7 @@ public class RouteAnalyzer {
 	public Route getRouteById(String id) {
 		return loadedRoutes.get(id);
 	}
-	
+
 	public boolean saveGame(String saveName) {
 		try {
 			String filePath = MenuController.SAVE_PATH + saveName.toLowerCase().replace(" ", "_");
@@ -221,7 +220,7 @@ public class RouteAnalyzer {
 						if(currentMove != null) {
 							currentLine += "," + currentMove.getName();
 						} else {
-							currentLine += ",null"; 
+							currentLine += ",null";
 						}
 					}
 				} else {
@@ -257,7 +256,7 @@ public class RouteAnalyzer {
 			return false;
 		}
 	}
-	
+
 	public boolean loadGame(String path) {
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(new File(path)));

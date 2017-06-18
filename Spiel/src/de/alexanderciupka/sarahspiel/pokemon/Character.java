@@ -38,14 +38,14 @@ public class Character {
 	private Route lastPokemonCenter;
 
 	private GameController gController;
-	
+
 	private ArrayList<String> routeHistory;
-	
+
 	//TODO: Add History to check where the last Pokemon center was.
-	
+
 	public Character() {
 		gController = GameController.getInstance();
-		routeHistory = new ArrayList<String>(); 
+		routeHistory = new ArrayList<String>();
 		team = new Team();
 		currentPosition = new Point(0, 0);
 		originalPosition = new Point(0, 0);
@@ -68,11 +68,11 @@ public class Character {
 	public Route getCurrentRoute() {
 		return this.currentRoute;
 	}
-	
+
 	public ArrayList<String> getRouteHistory() {
 		return this.routeHistory;
 	}
-	
+
 	public Route getLastPokemonCenter() {
 		String routeID = "zuhause";
 		int x = 2;
@@ -147,7 +147,6 @@ public class Character {
 	}
 
 	public void warpToPokemonCenter() {
-		System.out.println(this.getLastPokemonCenter().getId());
 		this.setCurrentRoute(this.getLastPokemonCenter());
 		gController.setCurrentRoute(this.getCurrentRoute());
 		team.restoreTeam();
@@ -307,7 +306,7 @@ public class Character {
 
 	public int checkStartFight() {
 		if (this.hasTeam) {
-			if (!this.defeated) {	
+			if (!this.defeated) {
 				int mainX = gController.getMainCharacter().getCurrentPosition().x;
 				int mainY = gController.getMainCharacter().getCurrentPosition().y;
 				if (mainX == currentPosition.x || mainY == currentPosition.y) {
@@ -432,8 +431,8 @@ public class Character {
 			this.currentDirection = originalDirection;
 		}
 		currentRoute.updateMap(currentPosition, originalPosition);
-	
-		
+
+
 	}
 
 	public void faceTowardsMainCharacter() {
@@ -476,15 +475,15 @@ public class Character {
 			System.exit(0);
 		}
 	}
-	
+
 	public String getBeforeFightDialogue() {
 		return this.beforeFight;
 	}
-	
+
 	public String getNoFightDialogue() {
 		return this.noFight;
 	}
-	
+
 	private String getFileName() {
 		return this.name.toLowerCase().replace(" ", "_");
 	}

@@ -108,7 +108,7 @@ public class GameFrame extends JFrame {
 		dialogue.addText(text);
 		dialogue.setActive();
 	}
-	
+
 	public boolean isDialogueEmpty() {
 		return dialogue.isEmpty();
 	}
@@ -116,7 +116,7 @@ public class GameFrame extends JFrame {
 	public TextLabel getDialogue() {
 		return dialogue;
 	}
-	
+
 	public void setDelay(long slow) {
 		this.dialogue.setDelay(slow);
 	}
@@ -128,22 +128,27 @@ public class GameFrame extends JFrame {
 		}
 		this.newMove.update(pokemon, newMove);
 		this.gController.getFight().setCurrentFightOption(FightOption.NEW_ATTACK);
-		gController.repaint();	
+		gController.repaint();
 	}
 
 	public NewAttackPanel getNewAttackPanel() {
 		return newMove;
 	}
-	
+
 	public void setActive() {
 		this.active = false;
 	}
 
 	public void setCurrentPanel(JPanel currentPanel) {
 		this.currentPanel = currentPanel;
+		if(this.gController.isFighting() && currentPanel instanceof PokemonPanel) {
+			this.gController.getFight().setCurrentFightOption(FightOption.POKEMON);
+		} else if(this.gController.isFighting() && currentPanel instanceof ReportPanel) {
+			this.gController.getFight().setCurrentFightOption(FightOption.REPORT);
+		}
 		this.repaint();
 	}
-	
+
 	private void addActions() {
 		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("W"), "up");
 		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("UP"), "up");
