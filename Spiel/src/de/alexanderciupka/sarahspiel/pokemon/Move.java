@@ -5,6 +5,8 @@ import java.util.Random;
 
 import com.google.gson.JsonObject;
 
+import de.alexanderciupka.sarahspiel.map.GameController;
+
 public class Move {
 
 	private int id;
@@ -254,6 +256,12 @@ public class Move {
 		data.addProperty("id", this.id);
 		data.addProperty("currentPP", this.currentPP);
 		return data;
+	}
+
+	public static Move importSaveData(JsonObject saveData) {
+		Move result = GameController.getInstance().getInformation().getMoveById(saveData.get("id").getAsInt());
+		result.setCurrentPP(saveData.get("currentPP").getAsInt());
+		return result;
 	}
 
 }

@@ -105,6 +105,7 @@ public class GameFrame extends JFrame {
 	}
 
 	public void addDialogue(String text) {
+		System.out.println(text);
 		dialogue.addText(text);
 		dialogue.setActive();
 	}

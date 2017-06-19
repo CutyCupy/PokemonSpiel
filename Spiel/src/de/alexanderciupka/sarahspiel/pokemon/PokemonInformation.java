@@ -203,6 +203,11 @@ public class PokemonInformation {
 	}
 
 	public Move getMoveById(int id) {
+		for(Move move : allMoves) {
+			if(move.getId() == id) {
+				return move.clone();
+			}
+		}
 		return this.allMoves.get(id - 1).clone();
 	}
 

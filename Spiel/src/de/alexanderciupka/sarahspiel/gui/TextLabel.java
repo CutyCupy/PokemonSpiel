@@ -40,7 +40,9 @@ public class TextLabel extends JLabel implements Runnable {
 	public void setActive() {
 		try {
 			if(!text.isEmpty()) {
+				System.out.println("active");
 				isActive = true;
+				this.setVisible(true);
 			} else {
 				isActive = false;
 				this.setVisible(false);
@@ -54,10 +56,12 @@ public class TextLabel extends JLabel implements Runnable {
 	public void run() {
 		while(true) {
 			if(isActive && !waiting) {
+				System.out.println("visible");
 				this.setVisible(true);
 				this.setText("<html>");
 				char[] currentLine = text.get(0).toCharArray();
 				for(char c : currentLine) {
+					System.out.println(this.getText() + c);
 					this.setText(this.getText() + c);
 					repaint();
 					try {
@@ -113,7 +117,7 @@ public class TextLabel extends JLabel implements Runnable {
 					secondRow = words[i] + " ";
 					firstRow = false;
 				}
-			} else {	
+			} else {
 				if(secondRow.length() + words[i].length() <= 24) {
 					secondRow += words[i] + " ";
 				} else {

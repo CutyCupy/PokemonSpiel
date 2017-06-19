@@ -196,7 +196,7 @@ public class GameController {
 				break;
 			default:
 				break;
-				
+
 			}
 		}
 		gameFrame.stopFight();
@@ -317,6 +317,8 @@ public class GameController {
 	public void startNewGame() {
 		mainCharacter = new Character();
 		mainCharacter.setCharacterImage("main", "front");
+		mainCharacter.setName("Sarah");
+		mainCharacter.setID("999");
 		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("zuhause"));
 		mainCharacter.setCurrentPosition(2, 0);
 		currentBackground = new Background(mainCharacter.getCurrentRoute());
@@ -350,10 +352,11 @@ public class GameController {
 		if(!interactionPause) {
 			interactionPause = true;
 			if(routeAnalyzer.saveGame(mController.saveGame())) {
+				System.out.println("saved");
 				gameFrame.addDialogue("Spiel wurde erfolgreich gespeichert!");
 				waitDialogue();
 			}
-			interactionPause = false;
+//			interactionPause = false;
 		}
 	}
 
@@ -368,8 +371,8 @@ public class GameController {
 		} else if(choice == 0) {
 			this.saveGame();
 		}
-		gameFrame.setVisible(false);
-		this.mController.showMenu();
+//		gameFrame.setVisible(false);
+//		this.mController.showMenu();
 	}
 
 	public void displayReport(Pokemon pokemon) {

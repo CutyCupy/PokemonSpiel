@@ -143,6 +143,10 @@ public class Pokemon {
 		}
 	}
 
+	private void addMove(Move move) {
+		this.addMove(move.getName());
+	}
+
 	public boolean addMove(String currentMove, Move replacementMove) {
 		for(int i = 0; i < 4; i++) {
 			if(moves[i].getName().equals(currentMove)) {
@@ -289,5 +293,15 @@ public class Pokemon {
 		data.add("moves", moveData);
 		data.addProperty("ailment", this.ailment.name());
 		return data;
+	}
+
+	public static Pokemon importSaveData(JsonObject saveData) {
+		Pokemon result = new Pokemon(saveData.get("id").getAsInt());
+		result.getStats().importSaveData(saveData.get("stats").getAsJsonObject());
+		result.setMoves(new Move[4]);
+		for(int i = 0; i < Math.min(result.getMoves().length, saveData.get("moves").getAsJsonArray().size()); i++) {
+			result.addMove(Move.importSaveData(saveData.get("moves").getAsJsonArray().get(i).getAsJsonObject()));
+		}
+		return result;
 	}
 }

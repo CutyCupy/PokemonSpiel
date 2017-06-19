@@ -62,13 +62,12 @@ public class Stats {
 			levelUpXP = calculateLevelUpXP();
 			newMoves();
 			evolve();
-		} else if (level == 99) {
+		} else {
+			this.level = 100;
+			this.currentXP = 0;
 			levelUpXP = 0;
-			level++;
 			newMoves();
 			evolve();
-		} else {
-			return;
 		}
 		float random;
 		for (int i = 0; i < stats.length; i++) {
@@ -77,30 +76,9 @@ public class Stats {
 			if (i == 0) {
 				this.currentHP += Math.round(random * 4);
 			}
-			if(fightStats != null) {
+			if (fightStats != null) {
 				calcFightStats();
 			}
-			// if (random <= 0.15) {
-			// stats[i] += 1;
-			// if (i == 0) {
-			// this.currentHP += 1;
-			// }
-			// } else if (random <= 0.5) {
-			// stats[i] += 2;
-			// if (i == 0) {
-			// this.currentHP += 2;
-			// }
-			// } else if (random <= 0.85) {
-			// stats[i] += 3;
-			// if (i == 0) {
-			// this.currentHP += 3;
-			// }
-			// } else {
-			// stats[i] += 4;
-			// if (i == 0) {
-			// this.currentHP += 4;
-			// }
-			// }
 		}
 	}
 
@@ -108,9 +86,9 @@ public class Stats {
 		this.fightStats = stats.clone();
 		int i = 0;
 		for (short change : fightStatsChanges) {
-			if(change > 0) {
+			if (change > 0) {
 				increaseStat(i, change);
-			} else if(change < 0) {
+			} else if (change < 0) {
 				decreaseStat(i, Math.abs(change));
 			}
 			i++;
@@ -209,7 +187,7 @@ public class Stats {
 		if (level < 100) {
 			currentXP += gain;
 			allTimeXP += gain;
-			while (currentXP >= levelUpXP) {
+			while (currentXP >= levelUpXP && level < 100) {
 				currentXP = currentXP - levelUpXP;
 				gController.getGameFrame().getFightPanel().updatePanels();
 				gController.getGameFrame().getFightPanel()
@@ -255,9 +233,9 @@ public class Stats {
 	}
 
 	public boolean increaseStat(int index, int ammount) {
-		if(fightStatsChanges[index] + ammount > 7) {
-			gController.getGameFrame().getFightPanel().addText(STAT_NAMES[index] + " von " + this.pokemon.getName() + " kann nicht weiter "
-					+ "erhöht werden!");
+		if (fightStatsChanges[index] + ammount > 7) {
+			gController.getGameFrame().getFightPanel().addText(
+					STAT_NAMES[index] + " von " + this.pokemon.getName() + " kann nicht weiter " + "erhöht werden!");
 			return false;
 		}
 		for (int i = 0; i < ammount; i++) {
@@ -315,11 +293,12 @@ public class Stats {
 	}
 
 	private int calculateLevelUpXP() {
-		return calculateLevelUpXP(level + 1) - calculateLevelUpXP(level);
+		int result = calculateLevelUpXP(level + 1) - calculateLevelUpXP(level);
+		return result > 0 ? result : 0;
 	}
 
 	private int calculateLevelUpXP(int level) {
-		if (level > 1 && level < 99) {
+		if (level >= 1 && level <= 100) {
 			return (int) (Math.pow(level, 3));
 		} else {
 			return 0;
@@ -343,10 +322,20 @@ public class Stats {
 		data.addProperty("current_xp", this.currentXP);
 		data.addProperty("current_hp", this.currentHP);
 		JsonObject statData = new JsonObject();
-		for(int i = 0; i < stats.length; i++) {
+		for (int i = 0; i < stats.length; i++) {
 			statData.addProperty(String.valueOf(i), stats[i]);
 		}
 		data.add("stats", statData);
 		return data;
+	}
+
+	public void importSaveData(JsonObject saveData) {
+		this.generateStats(saveData.get("level").getAsShort());
+		this.currentXP = saveData.get("current_xp").getAsInt();
+		this.currentHP = saveData.get("current_hp").getAsShort();
+		JsonObject stats = saveData.get("stats").getAsJsonObject();
+		for (int i = 0; i < this.stats.length; i++) {
+			this.stats[i] = stats.get(String.valueOf(i)).getAsShort();
+		}
 	}
 }

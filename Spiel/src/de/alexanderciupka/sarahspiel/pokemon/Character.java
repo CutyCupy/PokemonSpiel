@@ -502,7 +502,36 @@ public class Character {
 		data.add("team", this.getTeam().getSaveData());
 		data.addProperty("defeated", this.defeated);
 		return data;
+	}
 
+	public boolean importSaveData(JsonObject saveData) {
+		if(this.id == null || this.id.equals(saveData.get("id").getAsString())) {
+			this.setName(saveData.get("name").getAsString());
+			this.money = saveData.get("money").getAsLong();
+			this.setCurrentRoute(gController.getRouteAnalyzer().getRouteById(saveData.get("route").getAsString()));
+			this.setCurrentPosition(saveData.get("current_position.x").getAsInt(), saveData.get("current_position.y").getAsInt());
+			switch(saveData.get("current_direction").getAsString()) {
+			case "DOWN":
+				setCurrentDirection(Direction.DOWN);
+				break;
+			case "LEFT":
+				setCurrentDirection(Direction.LEFT);
+				break;
+			case "UP":
+				setCurrentDirection(Direction.UP);
+				break;
+			case "RIGHT":
+				setCurrentDirection(Direction.RIGHT);
+				break;
+			default:
+				setCurrentDirection(Direction.DOWN);
+				break;
+			}
+			this.team.importSaveData(saveData.get("team").getAsJsonArray());
+			this.defeated = saveData.get("defeated").equals("true") ? true : false;
+			return true;
+		}
+		return false;
 	}
 
 }

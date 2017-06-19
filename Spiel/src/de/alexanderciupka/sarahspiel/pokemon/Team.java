@@ -84,8 +84,18 @@ public class Team {
 	public JsonArray getSaveData() {
 		JsonArray data = new JsonArray();
 		for(Pokemon p : this.pokemon) {
-			data.add(p.getSaveData());
+			if(p != null) {
+				data.add(p.getSaveData());
+			}
 		}
 		return data;
+	}
+
+	public boolean importSaveData(JsonArray saveData) {
+		this.pokemon = new Pokemon[6];
+		for(int p = 0; p < Math.min(saveData.size(), this.pokemon.length); p++) {
+			pokemon[p] = Pokemon.importSaveData(saveData.get(p).getAsJsonObject());
+		}
+		return true;
 	}
 }
