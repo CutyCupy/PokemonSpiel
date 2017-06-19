@@ -9,6 +9,8 @@ import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
 
+import com.google.gson.JsonObject;
+
 import de.alexanderciupka.sarahspiel.map.GameController;
 import de.alexanderciupka.sarahspiel.map.Route;
 
@@ -487,4 +489,20 @@ public class Character {
 	private String getFileName() {
 		return this.name.toLowerCase().replace(" ", "_");
 	}
+
+	public JsonObject getSaveData() {
+		JsonObject data = new JsonObject();
+		data.addProperty("name", this.name);
+		data.addProperty("id", this.id);
+		data.addProperty("money", this.money);
+		data.addProperty("route", this.currentRoute.getId());
+		data.addProperty("current_position.x", this.currentPosition.x);
+		data.addProperty("current_position.y", this.currentPosition.y);
+		data.addProperty("current_direction", this.currentDirection.name());
+		data.add("team", this.getTeam().getSaveData());
+		data.addProperty("defeated", this.defeated);
+		return data;
+
+	}
+
 }

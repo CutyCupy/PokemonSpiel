@@ -5,6 +5,9 @@ import java.util.Random;
 
 import javax.swing.ImageIcon;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 import de.alexanderciupka.sarahspiel.map.GameController;
 
 public class Pokemon {
@@ -273,5 +276,18 @@ public class Pokemon {
 			break;
 		}
 		gController.getGameFrame().getFightPanel().updatePanels();
+	}
+
+	public JsonObject getSaveData() {
+		JsonObject data = new JsonObject();
+		data.addProperty("id", this.id);
+		data.add("stats", this.stats.getSaveData());
+		JsonArray moveData = new JsonArray();
+		for(int i = 0; i < getAmmountOfMoves(); i++) {
+			moveData.add(this.moves[i].getSaveData());
+		}
+		data.add("moves", moveData);
+		data.addProperty("ailment", this.ailment.name());
+		return data;
 	}
 }

@@ -3,6 +3,8 @@ package de.alexanderciupka.sarahspiel.pokemon;
 import java.util.HashMap;
 import java.util.Random;
 
+import com.google.gson.JsonObject;
+
 public class Move {
 
 	private int id;
@@ -246,4 +248,12 @@ public class Move {
 	public void setStat_changes(HashMap<Integer, Integer> stat_changes) {
 		this.stat_changes = stat_changes;
 	}
+
+	public JsonObject getSaveData() {
+		JsonObject data = new JsonObject();
+		data.addProperty("id", this.id);
+		data.addProperty("currentPP", this.currentPP);
+		return data;
+	}
+
 }

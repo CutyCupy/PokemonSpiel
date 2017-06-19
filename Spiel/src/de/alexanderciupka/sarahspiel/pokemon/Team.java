@@ -1,5 +1,7 @@
 package de.alexanderciupka.sarahspiel.pokemon;
 
+import com.google.gson.JsonArray;
+
 public class Team {
 
 	private Pokemon[] pokemon;
@@ -77,5 +79,13 @@ public class Team {
 
 	public Pokemon[] getTeam() {
 		return this.pokemon;
+	}
+
+	public JsonArray getSaveData() {
+		JsonArray data = new JsonArray();
+		for(Pokemon p : this.pokemon) {
+			data.add(p.getSaveData());
+		}
+		return data;
 	}
 }

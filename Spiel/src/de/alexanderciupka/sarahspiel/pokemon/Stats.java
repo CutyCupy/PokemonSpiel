@@ -3,6 +3,8 @@ package de.alexanderciupka.sarahspiel.pokemon;
 import java.awt.Color;
 import java.util.Random;
 
+import com.google.gson.JsonObject;
+
 import de.alexanderciupka.sarahspiel.gui.After;
 import de.alexanderciupka.sarahspiel.map.GameController;
 
@@ -333,5 +335,18 @@ public class Stats {
 		} else {
 			return Color.RED;
 		}
+	}
+
+	public JsonObject getSaveData() {
+		JsonObject data = new JsonObject();
+		data.addProperty("level", this.level);
+		data.addProperty("current_xp", this.currentXP);
+		data.addProperty("current_hp", this.currentHP);
+		JsonObject statData = new JsonObject();
+		for(int i = 0; i < stats.length; i++) {
+			statData.addProperty(String.valueOf(i), stats[i]);
+		}
+		data.add("stats", statData);
+		return data;
 	}
 }
