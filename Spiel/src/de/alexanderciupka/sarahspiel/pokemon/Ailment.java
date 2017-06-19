@@ -6,7 +6,7 @@ public enum Ailment {
 
 	NONE, BURN, FREEZE,
 	PARALYSIS, SLEEP, CONFUSION,
-	POISON;
+	POISON, FAINTED;
 
 
 
@@ -44,6 +44,8 @@ public enum Ailment {
 			return "GIF";
 		case SLEEP:
 			return "SLF";
+		case FAINTED:
+			return "BSG";
 		default:
 			return "NONE";
 		}
@@ -63,6 +65,8 @@ public enum Ailment {
 			return Type.getColor(Type.POISON);
 		case SLEEP:
 			return Type.getColor(Type.NORMAL);
+		case FAINTED:
+			return Type.getColor(Type.FIGHTING);
 		default:
 			return new Color(0, 0, 0);
 		}

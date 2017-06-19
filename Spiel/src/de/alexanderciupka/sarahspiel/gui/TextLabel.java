@@ -41,7 +41,6 @@ public class TextLabel extends JLabel implements Runnable {
 		try {
 			if(!text.isEmpty()) {
 				isActive = true;
-//				this.setVisible(true);
 			} else {
 				isActive = false;
 				this.setVisible(false);
@@ -114,7 +113,7 @@ public class TextLabel extends JLabel implements Runnable {
 					secondRow = words[i] + " ";
 					firstRow = false;
 				}
-			} else {
+			} else {	
 				if(secondRow.length() + words[i].length() <= 24) {
 					secondRow += words[i] + " ";
 				} else {

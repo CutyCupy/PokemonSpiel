@@ -126,7 +126,7 @@ public class GameFrame extends JFrame {
 			this.newMove = new NewAttackPanel();
 			this.newMove.setBorder(new EmptyBorder(5, 5, 5, 5));
 		}
-		this.newMove.update(pokemon, newMove);
+		this.newMove.set(pokemon, newMove);
 		this.gController.getFight().setCurrentFightOption(FightOption.NEW_ATTACK);
 		gController.repaint();
 	}

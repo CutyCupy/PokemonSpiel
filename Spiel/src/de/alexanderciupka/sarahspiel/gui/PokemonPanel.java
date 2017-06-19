@@ -32,11 +32,11 @@ public class PokemonPanel extends JPanel {
 		gController = GameController.getInstance();
 		for (int i = 0; i < 6; i++) {
 			PokemonButton pokemonButton = new PokemonButton(gController.getMainCharacter().getTeam().getTeam()[i], i);
-			pokemonButton.setSize(200, 75);
+			pokemonButton.setSize(250, 75);
 			if (i % 2 == 0) {
-				pokemonButton.setLocation(90, 100 + i * 62);
+				pokemonButton.setLocation(50, 100 + i * 62);
 			} else {
-				pokemonButton.setLocation(340, 100 + (i - 1) * 62 + 25);
+				pokemonButton.setLocation(330, 100 + (i - 1) * 62 + 25);
 			}
 			pokemonButton.update();
 			pokemonButton.setBorder(BorderFactory.createLineBorder(Color.BLACK));

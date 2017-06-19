@@ -183,18 +183,22 @@ public class GameController {
 
 	public void escape() {
 		if (fight.canEscape()) {
-			this.fighting = false;
-			gameFrame.stopFight();
+			endFight();
 		}
 	}
 
 	public void endFight() {
 		this.fighting = false;
-		gameFrame.stopFight();
-	}
-
-	public void stopFight() {
-		this.fighting = false;
+		for(int i = 0; i < this.mainCharacter.getTeam().getAmmount(); i++) {
+			switch(this.mainCharacter.getTeam().getTeam()[i].getAilment()) {
+			case CONFUSION:
+				this.mainCharacter.getTeam().getTeam()[i].setAilment(Ailment.NONE);
+				break;
+			default:
+				break;
+				
+			}
+		}
 		gameFrame.stopFight();
 	}
 
@@ -316,9 +320,8 @@ public class GameController {
 		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("zuhause"));
 		mainCharacter.setCurrentPosition(2, 0);
 		currentBackground = new Background(mainCharacter.getCurrentRoute());
-		Pokemon player = new Pokemon(54);
-		player.getStats().generateStats((short) 50);
-		player.setAilment(Ailment.CONFUSION);
+		Pokemon player = new Pokemon(246);
+		player.getStats().generateStats((short) 99);
 		mainCharacter.getTeam().addPokemon(player);
 		gameFrame = new GameFrame();
 	}

@@ -57,6 +57,7 @@ public class ReportPanel extends JPanel {
 	private JLabel strengthLabel;
 	private JLabel accuracyLabel;
 	private JLabel damageClassLabel;
+	private AilmentLabel ailmentLabel;
 
 	public ReportPanel() {
 		setBounds(0, 0, 630, 630);
@@ -67,7 +68,7 @@ public class ReportPanel extends JPanel {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		pokemonLabel.setBounds(50, 115, 200, 200);
+		pokemonLabel.setBounds(75, 115, 150, 150);
 		add(pokemonLabel);
 		
 		xpBar = new JProgressBar();
@@ -98,16 +99,16 @@ public class ReportPanel extends JPanel {
 		add(levelLabel);
 
 		hpBar = new HPBar();
-		hpBar.setBounds(290, 47, 200, 25);
+		hpBar.setBounds(230, 47, 200, 25);
 		add(hpBar);
 		
-		kpLabel = new JLabel("KP / KP");
-		kpLabel.setBounds(500, 47, 85, 25);
+		kpLabel = new JLabel("999 / 999");
+		kpLabel.setBounds(440, 47, 65, 25);
 		add(kpLabel);
 		
 		nameLabel = new JLabel("Name: ");
 		nameLabel.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		nameLabel.setBounds(50, 47, 200, 25);
+		nameLabel.setBounds(50, 47, 170, 25);
 		add(nameLabel);
 		
 		idLabel = new JLabel("ID: ");
@@ -148,6 +149,10 @@ public class ReportPanel extends JPanel {
 		damageClassLabel.setBounds(265, 386, 60, 25);
 		add(damageClassLabel);
 		
+		ailmentLabel = new AilmentLabel();
+		ailmentLabel.setLocation(515, 52);
+		add(ailmentLabel);
+		
 		moves = new MoveButton[4];
 		
 		
@@ -155,22 +160,6 @@ public class ReportPanel extends JPanel {
 			MoveButton currentMove = new MoveButton();
 			currentMove.setBounds(125 + 185 * (i % 2), 430 + 50 * (i / 2), 175, 40);
 			currentMove.setName(String.valueOf(i));
-//			currentMove.addActionListener(new ActionListener() {
-//				@Override
-//				public void actionPerformed(ActionEvent arg0) {
-//					JButton source = (JButton) arg0.getSource();
-//					if(swapping) {
-//						second = Integer.parseInt(source.getName());
-//						pokemon.swapMoves(first, second);
-//						updateMoves();
-//						swapping = false;
-//					} else {
-//						first = Integer.parseInt(source.getName());
-//						moves[first].setBackground(Color.LIGHT_GRAY);
-//						swapping = true;
-//					}
-//				}
-//			});
 			
 			currentMove.addMouseListener(new MouseAdapter() {
 				
@@ -196,7 +185,7 @@ public class ReportPanel extends JPanel {
 						Move move = pokemon.getMoves()[Integer.parseInt(e.getComponent().getName())];
 						moveTypeLabel.setType(move.getMoveType());
 						strengthLabel.setText("Stärke: " + move.getPower());
-						accuracyLabel.setText("Genauigkeit: " + ((int) move.getAccuracy()));
+						accuracyLabel.setText("Genauigkeit: " + (move.getAccuracy() > 100 ? "---" : (int) move.getAccuracy()));
 						
 						switch(move.getDamageClass()) {
 						case PHYSICAL:
@@ -256,7 +245,7 @@ public class ReportPanel extends JPanel {
 		Stats stats = this.pokemon.getStats();
 		
 		//Pokemon Data
-		this.pokemonLabel.setIcon(new ImageIcon(Painting.toBufferedImage(this.pokemon.getSpriteFront()).getScaledInstance(200, 200, Image.SCALE_SMOOTH)));
+		this.pokemonLabel.setIcon(new ImageIcon(Painting.toBufferedImage(this.pokemon.getSpriteFront()).getScaledInstance(150, 150, Image.SCALE_SMOOTH)));
 		this.nameLabel.setText("Name: " + this.pokemon.getName());
 		this.idLabel.setText("ID: " + this.pokemon.getId());
 		this.firstTypeLabel.setType(this.pokemon.getTypes()[0]);
@@ -272,6 +261,7 @@ public class ReportPanel extends JPanel {
 		this.hpBar.setMaximum(stats.getStats()[0]);
 		this.hpBar.setValue(stats.getCurrentHP());
 		this.hpBar.setForeground(stats.getHPColor());
+		this.ailmentLabel.setAilment(this.pokemon.getAilment());
 		//Stats
 		for(int i = 1; i < stats.getStats().length; i++) {
 			this.stats[i-1].setText(Stats.STAT_NAMES[i-1] + ": " + stats.getStats()[i]);

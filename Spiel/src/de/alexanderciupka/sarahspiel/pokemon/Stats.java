@@ -41,7 +41,7 @@ public class Stats {
 		stats[0] *= 2;
 		this.currentHP = stats[0];
 		gController = GameController.getInstance();
-	}
+	}	
 
 	public Stats(short level, short hp, short attack, short defense, short spattack, short spdefense, short speed,
 			int currentXP) {
@@ -55,11 +55,8 @@ public class Stats {
 
 	public void levelUP() {
 		if (level < 99) {
-//			levelUpXP *= (Math.pow((3250 / 3.0), 1 / (99.0)));
 			level++;
 			levelUpXP = calculateLevelUpXP();
-//			if(this.pokemon.getName().equals("Sarah") || this.pokemon.getName().equals("Entoron"))
-//				System.err.println(level + ": " + levelUpXP);
 			newMoves();
 			evolve();
 		} else if (level == 99) {
@@ -217,6 +214,7 @@ public class Stats {
 	public boolean loseHP(int ammount) {
 		if (this.currentHP - ammount <= 0) {
 			this.currentHP = 0;
+			this.pokemon.setAilment(Ailment.FAINTED);
 			return true;
 		}
 		this.currentHP -= ammount;

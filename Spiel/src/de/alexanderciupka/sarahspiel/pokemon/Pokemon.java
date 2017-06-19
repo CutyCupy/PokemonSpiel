@@ -21,6 +21,7 @@ public class Pokemon {
 
 	private Type[] types;
 	private Ailment ailment;
+	private int since;
 
 	private Random rng;
 
@@ -166,6 +167,9 @@ public class Pokemon {
 		if(newID != 0) {
 			this.id = newID;
 			update();
+			if(gController.isFighting()) {
+				gController.getGameFrame().getFightPanel().setPlayer();
+			}
 			return true;
 		}
 		return false;
@@ -175,6 +179,7 @@ public class Pokemon {
 		this.name = gController.getInformation().getName(id);
 		this.spriteFront = new ImageIcon(this.getClass().getResource("/pokemon/front/" + id + ".png")).getImage();
 		this.spriteBack = new ImageIcon(this.getClass().getResource("/pokemon/back/" + id + ".png")).getImage();
+		this.types = gController.getPokemonInformation().getTypes(this.id);
 	}
 
 	public void restoreMoves() {
@@ -208,7 +213,8 @@ public class Pokemon {
 	}
 
 	public boolean setAilment(Ailment ailment) {
-		if(Ailment.NONE.equals(this.ailment) || ailment.equals(Ailment.NONE)) {
+		if(Ailment.NONE.equals(this.ailment) || ailment.equals(Ailment.NONE) || ailment.equals(Ailment.FAINTED)) {
+			this.since = 1;
 			this.ailment = ailment;
 			return true;
 		}
@@ -232,11 +238,17 @@ public class Pokemon {
 		case SLEEP:
 			if(rng.nextFloat() < 0.25f) {
 				this.ailment = Ailment.NONE;
-				this.gController.getGameFrame().getFightPanel().updatePanels();
+				gController.getGameFrame().getFightPanel().updatePanels();
 				return this.name + " ist wieder aufgewacht!";
 			}
-			return this.name + " schläft tief und fest!";
+			return this.name + " schlï¿½ft tief und fest!";
 		case CONFUSION:
+			if(rng.nextFloat() < 0.2f * since) {
+				this.ailment = Ailment.NONE;
+				gController.getGameFrame().getFightPanel().updatePanels();
+				this.gController.getGameFrame().getFightPanel().addText(this.name + " ist nicht mehr verwirrt!", false);
+				return null;
+			}
 			this.gController.getGameFrame().getFightPanel().addText(this.name + " ist verwirrt!");
 			if(rng.nextFloat() < (1/3.0)) {
 				this.gController.getFight().selfAttack(this);
@@ -245,6 +257,7 @@ public class Pokemon {
 		default:
 			break;
 		}
+		since++;
 		return null;
 	}
 

@@ -207,6 +207,7 @@ public class FightPanel extends JPanel {
 							@Override
 							public void run() {
 								showText();
+								textLabel.setActive();
 								Move playerMove = mine.getMoveByName(((JButton) e.getSource()).getName());
 								Move enemyMove = enemy.getMove(mine);
 								boolean playerStarts = gController.getFight().isPlayerStart(playerMove, enemyMove);
@@ -342,6 +343,7 @@ public class FightPanel extends JPanel {
 //		new Thread(new Runnable() {
 //			@Override
 //			public void run() {
+		
 				playerStats.setText(mine.getName() + " Lv.: " + mine.getStats().getLevel());
 				enemyStats.setText(enemy.getName() + " Lv.: " + enemy.getStats().getLevel());
 

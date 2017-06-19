@@ -367,5 +367,5 @@ public class Fighting {
 		}
 		return xp / 7;
 	}
-
+		
 }
