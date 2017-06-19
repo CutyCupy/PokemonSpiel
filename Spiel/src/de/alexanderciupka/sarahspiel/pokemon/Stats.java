@@ -10,7 +10,8 @@ import de.alexanderciupka.sarahspiel.map.GameController;
 public class Stats {
 
 	private final short BASE_VALUE = 5;
-	public static final String[] STAT_NAMES = {"Angriff","Verteidigung","Spezialangriff","Spezialverteidigung","Initiative"};
+	public static final String[] STAT_NAMES = { "Angriff", "Verteidigung", "Spezialangriff", "Spezialverteidigung",
+			"Initiative" };
 
 	private Pokemon pokemon;
 	private short level;
@@ -41,7 +42,7 @@ public class Stats {
 		stats[0] *= 2;
 		this.currentHP = stats[0];
 		gController = GameController.getInstance();
-	}	
+	}
 
 	public Stats(short level, short hp, short attack, short defense, short spattack, short spdefense, short speed,
 			int currentXP) {
@@ -70,56 +71,80 @@ public class Stats {
 		float random;
 		for (int i = 0; i < stats.length; i++) {
 			random = rng.nextFloat();
-			if (random <= 0.15) {
-				stats[i] += 1;
-				if (i == 0) {
-					this.currentHP += 1;
-				}
-			} else if (random <= 0.5) {
-				stats[i] += 2;
-				if (i == 0) {
-					this.currentHP += 2;
-				}
-			} else if (random <= 0.85) {
-				stats[i] += 3;
-				if (i == 0) {
-					this.currentHP += 3;
-				}
-			} else {
-				stats[i] += 4;
-				if (i == 0) {
-					this.currentHP += 4;
-				}
+			stats[i] += Math.round(random * 4);
+			if (i == 0) {
+				this.currentHP += Math.round(random * 4);
 			}
+			if(fightStats != null) {
+				calcFightStats();
+			}
+			// if (random <= 0.15) {
+			// stats[i] += 1;
+			// if (i == 0) {
+			// this.currentHP += 1;
+			// }
+			// } else if (random <= 0.5) {
+			// stats[i] += 2;
+			// if (i == 0) {
+			// this.currentHP += 2;
+			// }
+			// } else if (random <= 0.85) {
+			// stats[i] += 3;
+			// if (i == 0) {
+			// this.currentHP += 3;
+			// }
+			// } else {
+			// stats[i] += 4;
+			// if (i == 0) {
+			// this.currentHP += 4;
+			// }
+			// }
+		}
+	}
+
+	private void calcFightStats() {
+		this.fightStats = stats.clone();
+		int i = 0;
+		for (short change : fightStatsChanges) {
+			if(change > 0) {
+				increaseStat(i, change);
+			} else if(change < 0) {
+				decreaseStat(i, Math.abs(change));
+			}
+			i++;
 		}
 	}
 
 	public void newMoves() {
-		for(Move newMove : gController.getInformation().getNewMove(this.pokemon.getId(), this.level)) {
-			if(this.pokemon.getAmmountOfMoves() != 4) {
+		for (Move newMove : gController.getInformation().getNewMove(this.pokemon.getId(), this.level)) {
+			if (this.pokemon.getAmmountOfMoves() != 4) {
 				try {
-					if(!generated) {
-						gController.getGameFrame().getFightPanel().addText(this.pokemon.getName() + " erlernt " + newMove.getName() + "!");
+					if (!generated) {
+						gController.getGameFrame().getFightPanel()
+								.addText(this.pokemon.getName() + " erlernt " + newMove.getName() + "!");
 					}
 					this.pokemon.addMove(newMove.getName());
-				} catch(Exception e) {}
+				} catch (Exception e) {
+				}
 			} else {
-				if(!generated) {
-					gController.getGameFrame().getFightPanel().addText(this.pokemon.getName() + " versucht " + newMove.getName() + " zu erlernen! M�chtest du eine andere Attacke vergessen oder deine momentanen Attacken behalten?");
+				if (!generated) {
+					gController.getGameFrame().getFightPanel().addText(this.pokemon.getName() + " versucht "
+							+ newMove.getName()
+							+ " zu erlernen! M�chtest du eine andere Attacke vergessen oder deine momentanen Attacken behalten?");
 					gController.getGameFrame().getFightPanel().getTextLabel().setAfter(After.NEW_ATTACK);
 					gController.getGameFrame().displayNewMove(this.pokemon, newMove);
-					while(this.gController.getFight().getCurrentFightOption() == FightOption.NEW_ATTACK) {
+					while (this.gController.getFight().getCurrentFightOption() == FightOption.NEW_ATTACK) {
 						gController.sleep(50);
 					}
 				} else {
-					 this.pokemon.addMove(this.pokemon.getRandomMove().getName(), newMove.clone());
+					this.pokemon.addMove(this.pokemon.getRandomMove().getName(), newMove.clone());
 				}
 			}
 		}
 	}
 
 	public void evolve() {
-		if(this.pokemon.evolve(gController.getInformation().checkEvolution(this.pokemon.getId(), this.level))) {
+		if (this.pokemon.evolve(gController.getInformation().checkEvolution(this.pokemon.getId(), this.level))) {
 			newMoves();
 		}
 	}
@@ -185,7 +210,8 @@ public class Stats {
 			while (currentXP >= levelUpXP) {
 				currentXP = currentXP - levelUpXP;
 				gController.getGameFrame().getFightPanel().updatePanels();
-				gController.getGameFrame().getFightPanel().addText(pokemon.getName() + " erreicht Level " + (this.level + 1) + "!");
+				gController.getGameFrame().getFightPanel()
+						.addText(pokemon.getName() + " erreicht Level " + (this.level + 1) + "!");
 				levelUP();
 			}
 		}
@@ -227,42 +253,42 @@ public class Stats {
 	}
 
 	public boolean increaseStat(int index, int ammount) {
+		if(fightStatsChanges[index] + ammount > 7) {
+			gController.getGameFrame().getFightPanel().addText(STAT_NAMES[index] + " von " + this.pokemon.getName() + " kann nicht weiter "
+					+ "erhöht werden!");
+			return false;
+		}
 		for (int i = 0; i < ammount; i++) {
-			if(fightStatsChanges[index] >= 7) {
-				gController.getGameFrame().getFightPanel().addText(STAT_NAMES[index] + " von " + this.pokemon.getName() + " kann nicht weiter erhoeht werden!");
-				return false;
+			if (fightStatsChanges[index] < 0) {
+				fightStats[index + 1] = (short) (fightStats[index + 1] * (3 / 2.0));
 			} else {
-				if (fightStatsChanges[index] < 0) {
-					fightStats[index + 1] = (short) (fightStats[index + 1] * (3 / 2.0));
-				} else {
-					fightStats[index + 1] = (short) (fightStats[index + 1] * (5 / 4.0));
-				}
-				fightStatsChanges[index]++;
+				fightStats[index + 1] = (short) (fightStats[index + 1] * (5 / 4.0));
 			}
+			fightStatsChanges[index]++;
 		}
 		return true;
 	}
 
 	public boolean decreaseStat(int index, int ammount) {
+		if (fightStatsChanges[index] - ammount < -7) {
+			gController.getGameFrame().getFightPanel().addText(
+					STAT_NAMES[index] + " von " + this.pokemon.getName() + " kann nicht weiter gesenkt werden!");
+			return false;
+		}
 		for (int i = 0; i < ammount; i++) {
-			if(fightStatsChanges[index] <= -7) {
-				gController.getGameFrame().getFightPanel().addText(STAT_NAMES[index] + " von " + this.pokemon.getName() + " kann nicht weiter gesenkt werden!");
-				return false;
+			if (fightStatsChanges[index] <= 0) {
+				fightStats[index + 1] = (short) (fightStats[index + 1] * (2 / 3.0));
 			} else {
-				if (fightStatsChanges[index] <= 0) {
-					fightStats[index + 1] = (short) (fightStats[index + 1] * (2 / 3.0));
-				} else {
-					fightStats[index + 1] = (short) (fightStats[index + 1] * (4 / 5.0));
-				}
-				fightStatsChanges[index]--;
+				fightStats[index + 1] = (short) (fightStats[index + 1] * (4 / 5.0));
 			}
+			fightStatsChanges[index]--;
 		}
 		return true;
 	}
 
 	public short[] getFightStats() {
 		short[] result = this.fightStats.clone();
-		switch(this.pokemon.getAilment()) {
+		switch (this.pokemon.getAilment()) {
 		case BURN:
 			result[1] *= 0.5;
 			break;
@@ -291,7 +317,7 @@ public class Stats {
 	}
 
 	private int calculateLevelUpXP(int level) {
-		if(level > 1 && level < 99) {
+		if (level > 1 && level < 99) {
 			return (int) (Math.pow(level, 3));
 		} else {
 			return 0;
@@ -300,9 +326,9 @@ public class Stats {
 
 	public Color getHPColor() {
 		double life = (this.currentHP) / ((double) this.stats[0]);
-		if(life > 0.5) {
+		if (life > 0.5) {
 			return Color.GREEN;
-		} else if(life > 0.15) {
+		} else if (life > 0.15) {
 			return new Color(255, 255, 0);
 		} else {
 			return Color.RED;

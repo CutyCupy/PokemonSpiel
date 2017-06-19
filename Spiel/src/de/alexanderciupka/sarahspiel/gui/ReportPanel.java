@@ -2,6 +2,7 @@ package de.alexanderciupka.sarahspiel.gui;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -9,6 +10,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -17,6 +19,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingConstants;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 
 import de.alexanderciupka.sarahspiel.map.GameController;
 import de.alexanderciupka.sarahspiel.painting.Painting;
@@ -57,6 +62,7 @@ public class ReportPanel extends JPanel {
 	private JLabel strengthLabel;
 	private JLabel accuracyLabel;
 	private JLabel damageClassLabel;
+	private JLabel descriptionLabel;
 	private AilmentLabel ailmentLabel;
 
 	public ReportPanel() {
@@ -107,11 +113,13 @@ public class ReportPanel extends JPanel {
 		add(kpLabel);
 		
 		nameLabel = new JLabel("Name: ");
+		nameLabel.setBorder(new CompoundBorder(new LineBorder(new Color(0, 0, 0), 1, true), new EmptyBorder(0, 5, 0, 0)));
 		nameLabel.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		nameLabel.setBounds(50, 47, 170, 25);
 		add(nameLabel);
 		
 		idLabel = new JLabel("ID: ");
+		idLabel.setBorder(new CompoundBorder(new LineBorder(new Color(0, 0, 0), 1, true), new EmptyBorder(0, 5, 0, 0)));
 		idLabel.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		idLabel.setBounds(50, 83, 60, 25);
 		add(idLabel);
@@ -129,29 +137,37 @@ public class ReportPanel extends JPanel {
 		moveTypeLabel = new TypeLabel();
 		moveTypeLabel.setType(Type.NORMAL);
 		moveTypeLabel.setVisible(false);
-		moveTypeLabel.setLocation(265, 350);
+		moveTypeLabel.setLocation(215, 350);
 		add(moveTypeLabel);
 		
 		strengthLabel = new JLabel("Stärke: ");
+		strengthLabel.setBorder(new CompoundBorder(new LineBorder(new Color(0, 0, 0), 1, true), new EmptyBorder(0, 5, 0, 0)));
 		strengthLabel.setVisible(false);
 		strengthLabel.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		strengthLabel.setBounds(125, 348, 125, 25);
+		strengthLabel.setBounds(75, 348, 125, 25);
 		add(strengthLabel);
 		
 		accuracyLabel = new JLabel("Genauigkeit: ");
+		accuracyLabel.setBorder(new CompoundBorder(new LineBorder(new Color(0, 0, 0), 1, true), new EmptyBorder(0, 5, 0, 0)));
 		accuracyLabel.setVisible(false);
 		accuracyLabel.setFont(new Font("Tahoma", Font.PLAIN, 15));
-		accuracyLabel.setBounds(125, 384, 125, 25);
+		accuracyLabel.setBounds(75, 384, 125, 25);
 		add(accuracyLabel);
 		
 		damageClassLabel = new JLabel("DC");
 		damageClassLabel.setVisible(false);
-		damageClassLabel.setBounds(265, 386, 60, 25);
+		damageClassLabel.setBounds(215, 386, 60, 25);
 		add(damageClassLabel);
 		
 		ailmentLabel = new AilmentLabel();
 		ailmentLabel.setLocation(515, 52);
 		add(ailmentLabel);
+		
+		descriptionLabel = new JLabel("Description");
+		descriptionLabel.setBorder(new CompoundBorder(new LineBorder(new Color(0, 0, 0), 1, true), new EmptyBorder(0, 5, 0, 0)));
+		descriptionLabel.setVisible(false);
+		descriptionLabel.setBounds(290, 350, 245, 59);
+		add(descriptionLabel);
 		
 		moves = new MoveButton[4];
 		
@@ -184,7 +200,7 @@ public class ReportPanel extends JPanel {
 					if(e.getComponent().isEnabled()) {
 						Move move = pokemon.getMoves()[Integer.parseInt(e.getComponent().getName())];
 						moveTypeLabel.setType(move.getMoveType());
-						strengthLabel.setText("Stärke: " + move.getPower());
+						strengthLabel.setText("Stärke: " + (move.getPower() <= 0 ? "---" : move.getPower()));
 						accuracyLabel.setText("Genauigkeit: " + (move.getAccuracy() > 100 ? "---" : (int) move.getAccuracy()));
 						
 						switch(move.getDamageClass()) {
@@ -199,6 +215,10 @@ public class ReportPanel extends JPanel {
 							break;
 						}
 						
+						
+						descriptionLabel.setText(formatText((int) (descriptionLabel.getWidth() * 0.9), move.getDescription(), getFontMetrics(descriptionLabel.getFont()), 3));
+						
+						descriptionLabel.setVisible(true);
 						strengthLabel.setVisible(true);
 						accuracyLabel.setVisible(true);
 						damageClassLabel.setVisible(true);
@@ -207,6 +227,7 @@ public class ReportPanel extends JPanel {
 				
 				@Override
 				public void mouseExited(MouseEvent e) {
+					descriptionLabel.setVisible(false);
 					moveTypeLabel.setVisible(false);
 					strengthLabel.setVisible(false);
 					accuracyLabel.setVisible(false);
@@ -222,6 +243,7 @@ public class ReportPanel extends JPanel {
 			JLabel currentLabel = new JLabel(Stats.STAT_NAMES[i] + ": ");
 			currentLabel.setFont(new Font("Tahoma", Font.PLAIN, 15));
 			currentLabel.setBounds(290, 120 + 40 * i, 165, 25);
+			currentLabel.setBorder(new CompoundBorder(new LineBorder(new Color(0, 0, 0), 1, true), new EmptyBorder(0, 5, 0, 0)));
 			add(currentLabel);
 			stats[i] = currentLabel;
 		}
@@ -267,5 +289,32 @@ public class ReportPanel extends JPanel {
 			this.stats[i-1].setText(Stats.STAT_NAMES[i-1] + ": " + stats.getStats()[i]);
 		}
 		setVisible(true);
+	}
+	
+	public String formatText(int width, String text, FontMetrics fm, int maxRows) {
+		ArrayList<String> rows = new ArrayList<String>();
+		String currentRow = "";
+		for(String s : text.split(" ")) {
+			System.out.println(width);
+			if(fm.stringWidth(currentRow + " " + s) > width) {
+				rows.add(currentRow);
+				currentRow = s;
+			} else {
+				currentRow += " " + s;
+			}
+		}
+		if(!currentRow.isEmpty()) {
+			rows.add(currentRow);
+		}
+		if(rows.size() > maxRows) {
+			this.descriptionLabel.setFont(this.descriptionLabel.getFont().deriveFont(this.descriptionLabel.getFont().getSize() - 1.0f));
+			return formatText(width, text, getFontMetrics(this.descriptionLabel.getFont()), maxRows);
+		}
+		String result = "<html>";
+		for(String s : rows) {
+			System.out.println(s);
+			result += s + "<br>";
+		}
+		return result;
 	}
 }
