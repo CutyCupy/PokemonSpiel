@@ -116,7 +116,8 @@ public class MenuController {
 	}
 
 	public int returnToMenu() {
-		return JOptionPane.showConfirmDialog(null, "M�chtest du speichern bevor du zum Hauptmen� zur�ckkehrst?", "Zum Hauptmen�?", JOptionPane.YES_NO_CANCEL_OPTION);
+		return JOptionPane.showOptionDialog(null, "Was möchtest du tun?", "Menü", JOptionPane.YES_NO_CANCEL_OPTION,  JOptionPane.QUESTION_MESSAGE, null,
+				new Object[]{"Speichern", "Speichern und zum Hauptmenü", "Laden", "Abbrechen"}, "Speichern");
 	}
 
 	public void showMenu() {

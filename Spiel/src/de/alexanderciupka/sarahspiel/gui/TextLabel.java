@@ -36,13 +36,12 @@ public class TextLabel extends JLabel implements Runnable {
 		this.setVerticalAlignment(SwingConstants.TOP);
 		delay = SLOW;
 	}
-
+	
 	public void setActive() {
 		try {
 			if(!text.isEmpty()) {
 				System.out.println("active");
 				isActive = true;
-				this.setVisible(true);
 			} else {
 				isActive = false;
 				this.setVisible(false);
@@ -56,12 +55,11 @@ public class TextLabel extends JLabel implements Runnable {
 	public void run() {
 		while(true) {
 			if(isActive && !waiting) {
-				System.out.println("visible");
 				this.setVisible(true);
 				this.setText("<html>");
 				char[] currentLine = text.get(0).toCharArray();
 				for(char c : currentLine) {
-					System.out.println(this.getText() + c);
+					System.out.println(this.isVisible());
 					this.setText(this.getText() + c);
 					repaint();
 					try {
@@ -99,6 +97,7 @@ public class TextLabel extends JLabel implements Runnable {
 	}
 
 	private void removeFirst() {
+		System.out.println("remove");
 		text.remove(0);
 		isActive = false;
 	}

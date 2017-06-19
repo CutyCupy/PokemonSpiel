@@ -14,7 +14,7 @@ import com.google.gson.JsonObject;
 import de.alexanderciupka.sarahspiel.map.GameController;
 import de.alexanderciupka.sarahspiel.map.Route;
 
-public class Character {
+public class Character implements Runnable {
 
 	private Image front;
 	private Image left;
@@ -23,6 +23,7 @@ public class Character {
 	private String name;
 	private Route currentRoute;
 	private Point currentPosition;
+	private Point oldPosition;
 	private Point originalPosition;
 	private Direction originalDirection;
 	private Team team;
@@ -36,12 +37,23 @@ public class Character {
 	private String noFight;
 	private boolean hasTeam;
 	private boolean trainer;
+	
+	private double exactX;
+	private double exactY;
+	
+	private boolean moving;
 
 	private Route lastPokemonCenter;
 
 	private GameController gController;
 
 	private ArrayList<String> routeHistory;
+	
+	private int speed;
+	
+	public static final int FAST = 10;
+	public static final int SLOW = 30;
+	
 
 	//TODO: Add History to check where the last Pokemon center was.
 
@@ -50,7 +62,9 @@ public class Character {
 		routeHistory = new ArrayList<String>();
 		team = new Team();
 		currentPosition = new Point(0, 0);
+		oldPosition = new Point(currentPosition);
 		originalPosition = new Point(0, 0);
+		this.speed = SLOW;
 	}
 
 	public Character(String id) {
@@ -59,7 +73,9 @@ public class Character {
 		team = new Team();
 		this.id = id;
 		currentPosition = new Point(0, 0);
+		oldPosition = new Point(currentPosition);
 		originalPosition = new Point(0, 0);
+		this.speed = SLOW;
 	}
 
 	public void setCurrentRoute(Route currentRoute) {
@@ -97,11 +113,15 @@ public class Character {
 	public void setCurrentPosition(int x, int y) {
 		currentPosition.setLocation(x, y);
 		originalPosition.setLocation(x, y);
+		this.exactX = x;
+		this.exactY = y;
 	}
 
 	public void setCurrentPosition(Point newPosition) {
 		currentPosition.setLocation(newPosition);
 		originalPosition.setLocation(newPosition);
+		this.exactX = newPosition.x;
+		this.exactY = newPosition.y;
 	}
 
 	public Point getCurrentPosition() {
@@ -110,6 +130,7 @@ public class Character {
 
 	public void changePosition(Direction direction) {
 		currentDirection = direction;
+		oldPosition = new Point(currentPosition);
 		switch (direction) {
 		case UP:
 			currentPosition.y -= 1;
@@ -124,6 +145,8 @@ public class Character {
 			currentPosition.x += 1;
 			break;
 		}
+		new Thread(this).start();
+		waiting();
 	}
 
 	public Team getTeam() {
@@ -412,16 +435,33 @@ public class Character {
 			}
 			while (!(currentPosition.x + x == mainX && currentPosition.y + y == mainY)) {
 //				gController.sleep(500);
+				System.out.println("running");
 				currentRoute.getEntities()[currentPosition.y][currentPosition.x].removeCharacter();
-				currentPosition.x += x;
-				currentPosition.y += y;
-				currentRoute.getEntities()[currentPosition.y][currentPosition.x].addCharacter(this);
-				currentRoute.updateMap(new Point(currentPosition.x - x, currentPosition.y - y), currentPosition);
+				currentRoute.updateMap(currentPosition);
+//				currentPosition.x += x;
+//				currentPosition.y += y;
+				currentRoute.getEntities()[currentPosition.y + y][currentPosition.x + x].addCharacter(this);
+				this.changePosition(this.getCurrentDirection());
+//				waiting();
+				currentRoute.updateMap(currentPosition);
 				gController.repaint();
 			}
+			System.err.println("finished");
 			return true;
 		}
 		return false;
+	}
+
+	private void waiting() {
+		this.moving = true;
+		while(moving) {
+			try {
+				Thread.sleep(5);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		
 	}
 
 	public void resetPosition() {
@@ -506,6 +546,7 @@ public class Character {
 
 	public boolean importSaveData(JsonObject saveData) {
 		if(this.id == null || this.id.equals(saveData.get("id").getAsString())) {
+			this.setID(saveData.get("id").getAsString());
 			this.setName(saveData.get("name").getAsString());
 			this.money = saveData.get("money").getAsLong();
 			this.setCurrentRoute(gController.getRouteAnalyzer().getRouteById(saveData.get("route").getAsString()));
@@ -532,6 +573,81 @@ public class Character {
 			return true;
 		}
 		return false;
+	}
+
+	public double getExactY() {
+		return this.exactY;
+	}
+	
+	public double getExactX() {
+		return this.exactX;
+	}
+
+	@Override
+	public void run() {
+		switch (this.currentDirection) {
+		case UP:
+			for(int i = 0; i < 10; i++) {
+				this.exactY -= 0.1;
+				if(!this.id.equals("999")) {
+					currentRoute.updateMap(oldPosition, currentPosition);
+				}
+				gController.getGameFrame().repaint();
+				try {
+					Thread.sleep(this.speed);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			break;
+		case DOWN:
+			for(int i = 0; i < 10; i++) {
+				this.exactY += 0.1;
+				if(!this.id.equals("999")) {
+					currentRoute.updateMap(oldPosition, currentPosition);
+				}
+				gController.getGameFrame().repaint();
+				try {
+					Thread.sleep(this.speed);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			break;
+		case LEFT:
+			for(int i = 0; i < 10; i++) {
+				this.exactX -= 0.1;
+				if(!this.id.equals("999")) {
+					currentRoute.updateMap(oldPosition, currentPosition);
+				}
+				gController.getGameFrame().repaint();
+				try {
+					Thread.sleep(this.speed);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			break;
+		case RIGHT:
+			for(int i = 0; i < 10; i++) {
+				this.exactX += 0.1;
+				if(!this.id.equals("999")) {
+					currentRoute.updateMap(oldPosition, currentPosition);
+				}
+				gController.getGameFrame().repaint();
+				try {
+					Thread.sleep(this.speed);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			break;
+		}
+		this.moving = false;
+	}
+
+	public void toggleWalkingSpeed() {
+		this.speed = this.speed == SLOW ? FAST : SLOW;
 	}
 
 }

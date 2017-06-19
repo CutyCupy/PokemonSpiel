@@ -148,7 +148,7 @@ public class Route {
 					g.drawImage(entities[p.y][p.x].getTerrain(), p.x * 70, p.y * 70, null);
 					g.drawImage(entities[p.y][p.x].getSprite(), p.x * 70, p.y * 70, null);
 					if(entities[p.y][p.x].hasCharacter()) {
-						g.drawImage(entities[p.y][p.x].getCharacterSprite(), p.x * 70, p.y * 70, null);
+						g.drawImage(entities[p.y][p.x].getCharacterSprite(), (int) (entities[p.y][p.x].getCharacter().getExactX() * 70), (int) (entities[p.y][p.x].getCharacter().getExactY() * 70), null);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();

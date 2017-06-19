@@ -77,15 +77,16 @@ public class GameController {
 
 	private boolean updatePosition(int x, int y) {
 		if (currentBackground.checkPositionAccessible(new Point(x, y))) {
-			if (!currentBackground.getCurrentRoute().getEntities()[y][x].startWarp()) {
-				mainCharacter.setCurrentPosition(x, y);
-			} else {
+			mainCharacter.changePosition(mainCharacter.getCurrentDirection());
+			if (currentBackground.getCurrentRoute().getEntities()[y][x].startWarp()) {
 				x = mainCharacter.getCurrentPosition().x;
 				y = mainCharacter.getCurrentPosition().y;
 			}
 			int characterIndex = checkStartFight();
 			if (characterIndex >= 0) {
+				System.out.println("seen");
 				startFight(getCurrentBackground().getCurrentRoute().getCharacters().get(characterIndex));
+				System.out.println("walked");
 			} else if (currentBackground.getCurrentRoute().getEntities()[y][x].checkPokemon()) {
 				startFight(currentBackground.chooseEncounter());
 			}
@@ -344,7 +345,7 @@ public class GameController {
 		gameFrame.setActive();
 		while (!gameFrame.isDialogueEmpty()) {
 			sleep(50);
-			gameFrame.getDialogue().repaint();
+			this.gameFrame.getDialogue().repaint();
 		}
 	}
 
@@ -353,10 +354,10 @@ public class GameController {
 			interactionPause = true;
 			if(routeAnalyzer.saveGame(mController.saveGame())) {
 				System.out.println("saved");
-				gameFrame.addDialogue("Spiel wurde erfolgreich gespeichert!");
-				waitDialogue();
+//				gameFrame.addDialogue("Spiel wurde erfolgreich gespeichert! sd as a a asc asc csa csas cas acs ");
+//				waitDialogue();
 			}
-//			interactionPause = false;
+			interactionPause = false;
 		}
 	}
 
@@ -366,13 +367,22 @@ public class GameController {
 
 	public void returnToMenu() {
 		int choice = mController.returnToMenu();
-		if(choice == 2) {
-			return;
-		} else if(choice == 0) {
+		switch(choice) {
+		case 0:
 			this.saveGame();
+			break;
+		case 1:
+			this.saveGame();
+			gameFrame.setVisible(false);
+			this.mController.showMenu();
+			break;
+		case 2:
+			this.mController.loadGame();
+			break;
+		default:
+			break;
 		}
-//		gameFrame.setVisible(false);
-//		this.mController.showMenu();
+		
 	}
 
 	public void displayReport(Pokemon pokemon) {

@@ -34,7 +34,7 @@ public class GameFrame extends JFrame {
 	private GameController gController;
 	private boolean active;
 	private JPanel currentPanel;
-	private static final long COOLDOWN = 45;
+	private static final long COOLDOWN = 0;
 
 	public GameFrame() {
 		map = new JPanel(null);
@@ -66,6 +66,7 @@ public class GameFrame extends JFrame {
 				setContentPane(currentPanel);
 			} else {
 				map.paint(g);
+				map.repaint();
 			}
 		} else {
 			setContentPane(gController.getCurrentFightPanel());
@@ -105,7 +106,6 @@ public class GameFrame extends JFrame {
 	}
 
 	public void addDialogue(String text) {
-		System.out.println(text);
 		dialogue.addText(text);
 		dialogue.setActive();
 	}
@@ -226,6 +226,15 @@ public class GameFrame extends JFrame {
 				}
 			}
 		});
+		
+		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("R"), "run");
+		map.getActionMap().put("run", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				gController.getMainCharacter().toggleWalkingSpeed();
+			}
+		});
+		
 		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("S"), "down");
 		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("DOWN"), "down");
 		map.getActionMap().put("down", new AbstractAction() {
