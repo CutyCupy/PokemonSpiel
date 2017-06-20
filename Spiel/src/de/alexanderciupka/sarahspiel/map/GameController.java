@@ -382,7 +382,7 @@ public class GameController {
 		default:
 			break;
 		}
-		
+
 	}
 
 	public void displayReport(Pokemon pokemon) {

@@ -226,7 +226,7 @@ public class GameFrame extends JFrame {
 				}
 			}
 		});
-		
+
 		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("R"), "run");
 		map.getActionMap().put("run", new AbstractAction() {
 			@Override
@@ -234,7 +234,7 @@ public class GameFrame extends JFrame {
 				gController.getMainCharacter().toggleWalkingSpeed();
 			}
 		});
-		
+
 		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("S"), "down");
 		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("DOWN"), "down");
 		map.getActionMap().put("down", new AbstractAction() {
