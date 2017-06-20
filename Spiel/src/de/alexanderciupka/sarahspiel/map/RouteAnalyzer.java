@@ -51,7 +51,7 @@ public class RouteAnalyzer {
 		readAllRoutes();
 	}
 
-//	public void ureadAllRoutes() {
+//	public void readAllRoutes() {
 //		for (File currentFile : folderFiles) {
 //			if (currentFile.isFile() && currentFile.getName().endsWith(".txt")) {
 //				try {
