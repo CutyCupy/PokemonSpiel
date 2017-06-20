@@ -2,10 +2,6 @@ package de.alexanderciupka.sarahspiel.pokemon;
 
 import java.awt.Image;
 import java.awt.Point;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
 
@@ -20,46 +16,40 @@ public class Character implements Runnable {
 	private Image left;
 	private Image right;
 	private Image back;
-	private String name;
-	private Route currentRoute;
-	private Point currentPosition;
-	private Point oldPosition;
-	private Point originalPosition;
-	private Direction originalDirection;
-	private Team team;
-	private String id;
-	private long money;
-	private Direction currentDirection;
-	private boolean defeated;
-	private File teamFile;
-	private File dialogueFile;
-	private String beforeFight;
-	private String noFight;
-	private boolean hasTeam;
-	private boolean trainer;
-	
-	private double exactX;
-	private double exactY;
-	
-	private boolean moving;
+	protected String name;
+	protected Route currentRoute;
+	protected Point currentPosition;
+	protected Point oldPosition;
+	protected Point originalPosition;
+	protected Direction originalDirection;
+	protected Team team;
+	protected String id;
+	protected long money;
+	protected Direction currentDirection;
+	protected boolean defeated;
+	protected boolean hasTeam;
+	protected boolean trainer;
 
-	private Route lastPokemonCenter;
+	protected double exactX;
+	protected double exactY;
 
-	private GameController gController;
+	protected boolean moving;
 
-	private ArrayList<String> routeHistory;
-	
-	private int speed;
-	
+	protected GameController gController;
+
+
+	protected int speed;
+
 	public static final int FAST = 10;
 	public static final int SLOW = 30;
-	
+
+	private boolean surfing;
+
 
 	//TODO: Add History to check where the last Pokemon center was.
 
 	public Character() {
 		gController = GameController.getInstance();
-		routeHistory = new ArrayList<String>();
 		team = new Team();
 		currentPosition = new Point(0, 0);
 		oldPosition = new Point(currentPosition);
@@ -69,7 +59,6 @@ public class Character implements Runnable {
 
 	public Character(String id) {
 		gController = GameController.getInstance();
-		routeHistory = new ArrayList<String>();
 		team = new Team();
 		this.id = id;
 		currentPosition = new Point(0, 0);
@@ -79,35 +68,11 @@ public class Character implements Runnable {
 	}
 
 	public void setCurrentRoute(Route currentRoute) {
-		routeHistory.add(currentRoute.getId());
 		this.currentRoute = currentRoute;
 	}
 
 	public Route getCurrentRoute() {
 		return this.currentRoute;
-	}
-
-	public ArrayList<String> getRouteHistory() {
-		return this.routeHistory;
-	}
-
-	public Route getLastPokemonCenter() {
-		String routeID = "zuhause";
-		int x = 2;
-		int y = 0;
-		Direction d = Direction.DOWN;
-		for(int centerIndex = this.routeHistory.size() - 1; centerIndex >= 0; centerIndex--) {
-			if(this.routeHistory.get(centerIndex).equals("pokemon_center")) {
-				routeID = this.routeHistory.get(centerIndex);
-				x = 2;
-				y = 1;
-				d = Direction.UP;
-				break;
-			}
-		}
-		setCurrentPosition(x, y);
-		setCurrentDirection(d);
-		return GameController.getInstance().getRouteAnalyzer().getRouteById(routeID);
 	}
 
 	public void setCurrentPosition(int x, int y) {
@@ -147,6 +112,7 @@ public class Character implements Runnable {
 		}
 		new Thread(this).start();
 		waiting();
+		setSurfing(this.getCurrentRoute().getEntities()[currentPosition.y][currentPosition.x].isWater());
 	}
 
 	public Team getTeam() {
@@ -167,23 +133,6 @@ public class Character implements Runnable {
 		return null;
 	}
 
-	public void setLastPokemonCenter(Route center) {
-		this.lastPokemonCenter = center;
-	}
-
-	public void warpToPokemonCenter() {
-		this.setCurrentRoute(this.getLastPokemonCenter());
-		gController.setCurrentRoute(this.getCurrentRoute());
-		team.restoreTeam();
-//		this.setCurrentDirection(Direction.UP);
-//		if (lastPokemonCenter != null) {
-//			this.setCurrentPosition(2, 1);
-//			this.setCurrentRoute(this.lastPokemonCenter);
-//		} else {
-//			this.setCurrentPosition(2, 1);
-//			gController.setCurrentRoute(gController.getRouteAnalyzer().getRouteById("pokemon_center"));
-//		}
-	}
 
 	public void setCharacterImage(String characterImageName, String direction) {
 		this.front = new ImageIcon(
@@ -236,26 +185,6 @@ public class Character implements Runnable {
 		this.money -= ammount;
 	}
 
-	public void importTeam() {
-		try {
-			System.out.println("IMPORT TEAM: " + getFileName() + " - " + this.currentRoute.getId());
-			teamFile = new File(
-					this.getClass().getResource("/characters/teams/" + this.currentRoute.getId() + "/" + getFileName() + ".txt").getFile());
-			BufferedReader reader = new BufferedReader(new FileReader(teamFile));
-			String currentLine;
-			while ((currentLine = reader.readLine()) != null) {
-				String[] rowElements = currentLine.split(",");
-				Pokemon currentPokemon = new Pokemon(Integer.parseInt(rowElements[0]));
-				currentPokemon.getStats().generateStats(Short.parseShort(rowElements[1]));
-				this.team.addPokemon(currentPokemon);
-			}
-			hasTeam = true;
-		} catch (Exception e) {
-			hasTeam = false;
-		}
-
-	}
-
 	public String getName() {
 		return name;
 	}
@@ -293,20 +222,6 @@ public class Character implements Runnable {
 
 	public void setCurrentDirection(Direction direction) {
 		this.currentDirection = direction;
-	}
-
-	public Point getInteractionPoint() {
-		switch (currentDirection) {
-		case DOWN:
-			return new Point(currentPosition.x, currentPosition.y + 1);
-		case UP:
-			return new Point(currentPosition.x, currentPosition.y - 1);
-		case LEFT:
-			return new Point(currentPosition.x - 1, currentPosition.y);
-		case RIGHT:
-			return new Point(currentPosition.x + 1, currentPosition.y);
-		}
-		return null;
 	}
 
 	public void defeated(boolean defeat) {
@@ -364,7 +279,7 @@ public class Character implements Runnable {
 						return -1;
 					}
 					for (int i = 1; i <= 7; i++) {
-						if (checkAccessible(currentPosition.x + (i * x), currentPosition.y + (i * y))) {
+						if (this.getCurrentRoute().getEntities()[currentPosition.y + (i * y)][currentPosition.x + (i * x)].isAccessible(this)) {
 							if (mainX == currentPosition.x + (i * x) && mainY == currentPosition.y + (i * y)) {
 								return i;
 							}
@@ -376,81 +291,9 @@ public class Character implements Runnable {
 		return -1;
 	}
 
-	public boolean checkAccessible(int x, int y) {
-		return gController.getCurrentBackground().getCurrentRoute().getEntities()[y][x].isAccessible();
-	}
-
-	public boolean moveTowardsMainCharacter() {
-		int mainX = gController.getMainCharacter().getCurrentPosition().x;
-		int mainY = gController.getMainCharacter().getCurrentPosition().y;
-		if (currentPosition.x != mainX ^ currentPosition.y != mainY) {
-			int x = 0;
-			int y = 0;
-			switch (currentDirection) {
-			case DOWN:
-				if (mainX != currentPosition.x || currentPosition.y > mainY) {
-					return false;
-				}
-				y = 1;
-				break;
-			case LEFT:
-				if (mainY != currentPosition.y || currentPosition.x < mainX) {
-					return false;
-				}
-				x = -1;
-				break;
-			case RIGHT:
-				if (mainY != currentPosition.y || currentPosition.x > mainX) {
-					return false;
-				}
-				x = 1;
-				break;
-			case UP:
-				if (mainX != currentPosition.x || currentPosition.y < mainY) {
-					return false;
-				}
-				y = -1;
-				break;
-			}
-			for(int i = 1; i < 8; i++) {
-				if(currentPosition.x + (i*x) == mainX && currentPosition.y + (i*y) == mainY) {
-					break;
-				} else if(!currentRoute.getEntities()[currentPosition.y + (i*y)][currentPosition.x + (i*x)].isAccessible()) {
-					return false;
-				}
-			}
-			switch (this.getCurrentDirection()) {
-			case DOWN:
-				gController.getMainCharacter().setCurrentDirection(Direction.UP);
-				break;
-			case LEFT:
-				gController.getMainCharacter().setCurrentDirection(Direction.RIGHT);
-				break;
-			case RIGHT:
-				gController.getMainCharacter().setCurrentDirection(Direction.LEFT);
-				break;
-			case UP:
-				gController.getMainCharacter().setCurrentDirection(Direction.DOWN);
-				break;
-			}
-			while (!(currentPosition.x + x == mainX && currentPosition.y + y == mainY)) {
-//				gController.sleep(500);
-				System.out.println("running");
-				currentRoute.getEntities()[currentPosition.y][currentPosition.x].removeCharacter();
-				currentRoute.updateMap(currentPosition);
-//				currentPosition.x += x;
-//				currentPosition.y += y;
-				currentRoute.getEntities()[currentPosition.y + y][currentPosition.x + x].addCharacter(this);
-				this.changePosition(this.getCurrentDirection());
-//				waiting();
-				currentRoute.updateMap(currentPosition);
-				gController.repaint();
-			}
-			System.err.println("finished");
-			return true;
-		}
-		return false;
-	}
+//	public boolean checkAccessible(int x, int y) {
+//		return gController.getCurrentBackground().getCurrentRoute().getEntities()[y][x].isAccessible(this);
+//	}
 
 	private void waiting() {
 		this.moving = true;
@@ -461,73 +304,7 @@ public class Character implements Runnable {
 				e.printStackTrace();
 			}
 		}
-		
-	}
 
-	public void resetPosition() {
-		if (!currentPosition.equals(originalPosition)) {
-			currentRoute.getEntities()[currentPosition.y][currentPosition.x].removeCharacter();
-			currentRoute.getEntities()[originalPosition.y][originalPosition.x].addCharacter(this);
-			currentPosition = new Point(originalPosition);
-		} if(currentDirection != originalDirection) {
-			this.currentDirection = originalDirection;
-		}
-		currentRoute.updateMap(currentPosition, originalPosition);
-
-
-	}
-
-	public void faceTowardsMainCharacter() {
-		switch (gController.getMainCharacter().getCurrentDirection()) {
-		case UP:
-			currentDirection = Direction.DOWN;
-			break;
-		case RIGHT:
-			currentDirection = Direction.LEFT;
-			break;
-		case DOWN:
-			currentDirection = Direction.UP;
-			break;
-		case LEFT:
-			currentDirection = Direction.RIGHT;
-			break;
-		}
-		currentRoute.updateMap(currentPosition);
-		gController.repaint();
-	}
-
-	public void importDialogue() {
-		try {
-			System.out.println("IMPORT DIALOGUE: " + getFileName() + " - " + this.currentRoute.getId());
-			dialogueFile = new File(
-					this.getClass().getResource("/characters/dialoge/" + this.currentRoute.getId() + "/" +  getFileName() + ".txt").getFile());
-			BufferedReader reader = new BufferedReader(new FileReader(dialogueFile));
-			String currentLine;
-			while((currentLine = reader.readLine()) != null) {
-				currentLine = currentLine.toLowerCase();
-				if(currentLine.equals("before")) {
-					beforeFight = reader.readLine();
-				} else if((currentLine.equals("no"))) {
-					noFight = reader.readLine();
-				}
-			}
-		} catch (Exception e) {
-			System.err.println("/characters/dialoge/" + this.currentRoute.getId() + "/" +  getFileName() + ".txt");
-			e.printStackTrace();
-			System.exit(0);
-		}
-	}
-
-	public String getBeforeFightDialogue() {
-		return this.beforeFight;
-	}
-
-	public String getNoFightDialogue() {
-		return this.noFight;
-	}
-
-	private String getFileName() {
-		return this.name.toLowerCase().replace(" ", "_");
 	}
 
 	public JsonObject getSaveData() {
@@ -539,6 +316,7 @@ public class Character implements Runnable {
 		data.addProperty("current_position.x", this.currentPosition.x);
 		data.addProperty("current_position.y", this.currentPosition.y);
 		data.addProperty("current_direction", this.currentDirection.name());
+		data.addProperty("surfing", this.isSurfing());
 		data.add("team", this.getTeam().getSaveData());
 		data.addProperty("defeated", this.defeated);
 		return data;
@@ -568,8 +346,9 @@ public class Character implements Runnable {
 				setCurrentDirection(Direction.DOWN);
 				break;
 			}
+			this.setSurfing("true".equals(saveData.get("surfing").getAsString()));
 			this.team.importSaveData(saveData.get("team").getAsJsonArray());
-			this.defeated = saveData.get("defeated").equals("true") ? true : false;
+			this.defeated = saveData.get("defeated").equals("true");
 			return true;
 		}
 		return false;
@@ -578,7 +357,7 @@ public class Character implements Runnable {
 	public double getExactY() {
 		return this.exactY;
 	}
-	
+
 	public double getExactX() {
 		return this.exactX;
 	}
@@ -589,7 +368,7 @@ public class Character implements Runnable {
 		case UP:
 			for(int i = 0; i < 10; i++) {
 				this.exactY -= 0.1;
-				if(!this.id.equals("999")) {
+				if(this instanceof NPC) {
 					currentRoute.updateMap(oldPosition, currentPosition);
 				}
 				gController.getGameFrame().repaint();
@@ -603,7 +382,7 @@ public class Character implements Runnable {
 		case DOWN:
 			for(int i = 0; i < 10; i++) {
 				this.exactY += 0.1;
-				if(!this.id.equals("999")) {
+				if(this instanceof NPC) {
 					currentRoute.updateMap(oldPosition, currentPosition);
 				}
 				gController.getGameFrame().repaint();
@@ -617,7 +396,7 @@ public class Character implements Runnable {
 		case LEFT:
 			for(int i = 0; i < 10; i++) {
 				this.exactX -= 0.1;
-				if(!this.id.equals("999")) {
+				if(this instanceof NPC) {
 					currentRoute.updateMap(oldPosition, currentPosition);
 				}
 				gController.getGameFrame().repaint();
@@ -631,7 +410,7 @@ public class Character implements Runnable {
 		case RIGHT:
 			for(int i = 0; i < 10; i++) {
 				this.exactX += 0.1;
-				if(!this.id.equals("999")) {
+				if(this instanceof NPC) {
 					currentRoute.updateMap(oldPosition, currentPosition);
 				}
 				gController.getGameFrame().repaint();
@@ -650,4 +429,11 @@ public class Character implements Runnable {
 		this.speed = this.speed == SLOW ? FAST : SLOW;
 	}
 
+	public void setSurfing(boolean surfing) {
+		this.surfing = surfing;
+	}
+
+	public boolean isSurfing() {
+		return this.surfing;
+	}
 }

@@ -343,7 +343,7 @@ public class FightPanel extends JPanel {
 //		new Thread(new Runnable() {
 //			@Override
 //			public void run() {
-		
+
 				playerStats.setText(mine.getName() + " Lv.: " + mine.getStats().getLevel());
 				enemyStats.setText(enemy.getName() + " Lv.: " + enemy.getStats().getLevel());
 
@@ -353,13 +353,31 @@ public class FightPanel extends JPanel {
 				playerHPBar.updateValue(mine.getStats().getCurrentHP());
 				enemyHPBar.updateValue(enemy.getStats().getCurrentHP());
 
+				int counter = 0;
+
 				while(!playerHPBar.isFinished() || !enemyHPBar.isFinished()) {
+					if(playerHPBar.isFinished()) {
+						ownPokemon.setVisible(true);
+					} else if(enemyHPBar.isFinished()){
+						ownPokemon.setVisible(true);
+					}
+					if(counter % 10 == 0) {
+						if(!playerHPBar.isFinished()) {
+							ownPokemon.setVisible(!ownPokemon.isVisible());
+						} else if (!enemyHPBar.isFinished()) {
+							enemyPokemon.setVisible(!enemyPokemon.isVisible());
+						}
+					}
 					try {
 						Thread.sleep(5);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
+					counter++;
 				}
+
+				ownPokemon.setVisible(true);
+				enemyPokemon.setVisible(true);
 
 				stopWaiting();
 

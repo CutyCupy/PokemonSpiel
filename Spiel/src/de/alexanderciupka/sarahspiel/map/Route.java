@@ -9,7 +9,7 @@ import java.util.Random;
 
 import javax.imageio.ImageIO;
 
-import de.alexanderciupka.sarahspiel.pokemon.Character;
+import de.alexanderciupka.sarahspiel.pokemon.NPC;
 import de.alexanderciupka.sarahspiel.pokemon.Pokemon;
 
 public class Route {
@@ -20,13 +20,13 @@ public class Route {
 	private int height;
 	private Entity[][] entities;
 	private ArrayList<Pokemon> pokemonPool;
-	private ArrayList<Character> characters;
+	private ArrayList<NPC> characters;
 	private BufferedImage map;
 	private String terrainName;
 
 	public Route() {
 		this.pokemonPool = new ArrayList<Pokemon>();
-		this.characters = new ArrayList<Character>();
+		this.characters = new ArrayList<NPC>();
 	}
 
 	public String getId() {
@@ -85,7 +85,7 @@ public class Route {
 		}
 	}
 
-	public void addCharacterToEntity(int x, int y, Character character) {
+	public void addCharacterToEntity(int x, int y, NPC character) {
 		entities[y][x].addCharacter(character);
 		this.characters.add(character);
 	}
@@ -103,8 +103,8 @@ public class Route {
 	public ArrayList<Pokemon> getPokemonPool() {
 		return this.pokemonPool;
 	}
-	
-	public ArrayList<Character> getCharacters() {
+
+	public ArrayList<NPC> getCharacters() {
 		return this.characters;
 	}
 
@@ -139,7 +139,7 @@ public class Route {
 		}
 //		saveMap();
 	}
-	
+
 	public void updateMap(Point... updatePoint) {
 		if(map != null) {
 			Graphics g = map.getGraphics();
@@ -165,7 +165,31 @@ public class Route {
 			e.printStackTrace();
 		}
 	}
-	
+
+//	public Route copy() {
+//		Route result = new Route();
+//		result.setId(this.id);
+//		result.setName(this.name);
+//		result.setWidth(this.width);
+//		result.setHeight(this.height);
+//		result.createEntities();
+//		for(int x = 0; x < this.width; x++) {
+//			for(int y = 0; y < this.height; y++) {
+//				result.addEntity(x, y, this.getEntities()[y][x].copy());
+//			}
+//		}
+//		result.pokemonPool = (ArrayList<Pokemon>) pokemonPool.clone();
+//		result.characters = (ArrayList<NPC>) characters.clone();
+//		result.map = deepCopy(map);
+//	}
+
+//	static BufferedImage deepCopy(BufferedImage bi) {
+//		 ColorModel cm = bi.getColorModel();
+//		 boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
+//		 WritableRaster raster = bi.copyData(null);
+//		 return new BufferedImage(cm, raster, isAlphaPremultiplied, null);
+//		}
+
 	public BufferedImage getMap() {
 		return this.map;
 	}

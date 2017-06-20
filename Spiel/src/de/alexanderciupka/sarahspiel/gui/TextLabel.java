@@ -36,11 +36,10 @@ public class TextLabel extends JLabel implements Runnable {
 		this.setVerticalAlignment(SwingConstants.TOP);
 		delay = SLOW;
 	}
-	
+
 	public void setActive() {
 		try {
 			if(!text.isEmpty()) {
-				System.out.println("active");
 				isActive = true;
 			} else {
 				isActive = false;

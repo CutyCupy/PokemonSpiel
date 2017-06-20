@@ -36,12 +36,13 @@ public class Background {
 		return currentRoute.getEntities()[point.y][point.x].checkPokemon();
 	}
 
-	public boolean checkPositionAccessible(Point point) {
-		if(point.y >= 0 && point.x >= 0 && point.y < currentRoute.getHeight() && point.x < currentRoute.getWidth()) {
-			return currentRoute.getEntities()[point.y][point.x].isAccessible();
-		}
-		return false;
-	}
+//	public boolean checkPositionAccessible(Point point, de.alexanderciupka.sarahspiel.pokemon.Character character) {
+//		if(point.y >= 0 && point.x >= 0 && point.y < currentRoute.getHeight() && point.x < currentRoute.getWidth()) {
+//			character.setSurfing(currentRoute.getEntities()[point.y][point.x].isWater());
+//			return currentRoute.getEntities()[point.y][point.x].isAccessible(character);
+//		}
+//		return false;
+//	}
 
 	public int getHeight() {
 		return background.getHeight();
@@ -50,15 +51,15 @@ public class Background {
 	public int getWidth() {
 		return background.getWidth();
 	}
-	
+
 	public BufferedImage getBackground() {
 		return this.background;
 	}
-	
+
 	public Route getCurrentRoute() {
 		return this.currentRoute;
 	}
-	
+
 	public void setCurrentRoute(Route route) {
 		background = route.getMap();
 		this.currentRoute = route;

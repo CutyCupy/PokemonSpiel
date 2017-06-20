@@ -17,7 +17,7 @@ T,T,T,T,SA,SA,SA,S,S,S,S,S,S,S,SA,SA,SA,SA,SA,SA,SA,SA,S,S,S,S,S,S,S,S
 T,T,T,T,SA,SA,SA,S,S,S,S,S,S,S,SA,SA,S,S,S,S,SA,SA,S,S,S,S,S,S,S,S
 T,T,T,T,SA,SA,SA,S,S,S,S,S,S,S,SA,SA,S,S,S,S,SA,SA,S,S,S,S,S,S,S,S
 T,T,T,T,SA,SA,SA,S,S,S,S,S,S,S,SA,SA,S,S,S,S,SA,SA,S,S,S,S,S,S,S,S
-T,T,T,T,SA,SA,SA,S,S,S,S,S,S,S,SA,SA,SA,C1,C2,SA,SA,SA,S,S,S,S,S,S,S,S
+T,T,T,T,SA,SA,SA,S,S,S,C5,S,S,S,SA,SA,SA,C1,C2,SA,SA,SA,S,S,S,S,S,S,S,S
 T,T,T,T,SA,SA,SA,S,S,S,S,S,S,S,C3,SA,SA,SA,SA,SA,SA,C4,S,S,S,S,S,S,S,S
 T,T,T,T,SA,SA,SA,S,S,S,S,S,S,S,SA,SA,SA,SA,SA,SA,SA,SA,S,S,S,S,S,S,S,S
 T,T,T,T,SA,SA,SA,S,S,S,S,S,S,S,S,S,S,B,B,S,S,S,S,S,S,S,S,S,S,S
@@ -39,3 +39,4 @@ C1,Man,back,Tim,true,free
 C2,Man,back,Tom,true,free
 C3,Woman,left,Franziska,true,free
 C4,Man,right,Paul,true,free
+C5,Man,right,Paul,true,free,surfing

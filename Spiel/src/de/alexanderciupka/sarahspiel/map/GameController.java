@@ -9,17 +9,18 @@ import de.alexanderciupka.sarahspiel.gui.ReportPanel;
 import de.alexanderciupka.sarahspiel.gui.TextLabel;
 import de.alexanderciupka.sarahspiel.menu.MenuController;
 import de.alexanderciupka.sarahspiel.pokemon.Ailment;
-import de.alexanderciupka.sarahspiel.pokemon.Character;
 import de.alexanderciupka.sarahspiel.pokemon.Direction;
 import de.alexanderciupka.sarahspiel.pokemon.FightOption;
 import de.alexanderciupka.sarahspiel.pokemon.Fighting;
 import de.alexanderciupka.sarahspiel.pokemon.Move;
+import de.alexanderciupka.sarahspiel.pokemon.NPC;
+import de.alexanderciupka.sarahspiel.pokemon.Player;
 import de.alexanderciupka.sarahspiel.pokemon.Pokemon;
 import de.alexanderciupka.sarahspiel.pokemon.PokemonInformation;
 
 public class GameController {
 
-	private Character mainCharacter;
+	private Player mainCharacter;
 	private Background currentBackground;
 	private PokemonInformation information;
 	private RouteAnalyzer routeAnalyzer;
@@ -76,7 +77,14 @@ public class GameController {
 	}
 
 	private boolean updatePosition(int x, int y) {
-		if (currentBackground.checkPositionAccessible(new Point(x, y))) {
+		System.out.println(x);
+		System.out.println(y);
+		System.out.println(currentBackground.getWidth());
+		System.out.println(currentBackground.getHeight());
+		if(x >= currentBackground.getCurrentRoute().getWidth() || x < 0 || y >= currentBackground.getCurrentRoute().getHeight() || y < 0) {
+			return false;
+		}
+		if (currentBackground.getCurrentRoute().getEntities()[y][x].isAccessible(mainCharacter)) {
 			mainCharacter.changePosition(mainCharacter.getCurrentDirection());
 			if (currentBackground.getCurrentRoute().getEntities()[y][x].startWarp()) {
 				x = mainCharacter.getCurrentPosition().x;
@@ -84,9 +92,7 @@ public class GameController {
 			}
 			int characterIndex = checkStartFight();
 			if (characterIndex >= 0) {
-				System.out.println("seen");
 				startFight(getCurrentBackground().getCurrentRoute().getCharacters().get(characterIndex));
-				System.out.println("walked");
 			} else if (currentBackground.getCurrentRoute().getEntities()[y][x].checkPokemon()) {
 				startFight(currentBackground.chooseEncounter());
 			}
@@ -108,11 +114,11 @@ public class GameController {
 		return currentBackground;
 	}
 
-	public Character getMainCharacter() {
+	public Player getMainCharacter() {
 		return mainCharacter;
 	}
 
-	public void setMainCharacter(Character character) {
+	public void setMainCharacter(Player character) {
 		this.mainCharacter = character;
 	}
 
@@ -137,9 +143,9 @@ public class GameController {
 		return this.fighting;
 	}
 
-	public void startFight(Character enemy) {
+	public void startFight(NPC enemy) {
 		if(enemy.moveTowardsMainCharacter()) {
-			repaint();
+//			repaint();
 			gameFrame.addDialogue(enemy.getName() + ": " + enemy.getBeforeFightDialogue());
 			waitDialogue();
 			this.fighting = true;
@@ -278,6 +284,26 @@ public class GameController {
 						waitDialogue();
 					}
 				}
+			} else if(currentEntity.isWater() && !mainCharacter.isSurfing()) {
+				gameFrame.addDialogue("Hier könnte man surfen!");
+				boolean breaking = false;
+				for(Pokemon p : mainCharacter.getTeam().getTeam()) {
+					for(Move m : p.getMoves()) {
+						if(m != null) {
+							if(m.getName().equals("Surfer")) {
+								gameFrame.addDialogue("Du fängst an auf " + p.getName() + " zu surfen!");
+								mainCharacter.setSurfing(true);
+								breaking = true;
+								break;
+							}
+						}
+					}
+					if(breaking) break;
+				}
+				waitDialogue();
+				if(breaking) {
+					mainCharacter.changePosition(mainCharacter.getCurrentDirection());
+				}
 			}
 			interactionPause = false;
 		}
@@ -306,7 +332,7 @@ public class GameController {
 	}
 
 	public void resetCharacterPositions() {
-		for (Character c : currentBackground.getCurrentRoute().getCharacters()) {
+		for (NPC c : currentBackground.getCurrentRoute().getCharacters()) {
 			c.resetPosition();
 		}
 	}
@@ -316,7 +342,7 @@ public class GameController {
 	}
 
 	public void startNewGame() {
-		mainCharacter = new Character();
+		mainCharacter = new Player();
 		mainCharacter.setCharacterImage("main", "front");
 		mainCharacter.setName("Sarah");
 		mainCharacter.setID("999");
@@ -325,12 +351,13 @@ public class GameController {
 		currentBackground = new Background(mainCharacter.getCurrentRoute());
 		Pokemon player = new Pokemon(246);
 		player.getStats().generateStats((short) 99);
+		player.addMove(player.getMoves()[0].getName(), information.getMoveByName("Surfer"));
 		mainCharacter.getTeam().addPokemon(player);
 		gameFrame = new GameFrame();
 	}
 
 	public boolean loadGame(String path) {
-		mainCharacter = new Character();
+		mainCharacter = new Player();
 		mainCharacter.setCharacterImage("main", "front");
 		if(routeAnalyzer.loadGame(path)) {
 			currentBackground = new Background(mainCharacter.getCurrentRoute());
@@ -352,10 +379,8 @@ public class GameController {
 	public void saveGame() {
 		if(!interactionPause) {
 			interactionPause = true;
-			if(routeAnalyzer.saveGame(mController.saveGame())) {
-				System.out.println("saved");
-//				gameFrame.addDialogue("Spiel wurde erfolgreich gespeichert! sd as a a asc asc csa csas cas acs ");
-//				waitDialogue();
+			if(!routeAnalyzer.saveGame(mController.saveGame())) {
+				System.err.println("ERROR");
 			}
 			interactionPause = false;
 		}

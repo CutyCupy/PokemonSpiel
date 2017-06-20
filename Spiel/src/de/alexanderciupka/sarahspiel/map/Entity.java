@@ -7,6 +7,7 @@ import java.util.Random;
 import javax.swing.ImageIcon;
 
 import de.alexanderciupka.sarahspiel.pokemon.Character;
+import de.alexanderciupka.sarahspiel.pokemon.NPC;
 
 public class Entity {
 
@@ -14,9 +15,11 @@ public class Entity {
 	private Image sprite;
 	private float pokemonRate;
 	private Warp warp;
-	private Character character;
+	private NPC character;
 	private Image terrain;
 	private boolean hasCharacter;
+
+	private boolean water;
 
 	public static final float POKEMON_GRASS_RATE = 0.1f;
 
@@ -27,10 +30,12 @@ public class Entity {
 		this.accessible = accessible;
 		gController = GameController.getInstance();
 		try {
-			this.sprite = new ImageIcon(this.getClass().getResource("/routes/entities/" + spriteName + ".png"))
-					.getImage();
-			this.terrain = new ImageIcon(this.getClass().getResource("/routes/terrain/" + terrainName + ".png"))
-					.getImage();
+//			this.sprite = new ImageIcon(this.getClass().getResource("/routes/entities/" + spriteName + ".png"))
+//					.getImage();
+			setSprite(spriteName);
+			setTerrain(terrainName);
+//			this.terrain = new ImageIcon(this.getClass().getResource("/routes/terrain/" + terrainName + ".png"))
+//					.getImage();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -39,8 +44,8 @@ public class Entity {
 		rng = new Random();
 	}
 
-	public boolean isAccessible() {
-		return this.accessible;
+	public boolean isAccessible(Character c) {
+		return ((this.accessible && !this.isWater()) || (this.isWater() && c.isSurfing() && this.accessible)) && !this.hasCharacter();
 	}
 
 	public void setSprite(String spriteName) {
@@ -48,6 +53,16 @@ public class Entity {
 			this.terrain = new ImageIcon(this.getClass().getResource("/routes/terrain/grassy.png")).getImage();
 		}
 		this.sprite = new ImageIcon(this.getClass().getResource("/routes/entities/" + spriteName + ".png")).getImage();
+	}
+
+	public void setTerrain(String terrainName) {
+		try {
+			this.terrain = new ImageIcon(this.getClass().getResource("/routes/terrain/" + terrainName + ".png"))
+					.getImage();
+			this.setWater(terrainName.equals("see"));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public Image getSprite() {
@@ -66,23 +81,21 @@ public class Entity {
 		this.warp = warp;
 	}
 
-	public void addCharacter(Character character) {
+	public void addCharacter(NPC character) {
 		this.hasCharacter = true;
 		this.character = character;
-		this.accessible = false;
 	}
 
 	public boolean removeCharacter() {
 		if (hasCharacter) {
 			this.character = null;
 			this.hasCharacter = false;
-			this.accessible = true;
 			return true;
 		}
 		return false;
 	}
 
-	public Character getCharacter() {
+	public NPC getCharacter() {
 		return this.character;
 	}
 
@@ -128,7 +141,7 @@ public class Entity {
 									+ "Happy Birthday to You! Happy Birthday liebe SARAH! Happy Birthday to You!");
 							gController.getGameFrame().addDialogue("Alex: Alles Gute zum Geburtstag Schatz!");
 							gController.waitDialogue();
-						} 
+						}
 						break;
 					}
 				}
@@ -141,12 +154,25 @@ public class Entity {
 	public boolean hasCharacter() {
 		return this.hasCharacter;
 	}
-	
+
 	public Warp getWarp() {
 		return this.warp;
 	}
-	
+
 	public void setAccessible(boolean accessible) {
 		this.accessible = accessible;
 	}
+
+	public void setWater(boolean water) {
+		this.water = water;
+	}
+
+	public boolean isWater() {
+		return this.water;
+	}
+
+//	public Entity copy() {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
 }

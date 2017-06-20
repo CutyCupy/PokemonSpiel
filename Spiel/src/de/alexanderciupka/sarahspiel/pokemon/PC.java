@@ -29,7 +29,6 @@ public class PC {
 		}
 		int boxSize = boxes.size();
 		for(int i = boxSize; i < NEW_BOXES + boxSize; i++) {
-			System.out.println("refilling");
 			this.boxes.add(new Box(i,this));
 		}
 	}
