@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Random;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -263,16 +264,25 @@ public class FightPanel extends JPanel {
 								revalidate();
 								repaint();
 							}
+							
 							if(gController.getFight().canEscape()) {
-								if(gController.getMainCharacter().getTeam().getAmmount() < 6) {
+								System.out.println((1f / enemy.getStats().getLevel()) * (enemy.getStats().getCurrentHP() / enemy.getStats().getStats()[0]));
+								if(new Random().nextFloat() < (1f / enemy.getStats().getLevel()) * (enemy.getStats().getCurrentHP() / enemy.getStats().getStats()[0])) {
 									enemyPokemon.setVisible(false);
-									addText(gController.getFight().getEnemy().getName() + " wurde gefangen!");
-									gController.getMainCharacter().getTeam().addPokemon(gController.getFight().getEnemy());
+									addText(enemy.getName() + " wurde gefangen!");
+									if(gController.getMainCharacter().getTeam().getAmmount() < 6) {
+										gController.getMainCharacter().getTeam().addPokemon(enemy);
+									} else {
+										addText("Dein Team ist voll!");
+										addText(enemy.getName() + " wurde auf deinem PC in " + gController.getMainCharacter().getPC().addPokemon(enemy).getName() + " gespeichert!");
+										
+									}
 									gController.endFight();
+									pokeball.setVisible(false);
 									return;
 								} else {
 									pokeball.setVisible(false);
-									addText("Dein Team ist voll!");
+									addText(enemy.getName() + " hat sich befreit!");
 								}
 							} else {
 								pokeball.setVisible(false);

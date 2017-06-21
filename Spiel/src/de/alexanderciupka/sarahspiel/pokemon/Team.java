@@ -24,10 +24,12 @@ public class Team {
 	}
 
 	public boolean addPokemon(Pokemon newPokemon) {
-		if(ammount < 6) {
-			pokemon[ammount] = newPokemon;
-			ammount++;
-			return true;
+		for(int i = 0; i < this.pokemon.length; i++) {
+			this.ammount = i+1;
+			if(pokemon[i] == null) {
+				pokemon[i] = newPokemon;
+				return true;
+			}
 		}
 		return false;
 	}

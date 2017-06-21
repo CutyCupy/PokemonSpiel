@@ -346,7 +346,10 @@ public class Character implements Runnable {
 				setCurrentDirection(Direction.DOWN);
 				break;
 			}
-			this.setSurfing("true".equals(saveData.get("surfing").getAsString()));
+			this.setSurfing(false);
+			if(saveData.get("surfing") != null) {
+				this.setSurfing(saveData.get("surfing").getAsBoolean());
+			}
 			this.team.importSaveData(saveData.get("team").getAsJsonArray());
 			this.defeated = saveData.get("defeated").equals("true");
 			return true;
