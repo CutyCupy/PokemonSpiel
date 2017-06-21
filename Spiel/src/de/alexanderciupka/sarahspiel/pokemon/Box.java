@@ -76,4 +76,14 @@ public class Box {
 		return pc;
 	}
 
+	public int getAmount() {
+		int counter = 0;
+		for(Pokemon p : this.pokemons) {
+			if(p != null) {
+				counter++;
+			}
+		}
+		return counter;
+	}
+
 }
