@@ -7,7 +7,7 @@ public class Box {
 	private PC pc;
 	private String name;
 
-	public static final int LIMIT = 30;
+	public static final int LIMIT = 36;
 
 	public Box(int number, PC pc) {
 		this.number = number;
@@ -84,6 +84,35 @@ public class Box {
 			}
 		}
 		return counter;
+	}
+
+	public Box getNext() {
+		for(int i = 0; i < pc.getBoxes().length; i++) {
+			System.out.println(pc.getBoxes()[i].getNumber());
+			if(pc.getBoxes()[i].getNumber() == this.number) {
+				return i != pc.getBoxes().length - 1 ? pc.getBoxes()[i+1] : pc.getBoxes()[0];
+			}
+		}
+		return null;
+	}
+
+	public Box getBefore() {
+		for(int i = 0; i < pc.getBoxes().length; i++) {
+			if(pc.getBoxes()[i].getNumber() == this.number) {
+				return i != 0 ? pc.getBoxes()[i-1] : pc.getBoxes()[pc.getBoxes().length - 1];
+			}
+		}
+		return null;
+	}
+
+	public Pokemon replacePokemon(int index, Pokemon pokemon) {
+		Pokemon old = this.pokemons[index];
+		this.pokemons[index] = pokemon;
+		return old;
+	}
+
+	public void setNumber(int asInt) {
+		this.number = asInt;
 	}
 
 }

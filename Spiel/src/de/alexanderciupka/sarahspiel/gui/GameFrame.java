@@ -16,6 +16,7 @@ import de.alexanderciupka.sarahspiel.menu.MenuController;
 import de.alexanderciupka.sarahspiel.pokemon.Direction;
 import de.alexanderciupka.sarahspiel.pokemon.FightOption;
 import de.alexanderciupka.sarahspiel.pokemon.Move;
+import de.alexanderciupka.sarahspiel.pokemon.Player;
 import de.alexanderciupka.sarahspiel.pokemon.Pokemon;
 
 @SuppressWarnings("serial")
@@ -28,6 +29,7 @@ public class GameFrame extends JFrame {
 	private PokemonPanel pokemon;
 	private JPanel map;
 	private NewAttackPanel newMove;
+	private PCPanel pc;
 	private ReportPanel report;
 	private BackgroundLabel imageHolder;
 	private TextLabel dialogue;
@@ -65,6 +67,7 @@ public class GameFrame extends JFrame {
 			if(currentPanel != null) {
 				setContentPane(currentPanel);
 			} else {
+				setContentPane(map);
 				map.paint(g);
 				map.repaint();
 			}
@@ -317,6 +320,14 @@ public class GameFrame extends JFrame {
 				}
 			}
 		});
+	}
+
+	public void displayPC(Player owner) {
+		if(this.pc == null) {
+			this.pc = new PCPanel();
+		}
+		this.pc.setPC(owner.getPC());
+		this.setCurrentPanel(this.pc.getContentPane());
 	}
 
 	public JPanel getReportPanel() {

@@ -18,7 +18,7 @@ import de.alexanderciupka.sarahspiel.map.GameController;
 import de.alexanderciupka.sarahspiel.painting.PaintingController;
 
 public class MenuController {
-	
+
 	private static MenuController instance;
 	private PaintingController pController;
 	private GameController gController;
@@ -27,47 +27,47 @@ public class MenuController {
 	private MainMenuFrame menuFrame;
 	private PaintingNameFrame paintingFrame;
 	public static final String SAVE_PATH = System.getProperty("user.home") + "/SarahsSpielSpeicherdateien/";
-	
+
 	public static final Dimension SCREEN_SIZE = Toolkit.getDefaultToolkit().getScreenSize();
-	
+
 	public static final List<Character> forbiddenChars = Arrays.asList('<', '>', '?' , '"', ':', '|', '\\', '/', '*', '.', ',', '[', ']', '(', ')', '!', '\'', '{', '}');
-	
+
 	private MenuController() {
 	}
-	
+
 	public void start() {
 		gController = GameController.getInstance();
 		pController = PaintingController.getInstance();
 		new File(SAVE_PATH).mkdir();
 		fileChooser = new JFileChooser(SAVE_PATH);
-		fileChooser.setFileFilter(new FileNameExtensionFilter("Sarahs Spiel Speicherdateien", 
+		fileChooser.setFileFilter(new FileNameExtensionFilter("Sarahs Spiel Speicherdateien",
 	            "sss"));
 		menuFont = importFont("/fonts/pokemon_solid.ttf");
 		menuFrame = new MainMenuFrame();
 	}
-	
+
 	public static MenuController getInstance() {
 		if(instance == null) {
 			instance = new MenuController();
 			instance.start();
 		}
 		return instance;
-	} 
-	
+	}
+
 	public void startEditor() {
 		if(paintingFrame == null)
 			paintingFrame = new PaintingNameFrame();
 		paintingFrame.setVisible(true);
 	}
-	
+
 	public void openEditor(String pictureName, int width, int height) {
 		pController.startNewImage(pictureName, width, height);
-	}	
-		
+	}
+
 	public Font getMenuFont() {
 		return this.menuFont;
 	}
-	
+
 	public Font importFont(String path) {
 		InputStream is = getClass().getResourceAsStream(path);
 		try {
@@ -80,14 +80,14 @@ public class MenuController {
 			return null;
 		}
 	}
-	
+
 	public static Rectangle getToCenter(int width, int height) {
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		int screenWidth = (int) screenSize.getWidth();
 		int screenHeight = (int) screenSize.getHeight();
 		return new Rectangle((screenWidth / 2) - (width / 2), (screenHeight / 2) - (height / 2), width, height);
 	}
-	
+
 	public boolean checkName(String text, char typedChar) {
 		if(text.length() <= 16) {
 			if(forbiddenChars.contains(typedChar)) {
@@ -103,14 +103,13 @@ public class MenuController {
 	}
 
 	public boolean loadGame() {
-		fileChooser.showDialog(null, "Laden");
-		return gController.loadGame(fileChooser.getSelectedFile().getPath());
+		return fileChooser.showDialog(null, "Laden") == 0 ? gController.loadGame(fileChooser.getSelectedFile().getPath()) : false;
 	}
-	
+
 	public String saveGame() {
 		fileChooser.showSaveDialog(null);
 		if(fileChooser.getSelectedFile() != null) {
-			return fileChooser.getSelectedFile().getName();			
+			return fileChooser.getSelectedFile().getName();
 		}
 		return null;
 	}

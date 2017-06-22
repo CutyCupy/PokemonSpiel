@@ -264,9 +264,8 @@ public class FightPanel extends JPanel {
 								revalidate();
 								repaint();
 							}
-							
+
 							if(gController.getFight().canEscape()) {
-								System.out.println((1f / enemy.getStats().getLevel()) * (enemy.getStats().getCurrentHP() / enemy.getStats().getStats()[0]));
 								if(new Random().nextFloat() < (1f / enemy.getStats().getLevel()) * (enemy.getStats().getCurrentHP() / enemy.getStats().getStats()[0])) {
 									enemyPokemon.setVisible(false);
 									addText(enemy.getName() + " wurde gefangen!");
@@ -275,7 +274,7 @@ public class FightPanel extends JPanel {
 									} else {
 										addText("Dein Team ist voll!");
 										addText(enemy.getName() + " wurde auf deinem PC in " + gController.getMainCharacter().getPC().addPokemon(enemy).getName() + " gespeichert!");
-										
+
 									}
 									gController.endFight();
 									pokeball.setVisible(false);

@@ -9,17 +9,14 @@ import de.alexanderciupka.sarahspiel.map.Route;
 public class Player extends Character {
 
 	private ArrayList<String> routeHistory;
-	private PC pc;
 
 	public Player() {
 		super();
-		pc = new PC();
 		routeHistory = new ArrayList<String>();
 	}
 
 	public Player(String id) {
 		super(id);
-		pc = new PC();
 		routeHistory = new ArrayList<String>();
 	}
 
@@ -71,9 +68,4 @@ public class Player extends Character {
 	public ArrayList<String> getRouteHistory() {
 		return routeHistory;
 	}
-	
-	public PC getPC() {
-		return this.pc;
-	}
-
 }

@@ -21,6 +21,7 @@ public class Team {
 				break;
 			}
 		}
+		sort();
 	}
 
 	public boolean addPokemon(Pokemon newPokemon) {
@@ -28,6 +29,7 @@ public class Team {
 			this.ammount = i+1;
 			if(pokemon[i] == null) {
 				pokemon[i] = newPokemon;
+				sort();
 				return true;
 			}
 		}
@@ -42,6 +44,7 @@ public class Team {
 		Pokemon swap = pokemon[firstPokemon];
 		pokemon[firstPokemon] = pokemon[secondPokemon];
 		pokemon[secondPokemon] = swap;
+		sort();
 	}
 
 	public Pokemon getFirstFightPokemon() {
@@ -98,6 +101,35 @@ public class Team {
 		for(int p = 0; p < Math.min(saveData.size(), this.pokemon.length); p++) {
 			pokemon[p] = Pokemon.importSaveData(saveData.get(p).getAsJsonObject());
 		}
+		sort();
 		return true;
+	}
+
+	public Pokemon replacePokemon(int index, Pokemon pokemon) {
+		if(index >= 0 && index < this.pokemon.length) {
+			Pokemon old = this.pokemon[index];
+			this.pokemon[index] = pokemon;
+			sort();
+			return old;
+		}
+		return null;
+	}
+
+	public void sort() {
+		for(int j = 0; j < this.pokemon.length - 1; j++) {
+			for(int i = 0; i < this.pokemon.length - 1; i++) {
+				if(pokemon[i] == null) {
+					pokemon[i] = pokemon[i+1];
+					pokemon[i+1] = null;
+				}
+			}
+		}
+		this.ammount = 0;
+		for(Pokemon p : this.getTeam()) {
+			if(p == null) {
+				break;
+			}
+			ammount++;
+		}
 	}
 }

@@ -20,6 +20,7 @@ public class Entity {
 	private boolean hasCharacter;
 
 	private boolean water;
+	private boolean pc;
 
 	public static final float POKEMON_GRASS_RATE = 0.1f;
 
@@ -52,6 +53,7 @@ public class Entity {
 		if(spriteName.equals("grass")) {
 			this.terrain = new ImageIcon(this.getClass().getResource("/routes/terrain/grassy.png")).getImage();
 		}
+		pc = spriteName.equals("pc");
 		this.sprite = new ImageIcon(this.getClass().getResource("/routes/entities/" + spriteName + ".png")).getImage();
 	}
 
@@ -169,6 +171,10 @@ public class Entity {
 
 	public boolean isWater() {
 		return this.water;
+	}
+
+	public boolean isPC() {
+		return pc;
 	}
 
 //	public Entity copy() {

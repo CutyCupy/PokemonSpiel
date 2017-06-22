@@ -1,0 +1,10 @@
+Haus von Alex
+stone
+5
+5
+F,F,F,F,F
+F,F,F,F,F
+F,F,F,F,F
+F,F,F,F,F
+F,F,W1,F,F
+W1,hanau,4,13

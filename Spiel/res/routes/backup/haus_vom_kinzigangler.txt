@@ -1,0 +1,11 @@
+Haus vom Kinzigangler
+stone
+5
+5
+F,F,C0,F,F
+F,F,F,F,F
+F,F,F,F,F
+F,F,F,F,F
+F,F,W0,F,F
+W0,route_2,13,6
+C0,man,back,Angler Nils,true,free

@@ -112,15 +112,12 @@ public class NPC extends Character {
 				gController.getMainCharacter().setCurrentDirection(Direction.DOWN);
 				break;
 			}
+			gController.getGameFrame().repaint();
 			while (!(currentPosition.x + x == mainX && currentPosition.y + y == mainY)) {
-//				gController.sleep(500);
 				currentRoute.getEntities()[currentPosition.y][currentPosition.x].removeCharacter();
 				currentRoute.updateMap(currentPosition);
-//				currentPosition.x += x;
-//				currentPosition.y += y;
 				currentRoute.getEntities()[currentPosition.y + y][currentPosition.x + x].addCharacter(this);
 				this.changePosition(this.getCurrentDirection());
-//				waiting();
 				currentRoute.updateMap(currentPosition);
 			}
 			System.err.println("finished");

@@ -44,6 +44,7 @@ public class Character implements Runnable {
 	public static final int SLOW = 30;
 
 	private boolean surfing;
+	private PC pc;
 
 
 	//TODO: Add History to check where the last Pokemon center was.
@@ -55,6 +56,9 @@ public class Character implements Runnable {
 		oldPosition = new Point(currentPosition);
 		originalPosition = new Point(0, 0);
 		this.speed = SLOW;
+
+
+		pc = new PC(this);
 	}
 
 	public Character(String id) {
@@ -65,6 +69,8 @@ public class Character implements Runnable {
 		oldPosition = new Point(currentPosition);
 		originalPosition = new Point(0, 0);
 		this.speed = SLOW;
+
+		pc = new PC(this);
 	}
 
 	public void setCurrentRoute(Route currentRoute) {
@@ -291,10 +297,6 @@ public class Character implements Runnable {
 		return -1;
 	}
 
-//	public boolean checkAccessible(int x, int y) {
-//		return gController.getCurrentBackground().getCurrentRoute().getEntities()[y][x].isAccessible(this);
-//	}
-
 	private void waiting() {
 		this.moving = true;
 		while(moving) {
@@ -318,6 +320,7 @@ public class Character implements Runnable {
 		data.addProperty("current_direction", this.currentDirection.name());
 		data.addProperty("surfing", this.isSurfing());
 		data.add("team", this.getTeam().getSaveData());
+		data.add("pc", pc.getSaveData());
 		data.addProperty("defeated", this.defeated);
 		return data;
 	}
@@ -351,6 +354,7 @@ public class Character implements Runnable {
 				this.setSurfing(saveData.get("surfing").getAsBoolean());
 			}
 			this.team.importSaveData(saveData.get("team").getAsJsonArray());
+			this.pc.importSaveData(saveData.get("pc").getAsJsonArray());
 			this.defeated = saveData.get("defeated").equals("true");
 			return true;
 		}
@@ -438,5 +442,9 @@ public class Character implements Runnable {
 
 	public boolean isSurfing() {
 		return this.surfing;
+	}
+
+	public PC getPC() {
+		return this.pc;
 	}
 }

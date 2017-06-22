@@ -77,10 +77,6 @@ public class GameController {
 	}
 
 	private boolean updatePosition(int x, int y) {
-		System.out.println(x);
-		System.out.println(y);
-		System.out.println(currentBackground.getWidth());
-		System.out.println(currentBackground.getHeight());
 		if(x >= currentBackground.getCurrentRoute().getWidth() || x < 0 || y >= currentBackground.getCurrentRoute().getHeight() || y < 0) {
 			return false;
 		}
@@ -279,8 +275,14 @@ public class GameController {
 					waitDialogue();
 					if(currentEntity.getCharacter().getName().equals("Joy")) {
 						mainCharacter.getTeam().restoreTeam();
-						sleep(500);
-						gameFrame.addDialogue("Joy: Deine Pokemon sind geheilt!");
+						for(int i = 1; i <= mainCharacter.getTeam().getAmmount() + 1; i++) {
+							System.out.println("test");
+							getCurrentBackground().getCurrentRoute().getEntities()[0][1].setSprite("joyhealing" + (i % (mainCharacter.getTeam().getAmmount() + 1)));
+							getCurrentBackground().getCurrentRoute().updateMap(new Point(1, 0));
+							gameFrame.repaint();
+							sleep(i == mainCharacter.getTeam().getAmmount() ? 1500 : 750);
+						}
+						gameFrame.addDialogue("Deine Pokemon sind nun wieder topfit!");
 						waitDialogue();
 					}
 				}
@@ -304,8 +306,10 @@ public class GameController {
 				if(breaking) {
 					mainCharacter.changePosition(mainCharacter.getCurrentDirection());
 				}
+			} else if(currentEntity.isPC()) {
+				gameFrame.displayPC(mainCharacter);
 			}
-			interactionPause = false;
+ 			interactionPause = false;
 		}
 	}
 

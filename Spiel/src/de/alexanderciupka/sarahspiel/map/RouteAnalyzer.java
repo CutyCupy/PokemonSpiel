@@ -305,6 +305,12 @@ public class RouteAnalyzer {
 								case "B": //Bridge
 									currentEntity = new Entity(true, "bridge", 0, currentRoute.getTerrain());
 									break;
+								case "PC":
+									currentEntity = new Entity(false, "pc", 0, currentRoute.getTerrain());
+									break;
+								case "JH":
+									currentEntity = new Entity(false, "joyhealing0", 0, currentRoute.getTerrain());
+									break;
 								}
 							} else if (currentString.startsWith("W")) {
 								Warp currentWarp = new Warp(currentString, routeID);

@@ -58,7 +58,6 @@ public class TextLabel extends JLabel implements Runnable {
 				this.setText("<html>");
 				char[] currentLine = text.get(0).toCharArray();
 				for(char c : currentLine) {
-					System.out.println(this.isVisible());
 					this.setText(this.getText() + c);
 					repaint();
 					try {
@@ -96,7 +95,6 @@ public class TextLabel extends JLabel implements Runnable {
 	}
 
 	private void removeFirst() {
-		System.out.println("remove");
 		text.remove(0);
 		isActive = false;
 	}
