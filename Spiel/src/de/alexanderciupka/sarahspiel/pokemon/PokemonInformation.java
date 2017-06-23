@@ -213,6 +213,7 @@ public class PokemonInformation {
 
 	public Move getMoveByName(String name) {
 		for (Move move : allMoves) {
+			System.out.println(move.getName());
 			if (move.getName().equals(name)) {
 				return move.clone();
 			}

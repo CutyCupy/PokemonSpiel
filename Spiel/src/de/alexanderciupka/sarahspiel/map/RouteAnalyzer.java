@@ -51,196 +51,6 @@ public class RouteAnalyzer {
 		readAllRoutes();
 	}
 
-//	public void readAllRoutes() {
-//		for (File currentFile : folderFiles) {
-//			if (currentFile.isFile() && currentFile.getName().endsWith(".txt")) {
-//				try {
-//					currentReader = new BufferedReader(new FileReader(currentFile));
-//				} catch (FileNotFoundException e) {
-//					e.printStackTrace();
-//				}
-//
-//				JsonObject route = new JsonObject();
-//
-//				Route currentRoute = new Route();
-//				String routeID = currentFile.getName().split("\\.")[0];
-//				String currentLine;
-//				try {
-//					JsonObject routeDetails = new JsonObject();
-//					currentRoute.setId(routeID);
-//					currentRoute.setName(currentReader.readLine());
-//					currentRoute.setTerrain(currentReader.readLine());
-//					currentRoute.setHeight(Integer.parseInt(currentReader.readLine()));
-//					currentRoute.setWidth(Integer.parseInt(currentReader.readLine()));
-//					routeDetails.addProperty("id", routeID);
-//					routeDetails.addProperty("name", currentRoute.getName());
-//					routeDetails.addProperty("terrain", currentRoute.getTerrain());
-//					routeDetails.addProperty("height", currentRoute.getHeight());
-//					routeDetails.addProperty("width", currentRoute.getWidth());
-//					warps = new ArrayList<Warp>();
-//					characters = new ArrayList<NPC>();
-//					for (int y = 0; y < currentRoute.getHeight(); y++) {
-//						currentLine = currentReader.readLine();
-//						String[] rowElements = currentLine.split(",");
-//						for (int x = 0; x < currentRoute.getWidth(); x++) {
-//							Entity currentEntity = null;
-//							String currentString = rowElements[x];
-//							routeDetails.addProperty(x + "." + y, currentString);
-//							if (!currentString.startsWith("W") && !currentString.startsWith("C")) {
-//								switch (rowElements[x]) {
-//								case "T": // Tree
-//									currentEntity = new Entity(false, "tree", 0, "grassy");
-//									break;
-//								case "F": // Free
-//									currentEntity = new Entity(true, "free", 0, currentRoute.getTerrain());
-//									break;
-//								case "G": // Grass
-//									currentEntity = new Entity(true, "grass", Entity.POKEMON_GRASS_RATE, "grassy");
-//									break;
-//								case "M": // Mauer - House/Center/Market
-//									currentEntity = new Entity(false, "free", 0, currentRoute.getTerrain());
-//									break;
-//								case "P": // Center
-//									currentEntity = new Entity(false, "center", 0, currentRoute.getTerrain());
-//									break;
-//								case "HS":
-//									currentEntity = new Entity(false, "house_small", 0, currentRoute.getTerrain());
-//									break;
-//								case "HL":
-//									currentEntity = new Entity(false, "house_large", 0, currentRoute.getTerrain());
-//									break;
-//								case "A":
-//									currentEntity = new Entity(false, "gym", 0, currentRoute.getTerrain());
-//									break;
-//								case "S": //See
-//									currentEntity = new Entity(true, "free", 0, "see");
-//									currentEntity.setWater(true);
-//									break;
-//								case "SA": //Sand
-//									currentEntity = new Entity(true, "free", 0, "sandy");
-//									break;
-//								case "B": //Bridge
-//									currentEntity = new Entity(true, "bridge", 0, currentRoute.getTerrain());
-//									break;
-//								}
-//							} else if (currentString.startsWith("W")) {
-//								Warp currentWarp = new Warp(currentString, routeID);
-//								if (currentString.startsWith("WD")) { // door
-//									currentEntity = new Entity(true, "free", 0, currentRoute.getTerrain());
-//								} else {
-//									currentEntity = new Entity(true, "warp", 0, currentRoute.getTerrain());
-//								}
-//								currentEntity.addWarp(currentWarp);
-//								warps.add(currentWarp);
-//							} else if (currentString.startsWith("C")) {
-//								currentEntity = new Entity(true, "free", 0, currentRoute.getTerrain());
-//								NPC currentCharacter = new NPC(currentString);
-//								currentCharacter.setCurrentPosition(x, y);
-//								currentCharacter.setCurrentRoute(currentRoute);
-//								characters.add(currentCharacter);
-//							}
-//							currentRoute.addEntity(x, y, currentEntity);
-//						}
-//					}
-//					JsonArray warpDetails = new JsonArray();
-//					for (int y = 0; y < warps.size(); y++) {
-//						JsonObject currentWarp = new JsonObject();
-//						currentLine = currentReader.readLine();
-//						String[] rowElements = currentLine.split(",");
-//						int warpIndex = y;
-//						currentWarp.addProperty("id", rowElements[0]);
-//						if (!rowElements[0].equals(warps.get(warpIndex).getWarpString())) {
-//							for (int i = 0; i < warps.size(); i++) {
-//								warpIndex = i;
-//								if (rowElements[0].equals(warps.get(warpIndex).getWarpString())) {
-//									break;
-//								}
-//							}
-//						}
-//						warps.get(warpIndex).setNewRoute(rowElements[1]);
-//						warps.get(warpIndex).setNewPosition(
-//								new Point(Integer.parseInt(rowElements[2]), Integer.parseInt(rowElements[3])));
-//
-//						currentWarp.addProperty("new_route", rowElements[1]);
-//						currentWarp.addProperty("new_x", Integer.parseInt(rowElements[2]));
-//						currentWarp.addProperty("new_y", Integer.parseInt(rowElements[3]));
-//						warpDetails.add(currentWarp);
-//					}
-//					JsonArray characterDetails = new JsonArray();
-//					for (int y = 0; y < characters.size(); y++) {
-//						JsonObject currentChar = new JsonObject();
-//						currentLine = currentReader.readLine();
-//						String[] rowElements = currentLine.split(",");
-//						int characterIndex = y;
-//						currentChar.addProperty("id", rowElements[0]);
-//						if (!rowElements[0].equals(characters.get(characterIndex).getID())) {
-//							for (int i = 0; i < characters.size(); i++) {
-//								characterIndex = i;
-//								if (rowElements[0].equals(characters.get(characterIndex).getID())) {
-//									break;
-//								}
-//							}
-//						}
-//						NPC currentCharacter = characters.get(characterIndex);
-//						currentChar.addProperty("char_sprite", rowElements[1]);
-//						currentChar.addProperty("name", rowElements[3]);
-//						currentChar.addProperty("is_trainer", rowElements[4]);
-//						currentCharacter.setID(rowElements[0]);
-//						currentCharacter.setCharacterImage(rowElements[1], rowElements[2].toLowerCase());
-//						currentCharacter.setName(rowElements[3]);
-//						currentCharacter.setTrainer(rowElements[4]);
-//						currentChar.addProperty("direction", rowElements[2].toLowerCase());
-//						if (rowElements.length == 6) {
-//							currentChar.addProperty("sprite", rowElements[5]);
-//							currentRoute.getEntities()[currentCharacter.getCurrentPosition().y]
-//									[currentCharacter.getCurrentPosition().x].setSprite(rowElements[5]);
-//						}
-//						if(rowElements.length == 7) {
-//							currentChar.addProperty("surfing", rowElements[6]);
-//							currentCharacter.setSurfing(true);
-//							currentRoute.getEntities()[currentCharacter.getCurrentPosition().y]
-//									[currentCharacter.getCurrentPosition().x].setTerrain("see");;
-//						}
-//						if(currentCharacter.isTrainer()) {
-//							currentCharacter.importTeam();
-//						}
-//						currentCharacter.importDialogue();
-//						currentRoute.addCharacterToEntity(currentCharacter.getCurrentPosition().x,
-//								currentCharacter.getCurrentPosition().y, currentCharacter);
-//						characterDetails.add(currentChar);
-//					}
-//					JsonArray encounterDetails = new JsonArray();
-//					while ((currentLine = currentReader.readLine()) != null) {
-//						// possibleEncounters (id,level)
-//						JsonObject encounter = new JsonObject();
-//						String[] rowElements = currentLine.split(",");
-//						encounter.addProperty("id", Integer.parseInt(rowElements[0]));
-//						encounter.addProperty("level", Short.parseShort(rowElements[1]));
-//						encounterDetails.add(encounter);
-//						Pokemon currentEncounter = new Pokemon(Integer.parseInt(rowElements[0]));
-//						currentEncounter.getStats().generateStats(Short.parseShort(rowElements[1]));
-//						currentRoute.addPokemon(currentEncounter);
-//					}
-//					route.add("route", routeDetails);
-//					route.add("warps", warpDetails);
-//					route.add("characters", characterDetails);
-//					route.add("encounters", encounterDetails);
-//					FileWriter fw = new FileWriter(new File(currentFile.getPath().substring(0, currentFile.getPath().length() - 4) + ".route"));
-//					for(char c : route.toString().toCharArray()) {
-//						fw.write(c);
-//						fw.flush();
-//					}
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-//				currentRoute.createMap();
-//				loadedRoutes.put(routeID, currentRoute);
-////				originalRoutes.put(routeID, currentRoute.copy());
-//				warps.clear();
-//			}
-//		}
-//	}
-
 	public void readAllRoutes() {
 		for (File currentFile : folderFiles) {
 			if (currentFile.isFile() && currentFile.getName().endsWith(".route")) {
@@ -275,25 +85,25 @@ public class RouteAnalyzer {
 									currentEntity = new Entity(false, "tree", 0, "grassy");
 									break;
 								case "F": // Free
-									currentEntity = new Entity(true, "free", 0, currentRoute.getTerrain());
+									currentEntity = new Entity(true, "free", 0, currentRoute.getTerrainName());
 									break;
 								case "G": // Grass
 									currentEntity = new Entity(true, "grass", Entity.POKEMON_GRASS_RATE, "grassy");
 									break;
 								case "M": // Mauer - House/Center/Market
-									currentEntity = new Entity(false, "free", 0, currentRoute.getTerrain());
+									currentEntity = new Entity(false, "free", 0, currentRoute.getTerrainName());
 									break;
 								case "P": // Center
-									currentEntity = new Entity(false, "center", 0, currentRoute.getTerrain());
+									currentEntity = new Entity(false, "center", 0, currentRoute.getTerrainName());
 									break;
 								case "HS":
-									currentEntity = new Entity(false, "house_small", 0, currentRoute.getTerrain());
+									currentEntity = new Entity(false, "house_small", 0, currentRoute.getTerrainName());
 									break;
 								case "HL":
-									currentEntity = new Entity(false, "house_large", 0, currentRoute.getTerrain());
+									currentEntity = new Entity(false, "house_large", 0, currentRoute.getTerrainName());
 									break;
 								case "A":
-									currentEntity = new Entity(false, "gym", 0, currentRoute.getTerrain());
+									currentEntity = new Entity(false, "gym", 0, currentRoute.getTerrainName());
 									break;
 								case "S": //See
 									currentEntity = new Entity(true, "free", 0, "see");
@@ -303,26 +113,49 @@ public class RouteAnalyzer {
 									currentEntity = new Entity(true, "free", 0, "sandy");
 									break;
 								case "B": //Bridge
-									currentEntity = new Entity(true, "bridge", 0, currentRoute.getTerrain());
+									currentEntity = new Entity(true, "bridge", 0, currentRoute.getTerrainName());
 									break;
 								case "PC":
-									currentEntity = new Entity(false, "pc", 0, currentRoute.getTerrain());
+									currentEntity = new Entity(false, "pc", 0, currentRoute.getTerrainName());
 									break;
 								case "JH":
-									currentEntity = new Entity(false, "joyhealing0", 0, currentRoute.getTerrain());
+									currentEntity = new Entity(false, "joyhealing0", 0, currentRoute.getTerrainName());
 									break;
+								case "MD":
+									currentEntity = new Entity(true, "free", 0, "movedown");
+									break;
+								case "MU":
+									currentEntity = new Entity(true, "free", 0, "moveup");
+									break;
+								case "ML":
+									currentEntity = new Entity(true, "free", 0, "moveleft");
+									break;
+								case "MR":
+									currentEntity = new Entity(true, "free", 0, "moveright");
+									break;
+								case "MS":
+									currentEntity = new Entity(true, "free", 0, "movestop");
+									break;
+								case "RB":
+									currentEntity = new Entity(false, "rockbig", 0, currentRoute.getTerrainName());
+									break;
+								case "RG":
+									currentEntity = new Entity(false, "rockgroup", 0, currentRoute.getTerrainName());
+									break;
+								case "R":
+									currentEntity = new Entity(false, "rock", 0, currentRoute.getTerrainName());
 								}
 							} else if (currentString.startsWith("W")) {
 								Warp currentWarp = new Warp(currentString, routeID);
 								if (currentString.startsWith("WD")) { // door
-									currentEntity = new Entity(true, "free", 0, currentRoute.getTerrain());
+									currentEntity = new Entity(true, "free", 0, currentRoute.getTerrainName());
 								} else {
-									currentEntity = new Entity(true, "warp", 0, currentRoute.getTerrain());
+									currentEntity = new Entity(true, "warp", 0, currentRoute.getTerrainName());
 								}
 								currentEntity.addWarp(currentWarp);
 								warps.add(currentWarp);
 							} else if (currentString.startsWith("C")) {
-								currentEntity = new Entity(true, "free", 0, currentRoute.getTerrain());
+								currentEntity = new Entity(true, "free", 0, currentRoute.getTerrainName());
 								NPC currentCharacter = new NPC(currentString);
 								currentCharacter.setCurrentPosition(x, y);
 								currentCharacter.setCurrentRoute(currentRoute);

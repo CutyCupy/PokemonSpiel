@@ -50,7 +50,7 @@ public class GameController {
 	}
 
 	public void move(Direction moveDirection) {
-		if (!interactionPause) {
+		if (!interactionPause && mainCharacter.isControllable()) {
 			interactionPause = true;
 			gameFrame.setDelay(TextLabel.SLOW);
 			Point possiblePoint = mainCharacter.getCurrentPosition();
@@ -76,24 +76,44 @@ public class GameController {
 		}
 	}
 
+	public void slide(Direction slideDirection) {
+		Point possiblePoint = mainCharacter.getCurrentPosition();
+		switch (slideDirection) {
+		case UP:
+			updatePosition(possiblePoint.x, possiblePoint.y - 1);
+			break;
+		case DOWN:
+			updatePosition(possiblePoint.x, possiblePoint.y + 1);
+			break;
+		case LEFT:
+			updatePosition(possiblePoint.x - 1, possiblePoint.y);
+			break;
+		case RIGHT:
+			updatePosition(possiblePoint.x + 1, possiblePoint.y);
+			break;
+		}
+	}
+
 	private boolean updatePosition(int x, int y) {
 		if(x >= currentBackground.getCurrentRoute().getWidth() || x < 0 || y >= currentBackground.getCurrentRoute().getHeight() || y < 0) {
+			mainCharacter.setControllable(true);
 			return false;
 		}
+		System.out.println(x + ":" + y);
 		if (currentBackground.getCurrentRoute().getEntities()[y][x].isAccessible(mainCharacter)) {
-			mainCharacter.changePosition(mainCharacter.getCurrentDirection());
-			if (currentBackground.getCurrentRoute().getEntities()[y][x].startWarp()) {
-				x = mainCharacter.getCurrentPosition().x;
-				y = mainCharacter.getCurrentPosition().y;
+			System.out.println("yay");
+			if(mainCharacter.isControllable()) {
+				System.out.println("moving");
+				mainCharacter.changePosition(mainCharacter.getCurrentDirection());
+			} else {
+				mainCharacter.slide(mainCharacter.getCurrentDirection());
 			}
-			int characterIndex = checkStartFight();
-			if (characterIndex >= 0) {
-				startFight(getCurrentBackground().getCurrentRoute().getCharacters().get(characterIndex));
-			} else if (currentBackground.getCurrentRoute().getEntities()[y][x].checkPokemon()) {
-				startFight(currentBackground.chooseEncounter());
-			}
+			currentBackground.getCurrentRoute().getEntities()[y][x].onStep(mainCharacter);
+
 			interactionPause = false;
 			return true;
+		} else {
+			mainCharacter.setControllable(true);
 		}
 		return false;
 	}
@@ -256,59 +276,10 @@ public class GameController {
 	public void checkInteraction() {
 		if (!interactionPause) {
 			interactionPause = true;
-			boolean flag = false;
 			Point interactionPoint = mainCharacter.getInteractionPoint();
-			Entity currentEntity = currentBackground.getCurrentRoute()
-					.getEntities()[interactionPoint.y][interactionPoint.x];
-			if (currentEntity.hasCharacter()) {
-				if (currentEntity.getCharacter().isTrainer()) {
-					if (!currentEntity.getCharacter().isDefeated()) {
-						currentEntity.getCharacter().faceTowardsMainCharacter();
-						startFight(currentEntity.getCharacter());
-						flag = true;
-					}
-				}
-				if(!flag) {
-					currentEntity.getCharacter().faceTowardsMainCharacter();
-					gameFrame.addDialogue(currentEntity.getCharacter().getName() + ": "
-							+ currentEntity.getCharacter().getNoFightDialogue());
-					waitDialogue();
-					if(currentEntity.getCharacter().getName().equals("Joy")) {
-						mainCharacter.getTeam().restoreTeam();
-						for(int i = 1; i <= mainCharacter.getTeam().getAmmount() + 1; i++) {
-							System.out.println("test");
-							getCurrentBackground().getCurrentRoute().getEntities()[0][1].setSprite("joyhealing" + (i % (mainCharacter.getTeam().getAmmount() + 1)));
-							getCurrentBackground().getCurrentRoute().updateMap(new Point(1, 0));
-							gameFrame.repaint();
-							sleep(i == mainCharacter.getTeam().getAmmount() ? 1500 : 750);
-						}
-						gameFrame.addDialogue("Deine Pokemon sind nun wieder topfit!");
-						waitDialogue();
-					}
-				}
-			} else if(currentEntity.isWater() && !mainCharacter.isSurfing()) {
-				gameFrame.addDialogue("Hier könnte man surfen!");
-				boolean breaking = false;
-				for(Pokemon p : mainCharacter.getTeam().getTeam()) {
-					for(Move m : p.getMoves()) {
-						if(m != null) {
-							if(m.getName().equals("Surfer")) {
-								gameFrame.addDialogue("Du fängst an auf " + p.getName() + " zu surfen!");
-								mainCharacter.setSurfing(true);
-								breaking = true;
-								break;
-							}
-						}
-					}
-					if(breaking) break;
-				}
-				waitDialogue();
-				if(breaking) {
-					mainCharacter.changePosition(mainCharacter.getCurrentDirection());
-				}
-			} else if(currentEntity.isPC()) {
-				gameFrame.displayPC(mainCharacter);
-			}
+			 currentBackground.getCurrentRoute()
+				.getEntities()[interactionPoint.y][interactionPoint.x].onInteraction(mainCharacter);
+
  			interactionPause = false;
 		}
 	}
@@ -355,7 +326,7 @@ public class GameController {
 		currentBackground = new Background(mainCharacter.getCurrentRoute());
 		Pokemon player = new Pokemon(246);
 		player.getStats().generateStats((short) 99);
-		player.addMove(player.getMoves()[0].getName(), information.getMoveByName("Surfer"));
+		player.addMove(player.getMoves()[0].getName(), information.getMoveById(249));
 		mainCharacter.getTeam().addPokemon(player);
 		gameFrame = new GameFrame();
 	}

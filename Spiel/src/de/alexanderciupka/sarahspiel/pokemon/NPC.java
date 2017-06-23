@@ -27,7 +27,7 @@ public class NPC extends Character {
 			currentRoute.getEntities()[originalPosition.y][originalPosition.x].addCharacter(this);
 			currentPosition = new Point(originalPosition);
 		} if(currentDirection != originalDirection) {
-			this.currentDirection = originalDirection;
+			setCurrentDirection(originalDirection);
 		}
 		currentRoute.updateMap(currentPosition, originalPosition);
 	}
@@ -35,16 +35,16 @@ public class NPC extends Character {
 	public void faceTowardsMainCharacter() {
 		switch (gController.getMainCharacter().getCurrentDirection()) {
 		case UP:
-			currentDirection = Direction.DOWN;
+			setCurrentDirection(de.alexanderciupka.sarahspiel.pokemon.Direction.DOWN);
 			break;
 		case RIGHT:
-			currentDirection = Direction.LEFT;
+			setCurrentDirection(de.alexanderciupka.sarahspiel.pokemon.Direction.LEFT);
 			break;
 		case DOWN:
-			currentDirection = Direction.UP;
+			setCurrentDirection(de.alexanderciupka.sarahspiel.pokemon.Direction.UP);
 			break;
 		case LEFT:
-			currentDirection = Direction.RIGHT;
+			setCurrentDirection(de.alexanderciupka.sarahspiel.pokemon.Direction.RIGHT);
 			break;
 		}
 		currentRoute.updateMap(currentPosition);

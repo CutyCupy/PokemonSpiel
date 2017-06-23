@@ -22,7 +22,7 @@ public class Background {
 		this.currentRoute = currentRoute;
 		rng = new Random();
 		try {
-			this.terrain = ImageIO.read(new File(this.getClass().getResource("/routes/terrain/grassy.png").getFile()));
+			this.terrain = ImageIO.read(new File(this.getClass().getResource("/routes/terrain/" + currentRoute.getTerrainName()  + ".png").getFile()));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -88,7 +88,6 @@ public class Box {
 
 	public Box getNext() {
 		for(int i = 0; i < pc.getBoxes().length; i++) {
-			System.out.println(pc.getBoxes()[i].getNumber());
 			if(pc.getBoxes()[i].getNumber() == this.number) {
 				return i != pc.getBoxes().length - 1 ? pc.getBoxes()[i+1] : pc.getBoxes()[0];
 			}
