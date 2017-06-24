@@ -59,11 +59,14 @@ public class RouteAnalyzer {
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();
 				}
-				JsonObject route = parser.parse(currentReader).getAsJsonObject();
+
+				System.out.println(currentFile.getName());
+
 
 				Route currentRoute = new Route();
 				String routeID = currentFile.getName().split("\\.")[0];
 				try {
+					JsonObject route = parser.parse(currentReader).getAsJsonObject();
 					JsonObject routeDetails = route.get("route").getAsJsonObject();
 					currentRoute.setId(routeDetails.get("id").getAsString());
 					currentRoute.setName(routeDetails.get("name").getAsString());
@@ -144,6 +147,9 @@ public class RouteAnalyzer {
 									break;
 								case "R":
 									currentEntity = new Entity(false, "rock", 0, currentRoute.getTerrainName());
+									break;
+								case "TC":
+									currentEntity = new Entity(false, "treecut", 0, "grassy");
 									break;
 								default:
 									currentEntity = new Entity(true, "free", 0, currentRoute.getTerrainName());

@@ -39,6 +39,7 @@ public class Character implements Runnable {
 	private Direction uncontrollableDir;
 
 	protected int speed;
+	protected int originalSpeed;
 
 	public static final int FAST = 10;
 	public static final int SLOW = 30;
@@ -358,17 +359,17 @@ public class Character implements Runnable {
 			this.setCurrentRoute(gController.getRouteAnalyzer().getRouteById(saveData.get("route").getAsString()));
 			this.setCurrentPosition(saveData.get("current_position.x").getAsInt(),
 					saveData.get("current_position.y").getAsInt());
-			switch (saveData.get("current_direction").getAsString()) {
-			case "DOWN":
+			switch (saveData.get("current_direction").getAsString().toLowerCase()) {
+			case "down":
 				setCurrentDirection(Direction.DOWN);
 				break;
-			case "LEFT":
+			case "left":
 				setCurrentDirection(Direction.LEFT);
 				break;
-			case "UP":
+			case "up":
 				setCurrentDirection(Direction.UP);
 				break;
-			case "RIGHT":
+			case "right":
 				setCurrentDirection(Direction.RIGHT);
 				break;
 			default:
@@ -507,6 +508,9 @@ public class Character implements Runnable {
 
 	public void startUncontrollableMove(Direction dir) {
 		this.setControllable(false);
+		if(this.uncontrollableDir == null) {
+			this.originalSpeed = this.speed;
+		}
 		if(this.uncontrollableDir == dir) {
 			return;
 		}
@@ -520,9 +524,9 @@ public class Character implements Runnable {
 					gController.slide(currentDirection);
 				}
 				if(isControllable()) {
-					uncontrollableDir = null	;
+					uncontrollableDir = null;
 				}
-				speed = SLOW;
+				speed = originalSpeed;
 			}
 		});
 		uncontrollable.start();

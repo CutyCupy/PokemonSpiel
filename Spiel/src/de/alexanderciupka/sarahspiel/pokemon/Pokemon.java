@@ -304,4 +304,8 @@ public class Pokemon {
 		}
 		return result;
 	}
+
+	public void setName(String string) {
+		this.name = string;
+	}
 }

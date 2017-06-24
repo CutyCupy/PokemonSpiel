@@ -318,13 +318,12 @@ public class GameController {
 		mainCharacter.setCharacterImage("main", "front");
 		mainCharacter.setName("Sarah");
 		mainCharacter.setID("999");
-		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("bruchkoebel_arena_1"));
-		mainCharacter.setCurrentPosition(13, 9);
+		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("zuhause"));
+		mainCharacter.setCurrentPosition(2, 0);
 		currentBackground = new Background(mainCharacter.getCurrentRoute());
-		Pokemon player = new Pokemon(246);
-		player.getStats().generateStats((short) 99);
-		mainCharacter.setRocksmash(true);
-		mainCharacter.setSurf(true);
+		Pokemon player = new Pokemon(54);
+		player.setName("Sarah");
+		player.getStats().generateStats((short) 10);
 		mainCharacter.getTeam().addPokemon(player);
 		gameFrame = new GameFrame();
 	}
@@ -343,10 +342,12 @@ public class GameController {
 
 	public void waitDialogue() {
 		gameFrame.setActive();
+		this.interactionPause = true;
 		while (!gameFrame.isDialogueEmpty()) {
 			sleep(50);
 			this.gameFrame.getDialogue().repaint();
 		}
+		this.interactionPause = false;
 	}
 
 	public void saveGame() {

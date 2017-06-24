@@ -189,13 +189,16 @@ public class Entity {
 
 
 	public void onStep(Character c) {
-		startWarp(c);
-		onStepNoWarp(c);
+		if(!startWarp(c)) {
+			onStepNoWarp(c);
+		}
 	}
 
 	public void onStepNoWarp(Character c) {
 		int characterIndex = gController.checkStartFight();
+		System.out.println("no_warp");
 		if (characterIndex >= 0) {
+			System.out.println("started");
 			gController.startFight(gController.getCurrentBackground().getCurrentRoute().getCharacters().get(characterIndex));
 		} else if (checkPokemon()) {
 			gController.startFight(gController.getCurrentBackground().chooseEncounter());
@@ -223,6 +226,7 @@ public class Entity {
 
 	public void onInteraction(Player c) {
 		boolean flag = false;
+		System.out.println("interacting");
 		if (hasCharacter()) {
 			if (getCharacter().isTrainer()) {
 				if (!getCharacter().isDefeated()) {
@@ -250,25 +254,51 @@ public class Entity {
 			}
 		} else if(isWater() && !c.isSurfing()) {
 			gController.getGameFrame().addDialogue("Hier k�nnte man surfen!");
+			gController.waitDialogue();
 			if(c.canSurf()) {
 				gController.getGameFrame().addDialogue("Du f�ngst an zu surfen!");
 				c.setSurfing(true);
-			}
-			gController.waitDialogue();
-			if(c.isSurfing()) {
+				gController.waitDialogue();
 				c.changePosition(c.getCurrentDirection());
 			}
 		} else if(isPC()) {
 			gController.getGameFrame().displayPC(c);
 		} else if(this.spriteName.equals("rock")) {
 			gController.getGameFrame().addDialogue("Dieser Felsen könnte zertr�mmert werden!");
+			gController.waitDialogue();
 			if(c.canRocksmash()) {
 				gController.getGameFrame().addDialogue("Du hast den Felsen zertrümmert!");
 				this.setSprite("free");
 				this.setAccessible(true);
 				c.getCurrentRoute().updateMap(c.getInteractionPoint());
+				gController.waitDialogue();
 			}
-			gController.waitDialogue();
+			gController.getGameFrame().repaint();
+		} else if(this.spriteName.equals("treecut")) {
+			if(c.canCut()) {
+				gController.getGameFrame().addDialogue("Du zerschneidest den Baum!");
+				this.setAccessible(true);
+				gController.waitDialogue();
+
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						for(int i = 1; i <= 3; i++) {
+							setSprite("treecut" + i);
+							c.getCurrentRoute().updateMap(c.getInteractionPoint());
+							gController.getGameFrame().repaint();
+							try {
+								Thread.sleep(100);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+						}
+					}
+				}).start();
+			} else {
+				gController.getGameFrame().addDialogue("Dieser Baum k�nnte zerschnitten werden!");
+				gController.waitDialogue();
+			}
 			gController.getGameFrame().repaint();
 		}
 	}
