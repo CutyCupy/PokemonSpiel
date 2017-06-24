@@ -38,7 +38,6 @@ public class Character implements Runnable {
 	protected GameController gController;
 	private Direction uncontrollableDir;
 
-
 	protected int speed;
 
 	public static final int FAST = 10;
@@ -48,13 +47,11 @@ public class Character implements Runnable {
 	private boolean surfing;
 	private boolean controllable = true;
 
-
 	private PC pc;
 
 	private Thread uncontrollable;
 
-
-	//TODO: Add History to check where the last Pokemon center was.
+	// TODO: Add History to check where the last Pokemon center was.
 
 	public Character() {
 		gController = GameController.getInstance();
@@ -63,7 +60,6 @@ public class Character implements Runnable {
 		oldPosition = new Point(currentPosition);
 		originalPosition = new Point(0, 0);
 		this.speed = SLOW;
-
 
 		pc = new PC(this);
 	}
@@ -107,7 +103,7 @@ public class Character implements Runnable {
 	}
 
 	public void changePosition(Direction direction) {
-		if(controllable) {
+		if (controllable) {
 			setCurrentDirection(direction);
 			oldPosition = new Point(currentPosition);
 			switch (direction) {
@@ -168,7 +164,6 @@ public class Character implements Runnable {
 		return null;
 	}
 
-
 	public void setCharacterImage(String characterImageName, String direction) {
 		this.front = new ImageIcon(
 				this.getClass().getResource("/characters/" + characterImageName + "_front.png").getFile()).getImage();
@@ -177,26 +172,24 @@ public class Character implements Runnable {
 		this.left = new ImageIcon(
 				this.getClass().getResource("/characters/" + characterImageName + "_left.png").getFile()).getImage();
 		this.right = new ImageIcon(
-				this.getClass().getResource("/characters/" + characterImageName + "_right.png")	.getFile()).getImage();
+				this.getClass().getResource("/characters/" + characterImageName + "_right.png").getFile()).getImage();
 		switch (direction) {
 		case "front":
 			setCurrentDirection(Direction.DOWN);
-			this.originalDirection = currentDirection;
-			return;
+			break;
 		case "back":
 			setCurrentDirection(Direction.UP);
-			this.originalDirection = currentDirection;
-			return;
+			break;
 		case "left":
 			setCurrentDirection(Direction.LEFT);
-			this.originalDirection = currentDirection;
-			return;
+			break;
 		case "right":
 			setCurrentDirection(Direction.RIGHT);
-			this.originalDirection = currentDirection;
-			return;
+			break;
+		default:
+			setCurrentDirection(Direction.DOWN);
+			break;
 		}
-		setCurrentDirection(Direction.DOWN);
 		originalDirection = currentDirection;
 	}
 
@@ -232,31 +225,31 @@ public class Character implements Runnable {
 		return this.currentDirection;
 	}
 
-//	public void setCurrentDirection(String direction) {
-//		switch (direction) {
-//		case "front":
-//			currentDirection = Direction.DOWN;
-//			this.originalDirection = currentDirection;
-//			return;
-//		case "back":
-//			currentDirection = Direction.UP;
-//			this.originalDirection = currentDirection;
-//			return;
-//		case "left":
-//			currentDirection = Direction.LEFT;
-//			this.originalDirection = currentDirection;
-//			return;
-//		case "right":
-//			currentDirection = Direction.RIGHT;
-//			this.originalDirection = currentDirection;
-//			return;
-//		}
-//		currentDirection = Direction.DOWN;
-//		this.originalDirection = currentDirection;
-//	}
+	// public void setCurrentDirection(String direction) {
+	// switch (direction) {
+	// case "front":
+	// currentDirection = Direction.DOWN;
+	// this.originalDirection = currentDirection;
+	// return;
+	// case "back":
+	// currentDirection = Direction.UP;
+	// this.originalDirection = currentDirection;
+	// return;
+	// case "left":
+	// currentDirection = Direction.LEFT;
+	// this.originalDirection = currentDirection;
+	// return;
+	// case "right":
+	// currentDirection = Direction.RIGHT;
+	// this.originalDirection = currentDirection;
+	// return;
+	// }
+	// currentDirection = Direction.DOWN;
+	// this.originalDirection = currentDirection;
+	// }
 
 	public void setCurrentDirection(Direction direction) {
-		if(controllable) {
+		if (controllable) {
 			this.currentDirection = direction;
 		}
 	}
@@ -291,32 +284,33 @@ public class Character implements Runnable {
 					int y = 0;
 					switch (currentDirection) {
 					case DOWN:
-						if(mainY - currentPosition.y < 7 && mainY - currentPosition.y > 0) {
+						if (mainY - currentPosition.y < 7 && mainY - currentPosition.y > 0) {
 							y = 1;
 							break;
 						}
 						return -1;
 					case LEFT:
-						if(currentPosition.x - mainX < 7 && currentPosition.x - mainX > 0) {
+						if (currentPosition.x - mainX < 7 && currentPosition.x - mainX > 0) {
 							x = -1;
 							break;
 						}
 						return -1;
 					case RIGHT:
-						if(mainX - currentPosition.x < 7 && mainX - currentPosition.x > 0) {
+						if (mainX - currentPosition.x < 7 && mainX - currentPosition.x > 0) {
 							x = 1;
 							break;
 						}
 						return -1;
 					case UP:
-						if(currentPosition.y - mainY < 7 && currentPosition.y - mainY > 0) {
+						if (currentPosition.y - mainY < 7 && currentPosition.y - mainY > 0) {
 							y = -1;
 							break;
 						}
 						return -1;
 					}
 					for (int i = 1; i <= 7; i++) {
-						if (this.getCurrentRoute().getEntities()[currentPosition.y + (i * y)][currentPosition.x + (i * x)].isAccessible(this)) {
+						if (this.getCurrentRoute().getEntities()[currentPosition.y + (i * y)][currentPosition.x
+								+ (i * x)].isAccessible(this)) {
 							if (mainX == currentPosition.x + (i * x) && mainY == currentPosition.y + (i * y)) {
 								return i;
 							}
@@ -330,7 +324,7 @@ public class Character implements Runnable {
 
 	private void waiting() {
 		this.moving = true;
-		while(moving) {
+		while (moving) {
 			try {
 				Thread.sleep(5);
 			} catch (InterruptedException e) {
@@ -357,13 +351,14 @@ public class Character implements Runnable {
 	}
 
 	public boolean importSaveData(JsonObject saveData) {
-		if(this.id == null || this.id.equals(saveData.get("id").getAsString())) {
+		if (this.id == null || this.id.equals(saveData.get("id").getAsString())) {
 			this.setID(saveData.get("id").getAsString());
 			this.setName(saveData.get("name").getAsString());
 			this.money = saveData.get("money").getAsLong();
 			this.setCurrentRoute(gController.getRouteAnalyzer().getRouteById(saveData.get("route").getAsString()));
-			this.setCurrentPosition(saveData.get("current_position.x").getAsInt(), saveData.get("current_position.y").getAsInt());
-			switch(saveData.get("current_direction").getAsString()) {
+			this.setCurrentPosition(saveData.get("current_position.x").getAsInt(),
+					saveData.get("current_position.y").getAsInt());
+			switch (saveData.get("current_direction").getAsString()) {
 			case "DOWN":
 				setCurrentDirection(Direction.DOWN);
 				break;
@@ -381,7 +376,7 @@ public class Character implements Runnable {
 				break;
 			}
 			this.setSurfing(false);
-			if(saveData.get("surfing") != null) {
+			if (saveData.get("surfing") != null) {
 				this.setSurfing(saveData.get("surfing").getAsBoolean());
 			}
 			this.team.importSaveData(saveData.get("team").getAsJsonArray());
@@ -404,12 +399,12 @@ public class Character implements Runnable {
 	public void run() {
 		switch (this.currentDirection) {
 		case UP:
-			for(int i = 0; i < 10; i++) {
+			for (int i = 0; i < 10; i++) {
 				this.exactY -= 0.1;
-				if(this instanceof NPC) {
+				if (this instanceof NPC) {
 					currentRoute.updateMap(oldPosition, currentPosition);
 				}
-				if(!this.isControllable() && i % 3 == 0 && i != 0) {
+				if (!this.isControllable() && i % 3 == 0 && i != 0) {
 					this.currentDirection = next();
 				}
 				gController.getGameFrame().repaint();
@@ -421,12 +416,12 @@ public class Character implements Runnable {
 			}
 			break;
 		case DOWN:
-			for(int i = 0; i < 10; i++) {
+			for (int i = 0; i < 10; i++) {
 				this.exactY += 0.1;
-				if(this instanceof NPC) {
+				if (this instanceof NPC) {
 					currentRoute.updateMap(oldPosition, currentPosition);
 				}
-				if(!this.isControllable() && i % 3 == 0 && i != 0) {
+				if (!this.isControllable() && i % 3 == 0 && i != 0) {
 					this.currentDirection = next();
 				}
 				gController.getGameFrame().repaint();
@@ -438,12 +433,12 @@ public class Character implements Runnable {
 			}
 			break;
 		case LEFT:
-			for(int i = 0; i < 10; i++) {
+			for (int i = 0; i < 10; i++) {
 				this.exactX -= 0.1;
-				if(this instanceof NPC) {
+				if (this instanceof NPC) {
 					currentRoute.updateMap(oldPosition, currentPosition);
 				}
-				if(!this.isControllable() && i % 3 == 0 && i != 0) {
+				if (!this.isControllable() && i % 3 == 0 && i != 0) {
 					this.currentDirection = next();
 				}
 				gController.getGameFrame().repaint();
@@ -455,12 +450,12 @@ public class Character implements Runnable {
 			}
 			break;
 		case RIGHT:
-			for(int i = 0; i < 10; i++) {
+			for (int i = 0; i < 10; i++) {
 				this.exactX += 0.1;
-				if(this instanceof NPC) {
+				if (this instanceof NPC) {
 					currentRoute.updateMap(oldPosition, currentPosition);
 				}
-				if(!this.isControllable() && i % 3 == 0 && i != 0) {
+				if (!this.isControllable() && i % 3 == 0 && i != 0) {
 					this.currentDirection = next();
 				}
 				gController.getGameFrame().repaint();
@@ -476,16 +471,16 @@ public class Character implements Runnable {
 	}
 
 	private Direction next() {
-		for(int i = 0; i < Direction.values().length; i++) {
-			if(Direction.values()[i].equals(currentDirection)) {
-				return Direction.values()[(i+1) % Direction.values().length];
+		for (int i = 0; i < Direction.values().length; i++) {
+			if (Direction.values()[i].equals(currentDirection)) {
+				return Direction.values()[(i + 1) % Direction.values().length];
 			}
 		}
 		return null;
 	}
 
 	public void toggleWalkingSpeed() {
-		if(this.isControllable()) {
+		if (this.isControllable()) {
 			this.speed = this.speed == SLOW ? FAST : SLOW;
 		}
 	}
@@ -511,33 +506,25 @@ public class Character implements Runnable {
 	}
 
 	public void startUncontrollableMove(Direction dir) {
-		System.out.println("start");
-		System.out.println(dir);
-//		if(uncontrollable != null && uncontrollable.isAlive()) {
-//			System.out.println("INTERRUPT");
-//			uncontrollable.interrupt();
-//		}
 		this.setControllable(false);
+		if(this.uncontrollableDir == dir) {
+			return;
+		}
 		uncontrollableDir = dir;
 		uncontrollable = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				while(!isControllable() && uncontrollableDir == dir) {
+				while (!isControllable() && uncontrollableDir == dir) {
 					speed = VERY_SLOW;
 					currentDirection = dir;
 					gController.slide(currentDirection);
-					System.out.println("still moving" + dir);
+				}
+				if(isControllable()) {
+					uncontrollableDir = null	;
 				}
 				speed = SLOW;
 			}
 		});
 		uncontrollable.start();
-//		while(!this.isControllable()) {
-//			try {
-//				Thread.sleep(5);
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}
-//		}
 	}
 }

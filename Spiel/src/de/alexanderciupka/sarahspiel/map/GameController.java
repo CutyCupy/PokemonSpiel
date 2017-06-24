@@ -99,11 +99,8 @@ public class GameController {
 			mainCharacter.setControllable(true);
 			return false;
 		}
-		System.out.println(x + ":" + y);
 		if (currentBackground.getCurrentRoute().getEntities()[y][x].isAccessible(mainCharacter)) {
-			System.out.println("yay");
 			if(mainCharacter.isControllable()) {
-				System.out.println("moving");
 				mainCharacter.changePosition(mainCharacter.getCurrentDirection());
 			} else {
 				mainCharacter.slide(mainCharacter.getCurrentDirection());
@@ -321,12 +318,13 @@ public class GameController {
 		mainCharacter.setCharacterImage("main", "front");
 		mainCharacter.setName("Sarah");
 		mainCharacter.setID("999");
-		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("zuhause"));
-		mainCharacter.setCurrentPosition(2, 0);
+		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("bruchkoebel_arena_1"));
+		mainCharacter.setCurrentPosition(13, 9);
 		currentBackground = new Background(mainCharacter.getCurrentRoute());
 		Pokemon player = new Pokemon(246);
 		player.getStats().generateStats((short) 99);
-		player.addMove(player.getMoves()[0].getName(), information.getMoveById(249));
+		mainCharacter.setRocksmash(true);
+		mainCharacter.setSurf(true);
 		mainCharacter.getTeam().addPokemon(player);
 		gameFrame = new GameFrame();
 	}

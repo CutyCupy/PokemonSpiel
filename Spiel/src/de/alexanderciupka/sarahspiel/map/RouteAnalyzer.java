@@ -122,19 +122,19 @@ public class RouteAnalyzer {
 									currentEntity = new Entity(false, "joyhealing0", 0, currentRoute.getTerrainName());
 									break;
 								case "MD":
-									currentEntity = new Entity(true, "free", 0, "movedown");
+									currentEntity = new Entity(true, "movedown", 0, currentRoute.getTerrainName());
 									break;
 								case "MU":
-									currentEntity = new Entity(true, "free", 0, "moveup");
+									currentEntity = new Entity(true, "moveup", 0, currentRoute.getTerrainName());
 									break;
 								case "ML":
-									currentEntity = new Entity(true, "free", 0, "moveleft");
+									currentEntity = new Entity(true, "moveleft", 0, currentRoute.getTerrainName());
 									break;
 								case "MR":
-									currentEntity = new Entity(true, "free", 0, "moveright");
+									currentEntity = new Entity(true, "moveright", 0, currentRoute.getTerrainName());
 									break;
 								case "MS":
-									currentEntity = new Entity(true, "free", 0, "movestop");
+									currentEntity = new Entity(true, "movestop", 0, currentRoute.getTerrainName());
 									break;
 								case "RB":
 									currentEntity = new Entity(false, "rockbig", 0, currentRoute.getTerrainName());
@@ -144,6 +144,10 @@ public class RouteAnalyzer {
 									break;
 								case "R":
 									currentEntity = new Entity(false, "rock", 0, currentRoute.getTerrainName());
+									break;
+								default:
+									currentEntity = new Entity(true, "free", 0, currentRoute.getTerrainName());
+									break;
 								}
 							} else if (currentString.startsWith("W")) {
 								Warp currentWarp = new Warp(currentString, routeID);

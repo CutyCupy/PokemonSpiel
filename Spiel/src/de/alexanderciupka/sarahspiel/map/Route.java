@@ -23,9 +23,6 @@ public class Route {
 	private ArrayList<NPC> characters;
 	private BufferedImage map;
 
-	private BufferedImage terrain;
-	private BufferedImage sprites;
-
 	private String terrainName;
 
 	public Route() {
@@ -119,15 +116,11 @@ public class Route {
 
 	public void createMap() {
 		map = new BufferedImage(width * 70, height * 70, BufferedImage.TYPE_4BYTE_ABGR);
-		terrain = new BufferedImage(width * 70, height * 70, BufferedImage.TYPE_4BYTE_ABGR);
-		sprites = new BufferedImage(width * 70, height * 70, BufferedImage.TYPE_4BYTE_ABGR);
 		Graphics g = map.getGraphics();
-		Graphics gt = terrain.getGraphics();
-		Graphics gs = sprites.getGraphics();
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				try {
-					gt.drawImage(entities[y][x].getTerrain(), x * 70, y * 70, null);
+					g.drawImage(entities[y][x].getTerrain(), x * 70, y * 70, null);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -136,33 +129,26 @@ public class Route {
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				try {
-					gs.drawImage(entities[y][x].getSprite(), x * 70, y * 70, null);
+					g.drawImage(entities[y][x].getSprite(), x * 70, y * 70, null);
 					if(entities[y][x].hasCharacter()) {
-						gs.drawImage(entities[y][x].getCharacterSprite(), x * 70, y * 70, null);
+						g.drawImage(entities[y][x].getCharacterSprite(), x * 70, y * 70, null);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		}
-		g.drawImage(terrain, 0, 0, null);
-		g.drawImage(sprites, 0, 0, null);
 //		saveMap();
 	}
 
 	public void updateMap(Point... updatePoint) {
 		if(map != null) {
-			Graphics gs = sprites.getGraphics();
-			Graphics gt = terrain.getGraphics();
 			Graphics g = map.getGraphics();
 			for(Point p : updatePoint) {
 				try {
-					gt.drawImage(entities[p.y][p.x].getTerrain(), p.x * 70, p.y * 70, null);
-					gs.drawImage(entities[p.y][p.x].getSprite(), p.x * 70, p.y * 70, null);
 					g.drawImage(entities[p.y][p.x].getTerrain(), p.x * 70, p.y * 70, null);
 					g.drawImage(entities[p.y][p.x].getSprite(), p.x * 70, p.y * 70, null);
 					if(entities[p.y][p.x].hasCharacter()) {
-						gs.drawImage(entities[p.y][p.x].getCharacterSprite(), (int) (entities[p.y][p.x].getCharacter().getExactX() * 70), (int) (entities[p.y][p.x].getCharacter().getExactY() * 70), null);
 						g.drawImage(entities[p.y][p.x].getCharacterSprite(), (int) (entities[p.y][p.x].getCharacter().getExactX() * 70), (int) (entities[p.y][p.x].getCharacter().getExactY() * 70), null);
 					}
 				} catch (Exception e) {
@@ -209,14 +195,4 @@ public class Route {
 	public BufferedImage getMap() {
 		return this.map;
 	}
-
-
-	public BufferedImage getTerrain() {
-		return terrain;
-	}
-
-	public BufferedImage getSprites() {
-		return sprites;
-	}
-
 }

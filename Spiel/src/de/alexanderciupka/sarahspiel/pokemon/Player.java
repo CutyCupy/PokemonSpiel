@@ -9,6 +9,11 @@ import de.alexanderciupka.sarahspiel.map.Route;
 public class Player extends Character {
 
 	private ArrayList<String> routeHistory;
+	
+	private boolean cut;
+	private boolean rocksmash;
+	private boolean surf;
+	private boolean strength;
 
 	public Player() {
 		super();
@@ -67,5 +72,37 @@ public class Player extends Character {
 
 	public ArrayList<String> getRouteHistory() {
 		return routeHistory;
+	}
+
+	public boolean canCut() {
+		return cut;
+	}
+
+	public void setCut(boolean cut) {
+		this.cut = cut;
+	}
+
+	public boolean canRocksmash() {
+		return rocksmash;
+	}
+
+	public void setRocksmash(boolean rocksmash) {
+		this.rocksmash = rocksmash;
+	}
+
+	public boolean canSurf() {
+		return surf;
+	}
+
+	public void setSurf(boolean surf) {
+		this.surf = surf;
+	}
+
+	public boolean canStrength() {
+		return strength;
+	}
+
+	public void setStrength(boolean strength) {
+		this.strength = strength;
 	}
 }

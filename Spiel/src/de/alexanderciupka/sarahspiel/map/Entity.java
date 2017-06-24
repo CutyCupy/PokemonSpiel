@@ -8,10 +8,8 @@ import javax.swing.ImageIcon;
 
 import de.alexanderciupka.sarahspiel.pokemon.Character;
 import de.alexanderciupka.sarahspiel.pokemon.Direction;
-import de.alexanderciupka.sarahspiel.pokemon.Move;
 import de.alexanderciupka.sarahspiel.pokemon.NPC;
 import de.alexanderciupka.sarahspiel.pokemon.Player;
-import de.alexanderciupka.sarahspiel.pokemon.Pokemon;
 
 public class Entity {
 
@@ -56,7 +54,6 @@ public class Entity {
 	}
 
 	public void setSprite(String spriteName) {
-		System.out.println(spriteName);
 		this.spriteName = spriteName;
 		if(spriteName.equals("grass")) {
 			this.terrain = new ImageIcon(this.getClass().getResource("/routes/terrain/grassy.png")).getImage();
@@ -200,16 +197,15 @@ public class Entity {
 		int characterIndex = gController.checkStartFight();
 		if (characterIndex >= 0) {
 			gController.startFight(gController.getCurrentBackground().getCurrentRoute().getCharacters().get(characterIndex));
-		} else if (gController.getCurrentBackground().getCurrentRoute().getEntities()[c.getCurrentPosition().y][c.getCurrentPosition().y].checkPokemon()) {
+		} else if (checkPokemon()) {
 			gController.startFight(gController.getCurrentBackground().chooseEncounter());
 		} else {
-			if(this.terrainName.startsWith("move")) {
-				switch(terrainName) {
+			if(this.spriteName.startsWith("move")) {
+				switch(spriteName) {
 				case "moveleft":
 					c.startUncontrollableMove(Direction.LEFT);
 					break;
 				case "moveright":
-					System.out.println("start");
 					c.startUncontrollableMove(Direction.RIGHT);
 					break;
 				case "moveup":
@@ -243,7 +239,6 @@ public class Entity {
 				if(getCharacter().getName().equals("Joy")) {
 					c.getTeam().restoreTeam();
 					for(int i = 1; i <= c.getTeam().getAmmount() + 1; i++) {
-						System.out.println("test");
 						gController.getCurrentBackground().getCurrentRoute().getEntities()[0][1].setSprite("joyhealing" + (i % (c.getTeam().getAmmount() + 1)));
 						gController.getCurrentBackground().getCurrentRoute().updateMap(new Point(1, 0));
 						gController.getGameFrame().repaint();
@@ -254,44 +249,24 @@ public class Entity {
 				}
 			}
 		} else if(isWater() && !c.isSurfing()) {
-			gController.getGameFrame().addDialogue("Hier könnte man surfen!");
-			boolean breaking = false;
-			for(Pokemon p : c.getTeam().getTeam()) {
-				for(Move m : p.getMoves()) {
-					if(m != null) {
-						if(m.getName().equals("Surfer")) {
-							gController.getGameFrame().addDialogue("Du fängst an auf " + p.getName() + " zu surfen!");
-							c.setSurfing(true);
-							breaking = true;
-							break;
-						}
-					}
-				}
-				if(breaking) break;
+			gController.getGameFrame().addDialogue("Hier kï¿½nnte man surfen!");
+			if(c.canSurf()) {
+				gController.getGameFrame().addDialogue("Du fï¿½ngst an zu surfen!");
+				c.setSurfing(true);
 			}
 			gController.waitDialogue();
-			if(breaking) {
+			if(c.isSurfing()) {
 				c.changePosition(c.getCurrentDirection());
 			}
 		} else if(isPC()) {
 			gController.getGameFrame().displayPC(c);
 		} else if(this.spriteName.equals("rock")) {
-			gController.getGameFrame().addDialogue("Dieser Felsen könnte zertrümmert werden!");
-			boolean breaking = false;
-			for(Pokemon p : c.getTeam().getTeam()) {
-				for(Move m : p.getMoves()) {
-					if(m != null) {
-						if(m.getId() == 249) {
-							gController.getGameFrame().addDialogue(p.getName() + " zertrümmerte den Felsen!");
-							this.setSprite("free");
-							this.setAccessible(true);
-							c.getCurrentRoute().updateMap(c.getInteractionPoint());
-							breaking = true;
-							break;
-						}
-					}
-				}
-				if(breaking) break;
+			gController.getGameFrame().addDialogue("Dieser Felsen kÃ¶nnte zertrï¿½mmert werden!");
+			if(c.canRocksmash()) {
+				gController.getGameFrame().addDialogue("Du hast den Felsen zertrÃ¼mmert!");
+				this.setSprite("free");
+				this.setAccessible(true);
+				c.getCurrentRoute().updateMap(c.getInteractionPoint());
 			}
 			gController.waitDialogue();
 			gController.getGameFrame().repaint();

@@ -25,6 +25,9 @@ import javax.swing.JRadioButton;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 public class RouteCreator extends JFrame {
 
 	private JPanel contentPane;
@@ -47,7 +50,7 @@ public class RouteCreator extends JFrame {
 	private JComboBox<String> terrains;
 	private boolean active;
 
-	private static final String[][] TYPES = {{"Free", ""}, {"Tree", "T"}, {"Grass", "G"}, {"Mauer", "M"}, {"Pokemon Center", "P"}, {"House Small", "HS"}, {"Gym", "A"}, {"Warp", "W"}, {"Character", "C"}, {"See","S"}, {"Sand", "SA"}, {"Bridge", "B"}};
+	private static final String[][] TYPES = {{"Free", ""}, {"Tree", "T"}, {"Grass", "G"}, {"Mauer", "M"}, {"Pokemon Center", "P"}, {"House Small", "HS"}, {"Gym", "A"}, {"Warp", "W"}, {"Character", "C"}, {"See","S"}, {"Sand", "SA"}, {"Bridge", "B"}, {"PC", "BC"}, {"JoyHealing", "JH"}, {"MoveDown", "MD"}, {"MoveUp", "MU"}, {"MoveLeft", "ML"}, {"MoveRight", "MR"}, {"MoveStop", "MS"}, {"RockBig", "RB"}, {"RockGroup", "RG"}, {"Rock", "R"}};
 	private static final int SIZE = 25;
 
 	/**
@@ -293,45 +296,88 @@ public class RouteCreator extends JFrame {
 	}	
 	
 	public void saveRoute() {
-		File newRoute = new File("./res/routes/" + routeID + ".txt");
+		File newRoute = new File("./res/routes/" + routeID + ".route");
 		try {
-			BufferedWriter bWriter = new BufferedWriter(new FileWriter(newRoute));
-			bWriter.write(routeName);
-			bWriter.newLine();
-			bWriter.write(terrains.getItemAt(terrains.getSelectedIndex()));
-			bWriter.newLine();
-			bWriter.write(String.valueOf(vertical.length));
-			bWriter.newLine();
-			bWriter.write(String.valueOf(horizontal.length));
-			bWriter.newLine();
-			String line = "";
-			String labelText = "";
+			JsonObject route = new JsonObject();
+			JsonObject routeDetails = new JsonObject();
+			routeDetails.addProperty("id", routeID);
+			routeDetails.addProperty("name", routeName);
+			routeDetails.addProperty("terrain", this.terrains.getItemAt(terrains.getSelectedIndex()));
+			routeDetails.addProperty("height", vertical.length);
+			routeDetails.addProperty("width", horizontal.length);
+
 			for(int y = 0; y < vertical.length; y++) {
 				for(int x = 0; x < horizontal.length; x++) {
-					labelText = labels[y][x].getText();
-					if(labelText.equals("")) {
-						labelText = "F";
-					}
-					if(x == 0) {
-						line = labelText;
-					} else {
-						line += "," + labelText;
-					}
+					routeDetails.addProperty(x + "." + y, labels[y][x].getText());
 				}
-				bWriter.write(line);
-				bWriter.newLine();
 			}
+			JsonArray warpDetails = new JsonArray();
 			for(Warp currentWarp : warps) {
-				line = currentWarp.getWarpString() + "," + currentWarp.getNewRoute() + ",";
-				bWriter.write(line);
-				bWriter.newLine();
+				JsonObject warp = new JsonObject();
+				warp.addProperty("id", currentWarp.getWarpString());
+				warp.addProperty("new_route", currentWarp.getNewRoute());
+				warp.addProperty("new_x", "-1");
+				warp.addProperty("new_y", "-1");
+				warpDetails.add(warp);
 			}
+			JsonArray characterDetails = new JsonArray();
 			for(int i = 0; i < characters.size(); i++) {
-				line = "C" + i + "," + characters.get(i) + ",";
-				bWriter.write(line);
-				bWriter.newLine();
+				JsonObject currentCharacter = new JsonObject();
+				currentCharacter.addProperty("id", "C" + i);
+				currentCharacter.addProperty("name", characters.get(i));
+				currentCharacter.addProperty("char_sprite", "man");
+				currentCharacter.addProperty("direction", "todo");
+				currentCharacter.addProperty("is_trainer", "todo");
+				currentCharacter.addProperty("sprite", "free");
+				currentCharacter.addProperty("surfing", "todo");
+				characterDetails.add(currentCharacter);
 			}
-			bWriter.flush();
+			
+			route.add("route", routeDetails);
+			route.add("warps", warpDetails);
+			route.add("characters", characterDetails);
+			route.add("encounters", new JsonArray());
+			BufferedWriter bWriter = new BufferedWriter(new FileWriter(newRoute));
+			for(char c : route.toString().toCharArray()) {
+				bWriter.write(c);
+				bWriter.flush();
+			}
+//			bWriter.write(routeName);
+//			bWriter.newLine();
+//			bWriter.write(terrains.getItemAt(terrains.getSelectedIndex()));
+//			bWriter.newLine();
+//			bWriter.write(String.valueOf(vertical.length));
+//			bWriter.newLine();
+//			bWriter.write(String.valueOf(horizontal.length));
+//			bWriter.newLine();
+//			String line = "";
+//			String labelText = "";
+//			for(int y = 0; y < vertical.length; y++) {
+//				for(int x = 0; x < horizontal.length; x++) {
+//					labelText = labels[y][x].getText();
+//					if(labelText.equals("")) {
+//						labelText = "F";
+//					}
+//					if(x == 0) {
+//						line = labelText;
+//					} else {
+//						line += "," + labelText;
+//					}
+//				}
+//				bWriter.write(line);
+//				bWriter.newLine();
+//			}
+//			for(Warp currentWarp : warps) {
+//				line = currentWarp.getWarpString() + "," + currentWarp.getNewRoute() + ",";
+//				bWriter.write(line);
+//				bWriter.newLine();
+//			}
+//			for(int i = 0; i < characters.size(); i++) {
+//				line = "C" + i + "," + characters.get(i) + ",";
+//				bWriter.write(line);
+//				bWriter.newLine();
+//			}
+//			bWriter.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

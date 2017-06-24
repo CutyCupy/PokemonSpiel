@@ -22,14 +22,9 @@ public class BackgroundLabel extends JLabel {
 	@Override
 	public void paint(Graphics g) {
 		g.clearRect(0, 0, this.getWidth(), this.getHeight());
-//		g.drawImage(gController.getCurrentBackground().getBackground(),
-//				characterX - (int) gController.getMainCharacter().getCurrentPosition().getX() * 70,
-//				characterY - (int) gController.getMainCharacter().getCurrentPosition().getY() * 70, null);
 		int x = characterX - (int) (gController.getMainCharacter().getExactX() * 70);
 		int y = characterY - (int) (gController.getMainCharacter().getExactY() * 70);
-		g.drawImage(gController.getCurrentBackground().getCurrentRoute().getTerrain(),
-				x, y, null);
-		g.drawImage(gController.getCurrentBackground().getCurrentRoute().getSprites(),
+		g.drawImage(gController.getCurrentBackground().getCurrentRoute().getMap(),
 				x, y, null);
 		g.drawImage(gController.getMainCharacter().getCharacterImage(), characterX, characterY, null);
 	}
