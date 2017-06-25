@@ -5,6 +5,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 public class NPC extends Character {
 
 
@@ -12,7 +16,9 @@ public class NPC extends Character {
 	private File dialogueFile;
 	private String beforeFight;
 	private String noFight;
-
+	private String onDefeat;
+	private Item reward;
+	
 	public NPC() {
 		super();
 	}
@@ -143,22 +149,23 @@ public class NPC extends Character {
 		} catch (Exception e) {
 			hasTeam = false;
 		}
-
 	}
 
 	public void importDialogue() {
 		try {
 			System.out.println("IMPORT DIALOGUE: " + getFileName() + " - " + this.currentRoute.getId());
 			dialogueFile = new File(
-					this.getClass().getResource("/characters/dialoge/" + this.currentRoute.getId() + "/" +  getFileName() + ".txt").getFile());
-			BufferedReader reader = new BufferedReader(new FileReader(dialogueFile));
-			String currentLine;
-			while((currentLine = reader.readLine()) != null) {
-				currentLine = currentLine.toLowerCase();
-				if(currentLine.equals("before")) {
-					beforeFight = reader.readLine();
-				} else if((currentLine.equals("no"))) {
-					noFight = reader.readLine();
+					this.getClass().getResource("/characters/dialoge/" + this.currentRoute.getId() + "/" +  getFileName() + ".char").getFile());
+			JsonObject dialogue = new JsonParser().parse(new BufferedReader(new FileReader(dialogueFile))).getAsJsonObject();
+			this.beforeFight = dialogue.get("before") instanceof JsonNull ? null : dialogue.get("before").getAsString();
+			this.noFight = dialogue.get("no") instanceof JsonNull ? null : dialogue.get("no").getAsString();
+			this.onDefeat = dialogue.get("on_defeat") instanceof JsonNull ? null : dialogue.get("on_defeat").getAsString();
+			if(!(dialogue.get("reward") instanceof JsonNull)) {
+				for(Item i : Item.values()) {
+					if(i.name().toLowerCase().equals(dialogue.get("reward").getAsString().toLowerCase())) {
+						this.reward = i;
+						break;
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -170,6 +177,14 @@ public class NPC extends Character {
 
 	private String getFileName() {
 		return this.name.toLowerCase().replace(" ", "_");
+	}
+
+	public String getOnDefeatDialogue() {
+		return onDefeat;
+	}
+
+	public Item getReward() {
+		return reward;
 	}
 
 

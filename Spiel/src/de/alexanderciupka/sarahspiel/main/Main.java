@@ -2,6 +2,7 @@ package de.alexanderciupka.sarahspiel.main;
 
 import de.alexanderciupka.sarahspiel.menu.MenuController;
 
+
 public class Main {
 
 	public static void main(String[] args) {
