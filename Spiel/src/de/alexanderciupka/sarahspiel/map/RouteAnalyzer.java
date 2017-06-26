@@ -110,7 +110,6 @@ public class RouteAnalyzer {
 									break;
 								case "S": //See
 									currentEntity = new Entity(true, "free", 0, "see");
-									currentEntity.setWater(true);
 									break;
 								case "SA": //Sand
 									currentEntity = new Entity(true, "free", 0, "sandy");

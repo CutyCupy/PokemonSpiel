@@ -1,0 +1,11 @@
+Bruchköbel Arena
+stone
+5
+5
+M,M,C1,M,M
+M,F,F,F,M
+M,F,F,F,M
+M,F,F,F,M
+M,M,W1,M,M
+W1,bruchkoebel,29,7
+C1,man,back,Arenaleiter Dennis (Normal),true,free

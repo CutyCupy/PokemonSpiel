@@ -26,7 +26,7 @@ public class Entity {
 
 	private boolean water;
 
-	public static final float POKEMON_GRASS_RATE = 0.1f;
+	public static final float POKEMON_GRASS_RATE = 0.0f;
 
 	private Random rng;
 	private GameController gController;
@@ -74,6 +74,10 @@ public class Entity {
 
 	public Image getSprite() {
 		return this.sprite;
+	}
+
+	public String getSpriteName() {
+		return this.spriteName;
 	}
 
 	public Image getCharacterSprite() {
@@ -171,11 +175,15 @@ public class Entity {
 		return this.warp;
 	}
 
+	public String getTerrainName() {
+		return terrainName;
+	}
+
 	public void setAccessible(boolean accessible) {
 		this.accessible = accessible;
 	}
 
-	public void setWater(boolean water) {
+	private void setWater(boolean water) {
 		this.water = water;
 	}
 

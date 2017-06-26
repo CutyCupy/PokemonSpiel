@@ -117,7 +117,9 @@ public class Stats {
 						gController.sleep(50);
 					}
 				} else {
-					this.pokemon.addMove(this.pokemon.getRandomMove().getName(), newMove.clone());
+					if(newMove.getPower() > 0) {
+						this.pokemon.addMove(this.pokemon.getRandomMove().getName(), newMove.clone());
+					}
 				}
 			}
 		}
@@ -183,7 +185,7 @@ public class Stats {
 		return this.allTimeXP;
 	}
 
-	public void gainXP(int gain) {
+	public boolean gainXP(int gain) {
 		if (level < 100) {
 			currentXP += gain;
 			allTimeXP += gain;
@@ -194,7 +196,9 @@ public class Stats {
 						.addText(pokemon.getName() + " erreicht Level " + (this.level + 1) + "!");
 				levelUP();
 			}
+			return true;
 		}
+		return false;
 	}
 
 	public short getCurrentHP() {

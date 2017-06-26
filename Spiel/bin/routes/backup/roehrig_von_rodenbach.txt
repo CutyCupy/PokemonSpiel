@@ -1,0 +1,26 @@
+Roehrig von Rodenbach
+grassy
+15
+20
+T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T
+T,T,T,T,T,T,T,W1,W2,T,T,T,T,T,T,T,T,T,T,T
+T,T,T,T,T,T,T,F,F,T,T,T,T,T,T,T,T,T,T,T
+T,T,T,F,F,F,F,F,F,F,F,F,F,F,F,F,F,T,T,T
+T,T,T,F,F,F,F,F,F,F,F,F,F,S,S,F,F,T,T,T
+T,W3,F,F,F,F,F,S,S,F,C0,F,S,S,S,S,F,T,T,T
+T,W4,F,F,F,F,F,S,S,S,S,S,S,S,S,S,F,T,T,T
+T,T,T,F,F,F,C2,S,S,S,S,S,S,S,S,S,C1,T,T,T
+T,T,T,F,F,F,F,S,S,S,S,S,S,S,S,S,F,T,T,T
+T,T,T,F,F,F,F,F,S,S,S,S,S,S,S,S,F,T,T,T
+T,T,T,F,F,F,F,F,F,S,S,S,S,S,S,F,F,T,T,T
+T,T,T,F,F,F,F,F,F,F,F,F,F,F,F,F,F,T,T,T
+T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T
+T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T
+T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T
+W1,kinzigsee,5,23
+W2,kinzigsee,6,23
+W3,route_2,32,18
+W4,route_2,32,19
+C0,man,front,Konstantin,true,free
+C1,woman,left,Sabrina,true,free
+C2,Man,right,Guenther,true,free

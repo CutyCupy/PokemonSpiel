@@ -1,0 +1,13 @@
+Pizzeria La Stella
+stone
+5
+5
+F,F,F,F,F
+F,F,F,C1,F
+F,C2,F,F,F
+F,F,F,F,F
+F,F,W0,F,C0
+W0,neuberg,33,14
+C0,man,left,Tony,true,free
+C1,man,left,Mario,true,free
+C2,man,right,Luigi,true,free

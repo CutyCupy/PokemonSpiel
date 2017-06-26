@@ -224,10 +224,12 @@ public class GameController {
 
 	public boolean winFight(int XPGain) {
 		for (Pokemon p : fight.getParticipants()) {
-			gameFrame.getFightPanel().addText(p.getName() + " erh�lt " + XPGain + " Erfahrungspunkte!");
-			p.gainXP(XPGain / fight.getParticipants().size());
+			if(p.gainXP(XPGain / fight.getParticipants().size())) {
+				gameFrame.getFightPanel().addText(p.getName() + " erh�lt " + XPGain + " Erfahrungspunkte!");
+			}
 		}
 		if (fight.enemyDead()) {
+			this.getMainCharacter().addItem(fight.getEnemyCharacter().getReward());
 			gameFrame.getFightPanel().pause();
 			endFight();
 			return true;
@@ -323,7 +325,7 @@ public class GameController {
 		currentBackground = new Background(mainCharacter.getCurrentRoute());
 		Pokemon player = new Pokemon(54);
 		player.setName("Sarah");
-		player.getStats().generateStats((short) 10);
+		player.getStats().generateStats((short) 100);
 		mainCharacter.getTeam().addPokemon(player);
 		gameFrame = new GameFrame();
 	}

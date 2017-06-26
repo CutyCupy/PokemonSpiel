@@ -58,8 +58,8 @@ public class Pokemon {
 		return this.stats;
 	}
 
-	public void gainXP(int gain) {
-		stats.gainXP(gain);
+	public boolean gainXP(int gain) {
+		return stats.gainXP(gain);
 	}
 
 	public Move[] getMoves() {
@@ -192,7 +192,7 @@ public class Pokemon {
 	public void restoreMoves() {
 		for (int i = 0; i < moves.length; i++) {
 			if (moves[i] != null) {
-				moves[i].setCurrentPP(moves[i].getCurrentPP());
+				moves[i].setCurrentPP(moves[i].getPp());
 			}
 		}
 	}

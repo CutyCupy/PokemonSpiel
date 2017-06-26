@@ -367,5 +367,9 @@ public class Fighting {
 		}
 		return xp / 7;
 	}
-		
+
+	public NPC getEnemyCharacter() {
+		return (NPC) this.enemyCharacter;
+	}
+
 }

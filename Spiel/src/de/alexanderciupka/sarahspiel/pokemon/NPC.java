@@ -18,7 +18,7 @@ public class NPC extends Character {
 	private String noFight;
 	private String onDefeat;
 	private Item reward;
-	
+
 	public NPC() {
 		super();
 	}
@@ -145,9 +145,9 @@ public class NPC extends Character {
 				currentPokemon.getStats().generateStats(Short.parseShort(rowElements[1]));
 				this.team.addPokemon(currentPokemon);
 			}
-			hasTeam = true;
+			trainer = true;
 		} catch (Exception e) {
-			hasTeam = false;
+			trainer = false;
 		}
 	}
 
@@ -168,6 +168,9 @@ public class NPC extends Character {
 					}
 				}
 			}
+			if(this.reward == null) {
+				this.reward = Item.NONE;
+			}
 		} catch (Exception e) {
 			System.err.println("/characters/dialoge/" + this.currentRoute.getId() + "/" +  getFileName() + ".txt");
 			e.printStackTrace();
@@ -186,6 +189,4 @@ public class NPC extends Character {
 	public Item getReward() {
 		return reward;
 	}
-
-
 }

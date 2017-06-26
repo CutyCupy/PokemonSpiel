@@ -27,7 +27,6 @@ public class Character implements Runnable {
 	protected long money;
 	protected Direction currentDirection;
 	protected boolean defeated;
-	protected boolean hasTeam;
 	protected boolean trainer;
 
 	protected double exactX;
@@ -43,7 +42,7 @@ public class Character implements Runnable {
 
 	public static final int FAST = 10;
 	public static final int SLOW = 30;
-	public static final int VERY_SLOW = 60;
+	public static final int VERY_SLOW = 0;
 
 	private boolean surfing;
 	private boolean controllable = true;
@@ -263,10 +262,6 @@ public class Character implements Runnable {
 		return this.defeated;
 	}
 
-	public boolean isHasTeam() {
-		return hasTeam;
-	}
-
 	public boolean isTrainer() {
 		return trainer;
 	}
@@ -276,7 +271,7 @@ public class Character implements Runnable {
 	}
 
 	public int checkStartFight() {
-		if (this.hasTeam) {
+		if (this.trainer && false) {
 			if (!this.defeated) {
 				int mainX = gController.getMainCharacter().getCurrentPosition().x;
 				int mainY = gController.getMainCharacter().getCurrentPosition().y;
@@ -379,6 +374,10 @@ public class Character implements Runnable {
 			this.setSurfing(false);
 			if (saveData.get("surfing") != null) {
 				this.setSurfing(saveData.get("surfing").getAsBoolean());
+				if(isSurfing()) {
+					currentRoute.getEntities()[this.currentPosition.y][this.currentPosition.y].setTerrain("see");
+					currentRoute.updateMap(this.currentPosition);
+				}
 			}
 			this.team.importSaveData(saveData.get("team").getAsJsonArray());
 			this.pc.importSaveData(saveData.get("pc").getAsJsonArray());
