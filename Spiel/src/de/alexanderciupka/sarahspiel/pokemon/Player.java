@@ -1,6 +1,5 @@
 package de.alexanderciupka.sarahspiel.pokemon;
 
-import java.awt.Point;
 import java.util.ArrayList;
 
 import de.alexanderciupka.sarahspiel.map.GameController;
@@ -53,20 +52,6 @@ public class Player extends Character {
 		setCurrentPosition(x, y);
 		setCurrentDirection(d);
 		return GameController.getInstance().getRouteAnalyzer().getRouteById(routeID);
-	}
-
-	public Point getInteractionPoint() {
-		switch (currentDirection) {
-		case DOWN:
-			return new Point(currentPosition.x, currentPosition.y + 1);
-		case UP:
-			return new Point(currentPosition.x, currentPosition.y - 1);
-		case LEFT:
-			return new Point(currentPosition.x - 1, currentPosition.y);
-		case RIGHT:
-			return new Point(currentPosition.x + 1, currentPosition.y);
-		}
-		return null;
 	}
 
 	public ArrayList<String> getRouteHistory() {

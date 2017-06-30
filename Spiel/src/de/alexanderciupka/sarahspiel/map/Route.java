@@ -10,6 +10,7 @@ import java.util.Random;
 import javax.imageio.ImageIO;
 
 import de.alexanderciupka.sarahspiel.pokemon.NPC;
+import de.alexanderciupka.sarahspiel.pokemon.Player;
 import de.alexanderciupka.sarahspiel.pokemon.Pokemon;
 
 public class Route {
@@ -22,6 +23,7 @@ public class Route {
 	private ArrayList<Pokemon> pokemonPool;
 	private ArrayList<NPC> characters;
 	private BufferedImage map;
+	private boolean moving;
 
 	private String terrainName;
 
@@ -129,9 +131,9 @@ public class Route {
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
 				try {
-					g.drawImage(entities[y][x].getSprite(), x * 70, y * 70, null);
+					g.drawImage(entities[y][x].getSprite(), (int) (entities[y][x].getExactX() * 70), (int) (entities[y][x].getExactY() * 70), null);
 					if(entities[y][x].hasCharacter()) {
-						g.drawImage(entities[y][x].getCharacterSprite(), x * 70, y * 70, null);
+						g.drawImage(entities[y][x].getCharacterSprite(), (int) (entities[y][x].getCharacter().getExactX() * 70), (int) (entities[y][x].getCharacter().getExactY() * 70), null);
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -147,7 +149,7 @@ public class Route {
 			for(Point p : updatePoint) {
 				try {
 					g.drawImage(entities[p.y][p.x].getTerrain(), p.x * 70, p.y * 70, null);
-					g.drawImage(entities[p.y][p.x].getSprite(), p.x * 70, p.y * 70, null);
+					g.drawImage(entities[p.y][p.x].getSprite(),(int) (entities[p.y][p.x].getExactX() * 70), (int) (entities[p.y][p.x].getExactY() * 70), null);
 					if(entities[p.y][p.x].hasCharacter()) {
 						g.drawImage(entities[p.y][p.x].getCharacterSprite(), (int) (entities[p.y][p.x].getCharacter().getExactX() * 70), (int) (entities[p.y][p.x].getCharacter().getExactY() * 70), null);
 					}
@@ -194,5 +196,45 @@ public class Route {
 
 	public BufferedImage getMap() {
 		return this.map;
+	}
+
+	public void moveRock(Player p) {
+		Point interactionPoint = p.getInteractionPoint();
+		int x = interactionPoint.x;
+		int y = interactionPoint.y;
+		switch(p.getCurrentDirection()) {
+		case DOWN:
+			y++;
+			break;
+		case LEFT:
+			x--;
+			break;
+		case RIGHT:
+			x++;
+			break;
+		case UP:
+			y--;
+			break;
+		}
+		if(this.entities[y][x].isAccessible() && this.entities[y][x].getSpriteName().equals("free")) {
+			this.getEntities()[interactionPoint.y][interactionPoint.x].setSprite("free");
+			this.getEntities()[interactionPoint.y][interactionPoint.x].setAccessible(true);
+			this.getEntities()[y][x].setSprite("strength");
+			this.getEntities()[y][x].setAccessible(false);
+			this.getEntities()[y][x].setExactX(interactionPoint.x);
+			this.getEntities()[y][x].setExactY(interactionPoint.y);
+
+
+			this.moving = true;
+
+
+			while(moving) {
+				try {
+					Thread.sleep(5);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 }

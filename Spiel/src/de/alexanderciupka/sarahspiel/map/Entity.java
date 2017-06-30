@@ -28,25 +28,30 @@ public class Entity {
 
 	public static final float POKEMON_GRASS_RATE = 0.0f;
 
+	private int x;
+	private int y;
+
+	private double exactX;
+	private double exactY;
+
 	private Random rng;
 	private GameController gController;
-
 	public Entity(boolean accessible, String spriteName, float pokemonRate, String terrainName) {
 		this.accessible = accessible;
 		gController = GameController.getInstance();
 		try {
-//			this.sprite = new ImageIcon(this.getClass().getResource("/routes/entities/" + spriteName + ".png"))
-//					.getImage();
 			setSprite(spriteName);
 			setTerrain(terrainName);
-//			this.terrain = new ImageIcon(this.getClass().getResource("/routes/terrain/" + terrainName + ".png"))
-//					.getImage();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		this.hasCharacter = false;
 		this.pokemonRate = pokemonRate;
 		rng = new Random();
+	}
+
+	public boolean isAccessible() {
+		return this.accessible && !this.hasCharacter && (this.warp == null) && !this.water;
 	}
 
 	public boolean isAccessible(Character c) {
@@ -195,6 +200,31 @@ public class Entity {
 		return spriteName.equals("pc");
 	}
 
+	public int getX() {
+		return x;
+	}
+
+	public void setX(int x) {
+		this.x = x;
+		this.exactX = x;
+	}
+
+	public int getY() {
+		return y;
+	}
+
+	public void setY(int y) {
+		this.y = y;
+		this.exactY = y;
+	}
+
+	public double getExactX() {
+		return exactX;
+	}
+
+	public double getExactY() {
+		return exactY;
+	}
 
 	public void onStep(Character c) {
 		if(!startWarp(c)) {
@@ -234,8 +264,12 @@ public class Entity {
 
 	public void onInteraction(Player c) {
 		boolean flag = false;
-		System.out.println("interacting");
 		if (hasCharacter()) {
+			if(getCharacter().getID().equals("strength")) {
+				gController.getGameFrame().addDialogue("Dieser Felsen kann bewegt werden!");
+				gController.waitDialogue();
+				return;
+			}
 			if (getCharacter().isTrainer()) {
 				if (!getCharacter().isDefeated()) {
 					getCharacter().faceTowardsMainCharacter();
@@ -258,6 +292,12 @@ public class Entity {
 					}
 					gController.getGameFrame().addDialogue("Deine Pokemon sind nun wieder topfit!");
 					gController.waitDialogue();
+				}
+			}
+		} else if (getSpriteName().equals("free") && !accessible) {
+			if(y - 1 >= 0) {
+				if(c.getCurrentRoute().getEntities()[y-1][x].hasCharacter() && c.getCurrentRoute().getEntities()[y-1][x].getCharacter().getName().equals("Joy")) {
+					c.getCurrentRoute().getEntities()[y-1][x].onInteraction(c);
 				}
 			}
 		} else if(isWater() && !c.isSurfing()) {
@@ -309,5 +349,13 @@ public class Entity {
 			}
 			gController.getGameFrame().repaint();
 		}
+	}
+
+	public void setExactX(double x) {
+		this.exactX = x;
+	}
+
+	public void setExactY(double y) {
+		this.exactY = y;
 	}
 }

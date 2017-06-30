@@ -37,6 +37,7 @@ public class RouteAnalyzer {
 	private Map<String, Route> originalRoutes;
 	private ArrayList<Warp> warps;
 	private ArrayList<NPC> characters;
+	private ArrayList<NPC> stones;
 	private GameController gController;
 
 	private JsonParser parser;
@@ -75,6 +76,7 @@ public class RouteAnalyzer {
 					currentRoute.setWidth(routeDetails.get("width").getAsInt());
 					warps = new ArrayList<Warp>();
 					characters = new ArrayList<NPC>();
+					stones = new ArrayList<NPC>();
 					for (int y = 0; y < currentRoute.getHeight(); y++) {
 						for (int x = 0; x < currentRoute.getWidth(); x++) {
 							Entity currentEntity = null;
@@ -92,6 +94,9 @@ public class RouteAnalyzer {
 									break;
 								case "G": // Grass
 									currentEntity = new Entity(true, "grass", Entity.POKEMON_GRASS_RATE, "grassy");
+									break;
+								case "GR":
+									currentEntity = new Entity(true, "free", 0, "grassy");
 									break;
 								case "M": // Mauer - House/Center/Market
 									currentEntity = new Entity(false, "free", 0, currentRoute.getTerrainName());
@@ -123,6 +128,9 @@ public class RouteAnalyzer {
 								case "JH":
 									currentEntity = new Entity(false, "joyhealing0", 0, currentRoute.getTerrainName());
 									break;
+								case "PCD":
+									currentEntity = new Entity(false, "pokecenter_desk", 0, currentRoute.getTerrainName());
+									break;
 								case "MD":
 									currentEntity = new Entity(true, "movedown", 0, currentRoute.getTerrainName());
 									break;
@@ -150,6 +158,15 @@ public class RouteAnalyzer {
 								case "TC":
 									currentEntity = new Entity(false, "treecut", 0, "grassy");
 									break;
+								case "ST":
+									currentEntity = new Entity(true, "free", 0, currentRoute.getTerrainName());
+									NPC currentStone = new NPC(currentString);
+									currentStone.setCurrentPosition(x, y);
+									currentStone.setCurrentRoute(currentRoute);
+									currentStone.setID("strength");
+									currentStone.setCharacterImage("strength", "back");
+									stones.add(currentStone);
+									break;
 								default:
 									currentEntity = new Entity(true, "free", 0, currentRoute.getTerrainName());
 									break;
@@ -170,6 +187,8 @@ public class RouteAnalyzer {
 								currentCharacter.setCurrentRoute(currentRoute);
 								characters.add(currentCharacter);
 							}
+							currentEntity.setX(x);
+							currentEntity.setY(y);
 							currentRoute.addEntity(x, y, currentEntity);
 						}
 					}
@@ -213,6 +232,10 @@ public class RouteAnalyzer {
 							currentRoute.getEntities()[currentCharacter.getCurrentPosition().y]
 									[currentCharacter.getCurrentPosition().x].setSprite(currentChar.get("sprite").getAsString());
 						}
+						if(currentChar.get("ground") != null) {
+							currentRoute.getEntities()[currentCharacter.getCurrentPosition().y]
+									[currentCharacter.getCurrentPosition().x].setTerrain(currentChar.get("ground").getAsString());;
+						}
 						if(currentChar.get("surfing") != null) {
 							currentCharacter.setSurfing(currentChar.get("surfing").getAsBoolean());
 							if(currentCharacter.isSurfing()) {
@@ -227,6 +250,11 @@ public class RouteAnalyzer {
 						currentRoute.addCharacterToEntity(currentCharacter.getCurrentPosition().x,
 								currentCharacter.getCurrentPosition().y, currentCharacter);
 					}
+
+					for(int i = 0; i < stones.size(); i++) {
+						currentRoute.addCharacterToEntity(stones.get(i).getCurrentPosition().x, stones.get(i).getCurrentPosition().y, stones.get(i));
+					}
+
 					JsonArray encounterDetails = route.get("encounters").getAsJsonArray();
 					for(JsonElement j : encounterDetails) {
 						JsonObject currentEncounter = j.getAsJsonObject();

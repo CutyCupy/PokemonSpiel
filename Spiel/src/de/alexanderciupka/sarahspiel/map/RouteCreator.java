@@ -50,7 +50,7 @@ public class RouteCreator extends JFrame {
 	private JComboBox<String> terrains;
 	private boolean active;
 
-	private static final String[][] TYPES = {{"Free", ""}, {"Tree", "T"}, {"Grass", "G"}, {"Mauer", "M"}, {"Pokemon Center", "P"}, {"House Small", "HS"}, {"Gym", "A"}, {"Warp", "W"}, {"Character", "C"}, {"See","S"}, {"Sand", "SA"}, {"Bridge", "B"}, {"PC", "BC"}, {"JoyHealing", "JH"}, {"MoveDown", "MD"}, {"MoveUp", "MU"}, {"MoveLeft", "ML"}, {"MoveRight", "MR"}, {"MoveStop", "MS"}, {"RockBig", "RB"}, {"RockGroup", "RG"}, {"Rock", "R"}};
+	private static final String[][] TYPES = {{"Free", ""}, {"Tree", "T"}, {"Grass", "G"}, {"Grassy", "GR"}, {"Mauer", "M"}, {"Pokemon Center", "P"}, {"House Small", "HS"}, {"Gym", "A"}, {"Warp", "W"}, {"Character", "C"}, {"See","S"}, {"Sand", "SA"}, {"Bridge", "B"}, {"PC", "BC"}, {"JoyHealing", "JH"}, {"MoveDown", "MD"}, {"MoveUp", "MU"}, {"MoveLeft", "ML"}, {"MoveRight", "MR"}, {"MoveStop", "MS"}, {"RockBig", "RB"}, {"RockGroup", "RG"}, {"Rock", "R"}};
 	private static final int SIZE = 25;
 
 	/**
@@ -123,7 +123,7 @@ public class RouteCreator extends JFrame {
 					contentPane.add(horizontal[x - 1]);
 				} else if (y != 0 && x == 0) {
 					vertical[y - 1] = new JButton();
-					vertical[y - 1].setName(String.valueOf(y - 1)); 
+					vertical[y - 1].setName(String.valueOf(y - 1));
 					vertical[y - 1].setBounds(SIZE, SIZE + SIZE * y, SIZE, SIZE);
 					vertical[y - 1].setBackground(Color.GRAY);
 					vertical[y - 1].setBorder(BorderFactory.createLineBorder(Color.BLACK));
@@ -144,7 +144,7 @@ public class RouteCreator extends JFrame {
 		group = new ButtonGroup();
 		for(int i = 0; i < TYPES.length; i++) {
 			JRadioButton currentButton = new JRadioButton(RouteCreator.TYPES[i][0]);
-			currentButton.setBounds(1750, 40 + 40 * i, 150, 40);
+			currentButton.setBounds(1750, 40 + 25 * i, 150, 20);
 			buttons[i] = currentButton;
 			group.add(currentButton);
 			add(currentButton);
@@ -154,7 +154,7 @@ public class RouteCreator extends JFrame {
 		buttons[0].setSelected(true);
 		actionListeners();
 	}
-	
+
 	public void actionListeners() {
 		save.addActionListener(new ActionListener() {
 			@Override
@@ -203,16 +203,16 @@ public class RouteCreator extends JFrame {
 				labels[y][x].addMouseListener(new MouseListener() {
 					@Override
 				 	public void mouseReleased(MouseEvent e) {}
-					
+
 					@Override
 					public void mousePressed(MouseEvent e) {}
-					
+
 					@Override
 					public void mouseExited(MouseEvent e) {}
-					
+
 					@Override
 					public void mouseEntered(MouseEvent e) {}
-					
+
 					@Override
 					public void mouseClicked(MouseEvent e) {
 						if(!active) {
@@ -253,14 +253,14 @@ public class RouteCreator extends JFrame {
 								}
 							}
 							labels[yCoord][xCoord].setText(text);
-							active = false;	
+							active = false;
 						}
 					}
 				});
 			}
 		}
 	}
-	
+
 	public JRadioButton getSelectedButton() {
 		for(int i = 0; i < buttons.length; i++) {
 			if(buttons[i].isSelected()) {
@@ -269,7 +269,7 @@ public class RouteCreator extends JFrame {
 		}
 		return null;
 	}
-	
+
 	public boolean createBuilding(int xStart, int yStart, int width, int height, String buildingID) {
 		if(xStart + width < horizontal.length && yStart + height < vertical.length) {
 			for(int y = 0; y < height; y++) {
@@ -293,8 +293,8 @@ public class RouteCreator extends JFrame {
 			return true;
 		}
 		return false;
-	}	
-	
+	}
+
 	public void saveRoute() {
 		File newRoute = new File("./res/routes/" + routeID + ".route");
 		try {
@@ -332,7 +332,7 @@ public class RouteCreator extends JFrame {
 				currentCharacter.addProperty("surfing", "todo");
 				characterDetails.add(currentCharacter);
 			}
-			
+
 			route.add("route", routeDetails);
 			route.add("warps", warpDetails);
 			route.add("characters", characterDetails);
@@ -381,6 +381,6 @@ public class RouteCreator extends JFrame {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 	}
 }

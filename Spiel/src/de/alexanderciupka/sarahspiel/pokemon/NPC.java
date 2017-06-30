@@ -1,6 +1,5 @@
 package de.alexanderciupka.sarahspiel.pokemon;
 
-import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -28,14 +27,20 @@ public class NPC extends Character {
 	}
 
 	public void resetPosition() {
+		if(this.id.equals("strength")) {
+			System.out.println(currentPosition + " - " + originalPosition);
+		}
 		if (!currentPosition.equals(originalPosition)) {
+			System.out.println("change");
 			currentRoute.getEntities()[currentPosition.y][currentPosition.x].removeCharacter();
 			currentRoute.getEntities()[originalPosition.y][originalPosition.x].addCharacter(this);
-			currentPosition = new Point(originalPosition);
-		} if(currentDirection != originalDirection) {
-			setCurrentDirection(originalDirection);
+			currentRoute.updateMap(originalPosition, currentPosition);
+			setCurrentPosition(originalPosition);
 		}
-		currentRoute.updateMap(currentPosition, originalPosition);
+		if(currentDirection != originalDirection) {
+			setCurrentDirection(originalDirection);
+			currentRoute.updateMap(currentPosition);
+		}
 	}
 
 	public void faceTowardsMainCharacter() {

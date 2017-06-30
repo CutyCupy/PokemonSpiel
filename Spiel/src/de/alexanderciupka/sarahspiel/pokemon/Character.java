@@ -2,6 +2,7 @@ package de.alexanderciupka.sarahspiel.pokemon;
 
 import java.awt.Image;
 import java.awt.Point;
+import java.util.HashMap;
 
 import javax.swing.ImageIcon;
 
@@ -42,7 +43,7 @@ public class Character implements Runnable {
 
 	public static final int FAST = 10;
 	public static final int SLOW = 30;
-	public static final int VERY_SLOW = 0;
+	public static final int VERY_SLOW = 50;
 
 	private boolean surfing;
 	private boolean controllable = true;
@@ -50,6 +51,10 @@ public class Character implements Runnable {
 	private PC pc;
 
 	private Thread uncontrollable;
+
+	private HashMap<String, Image[]> sprites;
+	private int currentWalking;
+
 
 	// TODO: Add History to check where the last Pokemon center was.
 
@@ -60,6 +65,9 @@ public class Character implements Runnable {
 		oldPosition = new Point(currentPosition);
 		originalPosition = new Point(0, 0);
 		this.speed = SLOW;
+		controllable = true;
+
+		sprites = new HashMap<String, Image[]>();
 
 		pc = new PC(this);
 	}
@@ -72,6 +80,9 @@ public class Character implements Runnable {
 		oldPosition = new Point(currentPosition);
 		originalPosition = new Point(0, 0);
 		this.speed = SLOW;
+		controllable = true;
+
+		sprites = new HashMap<String, Image[]>();
 
 		pc = new PC(this);
 	}
@@ -102,9 +113,24 @@ public class Character implements Runnable {
 		return this.currentPosition;
 	}
 
+	public Point getInteractionPoint() {
+		switch (currentDirection) {
+		case DOWN:
+			return new Point(currentPosition.x, currentPosition.y + 1);
+		case UP:
+			return new Point(currentPosition.x, currentPosition.y - 1);
+		case LEFT:
+			return new Point(currentPosition.x - 1, currentPosition.y);
+		case RIGHT:
+			return new Point(currentPosition.x + 1, currentPosition.y);
+		}
+		return null;
+	}
+
 	public void changePosition(Direction direction) {
 		if (controllable) {
 			setCurrentDirection(direction);
+			System.out.println(currentPosition);
 			oldPosition = new Point(currentPosition);
 			switch (direction) {
 			case UP:
@@ -127,6 +153,7 @@ public class Character implements Runnable {
 	}
 
 	public void slide(Direction dir) {
+		setCurrentDirection(dir);
 		oldPosition = new Point(currentPosition);
 		switch (dir) {
 		case UP:
@@ -153,26 +180,35 @@ public class Character implements Runnable {
 	public Image getCharacterImage() {
 		switch (currentDirection) {
 		case UP:
-			return back;
+			return sprites.get("back")[currentWalking];
 		case DOWN:
-			return front;
+			return sprites.get("front")[currentWalking];
 		case LEFT:
-			return left;
+			return sprites.get("left")[currentWalking];
 		case RIGHT:
-			return right;
+			return sprites.get("right")[currentWalking];
 		}
 		return null;
 	}
 
 	public void setCharacterImage(String characterImageName, String direction) {
-		this.front = new ImageIcon(
-				this.getClass().getResource("/characters/" + characterImageName + "_front.png").getFile()).getImage();
-		this.back = new ImageIcon(
-				this.getClass().getResource("/characters/" + characterImageName + "_back.png").getFile()).getImage();
-		this.left = new ImageIcon(
-				this.getClass().getResource("/characters/" + characterImageName + "_left.png").getFile()).getImage();
-		this.right = new ImageIcon(
-				this.getClass().getResource("/characters/" + characterImageName + "_right.png").getFile()).getImage();
+		characterImageName = "team_marco";
+		for(String s : new String[]{"front","back","left","right"}) {
+			Image[] currentImages = new Image[4];
+			for(int i = 0; i <= 3; i++) {
+				currentImages[i] = new ImageIcon(
+						this.getClass().getResource("/characters/" + characterImageName + "_" + s + "_" + i + ".png").getFile()).getImage();
+			}
+			this.sprites.put(s, currentImages);
+		}
+//		this.front = new ImageIcon(
+//				this.getClass().getResource("/characters/" + characterImageName + "_front.png").getFile()).getImage();
+//		this.back = new ImageIcon(
+//				this.getClass().getResource("/characters/" + characterImageName + "_back.png").getFile()).getImage();
+//		this.left = new ImageIcon(
+//				this.getClass().getResource("/characters/" + characterImageName + "_left.png").getFile()).getImage();
+//		this.right = new ImageIcon(
+//				this.getClass().getResource("/characters/" + characterImageName + "_right.png").getFile()).getImage();
 		switch (direction) {
 		case "front":
 			setCurrentDirection(Direction.DOWN);
@@ -400,12 +436,16 @@ public class Character implements Runnable {
 		switch (this.currentDirection) {
 		case UP:
 			for (int i = 0; i < 10; i++) {
+				System.out.println(currentWalking);
 				this.exactY -= 0.1;
-				if (this instanceof NPC) {
-					currentRoute.updateMap(oldPosition, currentPosition);
-				}
 				if (!this.isControllable() && i % 3 == 0 && i != 0) {
 					this.currentDirection = next();
+				} else if(i % 2 == 0 && i != 0) {
+					currentWalking = (currentWalking + 1) % 4;
+				}
+				if (this instanceof NPC) {
+					System.out.println("update");
+					currentRoute.updateMap(oldPosition, currentPosition);
 				}
 				gController.getGameFrame().repaint();
 				try {
@@ -417,12 +457,17 @@ public class Character implements Runnable {
 			break;
 		case DOWN:
 			for (int i = 0; i < 10; i++) {
+				System.out.println(currentWalking);
 				this.exactY += 0.1;
-				if (this instanceof NPC) {
-					currentRoute.updateMap(oldPosition, currentPosition);
-				}
+
 				if (!this.isControllable() && i % 3 == 0 && i != 0) {
 					this.currentDirection = next();
+				} else if(i % 2 == 0 && i != 0) {
+					currentWalking = (currentWalking + 1) % 4;
+				}
+				if (this instanceof NPC) {
+					System.out.println("update");
+					currentRoute.updateMap(oldPosition, currentPosition);
 				}
 				gController.getGameFrame().repaint();
 				try {
@@ -434,12 +479,20 @@ public class Character implements Runnable {
 			break;
 		case LEFT:
 			for (int i = 0; i < 10; i++) {
+				System.out.println(currentWalking);
 				this.exactX -= 0.1;
 				if (this instanceof NPC) {
+					System.out.println("update");
 					currentRoute.updateMap(oldPosition, currentPosition);
 				}
 				if (!this.isControllable() && i % 3 == 0 && i != 0) {
 					this.currentDirection = next();
+				} else if(i % 2 == 0 && i != 0) {
+					currentWalking = (currentWalking + 1) % 4;
+				}
+				if (this instanceof NPC) {
+					System.out.println("update");
+					currentRoute.updateMap(oldPosition, currentPosition);
 				}
 				gController.getGameFrame().repaint();
 				try {
@@ -451,12 +504,17 @@ public class Character implements Runnable {
 			break;
 		case RIGHT:
 			for (int i = 0; i < 10; i++) {
+				System.out.println(currentWalking);
 				this.exactX += 0.1;
-				if (this instanceof NPC) {
-					currentRoute.updateMap(oldPosition, currentPosition);
-				}
+
 				if (!this.isControllable() && i % 3 == 0 && i != 0) {
 					this.currentDirection = next();
+				} else if(i % 2 == 0 && i != 0) {
+					currentWalking = (currentWalking + 1) % 4;
+				}
+				if (this instanceof NPC) {
+					System.out.println("update");
+					currentRoute.updateMap(oldPosition, currentPosition);
 				}
 				gController.getGameFrame().repaint();
 				try {
@@ -467,6 +525,8 @@ public class Character implements Runnable {
 			}
 			break;
 		}
+		currentWalking = 0;
+		gController.getGameFrame().repaint();
 		this.moving = false;
 	}
 

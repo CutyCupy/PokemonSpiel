@@ -12,6 +12,7 @@ import de.alexanderciupka.sarahspiel.pokemon.Ailment;
 import de.alexanderciupka.sarahspiel.pokemon.Direction;
 import de.alexanderciupka.sarahspiel.pokemon.FightOption;
 import de.alexanderciupka.sarahspiel.pokemon.Fighting;
+import de.alexanderciupka.sarahspiel.pokemon.Item;
 import de.alexanderciupka.sarahspiel.pokemon.Move;
 import de.alexanderciupka.sarahspiel.pokemon.NPC;
 import de.alexanderciupka.sarahspiel.pokemon.Player;
@@ -99,18 +100,32 @@ public class GameController {
 			mainCharacter.setControllable(true);
 			return false;
 		}
-		if (currentBackground.getCurrentRoute().getEntities()[y][x].isAccessible(mainCharacter)) {
-			if(mainCharacter.isControllable()) {
-				mainCharacter.changePosition(mainCharacter.getCurrentDirection());
-			} else {
-				mainCharacter.slide(mainCharacter.getCurrentDirection());
+		NPC stone = currentBackground.getCurrentRoute().getEntities()[y][x].getCharacter();
+		if(stone != null && stone.getID().equals("strength") && mainCharacter.canStrength()) {
+			currentBackground.getCurrentRoute().updateMap(new Point(x, y));
+			stone.setCurrentDirection(mainCharacter.getCurrentDirection());
+			if(currentBackground.getCurrentRoute().getEntities()[stone.getInteractionPoint().y][stone.getInteractionPoint().x].isAccessible() && (currentBackground.getCurrentRoute().getEntities()[stone.getInteractionPoint().y][stone.getInteractionPoint().x].getSpriteName().equals("free"))){
+				currentBackground.getCurrentRoute().updateMap(stone.getCurrentPosition());
+				currentBackground.getCurrentRoute().getEntities()[y][x].removeCharacter();
+				currentBackground.getCurrentRoute().getEntities()[stone.getInteractionPoint().y][stone.getInteractionPoint().x].addCharacter(stone);
+				stone.changePosition(stone.getCurrentDirection());
+				currentBackground.getCurrentRoute().updateMap(stone.getCurrentPosition());
+				currentBackground.getCurrentRoute().getEntities()[y][x].onStep(mainCharacter);
 			}
-			currentBackground.getCurrentRoute().getEntities()[y][x].onStep(mainCharacter);
-
-			interactionPause = false;
-			return true;
 		} else {
-			mainCharacter.setControllable(true);
+			if (currentBackground.getCurrentRoute().getEntities()[y][x].isAccessible(mainCharacter)) {
+				if(mainCharacter.isControllable()) {
+					mainCharacter.changePosition(mainCharacter.getCurrentDirection());
+				} else {
+					mainCharacter.slide(mainCharacter.getCurrentDirection());
+				}
+				currentBackground.getCurrentRoute().getEntities()[y][x].onStep(mainCharacter);
+
+				interactionPause = false;
+				return true;
+			} else {
+				mainCharacter.setControllable(true);
+			}
 		}
 		return false;
 	}
@@ -320,9 +335,10 @@ public class GameController {
 		mainCharacter.setCharacterImage("main", "front");
 		mainCharacter.setName("Sarah");
 		mainCharacter.setID("999");
-		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("zuhause"));
-		mainCharacter.setCurrentPosition(2, 0);
+		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("neuberg"));
+		mainCharacter.setCurrentPosition(13, 3);
 		currentBackground = new Background(mainCharacter.getCurrentRoute());
+		mainCharacter.addItem(Item.CUT);
 		Pokemon player = new Pokemon(54);
 		player.setName("Sarah");
 		player.getStats().generateStats((short) 100);
