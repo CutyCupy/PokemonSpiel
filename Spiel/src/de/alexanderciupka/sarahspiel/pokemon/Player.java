@@ -77,4 +77,8 @@ public class Player extends Character {
 	public void addItem(Item reward) {
 		this.items.add(reward);
 	}
+
+	public boolean hasItem(Item i) {
+		return items.contains(i);
+	}
 }

@@ -38,6 +38,7 @@ public class RouteAnalyzer {
 	private ArrayList<Warp> warps;
 	private ArrayList<NPC> characters;
 	private ArrayList<NPC> stones;
+	private ArrayList<PokemonEntity> pokemons;
 	private GameController gController;
 
 	private JsonParser parser;
@@ -77,6 +78,7 @@ public class RouteAnalyzer {
 					warps = new ArrayList<Warp>();
 					characters = new ArrayList<NPC>();
 					stones = new ArrayList<NPC>();
+					pokemons = new ArrayList<PokemonEntity>();
 					for (int y = 0; y < currentRoute.getHeight(); y++) {
 						for (int x = 0; x < currentRoute.getWidth(); x++) {
 							Entity currentEntity = null;
@@ -84,7 +86,7 @@ public class RouteAnalyzer {
 								break;
 							}
 							String currentString = routeDetails.get(x + "." + y).getAsString();
-							if (!currentString.startsWith("W") && !currentString.startsWith("C")) {
+							if (!currentString.startsWith("W") && !currentString.startsWith("C") && !currentString.startsWith("pokemon")) {
 								switch (currentString) {
 								case "T": // Tree
 									currentEntity = new Entity(false, "tree", 0, "grassy");
@@ -186,6 +188,8 @@ public class RouteAnalyzer {
 								currentCharacter.setCurrentPosition(x, y);
 								currentCharacter.setCurrentRoute(currentRoute);
 								characters.add(currentCharacter);
+							} else if(currentString.startsWith("pkm")) {
+								pokemons.add(new PokemonEntity(currentRoute.getTerrainName(), currentString));
 							}
 							currentEntity.setX(x);
 							currentEntity.setY(y);
@@ -250,6 +254,29 @@ public class RouteAnalyzer {
 						currentRoute.addCharacterToEntity(currentCharacter.getCurrentPosition().x,
 								currentCharacter.getCurrentPosition().y, currentCharacter);
 					}
+					
+					if(route.get("pokemons") != null) {
+						JsonArray pokemonDetails = route.get("pokemons").getAsJsonArray();
+						for(int i = 0; i < Math.min(this.pokemons.size(), pokemonDetails.size()); i++) {
+							JsonObject currentPokemon = pokemonDetails.get(i).getAsJsonObject();
+							int pokemonIndex = i;
+							String pokemonID = currentPokemon.get("entity_id").getAsString();
+							if (!pokemonID.equals(pokemons.get(pokemonIndex).getId())) {
+								for (int j = 0; j < pokemons.size(); j++) {
+									pokemonIndex = j;
+									if (pokemonID.equals(pokemons.get(pokemonIndex).getId())) {
+										break;
+									}
+								}
+							}
+							PokemonEntity entity = pokemons.get(pokemonIndex);
+							
+							Pokemon p = new Pokemon(currentPokemon.get("id").getAsInt());
+							p.getStats().generateStats(currentPokemon.get("level").getAsShort());
+							entity.setPokemon(p);
+							entity.importRequiredItems(currentPokemon.get("required_items"));
+						}
+					}
 
 					for(int i = 0; i < stones.size(); i++) {
 						currentRoute.addCharacterToEntity(stones.get(i).getCurrentPosition().x, stones.get(i).getCurrentPosition().y, stones.get(i));
@@ -290,7 +317,7 @@ public class RouteAnalyzer {
 			 * Line 2: Pokemon1 (id,lvl,CurrentHP,HP,ATTACK,DEFENSE,SPATTACK,SPDEFENSE,SPEED,currentXP,move1,move2,move3,move4)
 			 * ...
 			 * Line 7: Pokemon6
-			 * Line 7: RouteID,characterid,trainer,defeated,direction
+			 * Line 7: RouteID,Pokemonid,trainer,defeated,direction
 			 * LastLine: bruchkoebel[7][42] isWarp
 			 */
 			Player mainCharacter = gController.getMainCharacter();

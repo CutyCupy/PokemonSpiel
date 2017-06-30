@@ -76,8 +76,8 @@ public class Pokemon {
 	}
 
 	public int getAmmountOfMoves() {
-		for(int i = 0; i < moves.length; i++) {
-			if(moves[i] == null) {
+		for (int i = 0; i < moves.length; i++) {
+			if (moves[i] == null) {
 				return i;
 			}
 		}
@@ -89,7 +89,7 @@ public class Pokemon {
 	}
 
 	public boolean swapMoves(int first, int second) {
-		if(this.moves[first] == null || this.moves[second] == null || first == second) {
+		if (this.moves[first] == null || this.moves[second] == null || first == second) {
 			return false;
 		} else {
 			Move m = this.moves[first].clone();
@@ -127,16 +127,16 @@ public class Pokemon {
 				counter++;
 			}
 		}
-		if(counter == 0) {
+		if (counter == 0) {
 			return gController.getPokemonInformation().getMoveByName("Verzweifler");
 		}
 		return moves[rng.nextInt(counter)];
 	}
 
 	public void addMove(String moveName) {
-		//TODO: what happens when 4 moves already learned
-		for(int i = 0; i < 4; i++) {
-			if(moves[i] == null) {
+		// TODO: what happens when 4 moves already learned
+		for (int i = 0; i < 4; i++) {
+			if (moves[i] == null) {
 				moves[i] = gController.getInformation().getMoveByName(moveName).clone();
 				return;
 			}
@@ -148,8 +148,8 @@ public class Pokemon {
 	}
 
 	public boolean addMove(String currentMove, Move replacementMove) {
-		for(int i = 0; i < 4; i++) {
-			if(moves[i].getName().equals(currentMove)) {
+		for (int i = 0; i < 4; i++) {
+			if (moves[i].getName().equals(currentMove)) {
 				moves[i] = replacementMove;
 				return true;
 			}
@@ -159,22 +159,21 @@ public class Pokemon {
 
 	public void setTypes(Type... types) {
 		this.types = new Type[2];
-		for(int i = 0; i < Math.min(2, types.length); i++) {
+		for (int i = 0; i < Math.min(2, types.length); i++) {
 			this.types[i] = types[i];
 		}
 	}
 
-
-	//TODO: Change to return this.types
+	// TODO: Change to return this.types
 	public Type[] getTypes() {
 		return this.types;
 	}
 
 	public boolean evolve(int newID) {
-		if(newID != 0) {
+		if (newID != 0) {
 			this.id = newID;
 			update();
-			if(gController.isFighting()) {
+			if (gController.isFighting()) {
 				gController.getGameFrame().getFightPanel().setPlayer();
 			}
 			return true;
@@ -200,17 +199,17 @@ public class Pokemon {
 	public Move getMove(Pokemon player) {
 		double highscore = -1;
 		int index = -1;
-		for(int i = 0; i < this.getAmmountOfMoves(); i++) {
-				double current = Type.getEffectiveness(this.getMoves()[i].getMoveType(), player.getTypes());
-				if(current > highscore) {
+		for (int i = 0; i < this.getAmmountOfMoves(); i++) {
+			double current = Type.getEffectiveness(this.getMoves()[i].getMoveType(), player.getTypes());
+			if (current > highscore) {
+				index = i;
+				highscore = current;
+			} else if (current == highscore) {
+				if (new Random().nextBoolean()) {
 					index = i;
 					highscore = current;
-				} else if(current == highscore) {
-					if(new Random().nextBoolean()) {
-						index = i;
-						highscore = current;
-					}
 				}
+			}
 		}
 		return this.getMoves()[index];
 	}
@@ -220,7 +219,7 @@ public class Pokemon {
 	}
 
 	public boolean setAilment(Ailment ailment) {
-		if(Ailment.NONE.equals(this.ailment) || ailment.equals(Ailment.NONE) || ailment.equals(Ailment.FAINTED)) {
+		if (Ailment.NONE.equals(this.ailment) || ailment.equals(Ailment.NONE) || ailment.equals(Ailment.FAINTED)) {
 			this.since = 1;
 			this.ailment = ailment;
 			return true;
@@ -229,35 +228,35 @@ public class Pokemon {
 	}
 
 	public String canAttack() {
-		switch(this.ailment) {
+		switch (this.ailment) {
 		case FREEZE:
-			if(rng.nextFloat() < 0.2f) {
+			if (rng.nextFloat() < 0.2f) {
 				this.ailment = Ailment.NONE;
 				this.gController.getGameFrame().getFightPanel().updatePanels();
 				return this.name + " ist wieder aufgetaut!";
 			}
 			return this.name + " kann sich nicht bewegen!";
 		case PARALYSIS:
-			if(rng.nextFloat() < (1/3.0)) {
+			if (rng.nextFloat() < (1 / 3.0)) {
 				return this.name + " ist paralysiert und kann sich nicht bewegen!";
 			}
 			break;
 		case SLEEP:
-			if(rng.nextFloat() < 0.25f) {
+			if (rng.nextFloat() < 0.25f) {
 				this.ailment = Ailment.NONE;
 				gController.getGameFrame().getFightPanel().updatePanels();
 				return this.name + " ist wieder aufgewacht!";
 			}
 			return this.name + " schl�ft tief und fest!";
 		case CONFUSION:
-			if(rng.nextFloat() < 0.2f * since) {
+			if (rng.nextFloat() < 0.2f * since) {
 				this.ailment = Ailment.NONE;
 				gController.getGameFrame().getFightPanel().updatePanels();
 				this.gController.getGameFrame().getFightPanel().addText(this.name + " ist nicht mehr verwirrt!", false);
 				return null;
 			}
 			this.gController.getGameFrame().getFightPanel().addText(this.name + " ist verwirrt!");
-			if(rng.nextFloat() < (1/3.0)) {
+			if (rng.nextFloat() < (1 / 3.0)) {
 				this.gController.getFight().selfAttack(this);
 				return "Es hat sich vor Verwirrung selbst verletzt!";
 			}
@@ -269,12 +268,12 @@ public class Pokemon {
 	}
 
 	public void afterTurnDamage() {
-		switch(this.ailment) {
+		switch (this.ailment) {
 		case BURN:
-			this.stats.loseHP((int) (this.stats.getStats()[0] * (1/16.0)));
+			this.stats.loseHP((int) (this.stats.getStats()[0] * (1 / 16.0)));
 			break;
 		case POISON:
-			this.stats.loseHP((int) (this.stats.getStats()[0] * (1/8.0)));
+			this.stats.loseHP((int) (this.stats.getStats()[0] * (1 / 8.0)));
 			break;
 		default:
 			break;
@@ -287,7 +286,7 @@ public class Pokemon {
 		data.addProperty("id", this.id);
 		data.add("stats", this.stats.getSaveData());
 		JsonArray moveData = new JsonArray();
-		for(int i = 0; i < getAmmountOfMoves(); i++) {
+		for (int i = 0; i < getAmmountOfMoves(); i++) {
 			moveData.add(this.moves[i].getSaveData());
 		}
 		data.add("moves", moveData);
@@ -299,7 +298,7 @@ public class Pokemon {
 		Pokemon result = new Pokemon(saveData.get("id").getAsInt());
 		result.getStats().importSaveData(saveData.get("stats").getAsJsonObject());
 		result.setMoves(new Move[4]);
-		for(int i = 0; i < Math.min(result.getMoves().length, saveData.get("moves").getAsJsonArray().size()); i++) {
+		for (int i = 0; i < Math.min(result.getMoves().length, saveData.get("moves").getAsJsonArray().size()); i++) {
 			result.addMove(Move.importSaveData(saveData.get("moves").getAsJsonArray().get(i).getAsJsonObject()));
 		}
 		return result;
