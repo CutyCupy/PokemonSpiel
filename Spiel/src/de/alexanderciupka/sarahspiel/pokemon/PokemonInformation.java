@@ -248,4 +248,13 @@ public class PokemonInformation {
 		}
 		return null;
 	}
+
+	public int getID(String name) {
+		for(JsonElement e : allPokemon) {
+			if(e.getAsJsonObject().get("name").getAsString().toLowerCase().equals(name)) {
+				return e.getAsJsonObject().get("id").getAsInt();
+			}
+		}
+		return 0;
+	}
 }

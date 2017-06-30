@@ -86,7 +86,7 @@ public class RouteAnalyzer {
 								break;
 							}
 							String currentString = routeDetails.get(x + "." + y).getAsString();
-							if (!currentString.startsWith("W") && !currentString.startsWith("C") && !currentString.startsWith("pokemon")) {
+							if (!currentString.startsWith("W") && !currentString.startsWith("C") && !currentString.startsWith("pkm")) {
 								switch (currentString) {
 								case "T": // Tree
 									currentEntity = new Entity(false, "tree", 0, "grassy");
@@ -189,7 +189,9 @@ public class RouteAnalyzer {
 								currentCharacter.setCurrentRoute(currentRoute);
 								characters.add(currentCharacter);
 							} else if(currentString.startsWith("pkm")) {
-								pokemons.add(new PokemonEntity(currentRoute.getTerrainName(), currentString));
+								System.err.println("Adding");
+								currentEntity = new PokemonEntity(currentRoute.getTerrainName(), currentString);
+								pokemons.add((PokemonEntity) currentEntity);
 							}
 							currentEntity.setX(x);
 							currentEntity.setY(y);
@@ -254,10 +256,12 @@ public class RouteAnalyzer {
 						currentRoute.addCharacterToEntity(currentCharacter.getCurrentPosition().x,
 								currentCharacter.getCurrentPosition().y, currentCharacter);
 					}
-					
+
 					if(route.get("pokemons") != null) {
+						System.out.println("test");
 						JsonArray pokemonDetails = route.get("pokemons").getAsJsonArray();
 						for(int i = 0; i < Math.min(this.pokemons.size(), pokemonDetails.size()); i++) {
+							System.out.println(i);
 							JsonObject currentPokemon = pokemonDetails.get(i).getAsJsonObject();
 							int pokemonIndex = i;
 							String pokemonID = currentPokemon.get("entity_id").getAsString();
@@ -270,11 +274,14 @@ public class RouteAnalyzer {
 								}
 							}
 							PokemonEntity entity = pokemons.get(pokemonIndex);
-							
-							Pokemon p = new Pokemon(currentPokemon.get("id").getAsInt());
+
+							Pokemon p = new Pokemon(gController.getInformation().getID(currentPokemon.get("name").getAsString()));
 							p.getStats().generateStats(currentPokemon.get("level").getAsShort());
 							entity.setPokemon(p);
+							entity.setInteractionMessage(currentPokemon.get("interaction_message").getAsString());
+							entity.setNoInteractionMessage(currentPokemon.get("no_interaction_message").getAsString());
 							entity.importRequiredItems(currentPokemon.get("required_items"));
+							currentRoute.addEntity(entity.getX(), entity.getY(), entity);
 						}
 					}
 

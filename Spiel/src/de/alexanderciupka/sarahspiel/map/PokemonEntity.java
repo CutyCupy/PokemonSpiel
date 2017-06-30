@@ -11,10 +11,10 @@ import de.alexanderciupka.sarahspiel.pokemon.Player;
 import de.alexanderciupka.sarahspiel.pokemon.Pokemon;
 
 public class PokemonEntity extends Entity {
-	
+
 	private ArrayList<Item> requiredItems;
 	private GameController gController;
-	
+
 	private String noInteractionMessage;
 	private String interactionMessage;
 	private Pokemon pokemon;
@@ -29,22 +29,24 @@ public class PokemonEntity extends Entity {
 	public void setRequiredItems(Item... items) {
 		requiredItems = new ArrayList<Item>(items.length);
 		for(Item i : items) {
-			requiredItems.add(i);
+			addRequiredItem(i);
 		}
 	}
-	
+
 	public void addRequiredItem(Item item) {
+		System.out.println(item);
+		if(item == null) {return;}
 		if(requiredItems == null) {
 			requiredItems = new ArrayList<Item>();
 		}
 		requiredItems.add(item);
 	}
-	
+
 	public ArrayList<Item> getRequiredItems() {
 		return this.requiredItems;
 	}
-	
-	
+
+
 	public String getNoInteractionMessage() {
 		return noInteractionMessage;
 	}
@@ -52,7 +54,7 @@ public class PokemonEntity extends Entity {
 	public void setNoInteractionMessage(String noInteractionMessage) {
 		this.noInteractionMessage = noInteractionMessage;
 	}
-	
+
 	public String getInteractionMessage() {
 		return interactionMessage;
 	}
@@ -69,8 +71,9 @@ public class PokemonEntity extends Entity {
 			this.setSprite("free");
 			this.setAccessible(true);
 		}
+		System.out.println(this.getSpriteName());
 	}
-	
+
 	public Pokemon getPokemon() {
 		return this.pokemon;
 	}
@@ -90,6 +93,7 @@ public class PokemonEntity extends Entity {
 			for(Item i : this.requiredItems) {
 				if(!c.hasItem(i)) {
 					isInteractable = false;
+					break;
 				}
 			}
 		}
@@ -111,8 +115,15 @@ public class PokemonEntity extends Entity {
 
 	public void importRequiredItems(JsonElement je) {
 		this.requiredItems = new ArrayList<Item>();
-		if(je != null && je.isJsonArray()) {
+		System.out.println("hi");
+		if(je != null) {
+			System.out.println("yay");
 			JsonArray items = je.getAsJsonArray();
+			for(JsonElement i : items) {
+				try {
+					this.addRequiredItem(Item.valueOf(i.getAsJsonObject().get("item").getAsString().toUpperCase()));
+				} catch(Exception e) {}
+			}
 		}
 	}
 }

@@ -12,7 +12,6 @@ import de.alexanderciupka.sarahspiel.pokemon.Ailment;
 import de.alexanderciupka.sarahspiel.pokemon.Direction;
 import de.alexanderciupka.sarahspiel.pokemon.FightOption;
 import de.alexanderciupka.sarahspiel.pokemon.Fighting;
-import de.alexanderciupka.sarahspiel.pokemon.Item;
 import de.alexanderciupka.sarahspiel.pokemon.Move;
 import de.alexanderciupka.sarahspiel.pokemon.NPC;
 import de.alexanderciupka.sarahspiel.pokemon.Player;
@@ -244,7 +243,9 @@ public class GameController {
 			}
 		}
 		if (fight.enemyDead()) {
-			this.getMainCharacter().addItem(fight.getEnemyCharacter().getReward());
+			if(fight.getEnemyCharacter() != null) {
+				this.getMainCharacter().addItem(fight.getEnemyCharacter().getReward());
+			}
 			gameFrame.getFightPanel().pause();
 			endFight();
 			return true;
@@ -335,10 +336,9 @@ public class GameController {
 		mainCharacter.setCharacterImage("main", "front");
 		mainCharacter.setName("Sarah");
 		mainCharacter.setID("999");
-		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("neuberg"));
-		mainCharacter.setCurrentPosition(13, 3);
+		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("zuhause"));
+		mainCharacter.setCurrentPosition(2, 0);
 		currentBackground = new Background(mainCharacter.getCurrentRoute());
-		mainCharacter.addItem(Item.CUT);
 		Pokemon player = new Pokemon(54);
 		player.setName("Sarah");
 		player.getStats().generateStats((short) 100);
