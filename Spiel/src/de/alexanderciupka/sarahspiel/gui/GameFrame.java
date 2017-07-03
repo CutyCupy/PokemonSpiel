@@ -41,6 +41,7 @@ public class GameFrame extends JFrame {
 	public GameFrame() {
 		map = new JPanel(null);
 		setContentPane(map);
+		map.setBackground(Color.black);
 		gController = GameController.getInstance();
 		setUndecorated(true);
 		setVisible(true);
@@ -109,8 +110,10 @@ public class GameFrame extends JFrame {
 	}
 
 	public void addDialogue(String text) {
-		dialogue.addText(text);
-		dialogue.setActive();
+		if(text != null) {
+			dialogue.addText(text);
+			dialogue.setActive();
+		}
 	}
 
 	public boolean isDialogueEmpty() {

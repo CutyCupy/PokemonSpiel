@@ -13,10 +13,6 @@ import de.alexanderciupka.sarahspiel.map.Route;
 
 public class Character implements Runnable {
 
-	private Image front;
-	private Image left;
-	private Image right;
-	private Image back;
 	protected String name;
 	protected Route currentRoute;
 	protected Point currentPosition;

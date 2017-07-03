@@ -336,8 +336,8 @@ public class GameController {
 		mainCharacter.setCharacterImage("main", "front");
 		mainCharacter.setName("Sarah");
 		mainCharacter.setID("999");
-		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("zuhause"));
-		mainCharacter.setCurrentPosition(2, 0);
+		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("neuberg"));
+		mainCharacter.setCurrentPosition(13, 3);
 		currentBackground = new Background(mainCharacter.getCurrentRoute());
 		Pokemon player = new Pokemon(54);
 		player.setName("Sarah");

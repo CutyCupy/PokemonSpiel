@@ -50,7 +50,7 @@ public class RouteCreator extends JFrame {
 	private JComboBox<String> terrains;
 	private boolean active;
 
-	private static final String[][] TYPES = {{"Free", ""}, {"Tree", "T"}, {"Grass", "G"}, {"Grassy", "GR"}, {"Mauer", "M"}, {"Pokemon Center", "P"}, {"House Small", "HS"}, {"Gym", "A"}, {"Warp", "W"}, {"Character", "C"}, {"See","S"}, {"Sand", "SA"}, {"Bridge", "B"}, {"PC", "BC"}, {"JoyHealing", "JH"}, {"MoveDown", "MD"}, {"MoveUp", "MU"}, {"MoveLeft", "ML"}, {"MoveRight", "MR"}, {"MoveStop", "MS"}, {"RockBig", "RB"}, {"RockGroup", "RG"}, {"Rock", "R"}};
+	private static final String[][] TYPES = {{"Out of Bounds", "OOB"}, {"Free", ""}, {"Tree", "T"}, {"Table", "TA"}, {"Chair UP", "STUHLU"}, {"Chair DOWN", "STUHLD"}, {"Chair LEFT", "STUHLL"}, {"Chair RIGHT", "STUHLR"}, {"Settle UP", "SETTLEU"}, {"Settle DOWN", "SETTLED"}, {"Settle LEFT", "SETTLEL"}, {"Settle RIGHT", "SETTLER"}, {"Grass", "G"}, {"Grassy", "GR"}, {"Mauer", "M"}, {"Pokemon Center", "P"}, {"House Small", "HS"}, {"Gym", "A"}, {"Warp", "W"}, {"Character", "C"}, {"See","S"}, {"Sand", "SA"}, {"Bridge", "B"}, {"PC", "BC"}, {"JoyHealing", "JH"}, {"MoveDown", "MD"}, {"MoveUp", "MU"}, {"MoveLeft", "ML"}, {"MoveRight", "MR"}, {"MoveStop", "MS"}, {"RockBig", "RB"}, {"RockGroup", "RG"}, {"Rock", "R"}};
 	private static final int SIZE = 25;
 
 	/**

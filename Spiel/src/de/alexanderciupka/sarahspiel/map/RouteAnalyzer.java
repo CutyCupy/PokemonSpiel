@@ -85,11 +85,53 @@ public class RouteAnalyzer {
 							if(routeDetails.get(x + "." + y) == null) {
 								break;
 							}
-							String currentString = routeDetails.get(x + "." + y).getAsString();
+							String currentString = routeDetails.get(x + "." + y).getAsString().toUpperCase();
 							if (!currentString.startsWith("W") && !currentString.startsWith("C") && !currentString.startsWith("pkm")) {
 								switch (currentString) {
+								case "OOB":
+									currentEntity = new Entity(false, "free", 0, "free");
+									break;
 								case "T": // Tree
 									currentEntity = new Entity(false, "tree", 0, "grassy");
+									break;
+								case "TA": // Table
+									currentEntity = new Entity(false, "table", 0, currentRoute.getTerrainName());
+									break;
+								case "TV":
+									currentEntity = new Entity(false, "tv", 0, currentRoute.getTerrainName());
+									break;
+								case "LAPTOP":
+									currentEntity = new Entity(false, "laptop", 0, currentRoute.getTerrainName());
+									break;
+								case "SPÜLE":
+									currentEntity = new Entity(false, "spüle", 0, currentRoute.getTerrainName());
+									break;
+								case "BS":
+									currentEntity = new Entity(false, "bookshelf", 0, currentRoute.getTerrainName());
+									break;
+								case "STUHLR":
+									currentEntity = new Entity(true, "chair_r", 0, currentRoute.getTerrainName());
+									break;
+								case "STUHLL":
+									currentEntity = new Entity(true, "chair_l", 0, currentRoute.getTerrainName());
+									break;
+								case "STUHLD":
+									currentEntity = new Entity(true, "chair_d", 0, currentRoute.getTerrainName());
+									break;
+								case "STUHLU":
+									currentEntity = new Entity(true, "chair_u", 0, currentRoute.getTerrainName());
+									break;
+								case "SETTLER":
+									currentEntity = new Entity(true, "settle_r", 0, currentRoute.getTerrainName());
+									break;
+								case "SETTLEL":
+									currentEntity = new Entity(true, "settle_l", 0, currentRoute.getTerrainName());
+									break;
+								case "SETTLED":
+									currentEntity = new Entity(true, "settle_d", 0, currentRoute.getTerrainName());
+									break;
+								case "SETTLEU":
+									currentEntity = new Entity(true, "settle_u", 0, currentRoute.getTerrainName());
 									break;
 								case "F": // Free
 									currentEntity = new Entity(true, "free", 0, currentRoute.getTerrainName());
@@ -102,6 +144,15 @@ public class RouteAnalyzer {
 									break;
 								case "M": // Mauer - House/Center/Market
 									currentEntity = new Entity(false, "free", 0, currentRoute.getTerrainName());
+									break;
+								case "MW":
+									currentEntity = new Entity(false, "wand", 0, currentRoute.getTerrainName());
+									break;
+								case "MWW":
+									currentEntity = new Entity(false, "wand_window", 0, currentRoute.getTerrainName());
+									break;
+								case "MWWC":
+									currentEntity = new Entity(false, "wand_window_curtain", 0, currentRoute.getTerrainName());
 									break;
 								case "P": // Center
 									currentEntity = new Entity(false, "center", 0, currentRoute.getTerrainName());
@@ -177,6 +228,21 @@ public class RouteAnalyzer {
 								Warp currentWarp = new Warp(currentString, routeID);
 								if (currentString.startsWith("WD")) { // door
 									currentEntity = new Entity(true, "free", 0, currentRoute.getTerrainName());
+								} else if(currentString.startsWith("WS")) {
+									switch(currentString) {
+									case "WSUL":
+										currentEntity = new Entity(true, "stair_up_left", 0, currentRoute.getTerrainName());
+										break;
+									case "WSUR":
+										currentEntity = new Entity(true, "stair_up_right", 0, currentRoute.getTerrainName());
+										break;
+									case "WSDL":
+										currentEntity = new Entity(true, "stair_down_left", 0, currentRoute.getTerrainName());
+										break;
+									case "WSDR":
+										currentEntity = new Entity(true, "stair_down_right", 0, currentRoute.getTerrainName());
+										break;
+									}
 								} else {
 									currentEntity = new Entity(true, "warp", 0, currentRoute.getTerrainName());
 								}
@@ -189,7 +255,6 @@ public class RouteAnalyzer {
 								currentCharacter.setCurrentRoute(currentRoute);
 								characters.add(currentCharacter);
 							} else if(currentString.startsWith("pkm")) {
-								System.err.println("Adding");
 								currentEntity = new PokemonEntity(currentRoute.getTerrainName(), currentString);
 								pokemons.add((PokemonEntity) currentEntity);
 							}
