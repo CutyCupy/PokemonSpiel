@@ -103,7 +103,7 @@ public class GameController {
 		if(stone != null && stone.getID().equals("strength") && mainCharacter.canStrength()) {
 			currentBackground.getCurrentRoute().updateMap(new Point(x, y));
 			stone.setCurrentDirection(mainCharacter.getCurrentDirection());
-			if(currentBackground.getCurrentRoute().getEntities()[stone.getInteractionPoint().y][stone.getInteractionPoint().x].isAccessible() && (currentBackground.getCurrentRoute().getEntities()[stone.getInteractionPoint().y][stone.getInteractionPoint().x].getSpriteName().equals("free"))){
+			if(currentBackground.getCurrentRoute().getEntities()[stone.getInteractionPoint().y][stone.getInteractionPoint().x].isAccessible(stone) && (currentBackground.getCurrentRoute().getEntities()[stone.getInteractionPoint().y][stone.getInteractionPoint().x].getSpriteName().equals("free"))){
 				currentBackground.getCurrentRoute().updateMap(stone.getCurrentPosition());
 				currentBackground.getCurrentRoute().getEntities()[y][x].removeCharacter();
 				currentBackground.getCurrentRoute().getEntities()[stone.getInteractionPoint().y][stone.getInteractionPoint().x].addCharacter(stone);

@@ -227,20 +227,20 @@ public class RouteAnalyzer {
 							} else if (currentString.startsWith("W")) {
 								Warp currentWarp = new Warp(currentString, routeID);
 								if (currentString.startsWith("WD")) { // door
-									currentEntity = new Entity(true, "free", 0, currentRoute.getTerrainName());
+									currentEntity = new Entity(false, false, false, true, "free", 0, currentRoute.getTerrainName());
 								} else if(currentString.startsWith("WS")) {
-									switch(currentString) {
+									switch(currentString.substring(0, 4)) {
 									case "WSUL":
-										currentEntity = new Entity(true, "stair_up_left", 0, currentRoute.getTerrainName());
+										currentEntity = new Entity(false, true, false, false, "stair_up_left", 0, currentRoute.getTerrainName());
 										break;
 									case "WSUR":
-										currentEntity = new Entity(true, "stair_up_right", 0, currentRoute.getTerrainName());
+										currentEntity = new Entity(true, false, false, false, "stair_up_right", 0, currentRoute.getTerrainName());
 										break;
 									case "WSDL":
-										currentEntity = new Entity(true, "stair_down_left", 0, currentRoute.getTerrainName());
+										currentEntity = new Entity(false, true, false, false, "stair_down_left", 0, currentRoute.getTerrainName());
 										break;
 									case "WSDR":
-										currentEntity = new Entity(true, "stair_down_right", 0, currentRoute.getTerrainName());
+										currentEntity = new Entity(true, true, false, false, "stair_down_right", 0, currentRoute.getTerrainName());
 										break;
 									}
 								} else {

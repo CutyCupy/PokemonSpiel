@@ -2,19 +2,21 @@ package de.alexanderciupka.sarahspiel.map;
 
 import java.awt.Point;
 
+import de.alexanderciupka.sarahspiel.pokemon.Direction;
+
 public class Warp {
 
 	private String warpString;
 	private String oldRoute;
 	private String newRoute;
-	
+
 	private Point newPosition;
-	
+
 	public Warp(String warpString, String oldRoute) {
 		this.warpString = warpString;
 		this.oldRoute = oldRoute;
 	}
-	
+
 	public Warp(String warpString, String oldRoute, String newRoute, Point newPosition) {
 		this.warpString = warpString;
 		this.oldRoute = oldRoute;
@@ -45,9 +47,8 @@ public class Warp {
 	public void setNewPosition(Point newPosition) {
 		this.newPosition = newPosition;
 	}
-	
+
 	public String getWarpString() {
 		return this.warpString;
 	}
-	
 }

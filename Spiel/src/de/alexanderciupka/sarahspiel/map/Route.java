@@ -10,7 +10,6 @@ import java.util.Random;
 import javax.imageio.ImageIO;
 
 import de.alexanderciupka.sarahspiel.pokemon.NPC;
-import de.alexanderciupka.sarahspiel.pokemon.Player;
 import de.alexanderciupka.sarahspiel.pokemon.Pokemon;
 
 public class Route {
@@ -196,45 +195,5 @@ public class Route {
 
 	public BufferedImage getMap() {
 		return this.map;
-	}
-
-	public void moveRock(Player p) {
-		Point interactionPoint = p.getInteractionPoint();
-		int x = interactionPoint.x;
-		int y = interactionPoint.y;
-		switch(p.getCurrentDirection()) {
-		case DOWN:
-			y++;
-			break;
-		case LEFT:
-			x--;
-			break;
-		case RIGHT:
-			x++;
-			break;
-		case UP:
-			y--;
-			break;
-		}
-		if(this.entities[y][x].isAccessible() && this.entities[y][x].getSpriteName().equals("free")) {
-			this.getEntities()[interactionPoint.y][interactionPoint.x].setSprite("free");
-			this.getEntities()[interactionPoint.y][interactionPoint.x].setAccessible(true);
-			this.getEntities()[y][x].setSprite("strength");
-			this.getEntities()[y][x].setAccessible(false);
-			this.getEntities()[y][x].setExactX(interactionPoint.x);
-			this.getEntities()[y][x].setExactY(interactionPoint.y);
-
-
-			this.moving = true;
-
-
-			while(moving) {
-				try {
-					Thread.sleep(5);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-		}
 	}
 }

@@ -13,7 +13,11 @@ import de.alexanderciupka.sarahspiel.pokemon.Player;
 
 public class Entity {
 
-	private boolean accessible;
+	private boolean left;
+	private boolean right;
+	private boolean top;
+	private boolean bottom;
+
 	private Image sprite;
 	private float pokemonRate;
 	private Warp warp;
@@ -36,8 +40,13 @@ public class Entity {
 
 	private Random rng;
 	private GameController gController;
+
+
 	public Entity(boolean accessible, String spriteName, float pokemonRate, String terrainName) {
-		this.accessible = accessible;
+		this.left = accessible;
+		this.right = accessible;
+		this.top = accessible;
+		this.bottom = accessible;
 		gController = GameController.getInstance();
 		try {
 			setSprite(spriteName);
@@ -50,12 +59,40 @@ public class Entity {
 		rng = new Random();
 	}
 
-	public boolean isAccessible() {
-		return this.accessible && !this.hasCharacter && (this.warp == null) && !this.water;
+	public Entity(boolean left, boolean right, boolean top, boolean bottom, String spriteName, float pokemonRate, String terrainName) {
+	this.left = left;
+	this.right = right;
+	this.top = top;
+	this.bottom = bottom;
+	gController = GameController.getInstance();
+	try {
+		setSprite(spriteName);
+		setTerrain(terrainName);
+	} catch (Exception e) {
+		e.printStackTrace();
+	}
+	this.hasCharacter = false;
+	this.pokemonRate = pokemonRate;
+	rng = new Random();
 	}
 
 	public boolean isAccessible(Character c) {
-		return ((this.accessible && !this.isWater()) || (this.isWater() && c.isSurfing() && this.accessible)) && !this.hasCharacter();
+		boolean accessible = false;
+		switch(c.getCurrentDirection()) {
+		case DOWN:
+			accessible = this.top;
+			break;
+		case LEFT:
+			accessible = this.right;
+			break;
+		case RIGHT:
+			accessible = this.left;
+			break;
+		case UP:
+			accessible = this.bottom;
+			break;
+		}
+		return ((accessible && !this.isWater()) || (this.isWater() && c.isSurfing() && accessible)) && !this.hasCharacter();
 	}
 
 	public void setSprite(String spriteName) {
@@ -147,7 +184,7 @@ public class Entity {
 						houseWarp.setNewPosition(new Point(3, 4));
 						houseWarp.setNewRoute("verlassenes_haus");
 						house.addWarp(houseWarp);
-						house.accessible = true;
+						house.setAccessible(true);
 						gController.getGameFrame().addDialogue("Irgendwie scheint Alex nicht hier zu sein... Wo steckt er denn?! "
 								+ "Huch - was liegt denn da? Eine Notiz: WICHTIG! KOMME SOFORT NACH BRUCHKOEBEL ZUM VERLASSENEN HAUS!");
 						gController.waitDialogue();
@@ -185,7 +222,17 @@ public class Entity {
 	}
 
 	public void setAccessible(boolean accessible) {
-		this.accessible = accessible;
+		this.left = accessible;
+		this.right = accessible;
+		this.top = accessible;
+		this.bottom = accessible;
+	}
+
+	public void setAccessible(boolean left, boolean right, boolean top, boolean bottom) {
+		this.left = left;
+		this.right = right;
+		this.top = top;
+		this.bottom = bottom;
 	}
 
 	private void setWater(boolean water) {
@@ -294,7 +341,7 @@ public class Entity {
 					gController.waitDialogue();
 				}
 			}
-		} else if (getSpriteName().equals("free") && !accessible) {
+		} else if (getSpriteName().equals("free") && !isAccessible(c)) {
 			if(y - 1 >= 0) {
 				if(c.getCurrentRoute().getEntities()[y-1][x].hasCharacter() && c.getCurrentRoute().getEntities()[y-1][x].getCharacter().getName().equals("Joy")) {
 					c.getCurrentRoute().getEntities()[y-1][x].onInteraction(c);
