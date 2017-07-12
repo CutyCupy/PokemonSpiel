@@ -2,12 +2,15 @@ package de.alexanderciupka.sarahspiel.pokemon;
 
 import java.awt.Image;
 import java.awt.Point;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Stack;
 
 import javax.swing.ImageIcon;
 
 import com.google.gson.JsonObject;
 
+import de.alexanderciupka.sarahspiel.map.Entity;
 import de.alexanderciupka.sarahspiel.map.GameController;
 import de.alexanderciupka.sarahspiel.map.Route;
 
@@ -51,6 +54,8 @@ public class Character implements Runnable {
 	private HashMap<String, Image[]> sprites;
 	private int currentWalking;
 
+	private Stack<Point> stack;
+	private Stack<Integer> steps;
 
 	// TODO: Add History to check where the last Pokemon center was.
 
@@ -84,6 +89,7 @@ public class Character implements Runnable {
 	}
 
 	public void setCurrentRoute(Route currentRoute) {
+		this.oldPosition = new Point(this.currentPosition);
 		this.currentRoute = currentRoute;
 	}
 
@@ -123,11 +129,11 @@ public class Character implements Runnable {
 		return null;
 	}
 
-	public void changePosition(Direction direction) {
+	public void changePosition(Direction direction, boolean waiting) {
 		if (controllable) {
 			setCurrentDirection(direction);
-			System.out.println(currentPosition);
 			oldPosition = new Point(currentPosition);
+			System.out.println(currentPosition);
 			switch (direction) {
 			case UP:
 				currentPosition.y -= 1;
@@ -142,8 +148,18 @@ public class Character implements Runnable {
 				currentPosition.x += 1;
 				break;
 			}
+			System.out.println(currentPosition);
+			System.out.println(exactX);
+			System.out.println(exactY);
+			if (this instanceof NPC) {
+				currentRoute.getEntities()[oldPosition.y][oldPosition.x].removeCharacter();
+				currentRoute.getEntities()[currentPosition.y][currentPosition.x].addCharacter((NPC) this);
+			}
 			new Thread(this).start();
-			waiting();
+			this.moving = true;
+			if (waiting) {
+				waiting();
+			}
 			setSurfing(this.getCurrentRoute().getEntities()[currentPosition.y][currentPosition.x].isWater());
 		}
 	}
@@ -189,22 +205,27 @@ public class Character implements Runnable {
 
 	public void setCharacterImage(String characterImageName, String direction) {
 		characterImageName = "team_marco";
-		for(String s : new String[]{"front","back","left","right"}) {
+		for (String s : new String[] { "front", "back", "left", "right" }) {
 			Image[] currentImages = new Image[4];
-			for(int i = 0; i <= 3; i++) {
-				currentImages[i] = new ImageIcon(
-						this.getClass().getResource("/characters/" + characterImageName + "_" + s + "_" + i + ".png").getFile()).getImage();
+			for (int i = 0; i <= 3; i++) {
+				currentImages[i] = new ImageIcon(this.getClass()
+						.getResource("/characters/" + characterImageName + "_" + s + "_" + i + ".png").getFile())
+								.getImage();
 			}
 			this.sprites.put(s, currentImages);
 		}
-//		this.front = new ImageIcon(
-//				this.getClass().getResource("/characters/" + characterImageName + "_front.png").getFile()).getImage();
-//		this.back = new ImageIcon(
-//				this.getClass().getResource("/characters/" + characterImageName + "_back.png").getFile()).getImage();
-//		this.left = new ImageIcon(
-//				this.getClass().getResource("/characters/" + characterImageName + "_left.png").getFile()).getImage();
-//		this.right = new ImageIcon(
-//				this.getClass().getResource("/characters/" + characterImageName + "_right.png").getFile()).getImage();
+		// this.front = new ImageIcon(
+		// this.getClass().getResource("/characters/" + characterImageName +
+		// "_front.png").getFile()).getImage();
+		// this.back = new ImageIcon(
+		// this.getClass().getResource("/characters/" + characterImageName +
+		// "_back.png").getFile()).getImage();
+		// this.left = new ImageIcon(
+		// this.getClass().getResource("/characters/" + characterImageName +
+		// "_left.png").getFile()).getImage();
+		// this.right = new ImageIcon(
+		// this.getClass().getResource("/characters/" + characterImageName +
+		// "_right.png").getFile()).getImage();
 		switch (direction) {
 		case "front":
 			setCurrentDirection(Direction.DOWN);
@@ -350,8 +371,7 @@ public class Character implements Runnable {
 		return -1;
 	}
 
-	private void waiting() {
-		this.moving = true;
+	public void waiting() {
 		while (moving) {
 			try {
 				Thread.sleep(5);
@@ -359,7 +379,8 @@ public class Character implements Runnable {
 				e.printStackTrace();
 			}
 		}
-
+		this.currentRoute.getEntities()[currentPosition.y][currentPosition.x].onStep(this);
+		this.currentRoute.updateMap(currentPosition);
 	}
 
 	public JsonObject getSaveData() {
@@ -406,7 +427,7 @@ public class Character implements Runnable {
 			this.setSurfing(false);
 			if (saveData.get("surfing") != null) {
 				this.setSurfing(saveData.get("surfing").getAsBoolean());
-				if(isSurfing()) {
+				if (isSurfing()) {
 					currentRoute.getEntities()[this.currentPosition.y][this.currentPosition.y].setTerrain("see");
 					currentRoute.updateMap(this.currentPosition);
 				}
@@ -429,18 +450,18 @@ public class Character implements Runnable {
 
 	@Override
 	public void run() {
+		this.exactX = oldPosition.x;
+		this.exactY = oldPosition.y;
 		switch (this.currentDirection) {
 		case UP:
 			for (int i = 0; i < 10; i++) {
-				System.out.println(currentWalking);
 				this.exactY -= 0.1;
 				if (!this.isControllable() && i % 3 == 0 && i != 0) {
 					this.currentDirection = next();
-				} else if(i % 2 == 0 && i != 0) {
+				} else if (i % 2 == 0 && i != 0) {
 					currentWalking = (currentWalking + 1) % 4;
 				}
 				if (this instanceof NPC) {
-					System.out.println("update");
 					currentRoute.updateMap(oldPosition, currentPosition);
 				}
 				gController.getGameFrame().repaint();
@@ -453,16 +474,14 @@ public class Character implements Runnable {
 			break;
 		case DOWN:
 			for (int i = 0; i < 10; i++) {
-				System.out.println(currentWalking);
 				this.exactY += 0.1;
 
 				if (!this.isControllable() && i % 3 == 0 && i != 0) {
 					this.currentDirection = next();
-				} else if(i % 2 == 0 && i != 0) {
+				} else if (i % 2 == 0 && i != 0) {
 					currentWalking = (currentWalking + 1) % 4;
 				}
 				if (this instanceof NPC) {
-					System.out.println("update");
 					currentRoute.updateMap(oldPosition, currentPosition);
 				}
 				gController.getGameFrame().repaint();
@@ -475,19 +494,16 @@ public class Character implements Runnable {
 			break;
 		case LEFT:
 			for (int i = 0; i < 10; i++) {
-				System.out.println(currentWalking);
 				this.exactX -= 0.1;
 				if (this instanceof NPC) {
-					System.out.println("update");
 					currentRoute.updateMap(oldPosition, currentPosition);
 				}
 				if (!this.isControllable() && i % 3 == 0 && i != 0) {
 					this.currentDirection = next();
-				} else if(i % 2 == 0 && i != 0) {
+				} else if (i % 2 == 0 && i != 0) {
 					currentWalking = (currentWalking + 1) % 4;
 				}
 				if (this instanceof NPC) {
-					System.out.println("update");
 					currentRoute.updateMap(oldPosition, currentPosition);
 				}
 				gController.getGameFrame().repaint();
@@ -500,16 +516,14 @@ public class Character implements Runnable {
 			break;
 		case RIGHT:
 			for (int i = 0; i < 10; i++) {
-				System.out.println(currentWalking);
 				this.exactX += 0.1;
 
 				if (!this.isControllable() && i % 3 == 0 && i != 0) {
 					this.currentDirection = next();
-				} else if(i % 2 == 0 && i != 0) {
+				} else if (i % 2 == 0 && i != 0) {
 					currentWalking = (currentWalking + 1) % 4;
 				}
 				if (this instanceof NPC) {
-					System.out.println("update");
 					currentRoute.updateMap(oldPosition, currentPosition);
 				}
 				gController.getGameFrame().repaint();
@@ -563,10 +577,10 @@ public class Character implements Runnable {
 
 	public void startUncontrollableMove(Direction dir) {
 		this.setControllable(false);
-		if(this.uncontrollableDir == null) {
+		if (this.uncontrollableDir == null) {
 			this.originalSpeed = this.speed;
 		}
-		if(this.uncontrollableDir == dir) {
+		if (this.uncontrollableDir == dir) {
 			return;
 		}
 		uncontrollableDir = dir;
@@ -578,12 +592,92 @@ public class Character implements Runnable {
 					currentDirection = dir;
 					gController.slide(currentDirection);
 				}
-				if(isControllable()) {
+				if (isControllable()) {
 					uncontrollableDir = null;
 				}
 				speed = originalSpeed;
 			}
 		});
 		uncontrollable.start();
+	}
+
+	public Direction[] moveTowards(int x, int y) {
+		this.speed = SLOW;
+		int start = ((int) this.getExactY()) * this.currentRoute.getWidth() + (int) this.getExactX();
+		int[] distance = new int[this.currentRoute.getHeight() * this.currentRoute.getWidth()];
+		int[] predecessor = new int[distance.length];
+		HashMap<Integer, Entity> nodes = new HashMap<Integer, Entity>();
+		for (int i = 0; i < distance.length; i++) {
+			distance[i] = Integer.MAX_VALUE;
+			predecessor[i] = -1;
+			nodes.put(i, this.currentRoute.getEntities()[i / this.currentRoute.getWidth()][i
+					% this.currentRoute.getWidth()]);
+		}
+		distance[start] = 0;
+
+		while (!nodes.isEmpty()) {
+			Entity smallestNode = findSmallest(distance, nodes);
+			int curX = smallestNode.getX();
+			int curY = smallestNode.getY();
+			if (curX == x && curY == y) {
+				break;
+			}
+			Entity[] neighbors = { nodes.get(curY * currentRoute.getWidth() + curX + 1),
+					nodes.get(curY * currentRoute.getWidth() + curX - 1),
+					nodes.get((curY + 1) * currentRoute.getWidth() + curX),
+					nodes.get((curY - 1) * currentRoute.getWidth() + curX) };
+			for (int i = 0; i < neighbors.length; i++) {
+				if (neighbors[i] != null && neighbors[i].isAccessible(this)) {
+					distanceUpdate(curY * currentRoute.getWidth() + curX,
+							neighbors[i].getY() * currentRoute.getWidth() + neighbors[i].getX(), distance, predecessor,
+							start);
+				}
+			}
+
+		}
+
+		ArrayList<Point> path = new ArrayList<Point>();
+		path.add(new Point(x, y));
+		int u = y * currentRoute.getWidth() + x;
+		while (predecessor[u] != -1) {
+			u = predecessor[u];
+			path.add(0, new Point(u % this.currentRoute.getWidth(), u / this.currentRoute.getWidth()));
+		}
+
+		ArrayList<Direction> directions = new ArrayList<Direction>();
+		Point last = currentPosition;
+		for (Point p : path) {
+			if (p.x < last.x) {
+				directions.add(Direction.LEFT);
+			} else if (p.x > last.x) {
+				directions.add(Direction.RIGHT);
+			} else if (p.y < last.y) {
+				directions.add(Direction.UP);
+			} else if (p.y > last.y) {
+				directions.add(Direction.DOWN);
+			}
+			last = p;
+		}
+		return directions.toArray(new Direction[directions.size()]);
+	}
+
+	private Entity findSmallest(int[] distance, HashMap<Integer, Entity> nodes) {
+		int index = 0;
+		int value = Integer.MAX_VALUE;
+		for (int i = 0; i < distance.length; i++) {
+			if (distance[i] <= value && nodes.get(i) != null) {
+				index = i;
+				value = distance[i];
+			}
+		}
+		return nodes.remove(index);
+	}
+
+	private void distanceUpdate(int u, int v, int[] distance, int[] predecessor, int start) {
+		int alternativ = distance[u] + 1;
+		if (alternativ < distance[v]) {
+			distance[v] = alternativ;
+			predecessor[v] = u;
+		}
 	}
 }

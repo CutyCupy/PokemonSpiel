@@ -92,6 +92,25 @@ public class Route {
 		this.characters.add(character);
 	}
 
+	public void removeCharacter(String characterId) {
+		int toRemove = 0;
+		boolean breaked = false;
+		for(int i = 0; i < this.height * this.width; i++) {
+			int x = i % width;
+			int y = i / width;
+			for(int j = 0; j < this.entities[y][x].getCharacters().size(); j++) {
+				if(this.entities[y][x].getCharacters().get(j).getID().equals(characterId)) {
+					this.entities[y][x].removeCharacter(characterId);
+					breaked = true;
+					break;
+				}
+				toRemove++;
+			}
+			if(breaked) break;
+		}
+		characters.remove(toRemove);
+	}
+
 	private void createEntities() {
 		if (entities == null) {
 			this.entities = new Entity[height][width];
@@ -132,17 +151,20 @@ public class Route {
 				try {
 					g.drawImage(entities[y][x].getSprite(), (int) (entities[y][x].getExactX() * 70), (int) (entities[y][x].getExactY() * 70), null);
 					if(entities[y][x].hasCharacter()) {
-						g.drawImage(entities[y][x].getCharacterSprite(), (int) (entities[y][x].getCharacter().getExactX() * 70), (int) (entities[y][x].getCharacter().getExactY() * 70), null);
+						for(NPC npc : entities[y][x].getCharacters()) {
+							g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70), (int) (npc.getExactY() * 70), null);
+						}
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		}
-		saveMap();
+//		saveMap();
 	}
 
 	public void updateMap(Point... updatePoint) {
+		System.out.println(name);
 		if(map != null) {
 			Graphics g = map.getGraphics();
 			for(Point p : updatePoint) {
@@ -150,10 +172,29 @@ public class Route {
 					g.drawImage(entities[p.y][p.x].getTerrain(), p.x * 70, p.y * 70, null);
 					g.drawImage(entities[p.y][p.x].getSprite(),(int) (entities[p.y][p.x].getExactX() * 70), (int) (entities[p.y][p.x].getExactY() * 70), null);
 					if(entities[p.y][p.x].hasCharacter()) {
-						g.drawImage(entities[p.y][p.x].getCharacterSprite(), (int) (entities[p.y][p.x].getCharacter().getExactX() * 70), (int) (entities[p.y][p.x].getCharacter().getExactY() * 70), null);
+						for(NPC npc : entities[p.y][p.x].getCharacters()) {
+							g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70), (int) (npc.getExactY() * 70), null);
+						}
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
+				}
+			}
+			for(int x = 0; x < width; x++) {
+				for(int y = 0; y < height; y++) {
+					if(this.entities[y][x].getSpriteName().startsWith("house") || this.entities[y][x].getSpriteName().startsWith("pokecenter")) {
+						g.drawImage(entities[y][x].getTerrain(), x * 70, y * 70, null);
+						g.drawImage(entities[y][x].getSprite(),(int) (entities[y][x].getExactX() * 70), (int) (entities[y][x].getExactY() * 70), null);
+						if(entities[y][x].hasCharacter()) {
+							for(NPC npc : entities[y][x].getCharacters()) {
+								g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70), (int) (npc.getExactY() * 70), null);
+							}
+						}
+					}
+					for(NPC npc : entities[y][x].getCharacters()) {
+						g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70), (int) (npc.getExactY() * 70), null);
+
+					}
 				}
 			}
 //			saveMap();
@@ -195,5 +236,23 @@ public class Route {
 
 	public BufferedImage getMap() {
 		return this.map;
+	}
+
+	public NPC getNPC(String id) {
+		for(int i = 0; i < characters.size(); i++) {
+			if(characters.get(i).getID().equals(id)) {
+				return characters.get(i);
+			}
+		}
+		return null;
+	}
+
+	public NPC getNPCByName(String name) {
+		for(int i = 0; i < characters.size(); i++) {
+			if(characters.get(i).getName() != null && name.toLowerCase().equals(characters.get(i).getName().toLowerCase())) {
+				return characters.get(i);
+			}
+		}
+		return null;
 	}
 }

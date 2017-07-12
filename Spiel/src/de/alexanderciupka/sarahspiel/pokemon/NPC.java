@@ -27,11 +27,7 @@ public class NPC extends Character {
 	}
 
 	public void resetPosition() {
-		if(this.id.equals("strength")) {
-			System.out.println(currentPosition + " - " + originalPosition);
-		}
 		if (!currentPosition.equals(originalPosition)) {
-			System.out.println("change");
 			currentRoute.getEntities()[currentPosition.y][currentPosition.x].removeCharacter();
 			currentRoute.getEntities()[originalPosition.y][originalPosition.x].addCharacter(this);
 			currentRoute.updateMap(originalPosition, currentPosition);
@@ -128,7 +124,7 @@ public class NPC extends Character {
 				currentRoute.getEntities()[currentPosition.y][currentPosition.x].removeCharacter();
 				currentRoute.updateMap(currentPosition);
 				currentRoute.getEntities()[currentPosition.y + y][currentPosition.x + x].addCharacter(this);
-				this.changePosition(this.getCurrentDirection());
+				this.changePosition(this.getCurrentDirection(), true);
 				currentRoute.updateMap(currentPosition);
 			}
 			System.err.println("finished");
@@ -137,9 +133,16 @@ public class NPC extends Character {
 		return false;
 	}
 
+	@Override
+	public void setCurrentDirection(Direction direction) {
+		super.setCurrentDirection(direction);
+		if(currentRoute != null) {
+			this.currentRoute.updateMap(this.currentPosition);
+		}
+	}
+
 	public void importTeam() {
 		try {
-			System.out.println("IMPORT TEAM: " + getFileName() + " - " + this.currentRoute.getId());
 			teamFile = new File(
 					this.getClass().getResource("/characters/teams/" + this.currentRoute.getId() + "/" + getFileName() + ".txt").getFile());
 			BufferedReader reader = new BufferedReader(new FileReader(teamFile));
@@ -158,7 +161,6 @@ public class NPC extends Character {
 
 	public void importDialogue() {
 		try {
-			System.out.println("IMPORT DIALOGUE: " + getFileName() + " - " + this.currentRoute.getId());
 			dialogueFile = new File(
 					this.getClass().getResource("/characters/dialoge/" + this.currentRoute.getId() + "/" +  getFileName() + ".char").getFile());
 			JsonObject dialogue = new JsonParser().parse(new BufferedReader(new FileReader(dialogueFile))).getAsJsonObject();

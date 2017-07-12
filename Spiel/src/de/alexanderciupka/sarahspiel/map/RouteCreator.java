@@ -50,7 +50,7 @@ public class RouteCreator extends JFrame {
 	private JComboBox<String> terrains;
 	private boolean active;
 
-	private static final String[][] TYPES = {{"Out of Bounds", "OOB"}, {"Free", ""}, {"Tree", "T"}, {"Table", "TA"}, {"Chair UP", "STUHLU"}, {"Chair DOWN", "STUHLD"}, {"Chair LEFT", "STUHLL"}, {"Chair RIGHT", "STUHLR"}, {"Settle UP", "SETTLEU"}, {"Settle DOWN", "SETTLED"}, {"Settle LEFT", "SETTLEL"}, {"Settle RIGHT", "SETTLER"}, {"Grass", "G"}, {"Grassy", "GR"}, {"Mauer", "M"}, {"Pokemon Center", "P"}, {"House Small", "HS"}, {"Gym", "A"}, {"Warp", "W"}, {"Character", "C"}, {"See","S"}, {"Sand", "SA"}, {"Bridge", "B"}, {"PC", "BC"}, {"JoyHealing", "JH"}, {"MoveDown", "MD"}, {"MoveUp", "MU"}, {"MoveLeft", "ML"}, {"MoveRight", "MR"}, {"MoveStop", "MS"}, {"RockBig", "RB"}, {"RockGroup", "RG"}, {"Rock", "R"}};
+	private static final String[][] TYPES = {{"Out of Bounds", "OOB"}, {"Bett", "bed"}, {"Treppe hoch links", "WSUL"}, {"Treppe hoch rechts", "WSUR"}, {"Treppe runter links", "WSDL"}, {"Treppe runter rechts", "WSDR"}, {"Stärke", "ST"}, {"Zerschneider", "TC"}, {"Wand", "MW"}, {"Fenster", "MWW"}, {"Fenster+Gardine", "MWWC"}, {"Free", ""}, {"Tree", "T"}, {"Bookshelf", "BS"}, {"TV", "TV"}, {"SPÜLE", "spüle"}, {"Laptop", "LAPTOP"}, {"Table", "TA"}, {"Chair UP", "STUHLU"}, {"Chair DOWN", "STUHLD"}, {"Chair LEFT", "STUHLL"}, {"Chair RIGHT", "STUHLR"}, {"Settle UP", "SETTLEU"}, {"Settle DOWN", "SETTLED"}, {"Settle LEFT", "SETTLEL"}, {"Settle RIGHT", "SETTLER"}, {"Grass", "G"}, {"Grassy", "GR"}, {"Mauer", "M"}, {"Pokemon Center", "P"}, {"House Small", "HS"}, {"Gym", "A"}, {"Warp", "W"}, {"Character", "C"}, {"See","S"}, {"Sand", "SA"}, {"Bridge", "B"}, {"PC", "BC"}, {"JoyHealing", "JH"}, {"MoveDown", "MD"}, {"MoveUp", "MU"}, {"MoveLeft", "ML"}, {"MoveRight", "MR"}, {"MoveStop", "MS"}, {"RockBig", "RB"}, {"RockGroup", "RG"}, {"Rock", "R"}};
 	private static final int SIZE = 25;
 
 	/**
@@ -102,6 +102,8 @@ public class RouteCreator extends JFrame {
 		terrains.addItem("grassy");
 		terrains.addItem("stone");
 		terrains.addItem("sandy");
+		terrains.addItem("bright_laminat");
+		terrains.addItem("dark_laminat");
 		terrains.setBackground(Color.WHITE);
 		save = new JButton("SAVE!");
 		save.setBounds(1750, 600, 150, 40);
@@ -144,7 +146,8 @@ public class RouteCreator extends JFrame {
 		group = new ButtonGroup();
 		for(int i = 0; i < TYPES.length; i++) {
 			JRadioButton currentButton = new JRadioButton(RouteCreator.TYPES[i][0]);
-			currentButton.setBounds(1750, 40 + 25 * i, 150, 20);
+			currentButton.setFont(currentButton.getFont().deriveFont(8.0f));
+			currentButton.setBounds(1750, 40 + 15 * i, 150, 10);
 			buttons[i] = currentButton;
 			group.add(currentButton);
 			add(currentButton);
@@ -166,7 +169,7 @@ public class RouteCreator extends JFrame {
 			horizontal[index].addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					if(getSelectedButton().getText().equals("Free") || getSelectedButton().getText().equals("Tree") || getSelectedButton().getText().equals("Grass") || getSelectedButton().getText().equals("Sand") || getSelectedButton().getText().equals("See")) {
+//					if(getSelectedButton().getText().equals("Free") || getSelectedButton().getText().equals("Tree") || getSelectedButton().getText().equals("Grass") || getSelectedButton().getText().equals("Sand") || getSelectedButton().getText().equals("See")) {
 						for(int y = 0; y < labels.length; y++) {
 							String text = "";
 							for(int i = 0; i < TYPES.length; i++) {
@@ -176,7 +179,7 @@ public class RouteCreator extends JFrame {
 							}
 							labels[y][Integer.parseInt(((JButton) e.getSource()).getName())].setText(text);
 						}
-					}
+//					}
 				}
 			});
 		}
@@ -184,7 +187,7 @@ public class RouteCreator extends JFrame {
 			vertical[index].addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					if(getSelectedButton().getText().equals("Free") || getSelectedButton().getText().equals("Tree") || getSelectedButton().getText().equals("Grass") || getSelectedButton().getText().equals("Sand") || getSelectedButton().getText().equals("See")) {
+//					if(getSelectedButton().getText().equals("Free") || getSelectedButton().getText().equals("Tree") || getSelectedButton().getText().equals("Grass") || getSelectedButton().getText().equals("Sand") || getSelectedButton().getText().equals("See")) {
 						for(int x = 0; x < labels[0].length; x++) {
 							String text = "";
 							for(int i = 0; i < TYPES.length; i++) {
@@ -194,7 +197,7 @@ public class RouteCreator extends JFrame {
 							}
 							labels[Integer.parseInt(((JButton) e.getSource()).getName())][x].setText(text);
 						}
-					}
+//					}
 				}
 			});
 		}
@@ -237,7 +240,7 @@ public class RouteCreator extends JFrame {
 											text = "";
 										}
 									} else if(text.startsWith("W")) {
-										Warp newWarp = new Warp("W" + warpCounter, routeID);
+										Warp newWarp = new Warp(text + warpCounter, routeID);
 										System.out.print("New Route: ");
 										newWarp.setNewRoute(scanner.nextLine().toLowerCase().replace(" ", "_"));
 										warps.add(newWarp);

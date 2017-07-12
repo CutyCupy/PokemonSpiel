@@ -95,36 +95,47 @@ public class GameController {
 	}
 
 	private boolean updatePosition(int x, int y) {
-		if(x >= currentBackground.getCurrentRoute().getWidth() || x < 0 || y >= currentBackground.getCurrentRoute().getHeight() || y < 0) {
-			mainCharacter.setControllable(true);
-			return false;
-		}
-		NPC stone = currentBackground.getCurrentRoute().getEntities()[y][x].getCharacter();
-		if(stone != null && stone.getID().equals("strength") && mainCharacter.canStrength()) {
-			currentBackground.getCurrentRoute().updateMap(new Point(x, y));
-			stone.setCurrentDirection(mainCharacter.getCurrentDirection());
-			if(currentBackground.getCurrentRoute().getEntities()[stone.getInteractionPoint().y][stone.getInteractionPoint().x].isAccessible(stone) && (currentBackground.getCurrentRoute().getEntities()[stone.getInteractionPoint().y][stone.getInteractionPoint().x].getSpriteName().equals("free"))){
-				currentBackground.getCurrentRoute().updateMap(stone.getCurrentPosition());
-				currentBackground.getCurrentRoute().getEntities()[y][x].removeCharacter();
-				currentBackground.getCurrentRoute().getEntities()[stone.getInteractionPoint().y][stone.getInteractionPoint().x].addCharacter(stone);
-				stone.changePosition(stone.getCurrentDirection());
-				currentBackground.getCurrentRoute().updateMap(stone.getCurrentPosition());
-				currentBackground.getCurrentRoute().getEntities()[y][x].onStep(mainCharacter);
-			}
-		} else {
-			if (currentBackground.getCurrentRoute().getEntities()[y][x].isAccessible(mainCharacter)) {
-				if(mainCharacter.isControllable()) {
-					mainCharacter.changePosition(mainCharacter.getCurrentDirection());
-				} else {
-					mainCharacter.slide(mainCharacter.getCurrentDirection());
-				}
-				currentBackground.getCurrentRoute().getEntities()[y][x].onStep(mainCharacter);
-
-				interactionPause = false;
-				return true;
-			} else {
+		try {
+			System.out.println(x);
+			System.out.println(y);
+			System.out.println(currentBackground.getCurrentRoute().getName());
+			if(x >= mainCharacter.getCurrentRoute().getWidth() || x < 0 || y >= mainCharacter.getCurrentRoute().getHeight() || y < 0) {
 				mainCharacter.setControllable(true);
+				return false;
 			}
+			boolean changed = false;
+			for(NPC stone : mainCharacter.getCurrentRoute().getEntities()[y][x].getCharacters()) {
+				if(stone != null && stone.getID().equals("strength") && mainCharacter.canStrength()) {
+					mainCharacter.getCurrentRoute().updateMap(new Point(x, y));
+					stone.setCurrentDirection(mainCharacter.getCurrentDirection());
+					if(mainCharacter.getCurrentRoute().getEntities()[stone.getInteractionPoint().y][stone.getInteractionPoint().x].isAccessible(stone) && (currentBackground.getCurrentRoute().getEntities()[stone.getInteractionPoint().y][stone.getInteractionPoint().x].getSpriteName().equals("free"))){
+						mainCharacter.getCurrentRoute().updateMap(stone.getCurrentPosition());
+						mainCharacter.getCurrentRoute().getEntities()[y][x].removeCharacter();
+						mainCharacter.getCurrentRoute().getEntities()[stone.getInteractionPoint().y][stone.getInteractionPoint().x].addCharacter(stone);
+						stone.changePosition(stone.getCurrentDirection(), true);
+						mainCharacter.getCurrentRoute().updateMap(stone.getCurrentPosition());
+//					currentBackground.getCurrentRoute().getEntities()[y][x].onStep(mainCharacter);
+					}
+					changed = true;
+					break;
+				}
+			}
+			if(!changed) {
+				if (mainCharacter.getCurrentRoute().getEntities()[y][x].isAccessible(mainCharacter)) {
+					if(mainCharacter.isControllable()) {
+						mainCharacter.changePosition(mainCharacter.getCurrentDirection(), true);
+					} else {
+						mainCharacter.slide(mainCharacter.getCurrentDirection());
+					}
+//					mainCharacter.getCurrentRoute().getEntities()[mainCharacter.getCurrentPosition().y][mainCharacter.getCurrentPosition().x].onStep(mainCharacter);
+					interactionPause = false;
+					return true;
+				} else {
+					mainCharacter.setControllable(true);
+				}
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
 		return false;
 	}
@@ -336,8 +347,8 @@ public class GameController {
 		mainCharacter.setCharacterImage("main", "front");
 		mainCharacter.setName("Sarah");
 		mainCharacter.setID("999");
-		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("neuberg"));
-		mainCharacter.setCurrentPosition(13, 3);
+		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("eigenes_zimmer"));
+		mainCharacter.setCurrentPosition(5, 4);
 		currentBackground = new Background(mainCharacter.getCurrentRoute());
 		Pokemon player = new Pokemon(54);
 		player.setName("Sarah");

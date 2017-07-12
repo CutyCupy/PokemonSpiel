@@ -2,6 +2,7 @@ package de.alexanderciupka.sarahspiel.map;
 
 import java.awt.Image;
 import java.awt.Point;
+import java.util.ArrayList;
 import java.util.Random;
 
 import javax.swing.ImageIcon;
@@ -21,9 +22,8 @@ public class Entity {
 	private Image sprite;
 	private float pokemonRate;
 	private Warp warp;
-	private NPC character;
+	private ArrayList<NPC> characters;
 	private Image terrain;
-	private boolean hasCharacter;
 
 	private String terrainName;
 	private String spriteName;
@@ -41,6 +41,8 @@ public class Entity {
 	private Random rng;
 	private GameController gController;
 
+	private TriggeredEvent event;
+
 
 	public Entity(boolean accessible, String spriteName, float pokemonRate, String terrainName) {
 		this.left = accessible;
@@ -54,7 +56,7 @@ public class Entity {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		this.hasCharacter = false;
+		this.characters = new ArrayList<NPC>();
 		this.pokemonRate = pokemonRate;
 		rng = new Random();
 	}
@@ -71,7 +73,7 @@ public class Entity {
 	} catch (Exception e) {
 		e.printStackTrace();
 	}
-	this.hasCharacter = false;
+	this.characters = new ArrayList<NPC>();
 	this.pokemonRate = pokemonRate;
 	rng = new Random();
 	}
@@ -122,8 +124,12 @@ public class Entity {
 		return this.spriteName;
 	}
 
-	public Image getCharacterSprite() {
-		return this.character.getCharacterImage();
+	public Image[] getCharacterSprites() {
+		Image[] result = new Image[this.characters.size()];
+		for(int i = 0; i < this.characters.size(); i++) {
+			result[i] = this.characters.get(i).getCharacterImage();
+		}
+		return result;
 	}
 
 	public Image getTerrain() {
@@ -135,21 +141,31 @@ public class Entity {
 	}
 
 	public void addCharacter(NPC character) {
-		this.hasCharacter = true;
-		this.character = character;
+		this.characters.add(character);
 	}
 
 	public boolean removeCharacter() {
-		if (hasCharacter) {
-			this.character = null;
-			this.hasCharacter = false;
+		if (hasCharacter()) {
+			this.characters.remove(0);
 			return true;
 		}
 		return false;
 	}
 
-	public NPC getCharacter() {
-		return this.character;
+	public boolean removeCharacter(String characterId) {
+		int i = 0;
+		while(i < this.characters.size()) {
+			if(this.characters.get(i).getID().equals(characterId)) {
+				this.characters.remove(i);
+				return true;
+			}
+			i++;
+		}
+		return false;
+	}
+
+	public ArrayList<NPC> getCharacters() {
+		return this.characters;
 	}
 
 	public boolean checkPokemon() {
@@ -172,6 +188,23 @@ public class Entity {
 			}
 			gController.resetCharacterPositions();
 			c.setCurrentPosition(warp.getNewPosition());
+			c.setCurrentRoute(gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()));
+			if(this.spriteName.contains("stair")) {
+				switch(c.getCurrentDirection()) {
+				case LEFT:
+					c.setCurrentDirection(Direction.RIGHT);
+					break;
+				case RIGHT:
+					c.setCurrentDirection(Direction.LEFT);
+					break;
+				default:
+					break;
+				}
+			}
+			if(c instanceof NPC) {
+				gController.getRouteAnalyzer().getRouteById(warp.getOldRoute()).removeCharacter(c.getID());
+				gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()).addCharacterToEntity(c.getCurrentPosition().x, c.getCurrentPosition().y, (NPC) c);
+			}
 			if(c instanceof Player) {
 				gController.setCurrentRoute(gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()));
 			}
@@ -210,7 +243,7 @@ public class Entity {
 	}
 
 	public boolean hasCharacter() {
-		return this.hasCharacter;
+		return !this.characters.isEmpty();
 	}
 
 	public Warp getWarp() {
@@ -280,10 +313,12 @@ public class Entity {
 	}
 
 	public void onStepNoWarp(Character c) {
+		if(this.event != null && c instanceof Player) {
+			event.startEvent((Player) c);
+			return;
+		}
 		int characterIndex = gController.checkStartFight();
-		System.out.println("no_warp");
 		if (characterIndex >= 0) {
-			System.out.println("started");
 			gController.startFight(gController.getCurrentBackground().getCurrentRoute().getCharacters().get(characterIndex));
 		} else if (checkPokemon()) {
 			gController.startFight(gController.getCurrentBackground().chooseEncounter());
@@ -312,38 +347,40 @@ public class Entity {
 	public void onInteraction(Player c) {
 		boolean flag = false;
 		if (hasCharacter()) {
-			if(getCharacter().getID().equals("strength")) {
-				gController.getGameFrame().addDialogue("Dieser Felsen kann bewegt werden!");
-				gController.waitDialogue();
-				return;
-			}
-			if (getCharacter().isTrainer()) {
-				if (!getCharacter().isDefeated()) {
-					getCharacter().faceTowardsMainCharacter();
-					gController.startFight(getCharacter());
-					flag = true;
-				}
-			}
-			if(!flag) {
-				getCharacter().faceTowardsMainCharacter();
-				gController.getGameFrame().addDialogue(getCharacter().getName() + ": "
-						+ getCharacter().getNoFightDialogue());
-				gController.waitDialogue();
-				if(getCharacter().getName().equals("Joy")) {
-					c.getTeam().restoreTeam();
-					for(int i = 1; i <= c.getTeam().getAmmount() + 1; i++) {
-						gController.getCurrentBackground().getCurrentRoute().getEntities()[0][1].setSprite("joyhealing" + (i % (c.getTeam().getAmmount() + 1)));
-						gController.getCurrentBackground().getCurrentRoute().updateMap(new Point(1, 0));
-						gController.getGameFrame().repaint();
-						gController.sleep(i == c.getTeam().getAmmount() ? 1500 : 750);
-					}
-					gController.getGameFrame().addDialogue("Deine Pokemon sind nun wieder topfit!");
+			for(NPC character : getCharacters()) {
+				if(character.getID().equals("strength")) {
+					gController.getGameFrame().addDialogue("Dieser Felsen kann bewegt werden!");
 					gController.waitDialogue();
+					return;
+				}
+				if (character.isTrainer()) {
+					if (!character.isDefeated()) {
+						character.faceTowardsMainCharacter();
+						gController.startFight(character);
+						flag = true;
+					}
+				}
+				if(!flag) {
+					character.faceTowardsMainCharacter();
+					gController.getGameFrame().addDialogue(character.getName() + ": "
+							+ character.getNoFightDialogue());
+					gController.waitDialogue();
+					if(character.getName().equals("Joy")) {
+						c.getTeam().restoreTeam();
+						for(int i = 1; i <= c.getTeam().getAmmount() + 1; i++) {
+							gController.getCurrentBackground().getCurrentRoute().getEntities()[0][1].setSprite("joyhealing" + (i % (c.getTeam().getAmmount() + 1)));
+							gController.getCurrentBackground().getCurrentRoute().updateMap(new Point(1, 0));
+							gController.getGameFrame().repaint();
+							gController.sleep(i == c.getTeam().getAmmount() ? 1500 : 750);
+						}
+						gController.getGameFrame().addDialogue("Deine Pokemon sind nun wieder topfit!");
+						gController.waitDialogue();
+					}
 				}
 			}
 		} else if (getSpriteName().equals("free") && !isAccessible(c)) {
 			if(y - 1 >= 0) {
-				if(c.getCurrentRoute().getEntities()[y-1][x].hasCharacter() && c.getCurrentRoute().getEntities()[y-1][x].getCharacter().getName().equals("Joy")) {
+				if(c.getCurrentRoute().getEntities()[y-1][x].hasCharacter() && c.getCurrentRoute().getEntities()[y-1][x].getCharacters().get(0).getName().equals("Joy")) {
 					c.getCurrentRoute().getEntities()[y-1][x].onInteraction(c);
 				}
 			}
@@ -354,7 +391,7 @@ public class Entity {
 				gController.getGameFrame().addDialogue("Du f�ngst an zu surfen!");
 				c.setSurfing(true);
 				gController.waitDialogue();
-				c.changePosition(c.getCurrentDirection());
+				c.changePosition(c.getCurrentDirection(), true);
 			}
 		} else if(isPC()) {
 			gController.getGameFrame().displayPC(c);
@@ -404,5 +441,13 @@ public class Entity {
 
 	public void setExactY(double y) {
 		this.exactY = y;
+	}
+
+	public TriggeredEvent getEvent() {
+		return event;
+	}
+
+	public void setEvent(TriggeredEvent event) {
+		this.event = event;
 	}
 }

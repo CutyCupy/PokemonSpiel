@@ -34,7 +34,6 @@ public class PokemonEntity extends Entity {
 	}
 
 	public void addRequiredItem(Item item) {
-		System.out.println(item);
 		if(item == null) {return;}
 		if(requiredItems == null) {
 			requiredItems = new ArrayList<Item>();
@@ -71,7 +70,6 @@ public class PokemonEntity extends Entity {
 			this.setSprite("free");
 			this.setAccessible(true);
 		}
-		System.out.println(this.getSpriteName());
 	}
 
 	public Pokemon getPokemon() {
@@ -115,9 +113,7 @@ public class PokemonEntity extends Entity {
 
 	public void importRequiredItems(JsonElement je) {
 		this.requiredItems = new ArrayList<Item>();
-		System.out.println("hi");
 		if(je != null) {
-			System.out.println("yay");
 			JsonArray items = je.getAsJsonArray();
 			for(JsonElement i : items) {
 				try {
