@@ -67,6 +67,10 @@ public class TriggeredEvent {
 	public void addDirections(String[] directions) {
 		ArrayList<Direction> result = new ArrayList<Direction>();
 		for(String s : directions) {
+			if(s == null) {
+				result.add(null);
+				continue;
+			}
 			for(Direction dir : Direction.values()) {
 				if(dir.name().toLowerCase().equals(s.toLowerCase())) {
 					result.add(dir);
@@ -119,14 +123,27 @@ public class TriggeredEvent {
 								currentParticipants[c].setCurrentDirection(this.directions.get(i)[c]);
 							}
 						} else {
-							System.out.println("source");
 							source.waiting();
 							if(this.directions.get(i)[c] != null) {
 								source.setCurrentDirection(this.directions.get(i)[c]);
 							}
 						}
-						GameController.getInstance().repaint();
 					}
+//					GameController.getInstance().repaint();
+				}
+				if(max == 0) {
+					for(int c = 0; c  < currentParticipants.length; c++) {
+						if(currentParticipants[c] != null) {
+							if(this.directions.get(i)[c] != null) {
+								currentParticipants[c].setCurrentDirection(this.directions.get(i)[c]);
+							}
+						} else {
+							if(this.directions.get(i)[c] != null) {
+								source.setCurrentDirection(this.directions.get(i)[c]);
+							}
+						}
+					}
+					GameController.getInstance().getGameFrame().repaint();
 				}
 				for(int j = 0; j < Math.min(currentDialoges.length, currentParticipants.length); j++) {
 					if(currentDialoges[j] != null) {

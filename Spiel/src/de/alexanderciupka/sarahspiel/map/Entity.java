@@ -208,7 +208,7 @@ public class Entity {
 			if(c instanceof Player) {
 				gController.setCurrentRoute(gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()));
 			}
-			gController.repaint();
+			gController.getGameFrame().repaint();
 			if(c instanceof Player) {
 				if(c.getCurrentRoute().getId().equals("haus_von_alex")) {
 					Entity house = gController.getRouteAnalyzer().getRouteById("bruchkoebel").getEntities()[7][42];
@@ -428,7 +428,7 @@ public class Entity {
 					}
 				}).start();
 			} else {
-				gController.getGameFrame().addDialogue("Dieser Baum könnte zerschnitten werden!");
+				gController.getGameFrame().addDialogue("Dieser Baum kï¿½nnte zerschnitten werden!");
 				gController.waitDialogue();
 			}
 			gController.getGameFrame().repaint();
@@ -449,5 +449,19 @@ public class Entity {
 
 	public void setEvent(TriggeredEvent event) {
 		this.event = event;
+	}
+
+	public boolean isAccessible(Direction dir) {
+		switch(dir) {
+		case DOWN:
+			return this.bottom;
+		case LEFT:
+			return this.left;
+		case RIGHT:
+			return this.right;
+		case UP:
+			return this.top;
+		}
+		return false;
 	}
 }

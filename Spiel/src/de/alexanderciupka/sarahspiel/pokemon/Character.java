@@ -133,7 +133,6 @@ public class Character implements Runnable {
 		if (controllable) {
 			setCurrentDirection(direction);
 			oldPosition = new Point(currentPosition);
-			System.out.println(currentPosition);
 			switch (direction) {
 			case UP:
 				currentPosition.y -= 1;
@@ -148,9 +147,6 @@ public class Character implements Runnable {
 				currentPosition.x += 1;
 				break;
 			}
-			System.out.println(currentPosition);
-			System.out.println(exactX);
-			System.out.println(exactY);
 			if (this instanceof NPC) {
 				currentRoute.getEntities()[oldPosition.y][oldPosition.x].removeCharacter();
 				currentRoute.getEntities()[currentPosition.y][currentPosition.x].addCharacter((NPC) this);
@@ -614,20 +610,22 @@ public class Character implements Runnable {
 					% this.currentRoute.getWidth()]);
 		}
 		distance[start] = 0;
-
+		int curX = this.currentPosition.x;
+		int curY = this.currentPosition.y;
+		Direction[] neighborDirection = {Direction.RIGHT, Direction.LEFT, Direction.DOWN, Direction.UP};
 		while (!nodes.isEmpty()) {
 			Entity smallestNode = findSmallest(distance, nodes);
-			int curX = smallestNode.getX();
-			int curY = smallestNode.getY();
+			curX = smallestNode.getX();
+			curY = smallestNode.getY();
 			if (curX == x && curY == y) {
 				break;
 			}
 			Entity[] neighbors = { nodes.get(curY * currentRoute.getWidth() + curX + 1),
 					nodes.get(curY * currentRoute.getWidth() + curX - 1),
 					nodes.get((curY + 1) * currentRoute.getWidth() + curX),
-					nodes.get((curY - 1) * currentRoute.getWidth() + curX) };
+					nodes.get((curY - 1) * currentRoute.getWidth() + curX)};
 			for (int i = 0; i < neighbors.length; i++) {
-				if (neighbors[i] != null && neighbors[i].isAccessible(this)) {
+				if (neighbors[i] != null && neighbors[i].isAccessible(neighborDirection[i])) {
 					distanceUpdate(curY * currentRoute.getWidth() + curX,
 							neighbors[i].getY() * currentRoute.getWidth() + neighbors[i].getX(), distance, predecessor,
 							start);

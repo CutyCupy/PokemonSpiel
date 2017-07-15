@@ -164,7 +164,6 @@ public class Route {
 	}
 
 	public void updateMap(Point... updatePoint) {
-		System.out.println(name);
 		if(map != null) {
 			Graphics g = map.getGraphics();
 			for(Point p : updatePoint) {

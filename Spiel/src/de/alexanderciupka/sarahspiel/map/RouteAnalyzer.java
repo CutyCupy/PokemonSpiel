@@ -68,7 +68,6 @@ public class RouteAnalyzer {
 				Route currentRoute = new Route();
 				String routeID = currentFile.getName().split("\\.")[0];
 				try {
-					System.out.println(currentFile.getName());
 					JsonObject route = parser.parse(currentReader).getAsJsonObject();
 					JsonObject routeDetails = route.get("route").getAsJsonObject();
 					currentRoute.setId(routeDetails.get("id").getAsString());
@@ -113,7 +112,7 @@ public class RouteAnalyzer {
 									currentEntity = new Entity(false, "laptop", 0, currentRoute.getTerrainName());
 									break;
 								case "SPUELE":
-									currentEntity = new Entity(false, "spüle", 0, currentRoute.getTerrainName());
+									currentEntity = new Entity(false, "spï¿½le", 0, currentRoute.getTerrainName());
 									break;
 								case "BS":
 									currentEntity = new Entity(false, "bookshelf", 0, currentRoute.getTerrainName());
@@ -382,7 +381,7 @@ public class RouteAnalyzer {
 									routes.add(current.getAsJsonObject().get("route") != null ? current.getAsJsonObject().get("route").getAsString() : currentRoute.getId());
 									moves.add(new Point(current.getAsJsonObject().get("target_x").getAsInt(), current.getAsJsonObject().get("target_y").getAsInt()));
 									dialoges.add(current.getAsJsonObject().get("dialog") != null ? current.getAsJsonObject().get("dialog").getAsString() : null);
-									directions.add(current.getAsJsonObject().get("direction").getAsString());
+									directions.add(current.getAsJsonObject().get("direction") != null ? current.getAsJsonObject().get("direction").getAsString() : null);
 								}
 								te.addCharacters(participants.toArray(new String[participants.size()]));
 								te.addRoutes(routes.toArray(new String[routes.size()]));

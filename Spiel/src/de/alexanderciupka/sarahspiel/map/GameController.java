@@ -96,9 +96,6 @@ public class GameController {
 
 	private boolean updatePosition(int x, int y) {
 		try {
-			System.out.println(x);
-			System.out.println(y);
-			System.out.println(currentBackground.getCurrentRoute().getName());
 			if(x >= mainCharacter.getCurrentRoute().getWidth() || x < 0 || y >= mainCharacter.getCurrentRoute().getHeight() || y < 0) {
 				mainCharacter.setControllable(true);
 				return false;
@@ -347,8 +344,8 @@ public class GameController {
 		mainCharacter.setCharacterImage("main", "front");
 		mainCharacter.setName("Sarah");
 		mainCharacter.setID("999");
-		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("eigenes_zimmer"));
-		mainCharacter.setCurrentPosition(5, 4);
+		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("zuhause"));
+		mainCharacter.setCurrentPosition(0, 2);
 		currentBackground = new Background(mainCharacter.getCurrentRoute());
 		Pokemon player = new Pokemon(54);
 		player.setName("Sarah");
