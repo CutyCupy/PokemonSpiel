@@ -454,13 +454,13 @@ public class Entity {
 	public boolean isAccessible(Direction dir) {
 		switch(dir) {
 		case DOWN:
-			return this.bottom;
-		case LEFT:
-			return this.left;
-		case RIGHT:
-			return this.right;
-		case UP:
 			return this.top;
+		case LEFT:
+			return this.right;
+		case RIGHT:
+			return this.left;
+		case UP:
+			return this.bottom;
 		}
 		return false;
 	}

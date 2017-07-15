@@ -28,7 +28,7 @@ public class NPC extends Character {
 
 	public void resetPosition() {
 		if (!currentPosition.equals(originalPosition)) {
-			currentRoute.getEntities()[currentPosition.y][currentPosition.x].removeCharacter();
+			currentRoute.getEntities()[currentPosition.y][currentPosition.x].removeCharacter(this.id);
 			currentRoute.getEntities()[originalPosition.y][originalPosition.x].addCharacter(this);
 			currentRoute.updateMap(originalPosition, currentPosition);
 			setCurrentPosition(originalPosition);

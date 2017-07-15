@@ -599,7 +599,9 @@ public class Character implements Runnable {
 
 	public Direction[] moveTowards(int x, int y) {
 		this.speed = SLOW;
-		int start = ((int) this.getExactY()) * this.currentRoute.getWidth() + (int) this.getExactX();
+		int start = this.currentPosition.y * this.currentRoute.getWidth() + this.currentPosition.x;
+		System.out.println(new Point(start / this.currentRoute.getWidth(), start
+					% this.currentRoute.getWidth()));
 		int[] distance = new int[this.currentRoute.getHeight() * this.currentRoute.getWidth()];
 		int[] predecessor = new int[distance.length];
 		HashMap<Integer, Entity> nodes = new HashMap<Integer, Entity>();
@@ -617,6 +619,7 @@ public class Character implements Runnable {
 			Entity smallestNode = findSmallest(distance, nodes);
 			curX = smallestNode.getX();
 			curY = smallestNode.getY();
+			System.out.println(this.getName() + " (smallest): " + new Point(curX, curY));
 			if (curX == x && curY == y) {
 				break;
 			}
@@ -645,6 +648,7 @@ public class Character implements Runnable {
 		ArrayList<Direction> directions = new ArrayList<Direction>();
 		Point last = currentPosition;
 		for (Point p : path) {
+			System.out.println(this.name + ": " + p);
 			if (p.x < last.x) {
 				directions.add(Direction.LEFT);
 			} else if (p.x > last.x) {
@@ -663,7 +667,7 @@ public class Character implements Runnable {
 		int index = 0;
 		int value = Integer.MAX_VALUE;
 		for (int i = 0; i < distance.length; i++) {
-			if (distance[i] <= value && nodes.get(i) != null) {
+			if (distance[i] < value && nodes.get(i) != null) {
 				index = i;
 				value = distance[i];
 			}

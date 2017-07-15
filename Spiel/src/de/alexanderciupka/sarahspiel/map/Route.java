@@ -160,7 +160,7 @@ public class Route {
 				}
 			}
 		}
-//		saveMap();
+		saveMap();
 	}
 
 	public void updateMap(Point... updatePoint) {
