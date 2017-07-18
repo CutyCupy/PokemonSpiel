@@ -112,7 +112,7 @@ public class RouteAnalyzer {
 									currentEntity = new Entity(false, "laptop", 0, currentRoute.getTerrainName());
 									break;
 								case "SPUELE":
-									currentEntity = new Entity(false, "sp�le", 0, currentRoute.getTerrainName());
+									currentEntity = new Entity(false, "spuele", 0, currentRoute.getTerrainName());
 									break;
 								case "BS":
 									currentEntity = new Entity(false, "bookshelf", 0, currentRoute.getTerrainName());
@@ -319,9 +319,9 @@ public class RouteAnalyzer {
 							currentRoute.getEntities()[currentCharacter.getCurrentPosition().y]
 									[currentCharacter.getCurrentPosition().x].setSprite(currentChar.get("sprite").getAsString());
 						}
-						if(currentChar.get("ground") != null) {
+						if(currentChar.get("terrain") != null) {
 							currentRoute.getEntities()[currentCharacter.getCurrentPosition().y]
-									[currentCharacter.getCurrentPosition().x].setTerrain(currentChar.get("ground").getAsString());;
+									[currentCharacter.getCurrentPosition().x].setTerrain(currentChar.get("terrain").getAsString());
 						}
 						if(currentChar.get("surfing") != null) {
 							currentCharacter.setSurfing(currentChar.get("surfing").getAsBoolean());

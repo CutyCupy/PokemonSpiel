@@ -332,6 +332,7 @@ public class RouteCreator extends JFrame {
 				currentCharacter.addProperty("direction", "todo");
 				currentCharacter.addProperty("is_trainer", "todo");
 				currentCharacter.addProperty("sprite", "free");
+				currentCharacter.addProperty("terrain", this.terrains.getItemAt(terrains.getSelectedIndex()));
 				currentCharacter.addProperty("surfing", "todo");
 				characterDetails.add(currentCharacter);
 			}

@@ -99,6 +99,7 @@ public class Entity {
 
 	public void setSprite(String spriteName) {
 		this.spriteName = spriteName;
+		System.out.println("Sprite: " + spriteName);
 		if(spriteName.equals("grass")) {
 			this.terrain = new ImageIcon(this.getClass().getResource("/routes/terrain/grassy.png")).getImage();
 		}
@@ -106,6 +107,7 @@ public class Entity {
 	}
 
 	public void setTerrain(String terrainName) {
+		System.out.println(terrainName);
 		this.terrainName = terrainName;
 		try {
 			this.terrain = new ImageIcon(this.getClass().getResource("/routes/terrain/" + terrainName + ".png"))

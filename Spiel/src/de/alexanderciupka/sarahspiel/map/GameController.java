@@ -254,6 +254,7 @@ public class GameController {
 			if(fight.getEnemyCharacter() != null) {
 				this.getMainCharacter().addItem(fight.getEnemyCharacter().getReward());
 			}
+			gameFrame.getFightPanel().addText(fight.getEnemyCharacter().getOnDefeatDialogue());
 			gameFrame.getFightPanel().pause();
 			endFight();
 			return true;
@@ -263,6 +264,8 @@ public class GameController {
 
 	public boolean loseFight() {
 		if (fight.playerDead()) {
+			gameFrame.getFightPanel().addText("Du hast keine kampffähigen Pokemon mehr ... Dir wird schwarz vor Augen und rennst so schnell wie möglich zu einem Pokemon Center!");
+			gameFrame.getFightPanel().pause();
 			endFight();
 			resetCharacterPositions();
 			mainCharacter.warpToPokemonCenter();
