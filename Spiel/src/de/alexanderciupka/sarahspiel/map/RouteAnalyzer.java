@@ -235,7 +235,7 @@ public class RouteAnalyzer {
 							} else if (currentString.startsWith("W")) {
 								Warp currentWarp = new Warp(currentString, routeID);
 								if (currentString.startsWith("WD")) { // door
-									currentEntity = new Entity(false, false, false, true, "free", 0, currentRoute.getTerrainName());
+									currentEntity = new Entity(false, false, false, true, "free", 0, "free");
 								} else if(currentString.startsWith("WS")) {
 									switch(currentString.substring(0, 4)) {
 									case "WSUL":

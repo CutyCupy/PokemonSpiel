@@ -4,7 +4,6 @@ import java.awt.Image;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Stack;
 
 import javax.swing.ImageIcon;
 
@@ -40,8 +39,8 @@ public class Character implements Runnable {
 	protected int speed;
 	protected int originalSpeed;
 
-	public static final int FAST = 10;
-	public static final int SLOW = 30;
+	public static final int FAST = 20;
+	public static final int SLOW = 40;
 	public static final int VERY_SLOW = 50;
 
 	private boolean surfing;
@@ -53,9 +52,8 @@ public class Character implements Runnable {
 
 	private HashMap<String, Image[]> sprites;
 	private int currentWalking;
-
-	private Stack<Point> stack;
-	private Stack<Integer> steps;
+	
+	private int stepCounter;
 
 	// TODO: Add History to check where the last Pokemon center was.
 
@@ -157,6 +155,19 @@ public class Character implements Runnable {
 				waiting();
 			}
 			setSurfing(this.getCurrentRoute().getEntities()[currentPosition.y][currentPosition.x].isWater());
+			onMovement();
+		}
+	}
+	
+	public void onMovement() {
+		this.stepCounter++;
+		if(this.stepCounter % 8 == 0) {
+			for(int i = 0; i < this.team.getTeam().length; i++) {
+				if(this.team.getTeam()[i] == null) {
+					return;
+				}
+				this.team.getTeam()[i].afterWalkingDamage();
+			}
 		}
 	}
 

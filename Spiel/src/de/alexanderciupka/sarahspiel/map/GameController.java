@@ -264,7 +264,7 @@ public class GameController {
 
 	public boolean loseFight() {
 		if (fight.playerDead()) {
-			gameFrame.getFightPanel().addText("Du hast keine kampffähigen Pokemon mehr ... Dir wird schwarz vor Augen und rennst so schnell wie möglich zu einem Pokemon Center!");
+			gameFrame.getFightPanel().addText("Du hast keine kampffï¿½higen Pokemon mehr ... Dir wird schwarz vor Augen und rennst so schnell wie mï¿½glich zu einem Pokemon Center!");
 			gameFrame.getFightPanel().pause();
 			endFight();
 			resetCharacterPositions();
@@ -352,7 +352,8 @@ public class GameController {
 		currentBackground = new Background(mainCharacter.getCurrentRoute());
 		Pokemon player = new Pokemon(54);
 		player.setName("Sarah");
-		player.getStats().generateStats((short) 100);
+		player.getStats().generateStats((short) 1);
+		player.setAilment(Ailment.POISON);
 		mainCharacter.getTeam().addPokemon(player);
 		gameFrame = new GameFrame();
 	}

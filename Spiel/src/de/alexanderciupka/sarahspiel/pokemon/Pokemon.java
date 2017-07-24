@@ -271,14 +271,35 @@ public class Pokemon {
 		switch (this.ailment) {
 		case BURN:
 			this.stats.loseHP((int) (this.stats.getStats()[0] * (1 / 16.0)));
+			this.gController.getGameFrame().getFightPanel().addText(this.name + " wurde durch die Verbrennung verletzt!", true);
 			break;
 		case POISON:
 			this.stats.loseHP((int) (this.stats.getStats()[0] * (1 / 8.0)));
+			this.gController.getGameFrame().getFightPanel().addText(this.name + " wurde durch die Vergiftung verletzt!", true);
 			break;
 		default:
 			break;
 		}
 		gController.getGameFrame().getFightPanel().updatePanels();
+	}
+	
+	public void afterWalkingDamage() {
+		System.out.println("walking");
+		switch(this.ailment) {
+		case POISON:
+			if(this.stats.getCurrentHP() > 1) {
+				this.stats.loseHP(1);
+			} else if(this.stats.getCurrentHP() == 1) {
+				this.setAilment(Ailment.NONE);
+				this.gController.getGameFrame().addDialogue(this.getName() + " hat sich von der Vergiftung erholt!");
+			} else {
+				this.setAilment(Ailment.FAINTED);
+			}
+			break;
+		default:
+			break;
+		}
+		this.gController.waitDialogue();
 	}
 
 	public JsonObject getSaveData() {

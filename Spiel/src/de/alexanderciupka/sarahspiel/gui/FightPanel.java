@@ -232,10 +232,10 @@ public class FightPanel extends JPanel {
 										gController.repaint();
 									}
 								}
-								if(wholeTurn) {
+//								if(wholeTurn) {
 									mine.afterTurnDamage();
 									enemy.afterTurnDamage();
-								}
+//								}
 								updateMoves();
 								showMenu();
 								attacked = false;

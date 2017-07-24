@@ -1,0 +1,4 @@
+before
+Hallo! Ich bin Tony, dein persönlicher Kellner. Ich teste dein Geschick im Kampf mit Pokemon!
+no
+Ich sollte doch lieber weiter kellnern und nicht kaempfen...

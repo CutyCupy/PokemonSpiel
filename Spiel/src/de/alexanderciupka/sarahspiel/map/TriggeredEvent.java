@@ -102,7 +102,6 @@ public class TriggeredEvent {
 					if(current == null) {
 						current = source;
 					}
-					System.out.println(current.getCurrentRoute().getEntities()[10][6].isAccessible(current.getCurrentDirection()));
 					Direction[] dir = current.moveTowards(currentMoves[j].x, currentMoves[j].y);
 					currentDirections.add(dir);
 					max = dir.length > max ? dir.length : max;

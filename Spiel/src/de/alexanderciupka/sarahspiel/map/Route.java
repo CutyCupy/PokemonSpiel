@@ -179,23 +179,23 @@ public class Route {
 					e.printStackTrace();
 				}
 			}
-			for(int x = 0; x < width; x++) {
-				for(int y = 0; y < height; y++) {
-					if(this.entities[y][x].getSpriteName().startsWith("house") || this.entities[y][x].getSpriteName().startsWith("pokecenter")) {
-						g.drawImage(entities[y][x].getTerrain(), x * 70, y * 70, null);
-						g.drawImage(entities[y][x].getSprite(),(int) (entities[y][x].getExactX() * 70), (int) (entities[y][x].getExactY() * 70), null);
-						if(entities[y][x].hasCharacter()) {
-							for(NPC npc : entities[y][x].getCharacters()) {
-								g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70), (int) (npc.getExactY() * 70), null);
-							}
-						}
-					}
-					for(NPC npc : entities[y][x].getCharacters()) {
-						g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70), (int) (npc.getExactY() * 70), null);
-
-					}
-				}
-			}
+//			for(int x = 0; x < width; x++) {
+//				for(int y = 0; y < height; y++) {
+//					if(this.entities[y][x].getSpriteName().startsWith("house") || this.entities[y][x].getSpriteName().startsWith("pokecenter")) {
+//						g.drawImage(entities[y][x].getTerrain(), x * 70, y * 70, null);
+//						g.drawImage(entities[y][x].getSprite(),(int) (entities[y][x].getExactX() * 70), (int) (entities[y][x].getExactY() * 70), null);
+//						if(entities[y][x].hasCharacter()) {
+//							for(NPC npc : entities[y][x].getCharacters()) {
+//								g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70), (int) (npc.getExactY() * 70), null);
+//							}
+//						}
+//					}
+//					for(NPC npc : entities[y][x].getCharacters()) {
+//						g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70), (int) (npc.getExactY() * 70), null);
+//
+//					}
+//				}
+//			}
 //			saveMap();
 		}
 
