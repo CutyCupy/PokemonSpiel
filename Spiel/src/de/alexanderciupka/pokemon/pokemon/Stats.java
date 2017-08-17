@@ -47,7 +47,7 @@ public class Stats {
 		allTimeXP = 0;
 		baseStats = gController.getInformation().getBaseStats(pokemon.getId());
 		stats = new short[6];
-		dvs = new HashMap<String, Short>();// new short[] {(short) rng.nextInt(32), (short) rng.nextInt(32), (short) rng.nextInt(32), (short) rng.nextInt(32), (short) rng.nextInt(32), (short) rng.nextInt(32)};
+		dvs = new HashMap<String, Short>();
 		evs = new HashMap<String, Short>();
 
 		for(String s : STAT_SAVE_NAMES) {
@@ -74,11 +74,19 @@ public class Stats {
 	public void levelUP() {
 		if (level < 99) {
 			level++;
+			if(gController.isFighting()) {
+				gController.getGameFrame().getFightPanel().updatePanels();
+				gController.getGameFrame().getFightPanel().addText(pokemon.getName() + " erreicht Level " + this.level + "!");
+			}
 			levelUpXP = calculateLevelUpXP();
 			newMoves();
 			evolve();
 		} else {
 			this.level = 100;
+			if(gController.isFighting()) {
+				gController.getGameFrame().getFightPanel().updatePanels();
+				gController.getGameFrame().getFightPanel().addText(pokemon.getName() + " erreicht Level " + this.level + "!");
+			}
 			this.currentXP = 0;
 			levelUpXP = 0;
 			newMoves();
@@ -134,7 +142,6 @@ public class Stats {
 
 	public void evolve() {
 		if (this.pokemon.evolve(gController.getInformation().checkEvolution(this.pokemon.getId(), this.level))) {
-
 			newMoves();
 		}
 	}
@@ -196,9 +203,6 @@ public class Stats {
 			allTimeXP += gain;
 			while (currentXP >= levelUpXP && level < 100) {
 				currentXP = currentXP - levelUpXP;
-				gController.getGameFrame().getFightPanel().updatePanels();
-				gController.getGameFrame().getFightPanel()
-						.addText(pokemon.getName() + " erreicht Level " + (this.level + 1) + "!");
 				levelUP();
 			}
 			return true;

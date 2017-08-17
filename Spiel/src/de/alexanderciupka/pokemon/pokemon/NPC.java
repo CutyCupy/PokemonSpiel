@@ -1,5 +1,6 @@
 package de.alexanderciupka.pokemon.pokemon;
 
+import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -28,12 +29,14 @@ public class NPC extends Character {
 
 	public void resetPosition() {
 		if (!currentPosition.equals(originalPosition)) {
+			this.oldPosition = new Point(currentPosition);
 			setCurrentPosition(originalPosition);
+			currentRoute.updateMap(this.oldPosition);
 		}
 		if(currentDirection != originalDirection) {
 			setCurrentDirection(originalDirection);
 		}
-		currentRoute.updateMap(originalPosition, currentPosition);
+		currentRoute.updateMap(currentPosition);
 	}
 
 	public void faceTowardsMainCharacter() {
@@ -53,6 +56,18 @@ public class NPC extends Character {
 		}
 		currentRoute.updateMap(currentPosition);
 		gController.repaint();
+	}
+	
+	public void setBeforeFightDialogue(String dialog) {
+		this.beforeFight = dialog;
+	}
+	
+	public void setNoFightDialogue(String dialog) {
+		this.noFight = dialog;
+	}
+	
+	public void setAfterFightDialog(String dialog) {
+		this.onDefeat = dialog;
 	}
 
 	public String getBeforeFightDialogue() {
@@ -158,10 +173,10 @@ public class NPC extends Character {
 			dialogueFile = new File(
 					this.getClass().getResource("/characters/dialoge/" + this.currentRoute.getId() + "/" +  getFileName() + ".char").getFile());
 			JsonObject dialogue = new JsonParser().parse(new BufferedReader(new FileReader(dialogueFile))).getAsJsonObject();
-			this.beforeFight = dialogue.get("before") instanceof JsonNull ? null : dialogue.get("before").getAsString();
-			this.noFight = dialogue.get("no") instanceof JsonNull ? null : dialogue.get("no").getAsString();
-			this.onDefeat = dialogue.get("on_defeat") instanceof JsonNull ? null : dialogue.get("on_defeat").getAsString();
-			if(!(dialogue.get("reward") instanceof JsonNull)) {
+			this.beforeFight = dialogue.get("before") == null ? null : dialogue.get("before").getAsString();
+			this.noFight = dialogue.get("no") == null ? null : dialogue.get("no").getAsString();
+			this.onDefeat = dialogue.get("on_defeat") == null ? null : dialogue.get("on_defeat").getAsString();
+			if(!(dialogue.get("reward") == null)) {
 				for(Item i : Item.values()) {
 					if(i.name().toLowerCase().equals(dialogue.get("reward").getAsString().toLowerCase())) {
 						this.reward = i;
@@ -189,5 +204,28 @@ public class NPC extends Character {
 
 	public Item getReward() {
 		return reward;
+	}
+	
+	@Override
+	public JsonObject getSaveData() {
+		JsonObject saveData = super.getSaveData();
+		saveData.addProperty("before", this.beforeFight);
+		saveData.addProperty("no", this.noFight);
+		saveData.addProperty("after", this.onDefeat);
+		saveData.addProperty("reward", this.reward != null ? this.reward.name() : null);
+		return saveData;
+	}
+	
+	@Override
+	public boolean importSaveData(JsonObject saveData) {
+		if(super.importSaveData(saveData)) {
+			this.beforeFight = saveData.get("before") instanceof JsonNull ? null : saveData.get("before").getAsString();
+			this.noFight = saveData.get("no") instanceof JsonNull ? null : saveData.get("no").getAsString();
+			this.onDefeat = saveData.get("after") instanceof JsonNull ? null : saveData.get("after").getAsString();
+			this.reward = saveData.get("reward") instanceof JsonNull ? null : Item.valueOf(saveData.get("reward").getAsString());
+			return true;
+		}
+		
+		return false;
 	}
 }

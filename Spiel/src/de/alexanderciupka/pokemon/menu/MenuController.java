@@ -15,6 +15,7 @@ import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import de.alexanderciupka.pokemon.map.GameController;
+import de.alexanderciupka.pokemon.map.RouteCreator;
 import de.alexanderciupka.pokemon.painting.PaintingController;
 
 public class MenuController {
@@ -55,9 +56,10 @@ public class MenuController {
 	}
 
 	public void startEditor() {
-		if(paintingFrame == null)
-			paintingFrame = new PaintingNameFrame();
-		paintingFrame.setVisible(true);
+		new RouteCreator();
+//		if(paintingFrame == null)
+//			paintingFrame = new PaintingNameFrame();
+//		paintingFrame.setVisible(true);
 	}
 
 	public void openEditor(String pictureName, int width, int height) {

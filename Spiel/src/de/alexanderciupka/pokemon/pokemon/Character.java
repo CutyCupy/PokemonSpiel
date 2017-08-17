@@ -48,11 +48,11 @@ public class Character implements Runnable {
 	private boolean surfing;
 	private boolean controllable = true;
 
-	private PC pc;
 
 	private Thread uncontrollable;
 
 	private HashMap<String, Image[]> sprites;
+	private String spriteName;
 	private int currentWalking;
 
 	private int stepCounter;
@@ -70,7 +70,6 @@ public class Character implements Runnable {
 
 		sprites = new HashMap<String, Image[]>();
 
-		pc = new PC(this);
 	}
 
 	public Character(String id) {
@@ -85,7 +84,6 @@ public class Character implements Runnable {
 
 		sprites = new HashMap<String, Image[]>();
 
-		pc = new PC(this);
 	}
 
 	public void setCurrentRoute(Route currentRoute) {
@@ -98,6 +96,7 @@ public class Character implements Runnable {
 	}
 
 	public void setCurrentPosition(int x, int y) {
+		this.oldPosition.setLocation(currentPosition.x, currentPosition.y);
 		currentPosition.setLocation(x, y);
 		originalPosition.setLocation(x, y);
 		this.exactX = x;
@@ -105,6 +104,7 @@ public class Character implements Runnable {
 	}
 
 	public void setCurrentPosition(Point newPosition) {
+		this.oldPosition.setLocation(currentPosition.x, currentPosition.y);
 		currentPosition.setLocation(newPosition);
 		originalPosition.setLocation(newPosition);
 		this.exactX = newPosition.x;
@@ -132,7 +132,7 @@ public class Character implements Runnable {
 	public void changePosition(Direction direction, boolean waiting) {
 		if (controllable) {
 			setCurrentDirection(direction);
-			oldPosition = new Point(currentPosition);
+			oldPosition.setLocation(currentPosition.x, currentPosition.y);
 			switch (direction) {
 			case UP:
 				currentPosition.y -= 1;
@@ -206,30 +206,44 @@ public class Character implements Runnable {
 		}
 		return null;
 	}
+	
+	public void setCharacterImage(String characterImageName) {
+		switch(currentDirection) {
+		case DOWN:
+			setCharacterImage(characterImageName, "front");
+			break;
+		case LEFT:
+			setCharacterImage(characterImageName, "left");
+			break;
+		case RIGHT:
+			setCharacterImage(characterImageName, "right");
+			break;
+		case UP:
+			setCharacterImage(characterImageName, "back");
+			break;
+		default:
+			break;
+		};
+	}
 
 	public void setCharacterImage(String characterImageName, String direction) {
-		characterImageName = "team_marco";
+		this.spriteName = characterImageName;
 		for (String s : new String[] { "front", "back", "left", "right" }) {
 			Image[] currentImages = new Image[4];
 			for (int i = 0; i <= 3; i++) {
-				currentImages[i] = new ImageIcon(this.getClass()
-						.getResource("/characters/" + characterImageName + "_" + s + "_" + i + ".png").getFile())
-								.getImage();
+				try {
+					currentImages[i] = new ImageIcon(this.getClass()
+							.getResource("/characters/" + this.spriteName + "_" + s + "_" + i + ".png").getFile())
+							.getImage();
+				} catch(Exception e) {
+					System.err.println(this.spriteName);
+					currentImages[i] = new ImageIcon(this.getClass()
+							.getResource("/characters/team_marco" + "_" + s + "_" + i + ".png").getFile())
+							.getImage();
+				}
 			}
 			this.sprites.put(s, currentImages);
 		}
-		// this.front = new ImageIcon(
-		// this.getClass().getResource("/characters/" + characterImageName +
-		// "_front.png").getFile()).getImage();
-		// this.back = new ImageIcon(
-		// this.getClass().getResource("/characters/" + characterImageName +
-		// "_back.png").getFile()).getImage();
-		// this.left = new ImageIcon(
-		// this.getClass().getResource("/characters/" + characterImageName +
-		// "_left.png").getFile()).getImage();
-		// this.right = new ImageIcon(
-		// this.getClass().getResource("/characters/" + characterImageName +
-		// "_right.png").getFile()).getImage();
 		switch (direction) {
 		case "front":
 			setCurrentDirection(Direction.DOWN);
@@ -370,12 +384,19 @@ public class Character implements Runnable {
 		data.addProperty("route", this.currentRoute.getId());
 		data.addProperty("current_position.x", this.currentPosition.x);
 		data.addProperty("current_position.y", this.currentPosition.y);
+		data.addProperty("original_position.x", this.originalPosition.x);
+		data.addProperty("original_position.y", this.originalPosition.y);
 		data.addProperty("current_direction", this.currentDirection.name());
+		data.addProperty("original_direction", this.originalDirection.name());
 		data.addProperty("surfing", this.isSurfing());
 		data.addProperty("aggro", this.isAggro());
-		data.add("team", this.getTeam().getSaveData());
-		data.add("pc", this.getPC().getSaveData());
+		data.addProperty("trainer", this.trainer);
+		data.addProperty("aggro", this.aggro);
 		data.addProperty("defeated", this.defeated);
+		data.addProperty("step_counter", this.stepCounter);
+		data.addProperty("spriteName",  this.spriteName);
+
+		data.add("team", this.getTeam().getSaveData());
 		return data;
 	}
 
@@ -387,22 +408,17 @@ public class Character implements Runnable {
 			this.setCurrentRoute(gController.getRouteAnalyzer().getRouteById(saveData.get("route").getAsString()));
 			this.setCurrentPosition(saveData.get("current_position.x").getAsInt(),
 					saveData.get("current_position.y").getAsInt());
-			switch (saveData.get("current_direction").getAsString().toLowerCase()) {
-			case "down":
+			this.setOriginalPosition(new Point(saveData.get("original_position.x").getAsInt(),
+					saveData.get("original_position.y").getAsInt()));
+			try {
+				setCurrentDirection(Direction.valueOf(saveData.get("current_direction").getAsString()));
+			} catch(Exception e) {
 				setCurrentDirection(Direction.DOWN);
-				break;
-			case "left":
-				setCurrentDirection(Direction.LEFT);
-				break;
-			case "up":
-				setCurrentDirection(Direction.UP);
-				break;
-			case "right":
-				setCurrentDirection(Direction.RIGHT);
-				break;
-			default:
-				setCurrentDirection(Direction.DOWN);
-				break;
+			}
+			try {
+				setOriginalDirection(Direction.valueOf(saveData.get("original_direction").getAsString()));
+			} catch(Exception e) {
+				setOriginalDirection(Direction.DOWN);
 			}
 			this.setSurfing(false);
 			if (saveData.get("surfing") != null) {
@@ -413,9 +429,14 @@ public class Character implements Runnable {
 				}
 			}
 			this.team.importSaveData(saveData.get("team").getAsJsonArray());
-			this.pc.importSaveData(saveData.get("pc").getAsJsonArray());
+			this.trainer = saveData.get("trainer").getAsBoolean();
+			this.stepCounter = saveData.get("step_counter").getAsInt();
+			this.setCharacterImage(saveData.get("spriteName").getAsString());
 			this.defeated = saveData.get("defeated").getAsBoolean();
 			this.aggro = saveData.get("aggro") != null ? saveData.get("aggro").getAsBoolean() : true;
+//			System.out.println(this.currentPosition);
+//			System.out.println(this.oldPosition);
+//			this.currentRoute.updateMap(this.currentPosition, this.oldPosition);
 			return true;
 		}
 		return false;
@@ -536,9 +557,9 @@ public class Character implements Runnable {
 			break;
 		}
 		currentWalking = 0;
-		this.moving = false;
 		this.currentRoute.getEntities()[currentPosition.y][currentPosition.x].onStep(this);
 		this.currentRoute.updateMap(currentPosition);
+		this.moving = false;
 	}
 
 	private Direction next() {
@@ -563,10 +584,6 @@ public class Character implements Runnable {
 
 	public boolean isSurfing() {
 		return this.surfing;
-	}
-
-	public PC getPC() {
-		return this.pc;
 	}
 
 	public boolean isControllable() {
@@ -709,8 +726,17 @@ public class Character implements Runnable {
 	public boolean equals(Object obj) {
 		if(obj instanceof Character) {
 			Character c = (Character) obj;
-			return this.getID().equals(c.getID()) && this.getName().equals(c.getName()) && this.getCurrentPosition().equals(c.getCurrentPosition());
+			System.out.println(this.getName() + " - " + c.getName());
+			System.out.println(this.getID() + " - " + c.getID());
+			System.out.println(this.getCurrentPosition() + " - " + 	c.getCurrentPosition());
+			System.out.println(this.getCurrentRoute().getId() + " - " + c.getCurrentRoute().getId());
+			return this.getID().equals(c.getID()) && this.getName().equals(c.getName()) && this.getCurrentPosition().equals(c.getCurrentPosition()) 
+					&& this.getCurrentRoute().getId().equals(c.getCurrentRoute().getId());
 		}
 		return false;
+	}
+
+	public String getSpriteName() {
+		return this.spriteName;
 	}
 }

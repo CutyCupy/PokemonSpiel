@@ -5,7 +5,10 @@ import java.awt.Color;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -58,6 +61,12 @@ public class FightPanel extends JPanel {
 
 	private GameController gController;
 
+	private JLabel[] playerPokemons;
+	private JLabel[] enemyPokemons;
+
+	private Image coloredPokeball;
+	private Image grayPokeball;
+
 	public FightPanel(Pokemon mine, Pokemon enemy) {
 		super();
 		setLayout(new BorderLayout());
@@ -69,7 +78,8 @@ public class FightPanel extends JPanel {
 		menu = new JButton[4];
 		moves = new MoveButton[4];
 		pokeball = new JLabel();
-		pokeball.setIcon(new ImageIcon(new ImageIcon(this.getClass().getResource("/pokeballs/pokeball.png")).getImage().getScaledInstance(10, 10, Image.SCALE_SMOOTH)));
+		pokeball.setIcon(new ImageIcon(new ImageIcon(this.getClass().getResource("/pokeballs/pokeball.png")).getImage()
+				.getScaledInstance(10, 10, Image.SCALE_SMOOTH)));
 		textLabel = new TextLabel();
 		textLabel.setBounds(5, 480, 600, 110);
 		textLabel.setOpaque(true);
@@ -93,8 +103,10 @@ public class FightPanel extends JPanel {
 		playerStats.setVerticalAlignment(SwingConstants.TOP);
 		enemyStats.setVerticalAlignment(SwingConstants.TOP);
 		background = new JLabel(new ImageIcon(this.getClass().getResource("/battles/battlebgGrassy.png")));
-		playerStats.setBorder(BorderFactory.createCompoundBorder(new LineBorder(Color.BLACK), new EmptyBorder(2, 10, 2, 10)));
-		enemyStats.setBorder(BorderFactory.createCompoundBorder(new LineBorder(Color.BLACK), new EmptyBorder(2, 10, 2, 10)));
+		playerStats.setBorder(
+				BorderFactory.createCompoundBorder(new LineBorder(Color.BLACK), new EmptyBorder(2, 10, 2, 10)));
+		enemyStats.setBorder(
+				BorderFactory.createCompoundBorder(new LineBorder(Color.BLACK), new EmptyBorder(2, 10, 2, 10)));
 		enemyPokemon.setBounds(430, 150, 100, 100);
 		enemyStatPanel.setBounds(45, 150, 180, 40);
 		enemyStats.setLocation(0, 0);
@@ -155,8 +167,44 @@ public class FightPanel extends JPanel {
 		moves[1] = secondMove;
 		moves[2] = thirdMove;
 		moves[3] = fourthMove;
-		setPlayer();
-		setEnemy();
+
+		playerStatPanel.setVisible(false);
+		enemyStatPanel.setVisible(false);
+
+		playerPokemons = new JLabel[6];
+		enemyPokemons = new JLabel[6];
+
+		try {
+			coloredPokeball = ImageIO.read(new File(this.getClass().getResource("/pokeballs/pokeball.png").getFile()))
+					.getScaledInstance(10, 10, Image.SCALE_SMOOTH);
+			grayPokeball = ImageIO.read(new File(this.getClass().getResource("/pokeballs/gray_pokeball.png").getFile()))
+					.getScaledInstance(10, 10, Image.SCALE_SMOOTH);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		for (int i = 0; i < playerPokemons.length; i++) {
+			JLabel currentPlayer = new JLabel();
+			JLabel currentEnemy = new JLabel();
+
+			currentPlayer.setVisible(false);
+			currentEnemy.setVisible(false);
+
+			currentPlayer.setOpaque(false);
+			currentEnemy.setOpaque(false);
+
+			currentPlayer.setBounds(375 + (13 * i), 262, 10, 10);
+			currentEnemy.setBounds(45 + (13 * i), 137, 10, 10);
+
+			playerPokemons[i] = currentPlayer;
+			enemyPokemons[i] = currentEnemy;
+
+			add(currentPlayer);
+			add(currentEnemy);
+		}
+
+		// setPlayer();
+		// setEnemy();
 		addActionListener();
 		addComponents();
 	}
@@ -201,7 +249,7 @@ public class FightPanel extends JPanel {
 			moves[i].addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					if(!attacked && mine.getMoveByName(((JButton) e.getSource()).getName()).getCurrentPP() > 0) {
+					if (!attacked && mine.getMoveByName(((JButton) e.getSource()).getName()).getCurrentPP() > 0) {
 						attacked = true;
 						new Thread(new Runnable() {
 							@Override
@@ -213,17 +261,14 @@ public class FightPanel extends JPanel {
 								boolean playerStarts = gController.getFight().isPlayerStart(playerMove, enemyMove);
 								boolean wholeTurn = true;
 								if (playerStarts) {
-									if(gController.playerAttack(playerMove)) {
+									if (gController.playerAttack(playerMove)) {
 										gController.enemyAttack(enemyMove);
 
 									} else {
 										wholeTurn = false;
-										if(!gController.getFight().enemyDead()) {
-											setEnemy();
-										}
 									}
 								} else {
-									if(gController.enemyAttack(enemyMove)) {
+									if (gController.enemyAttack(enemyMove)) {
 										gController.playerAttack(playerMove);
 									} else {
 										wholeTurn = false;
@@ -231,10 +276,10 @@ public class FightPanel extends JPanel {
 										gController.repaint();
 									}
 								}
-//								if(wholeTurn) {
-									mine.afterTurnDamage();
-									enemy.afterTurnDamage();
-//								}
+								// if(wholeTurn) {
+								mine.afterTurnDamage();
+								enemy.afterTurnDamage();
+								// }
 								updateMoves();
 								showMenu();
 								attacked = false;
@@ -247,13 +292,13 @@ public class FightPanel extends JPanel {
 		bag.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if(!throwPokeball) {
+				if (!throwPokeball) {
 					throwPokeball = true;
 					new Thread(new Runnable() {
 						@Override
 						public void run() {
 							pokeball.setVisible(true);
-							for(int x = 150; x <= 480; x++) {
+							for (int x = 150; x <= 480; x++) {
 								try {
 									Thread.sleep(2);
 								} catch (InterruptedException e) {
@@ -263,21 +308,20 @@ public class FightPanel extends JPanel {
 								revalidate();
 								repaint();
 							}
-							if(gController.getFight().canEscape()) {
+							if (gController.getFight().canEscape()) {
 								enemyPokemon.setVisible(false);
-								if(enemy.isCatched()) {
+								if (enemy.isCatched()) {
 									try {
 										Thread.sleep(2000);
 									} catch (InterruptedException e) {
 										e.printStackTrace();
 									}
 									addText(enemy.getName() + " wurde gefangen!");
-									if(gController.getMainCharacter().getTeam().getAmmount() < 6) {
-										gController.getMainCharacter().getTeam().addPokemon(enemy);
-									} else {
+									if (!gController.getMainCharacter().getTeam().addPokemon(enemy)) {
 										addText("Dein Team ist voll!");
-										addText(enemy.getName() + " wurde auf deinem PC in " + gController.getMainCharacter().getPC().addPokemon(enemy).getName() + " gespeichert!");
-
+										addText(enemy.getName() + " wurde auf deinem PC in "
+												+ gController.getMainCharacter().getPC().addPokemon(enemy).getName()
+												+ " gespeichert!");
 									}
 									gController.endFight();
 									pokeball.setVisible(false);
@@ -292,28 +336,11 @@ public class FightPanel extends JPanel {
 									enemyPokemon.setVisible(true);
 									addText(enemy.getName() + " hat sich befreit!");
 								}
-//								if(new Random().nextFloat() < (1f / enemy.getStats().getLevel()) * (enemy.getStats().getCurrentHP() / enemy.getStats().getStats()[0])) {
-//									enemyPokemon.setVisible(false);
-//									addText(enemy.getName() + " wurde gefangen!");
-//									if(gController.getMainCharacter().getTeam().getAmmount() < 6) {
-//										gController.getMainCharacter().getTeam().addPokemon(enemy);
-//									} else {
-//										addText("Dein Team ist voll!");
-//										addText(enemy.getName() + " wurde auf deinem PC in " + gController.getMainCharacter().getPC().addPokemon(enemy).getName() + " gespeichert!");
-//
-//									}
-//									gController.endFight();
-//									pokeball.setVisible(false);
-//									return;
-//								} else {
-//									pokeball.setVisible(false);
-//									addText(enemy.getName() + " hat sich befreit!");
-//								}
 							} else {
 								pokeball.setVisible(false);
 								addText("Sei kein Dieb!");
 							}
-							if(!gController.enemyAttack()) {
+							if (!gController.enemyAttack()) {
 								gController.getFight().setCurrentFightOption(FightOption.POKEMON);
 								gController.repaint();
 							}
@@ -355,9 +382,23 @@ public class FightPanel extends JPanel {
 
 	public void setPlayer() {
 		this.mine = gController.getFight().getPlayer();
+//		this.addText("Du schaffst das " + this.mine.getName() + "!");
+		for (int i = 0; i < playerPokemons.length; i++) {
+			playerPokemons[i].setVisible(true);
+			if (gController.getMainCharacter().getTeam().getTeam()[i] != null) {
+				if (gController.getMainCharacter().getTeam().getTeam()[i].getStats().getCurrentHP() > 0) {
+					playerPokemons[i].setIcon(new ImageIcon(coloredPokeball));
+				} else {
+					playerPokemons[i].setIcon(new ImageIcon(grayPokeball));
+				}
+			} else {
+				playerPokemons[i].setVisible(false);
+			}
+		}
 		ownPokemon.setIcon(new ImageIcon(this.getClass().getResource("/pokemon/back/" + this.mine.getId() + ".png")));
 		updateMoves();
 		updatePanels();
+		playerStatPanel.setVisible(true);
 	}
 
 	public void updateMoves() {
@@ -368,73 +409,84 @@ public class FightPanel extends JPanel {
 
 	public void setEnemy() {
 		this.enemy = gController.getFight().getEnemy();
-		enemyPokemon.setIcon(new ImageIcon(this.getClass().getResource("/pokemon/front/" + this.enemy.getId() + ".png")));
+		if (!gController.getFight().canEscape()) {
+			this.addText(
+					gController.getFight().getEnemyCharacter().getName() + " setzt " + this.enemy.getName() + " ein!");
+		}
+		for (int i = 0; i < enemyPokemons.length; i++) {
+			enemyPokemons[i].setVisible(true);
+			if (gController.getFight().getEnemyCharacter() != null) {
+				if (gController.getFight().getEnemyCharacter().getTeam().getTeam()[i] != null) {
+					if (gController.getFight().getEnemyCharacter().getTeam().getTeam()[i].getStats()
+							.getCurrentHP() > 0) {
+						enemyPokemons[i].setIcon(new ImageIcon(coloredPokeball));
+					} else {
+						enemyPokemons[i].setIcon(new ImageIcon(grayPokeball));
+					}
+				} else {
+					enemyPokemons[i].setVisible(false);
+				}
+			} else {
+				enemyPokemons[i].setVisible(false);
+			}
+		}
+		this.enemyPokemon.setVisible(true);
+		enemyPokemon
+				.setIcon(new ImageIcon(this.getClass().getResource("/pokemon/front/" + this.enemy.getId() + ".png")));
 		updatePanels();
+		enemyStatPanel.setVisible(true);
 	}
 
 	public void updatePanels() {
-//		playerStats.setHorizontalAlignment(SwingConstants.CENTER);
-//		enemyStats.setHorizontalAlignment(SwingConstants.CENTER);
-//		new Thread(new Runnable() {
-//			@Override
-//			public void run() {
+		playerStats.setText(mine.getName() + " Lv.: " + mine.getStats().getLevel());
+		enemyStats.setText(enemy.getName() + " Lv.: " + enemy.getStats().getLevel());
 
-				playerStats.setText(mine.getName() + " Lv.: " + mine.getStats().getLevel());
-				enemyStats.setText(enemy.getName() + " Lv.: " + enemy.getStats().getLevel());
+		playerHPBar.setMaximum(mine.getStats().getStats()[0]);
+		enemyHPBar.setMaximum(enemy.getStats().getStats()[0]);
 
-				playerHPBar.setMaximum(mine.getStats().getStats()[0]);
-				enemyHPBar.setMaximum(enemy.getStats().getStats()[0]);
+		playerHPBar.updateValue(mine.getStats().getCurrentHP());
+		enemyHPBar.updateValue(enemy.getStats().getCurrentHP());
 
-				playerHPBar.updateValue(mine.getStats().getCurrentHP());
-				enemyHPBar.updateValue(enemy.getStats().getCurrentHP());
+		int counter = 0;
 
-				int counter = 0;
-
-				while(!playerHPBar.isFinished() || !enemyHPBar.isFinished()) {
-					if(playerHPBar.isFinished()) {
-						ownPokemon.setVisible(true);
-					} else if(enemyHPBar.isFinished()){
-						ownPokemon.setVisible(true);
-					}
-					if(counter % 10 == 0) {
-						if(!playerHPBar.isFinished()) {
-							ownPokemon.setVisible(!ownPokemon.isVisible());
-						} else if (!enemyHPBar.isFinished()) {
-							enemyPokemon.setVisible(!enemyPokemon.isVisible());
-						}
-					}
-					try {
-						Thread.sleep(5);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					counter++;
-				}
-
+		while (!playerHPBar.isFinished() || !enemyHPBar.isFinished()) {
+			if (playerHPBar.isFinished()) {
 				ownPokemon.setVisible(true);
-				enemyPokemon.setVisible(true);
+			} else if (enemyHPBar.isFinished()) {
+				ownPokemon.setVisible(true);
+			}
+			if (counter % 10 == 0) {
+				if (!playerHPBar.isFinished()) {
+					ownPokemon.setVisible(!ownPokemon.isVisible());
+				} else if (!enemyHPBar.isFinished()) {
+					enemyPokemon.setVisible(!enemyPokemon.isVisible());
+				}
+			}
+			try {
+				Thread.sleep(5);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			counter++;
+		}
 
-				stopWaiting();
+		ownPokemon.setVisible(true);
+		enemyPokemon.setVisible(true);
 
-				playerAilmentLabel.setAilment(mine.getAilment());
-				enemyAilmentLabel.setAilment(enemy.getAilment());
+		stopWaiting();
 
-				playerAilmentLabel.setLocation(playerStats.getWidth() - playerAilmentLabel.getWidth() - 10, 5);
-				enemyAilmentLabel.setLocation(enemyStats.getWidth() - enemyAilmentLabel.getWidth() - 10, 5);
+		playerAilmentLabel.setAilment(mine.getAilment());
+		enemyAilmentLabel.setAilment(enemy.getAilment());
 
-				playerHPBar.setSize(playerStats.getWidth() - 20, 10);
-				playerHPBar.setLocation(10, playerStats.getHeight() - playerHPBar.getHeight() - 7);
+		playerAilmentLabel.setLocation(playerStats.getWidth() - playerAilmentLabel.getWidth() - 10, 5);
+		enemyAilmentLabel.setLocation(enemyStats.getWidth() - enemyAilmentLabel.getWidth() - 10, 5);
 
-				enemyHPBar.setSize(enemyStats.getWidth() - 20, 10);
-				enemyHPBar.setLocation(10, enemyStats.getHeight() - enemyHPBar.getHeight() - 7);
-//			}
-//		}).start();
+		playerHPBar.setSize(playerStats.getWidth() - 20, 10);
+		playerHPBar.setLocation(10, playerStats.getHeight() - playerHPBar.getHeight() - 7);
 
-
-//		playerHPBar.setForeground(this.mine.getStats().getHPColor());
-//		enemyHPBar.setForeground(this.enemy.getStats().getHPColor());
+		enemyHPBar.setSize(enemyStats.getWidth() - 20, 10);
+		enemyHPBar.setLocation(10, enemyStats.getHeight() - enemyHPBar.getHeight() - 7);
 	}
-
 
 	public void showMenu() {
 		for (int i = 0; i < menu.length; i++) {
@@ -446,14 +498,14 @@ public class FightPanel extends JPanel {
 	}
 
 	public void checkEnemyAttack() {
-		if(enemyAttack) {
+		if (enemyAttack) {
 			gController.enemyAttack();
 			enemyAttack = false;
 		}
 	}
 
 	public void pause() {
-		while(!textLabel.isEmpty() && !textLabel.isWaiting()) {
+		while (!textLabel.isEmpty() && !textLabel.isWaiting()) {
 			gController.sleep(50);
 			textLabel.repaint();
 		}
@@ -474,7 +526,7 @@ public class FightPanel extends JPanel {
 
 	public void addText(String text, boolean wait) {
 		this.textLabel.setWaiting(wait);
-		if(!textLabel.isVisible()) {
+		if (!textLabel.isVisible()) {
 			showText();
 		}
 		this.textLabel.addText(text);
@@ -490,6 +542,14 @@ public class FightPanel extends JPanel {
 
 	public TextLabel getTextLabel() {
 		return this.textLabel;
+	}
+
+	public void removeEnemy() {
+		this.enemyStatPanel.setVisible(false);
+		this.enemyPokemon.setVisible(false);
+		for (int i = 0; i < enemyPokemons.length; i++) {
+			enemyPokemons[i].setVisible(false);
+		}
 	}
 
 }

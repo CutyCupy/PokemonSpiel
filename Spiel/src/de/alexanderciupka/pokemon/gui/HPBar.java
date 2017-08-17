@@ -42,10 +42,10 @@ public class HPBar extends JProgressBar implements Runnable {
 
 	@Override
 	public void run() {
-		if(nextValue != -1 && nextValue < this.getValue()) {
+		if(nextValue != -1) {
 			int delta = this.getValue() - nextValue;
-			double decrease = delta / (FPS * time);
-			for(double value = this.getValue(); value > nextValue; value -= decrease) {
+			double change = delta / (FPS * time);
+			for(double value = this.getValue(); delta > 0 ? value > nextValue : value < nextValue; value -= change) {
 				this.setValue((int) Math.round(value));
 				try {
 					Thread.sleep((long) (1000 / FPS));
@@ -54,9 +54,9 @@ public class HPBar extends JProgressBar implements Runnable {
 				}
 			}
 			this.setValue(nextValue);
-		} else if(nextValue >= this.getValue()) {
-			this.setValue(nextValue);
-		}
+		} //else if(nextValue >= this.getValue()) {
+//			this.setValue(nextValue);
+//		}
 		setFinished(true);
 	}
 

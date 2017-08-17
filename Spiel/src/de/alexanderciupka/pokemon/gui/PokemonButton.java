@@ -41,7 +41,11 @@ public class PokemonButton extends JButton {
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		if(pokemon != null) {
-			g.drawImage(sprite, 0, 0, null);
+			try {
+				g.drawImage(sprite, 0, 0, null);
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
 			g.setColor(Color.BLACK);
 			g.drawString(pokemon.getName() + " - Lvl: " + pokemon.getStats().getLevel(), sprite.getWidth(null) + 5, 25);
 			repaint();
@@ -76,16 +80,20 @@ public class PokemonButton extends JButton {
 		}
 		if(pokemon != null) {
 			setEnabled(true);
-			this.sprite = this.pokemon.getSpriteFront().getScaledInstance(75, 75, Image.SCALE_SMOOTH);
+			try {
+				this.sprite = this.pokemon.getSpriteFront();
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
 			hpBar.setMaximum(pokemon.getStats().getStats()[0]);
 			hpBar.setValue(pokemon.getStats().getCurrentHP());
-			hpBar.setBounds(80, 32, 150, 10);
+			hpBar.setBounds(100, 32, 175, 10);
 			
 			typeOne.setType(this.pokemon.getTypes()[0]);
-			typeOne.setLocation(80, 45);
+			typeOne.setLocation(100, 45);
 			
 			typeTwo.setType(this.pokemon.getTypes()[1]);
-			typeTwo.setLocation(80 + typeOne.getWidth() + 5, 45);
+			typeTwo.setLocation(100 + typeOne.getWidth() + 5, 45);
 			
 			ailment.setAilment(this.pokemon.getAilment());
 			ailment.setLocation(hpBar.getWidth() + hpBar.getX() - ailment.getWidth(), hpBar.getY() - ailment.getHeight() - 5);

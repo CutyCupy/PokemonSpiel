@@ -115,6 +115,13 @@ public class Fighting {
 			}
 			return false;
 		} else {
+			if (move.checkStatChange()) {
+				if (move.checkUserBuff()) {
+					buff(player, move);
+				} else {
+					buff(enemy, move);
+				}
+			}
 			return true;
 		}
 	}
@@ -122,7 +129,7 @@ public class Fighting {
 	public boolean enemyAttack() {
 		return enemyAttack(enemy.getMove(this.player));
 	}
-
+ 
 	public boolean enemyAttack(Move move) {
 		String message = enemy.canAttack();
 		if (message != null) {
@@ -155,6 +162,14 @@ public class Fighting {
 			}
 			return false;
 		} else {
+			if (move.checkStatChange()) {
+				if (move.checkUserBuff()) {
+					buff(enemy, move);
+				} else {
+					buff(player, move);
+				}
+			}
+
 			return true;
 		}
 	}
@@ -166,13 +181,6 @@ public class Fighting {
 			for (int i = 0; i < playerMove.getMinHits() + ammount; i++) {
 				damageCalculation(player, enemy, playerMove);
 				gController.sleep(150);
-			}
-			if (playerMove.checkStatChange()) {
-				if (playerMove.checkUserBuff()) {
-					buff(player, playerMove);
-				} else {
-					buff(enemy, playerMove);
-				}
 			}
 			return true;
 		}
@@ -186,13 +194,6 @@ public class Fighting {
 			for (int i = 0; i < enemyMove.getMinHits() + ammount; i++) {
 				damageCalculation(enemy, player, enemyMove);
 				gController.sleep(150);
-			}
-			if (enemyMove.checkStatChange()) {
-				if (enemyMove.checkUserBuff()) {
-					buff(enemy, enemyMove);
-				} else {
-					buff(player, enemyMove);
-				}
 			}
 			return true;
 		}
@@ -267,9 +268,18 @@ public class Fighting {
 			} else if (weakness == Type.USELESS) {
 				gController.getGameFrame().getFightPanel().addText("Die Attacke zeigte keine Wirkung!", true);
 			}
-			defenderStats.loseHP(
-					(int) (weakness * ((attackerStats.getLevel() * (2 / 5.0) + 2) * damage * (atk / (50.0 * def)) + 2)
-							* crit * ((rng.nextFloat() * 0.15f + 0.85) / 1)));
+			damage = (weakness * ((attackerStats.getLevel() * (2 / 5.0) + 2) * damage * (atk / (50.0 * def)) + 2)
+					* crit * ((rng.nextFloat() * 0.15f + 0.85) / 1));
+			defenderStats.loseHP((int) damage);
+			if(usedMove.getDrain() > 0) {
+				attackerStats.restoreHP((int) (damage * (usedMove.getDrain() / 100)));
+				gController.getGameFrame().getFightPanel().addText(defense.getName() + " wurde Energie abgesaugt!", true);
+			}
+		}
+		
+		if(usedMove.getHealing() > 0) {
+			attackerStats.restoreHP((int) (attackerStats.getStats()[0] * (usedMove.getHealing() / 100)));
+			gController.getGameFrame().getFightPanel().addText("Die KP von " + attacker.getName() + " wurden aufgefrischt!", true);
 		}
 
 		if (rng.nextFloat() * 100 < usedMove.getAilmentChance()) {
@@ -300,9 +310,10 @@ public class Fighting {
 		if (!participants.contains(player)) {
 			participants.add(player);
 		}
+//		gController.getGameFrame().getFightPanel().addText("Du schaffst das " + this.player.getName() + "!");
 		gController.updateFight();
 	}
-
+	
 	public Pokemon getEnemy() {
 		return enemy;
 	}
@@ -326,6 +337,7 @@ public class Fighting {
 	 * @return false if enemy has another Pokemon
 	 */
 	public boolean enemyDead() {
+		gController.getGameFrame().getFightPanel().removeEnemy();
 		enemy = enemyTeam.getFirstFightPokemon();
 		if (enemy == null) {
 			if (enemyCharacter != null) {
@@ -362,7 +374,7 @@ public class Fighting {
 
 	public int calculateXP(Pokemon player) {
 		int enemyLevel = enemy.getStats().getLevel();
-		int xp = (int) (((enemy.getBaseExperience() * enemyLevel) / 5.0) * (Math.pow(2 * enemyLevel + 10, 2.5) / Math.pow(enemyLevel + player.getStats().getLevel() + 10, 2.5)) + 1);
+		int xp = (int) (((enemy.getBaseExperience() * enemyLevel) / 4.0) * (Math.pow(2 * enemyLevel + 10, 2.5) / Math.pow(enemyLevel + player.getStats().getLevel() + 10, 2.5)) + 1);
 		if(!canEscape()) {
 			xp *= 1.5;
 		}

@@ -52,7 +52,6 @@ public class GameController {
 	}
 
 	public void move(Direction moveDirection) {
-		System.out.println("Move");
 		if (!interactionPause) {
 			setInteractionPause(true);
 			gameFrame.setDelay(TextLabel.SLOW);
@@ -85,7 +84,6 @@ public class GameController {
 	}
 
 	public void slide(Direction slideDirection) {
-		System.out.println("Slide");
 		if (!interactionPause) {
 			setInteractionPause(true);
 			Point possiblePoint = mainCharacter.getCurrentPosition();
@@ -149,10 +147,6 @@ public class GameController {
 		return false;
 	}
 
-	public boolean checkForBattle() {
-		return currentBackground.checkEncounter(mainCharacter.getCurrentPosition());
-	}
-
 	public Pokemon getEncounterPokemon() {
 		return currentBackground.chooseEncounter();
 	}
@@ -191,21 +185,18 @@ public class GameController {
 	}
 
 	public void startFight(NPC enemy) {
-		if (enemy.moveTowardsMainCharacter()) {
-			// repaint();
-			gameFrame.addDialogue(enemy.getName() + ": " + enemy.getBeforeFightDialogue());
-			waitDialogue();
-			this.fighting = true;
-			this.fight = new Fighting(enemy);
-			gameFrame.startFight(fight.getPlayer(), fight.getEnemy());
-		}
+		gameFrame.addDialogue(enemy.getName() + ": " + enemy.getBeforeFightDialogue());
+		waitDialogue();
+		this.fighting = true;
+		this.fight = new Fighting(enemy);
+		gameFrame.startFight(fight.getPlayer(), fight.getEnemy());
+		gameFrame.getFightPanel().showMenu();
 	}
 
 	public void startFight(Pokemon enemy) {
 		this.fighting = true;
 		this.fight = new Fighting(enemy);
 		gameFrame.startFight(fight.getPlayer(), fight.getEnemy());
-		gameFrame.getFightPanel().addText("Ein wildes " + enemy.getName() + " erscheint!");
 		gameFrame.getFightPanel().showMenu();
 	}
 
@@ -259,8 +250,9 @@ public class GameController {
 	public boolean winFight() {
 		for (Pokemon p : fight.getParticipants()) {
 			int XPGain = fight.calculateXP(p);
-			if (p.gainXP(XPGain / fight.getParticipants().size())) {
+			if (p.getStats().getLevel() < 100) {
 				gameFrame.getFightPanel().addText(p.getName() + " erh�lt " + XPGain + " Erfahrungspunkte!");
+				p.gainXP(XPGain / fight.getParticipants().size());
 			}
 		}
 		if (fight.enemyDead()) {
@@ -314,7 +306,6 @@ public class GameController {
 	}
 
 	public void checkInteraction() {
-		System.out.println("Check Interaction");
 		if (!interactionPause) {
 			setInteractionPause(true);
 			Point interactionPoint = mainCharacter.getInteractionPoint();
@@ -359,24 +350,35 @@ public class GameController {
 
 	public void startNewGame() {
 		mainCharacter = new Player();
-		mainCharacter.setCharacterImage("main", "front");
+		mainCharacter.setCharacterImage("talih", "front");
 		mainCharacter.setName("Talih");
 		mainCharacter.setID("999");
+		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("winterhude"));
+		mainCharacter.setCurrentPosition(10, 2);
 //		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("eigenes_zimmer"));
 //		mainCharacter.setCurrentPosition(START.x, START.y);
-		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("winterhude"));
-		mainCharacter.setCurrentPosition(25, 15);
 		currentBackground = new Background(mainCharacter.getCurrentRoute());
 		Pokemon player = new Pokemon(152);
+		player.getStats().generateStats((short) (10));
+		player.getStats().setCurrentHP((short) 1); 
 		player.setName("Mandarine");
-		player.getStats().generateStats((short) 5);
+		player.addMove("Tackle", information.getMoveByName("Gigasauger"));
 		mainCharacter.getTeam().addPokemon(player);
+//		Random rng = new Random();
+//		for(int i = 0; i < 10000; i++) {
+//			Pokemon current = new Pokemon(rng.nextInt(649) + 1);
+//			current.getStats().generateStats((short) ((i % 100) + 1));
+//			mainCharacter.getPC().addPokemon(current);
+//			if(i % 1000 == 0) {
+//				System.out.println(i);
+//			}
+//		}
 		gameFrame = new GameFrame();
 	}
 
 	public boolean loadGame(String path) {
 		mainCharacter = new Player();
-		mainCharacter.setCharacterImage("main", "front");
+		mainCharacter.setCharacterImage("talih", "front");
 		if (routeAnalyzer.loadGame(path)) {
 			currentBackground = new Background(mainCharacter.getCurrentRoute());
 			gameFrame = new GameFrame();
@@ -437,7 +439,6 @@ public class GameController {
 	}
 
 	public void setInteractionPause(boolean b) {
-		System.out.println("Interaction Pause: " + b);
 		this.interactionPause = b;
 	}
 

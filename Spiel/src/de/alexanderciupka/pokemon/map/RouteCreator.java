@@ -1,7 +1,6 @@
 package de.alexanderciupka.pokemon.map;
 
 import java.awt.Color;
-import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,7 +11,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -20,6 +18,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.SwingConstants;
@@ -45,45 +44,26 @@ public class RouteCreator extends JFrame {
 	private ArrayList<String> characters;
 	private String routeName;
 	private String routeID;
-	private static Scanner scanner;
 	private JButton save;
 	private JComboBox<String> terrains;
 	private boolean active;
 
 	private RouteAnalyzer routeAnalyzer;
 
-	private static final String[][] TYPES = {{"Out of Bounds", "OOB"}, {"Bett", "bed"}, {"Treppe hoch links", "WSUL"}, {"Treppe hoch rechts", "WSUR"}, {"Treppe runter links", "WSDL"}, {"Treppe runter rechts", "WSDR"}, {"Stärke", "ST"}, {"Zerschneider", "TC"}, {"Wand", "MW"}, {"Fenster", "MWW"}, {"Fenster+Gardine", "MWWC"}, {"Free", ""}, {"Tree", "T"}, {"Bookshelf", "BS"}, {"TV", "TV"}, {"SPÜLE", "spuele"}, {"Laptop", "LAPTOP"}, {"Table", "TA"}, {"Chair UP", "STUHLU"}, {"Chair DOWN", "STUHLD"}, {"Chair LEFT", "STUHLL"}, {"Chair RIGHT", "STUHLR"}, {"Settle UP", "SETTLEU"}, {"Settle DOWN", "SETTLED"}, {"Settle LEFT", "SETTLEL"}, {"Settle RIGHT", "SETTLER"}, {"Grass", "G"}, {"Grassy", "GR"}, {"Mauer", "M"}, {"Pokemon Center", "P"}, {"House Small", "HS"}, {"Gym", "A"}, {"Warp", "W"}, {"Character", "C"}, {"See","S"}, {"Sand", "SA"}, {"Bridge", "B"}, {"PC", "BC"}, {"JoyHealing", "JH"}, {"MoveDown", "MD"}, {"MoveUp", "MU"}, {"MoveLeft", "ML"}, {"MoveRight", "MR"}, {"MoveStop", "MS"}, {"RockBig", "RB"}, {"RockGroup", "RG"}, {"Rock", "R"}};
+	private static final String[][] TYPES = {{"Out of Bounds", "OOB"}, {"Bett", "bed"}, {"Treppe hoch links", "WSUL"}, {"Treppe hoch rechts", "WSUR"}, {"Treppe runter links", "WSDL"}, {"Treppe runter rechts", "WSDR"}, {"Stï¿½rke", "ST"}, {"Zerschneider", "TC"}, {"Wand", "MW"}, {"Fenster", "MWW"}, {"Fenster+Gardine", "MWWC"}, {"Free", ""}, {"Tree", "T"}, {"Bookshelf", "BS"}, {"TV", "TV"}, {"SPï¿½LE", "spuele"}, {"Laptop", "LAPTOP"}, {"Table", "TA"}, {"Chair UP", "STUHLU"}, {"Chair DOWN", "STUHLD"}, {"Chair LEFT", "STUHLL"}, {"Chair RIGHT", "STUHLR"}, {"Settle UP", "SETTLEU"}, {"Settle DOWN", "SETTLED"}, {"Settle LEFT", "SETTLEL"}, {"Settle RIGHT", "SETTLER"}, {"Grass", "G"}, {"Grassy", "GR"}, {"Mauer", "M"}, {"Pokemon Center", "P"}, {"House Small", "HS"}, {"Gym", "A"}, {"Warp", "W"}, {"Character", "C"}, {"See","S"}, {"Sand", "SA"}, {"Bridge", "B"}, {"PC", "BC"}, {"JoyHealing", "JH"}, {"MoveDown", "MD"}, {"MoveUp", "MU"}, {"MoveLeft", "ML"}, {"MoveRight", "MR"}, {"MoveStop", "MS"}, {"RockBig", "RB"}, {"RockGroup", "RG"}, {"Rock", "R"}};
 	private static final int SIZE = 25;
 
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					scanner = new Scanner(System.in);
-					System.out.print("Breite (max: 65): ");
-					int width = Integer.parseInt(scanner.nextLine());
-					System.out.print("Hï¿½he (max: 40): ");
-					int height = Integer.parseInt(scanner.nextLine());
-					System.out.print("Name der Route: ");
-					String name = scanner.nextLine();
-					System.out.println(name);
-					RouteCreator frame = new RouteCreator(width, height, name);
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-
-	/**
-	 * Create the frame.
-	 */
-	public RouteCreator(int width, int height, String name) {
+	public RouteCreator() {
+		System.out.print("Breite (max: 65): ");
+		int width = Integer.parseInt(JOptionPane.showInputDialog("Breite (max: 65): "));
+		System.out.print("Hï¿½he (max: 40): ");
+		int height = Integer.parseInt(JOptionPane.showInputDialog("HÃ¶he (max: 40): "));
+		System.out.print("Name der Route: ");
+		String name = JOptionPane.showInputDialog("Name der Route: ");
+		System.out.println(name);
+		
+		
+		
 		routeAnalyzer = new RouteAnalyzer();
 		x = 0;
 		y = 0;
@@ -244,15 +224,13 @@ public class RouteCreator extends JFrame {
 										}
 									} else if(text.startsWith("W")) {
 										Warp newWarp = new Warp(text + warpCounter, routeID);
-										System.out.print("New Route: ");
-										newWarp.setNewRoute(scanner.nextLine().toLowerCase().replace(" ", "_"));
+										newWarp.setNewRoute(JOptionPane.showInputDialog("New Route: ").toLowerCase().replace(" ", "_"));
 										warps.add(newWarp);
 										System.out.println(xCoord + " / " + yCoord + " " + newWarp.getWarpString());
 										warpCounter++;
 										text = newWarp.getWarpString();
 									} else if(text.equals("C")) {
-										System.out.print("New Character name: ");
-										characters.add(scanner.nextLine());
+										characters.add(JOptionPane.showInputDialog("New Character Name: "));
 										text += characterCounter;
 										characterCounter++;
 									}
@@ -284,7 +262,7 @@ public class RouteCreator extends JFrame {
 						labels[yStart + y][xStart + x].setText("WD" + buildingID + warpCounter);
 						Warp newWarp = new Warp("WD" + buildingID + warpCounter, this.routeID);
 						System.out.print("New Route: ");
-						newWarp.setNewRoute(scanner.nextLine().toLowerCase().replace(" ", "_"));
+						newWarp.setNewRoute(JOptionPane.showInputDialog("New Route: ").toLowerCase().replace(" ", "_"));
 						System.out.println((xStart + x) + " / " + (yStart + y) + newWarp.getWarpString());
 						warps.add(newWarp);
 						warpCounter++;
@@ -349,42 +327,6 @@ public class RouteCreator extends JFrame {
 				bWriter.write(c);
 				bWriter.flush();
 			}
-//			bWriter.write(routeName);
-//			bWriter.newLine();
-//			bWriter.write(terrains.getItemAt(terrains.getSelectedIndex()));
-//			bWriter.newLine();
-//			bWriter.write(String.valueOf(vertical.length));
-//			bWriter.newLine();
-//			bWriter.write(String.valueOf(horizontal.length));
-//			bWriter.newLine();
-//			String line = "";
-//			String labelText = "";
-//			for(int y = 0; y < vertical.length; y++) {
-//				for(int x = 0; x < horizontal.length; x++) {
-//					labelText = labels[y][x].getText();
-//					if(labelText.equals("")) {
-//						labelText = "F";
-//					}
-//					if(x == 0) {
-//						line = labelText;
-//					} else {
-//						line += "," + labelText;
-//					}
-//				}
-//				bWriter.write(line);
-//				bWriter.newLine();
-//			}
-//			for(Warp currentWarp : warps) {
-//				line = currentWarp.getWarpString() + "," + currentWarp.getNewRoute() + ",";
-//				bWriter.write(line);
-//				bWriter.newLine();
-//			}
-//			for(int i = 0; i < characters.size(); i++) {
-//				line = "C" + i + "," + characters.get(i) + ",";
-//				bWriter.write(line);
-//				bWriter.newLine();
-//			}
-//			bWriter.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

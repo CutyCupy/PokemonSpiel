@@ -35,7 +35,6 @@ public class Warp {
 	}
 
 	public void setNewRoute(String newRoute) {
-		System.out.println(newRoute);
 		this.newRoute = newRoute;
 	}
 
@@ -49,5 +48,19 @@ public class Warp {
 
 	public String getWarpString() {
 		return this.warpString;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Warp) {
+			Warp other = (Warp) obj;
+			return (this.warpString.equals(other.warpString) && this.oldRoute.equals(other.oldRoute) && this.newRoute.equals(other.newRoute) && this.newPosition.equals(other.newPosition));
+		}
+		return false;
+	}
+	
+	@Override
+	protected Warp clone() {
+		return new Warp(this.warpString, this.oldRoute, this.newRoute, new Point(this.newPosition));
 	}
 }

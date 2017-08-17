@@ -95,6 +95,13 @@ public class GameFrame extends JFrame {
 		pokemon.setLayout(null);
 		report = new ReportPanel();
 		repaint();
+		if(!gController.getFight().canEscape()) {
+			this.getFightPanel().addText("Eine Herausforderung von " + gController.getFight().getEnemyCharacter().getName() + "!");
+		} else {
+			this.getFightPanel().addText("Ein wildes " + enemy.getName() + " erscheint!");
+		}
+		fight.setEnemy();
+		fight.setPlayer();
 	}
 
 	public void stopFight() {
@@ -180,7 +187,6 @@ public class GameFrame extends JFrame {
 									e.printStackTrace();
 								}
 								repaint();
-								System.out.println("active false");
 							}
 							active = false;
 						}
@@ -292,9 +298,7 @@ public class GameFrame extends JFrame {
 		map.getActionMap().put("enter", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				System.out.println(gController.getInteractionPause());
 				if (!gController.isFighting() && gController.getInteractionPause()) {
-					System.out.println("triggered");
 					dialogue.setActive();
 				}
 			}
@@ -334,5 +338,9 @@ public class GameFrame extends JFrame {
 
 	public JPanel getReportPanel() {
 		return report;
+	}
+	
+	public BackgroundLabel getBackgroundLabel() {
+		return imageHolder;
 	}
 }

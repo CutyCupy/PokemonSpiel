@@ -1,6 +1,5 @@
 package de.alexanderciupka.pokemon.map;
 
-import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -29,20 +28,8 @@ public class Background {
 	}
 
 	public Pokemon chooseEncounter() {
-		return currentRoute.getPokemonPool().get(rng.nextInt(currentRoute.getPokemonPool().size()));
+		return currentRoute.getEncounter();
 	}
-
-	public boolean checkEncounter(Point point) {
-		return currentRoute.getEntities()[point.y][point.x].checkPokemon();
-	}
-
-//	public boolean checkPositionAccessible(Point point, de.alexanderciupka.sarahspiel.pokemon.Character character) {
-//		if(point.y >= 0 && point.x >= 0 && point.y < currentRoute.getHeight() && point.x < currentRoute.getWidth()) {
-//			character.setSurfing(currentRoute.getEntities()[point.y][point.x].isWater());
-//			return currentRoute.getEntities()[point.y][point.x].isAccessible(character);
-//		}
-//		return false;
-//	}
 
 	public int getHeight() {
 		return background.getHeight();

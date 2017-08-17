@@ -204,28 +204,32 @@ public class Pokemon {
 	}
 
 	public Move getMove(Pokemon player) {
-		double highscore = -1;
-		ArrayList<Integer> index = new ArrayList<Integer>();
-		for (int i = 0; i < this.getAmmountOfMoves(); i++) {
-			if(this.getMoves()[i].getPower() <= 0) {
-				if(highscore <= 0) {
+		if(gController.getFight().canEscape()) {
+			return this.getMoves()[rng.nextInt(this.getAmmountOfMoves())];
+		} else {
+			double highscore = -1;
+			ArrayList<Integer> index = new ArrayList<Integer>();
+			for (int i = 0; i < this.getAmmountOfMoves(); i++) {
+				if(this.getMoves()[i].getPower() <= 0) {
+					if(highscore <= 0) {
+						index.add(i);
+					}
+					continue;
+				}
+				double current = Type.getEffectiveness(this.getMoves()[i].getMoveType(), player.getTypes());
+				if (current > highscore) {
+					index.clear();
+					index.add(i);
+					highscore = current;
+				} else if (current == highscore) {
 					index.add(i);
 				}
-				continue;
 			}
-			double current = Type.getEffectiveness(this.getMoves()[i].getMoveType(), player.getTypes());
-			if (current > highscore) {
-				index.clear();
-				index.add(i);
-				highscore = current;
-			} else if (current == highscore) {
-				index.add(i);
+			if(index.isEmpty()) {
+				return this.getMoves()[rng.nextInt(this.getAmmountOfMoves())];
 			}
+			return this.getMoves()[index.get(rng.nextInt(index.size()))];
 		}
-		if(index.isEmpty()) {
-			return this.getMoves()[rng.nextInt(this.getAmmountOfMoves())];
-		}
-		return this.getMoves()[index.get(rng.nextInt(index.size()))];
 	}
 
 	public Ailment getAilment() {

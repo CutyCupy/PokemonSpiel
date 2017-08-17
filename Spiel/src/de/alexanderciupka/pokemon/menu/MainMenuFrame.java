@@ -139,16 +139,16 @@ public class MainMenuFrame extends JFrame {
 	}
 	
 	public void createDesign() {
-		Image sarah = new ImageIcon(getClass().getResource("/avatars/character_sarah.png")).getImage().getScaledInstance(250, 250, Image.SCALE_SMOOTH);
-		JLabel sarahLabel = new JLabel(new ImageIcon(sarah));
-		sarahLabel.setBounds(100, 450, 250, 250);
-		
-		Image alex = new ImageIcon(getClass().getResource("/avatars/character_alex.png")).getImage().getScaledInstance(250, 250, Image.SCALE_SMOOTH);
-		JLabel alexLabel = new JLabel(new ImageIcon(alex));
-		alexLabel.setBounds(1010, 450, 250, 250);
-		
-		contentPane.add(alexLabel);
-		contentPane.add(sarahLabel);
+//		Image sarah = new ImageIcon(getClass().getResource("/avatars/character_sarah.png")).getImage().getScaledInstance(250, 250, Image.SCALE_SMOOTH);
+//		JLabel sarahLabel = new JLabel(new ImageIcon(sarah));
+//		sarahLabel.setBounds(100, 450, 250, 250);
+//		
+//		Image alex = new ImageIcon(getClass().getResource("/avatars/character_alex.png")).getImage().getScaledInstance(250, 250, Image.SCALE_SMOOTH);
+//		JLabel alexLabel = new JLabel(new ImageIcon(alex));
+//		alexLabel.setBounds(1010, 450, 250, 250);
+//		
+//		contentPane.add(alexLabel);
+//		contentPane.add(sarahLabel);
 		repaint();
 	}
 }
