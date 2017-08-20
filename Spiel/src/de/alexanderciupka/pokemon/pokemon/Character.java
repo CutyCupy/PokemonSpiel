@@ -434,9 +434,6 @@ public class Character implements Runnable {
 			this.setCharacterImage(saveData.get("spriteName").getAsString());
 			this.defeated = saveData.get("defeated").getAsBoolean();
 			this.aggro = saveData.get("aggro") != null ? saveData.get("aggro").getAsBoolean() : true;
-//			System.out.println(this.currentPosition);
-//			System.out.println(this.oldPosition);
-//			this.currentRoute.updateMap(this.currentPosition, this.oldPosition);
 			return true;
 		}
 		return false;
@@ -726,10 +723,6 @@ public class Character implements Runnable {
 	public boolean equals(Object obj) {
 		if(obj instanceof Character) {
 			Character c = (Character) obj;
-			System.out.println(this.getName() + " - " + c.getName());
-			System.out.println(this.getID() + " - " + c.getID());
-			System.out.println(this.getCurrentPosition() + " - " + 	c.getCurrentPosition());
-			System.out.println(this.getCurrentRoute().getId() + " - " + c.getCurrentRoute().getId());
 			return this.getID().equals(c.getID()) && this.getName().equals(c.getName()) && this.getCurrentPosition().equals(c.getCurrentPosition()) 
 					&& this.getCurrentRoute().getId().equals(c.getCurrentRoute().getId());
 		}

@@ -11,6 +11,7 @@ import com.google.gson.JsonObject;
 
 import de.alexanderciupka.pokemon.pokemon.Character;
 import de.alexanderciupka.pokemon.pokemon.Direction;
+import de.alexanderciupka.pokemon.pokemon.Item;
 import de.alexanderciupka.pokemon.pokemon.NPC;
 import de.alexanderciupka.pokemon.pokemon.Player;
 
@@ -199,6 +200,7 @@ public class Entity {
 			if (c instanceof Player) {
 				gController.resetCharacterPositions();
 				gController.setCurrentRoute(gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()));
+				gController.getGameFrame().getBackgroundLabel().changeRoute(gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()));
 			}
 			c.setCurrentRoute(gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()));
 			c.setCurrentPosition(warp.getNewPosition());
@@ -432,7 +434,7 @@ public class Entity {
 		} else if (isWater() && !c.isSurfing()) {
 			gController.getGameFrame().addDialogue("Hier k�nnte man surfen!");
 			gController.waitDialogue();
-			if (c.canSurf()) {
+			if (c.hasItem(Item.SURF)) {
 				gController.getGameFrame().addDialogue("Du f�ngst an zu surfen!");
 				c.setSurfing(true);
 				gController.waitDialogue();
@@ -443,7 +445,7 @@ public class Entity {
 		} else if (this.spriteName.equals("rock")) {
 			gController.getGameFrame().addDialogue("Dieser Felsen könnte zertr�mmert werden!");
 			gController.waitDialogue();
-			if (c.canRocksmash()) {
+			if (c.hasItem(Item.ROCKSMASH)) {
 				gController.getGameFrame().addDialogue("Du hast den Felsen zertrümmert!");
 				this.setSprite("free");
 				this.setAccessible(true);
@@ -452,7 +454,7 @@ public class Entity {
 			}
 			gController.getGameFrame().repaint();
 		} else if (this.spriteName.equals("treecut")) {
-			if (c.canCut()) {
+			if (c.hasItem(Item.CUT)) {
 				gController.getGameFrame().addDialogue("Du zerschneidest den Baum!");
 				this.setAccessible(true);
 				gController.waitDialogue();

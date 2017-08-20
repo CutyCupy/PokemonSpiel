@@ -17,6 +17,7 @@ public class NPC extends Character {
 	private String beforeFight;
 	private String noFight;
 	private String onDefeat;
+	private String logo;
 	private Item reward;
 
 	public NPC() {
@@ -206,6 +207,14 @@ public class NPC extends Character {
 		return reward;
 	}
 	
+	public String getLogo() {
+		return logo;
+	}
+
+	public void setLogo(String logo) {
+		this.logo = logo;
+	}
+
 	@Override
 	public JsonObject getSaveData() {
 		JsonObject saveData = super.getSaveData();

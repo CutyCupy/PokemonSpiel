@@ -25,6 +25,7 @@ public class Route {
 	private String name;
 	private int width;
 	private int height;
+	private boolean dark;
 	private Entity[][] entities;
 	private ArrayList<SimpleEntry<Integer, Short>> pokemonPool;
 	private ArrayList<NPC> characters;
@@ -79,6 +80,14 @@ public class Route {
 
 	public Entity[][] getEntities() {
 		return entities;
+	}
+
+	public boolean isDark() {
+		return dark;
+	}
+
+	public void setDark(boolean dark) {
+		this.dark = dark;
 	}
 
 	public void addEntity(int x, int y, Entity entity) {
@@ -165,7 +174,7 @@ public class Route {
 				}
 			}
 		}
-		// saveMap();
+		 saveMap();
 	}
 
 	public void updateMap(Point... updatePoint) {
@@ -360,7 +369,6 @@ public class Route {
 					this.entities[y][x].importSaveData(currentEntity, route.getEntities()[y][x]);
 				}
 			} else {
-				System.out.println("no entities");
 				for(int x = 0; x < this.width; x++) {
 					for(int y = 0; y < this.height; y++) {
 						this.entities[y][x] = route.getEntities()[y][x].clone();
@@ -377,7 +385,6 @@ public class Route {
 	}
 
 	public JsonObject getSaveData(Route oldRoute) {
-		boolean changed = false;
 		JsonObject saveData = new JsonObject();
 		saveData.addProperty("id", this.id);
 		if(!this.name.equals(oldRoute.name)) {

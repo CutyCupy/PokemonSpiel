@@ -12,6 +12,7 @@ import de.alexanderciupka.pokemon.pokemon.Ailment;
 import de.alexanderciupka.pokemon.pokemon.Direction;
 import de.alexanderciupka.pokemon.pokemon.FightOption;
 import de.alexanderciupka.pokemon.pokemon.Fighting;
+import de.alexanderciupka.pokemon.pokemon.Item;
 import de.alexanderciupka.pokemon.pokemon.Move;
 import de.alexanderciupka.pokemon.pokemon.NPC;
 import de.alexanderciupka.pokemon.pokemon.Player;
@@ -114,7 +115,7 @@ public class GameController {
 			}
 			boolean changed = false;
 			for (NPC stone : mainCharacter.getCurrentRoute().getEntities()[y][x].getCharacters()) {
-				if (stone != null && stone.getID().equals("strength") && mainCharacter.canStrength()) {
+				if (stone != null && stone.getID().equals("strength") && mainCharacter.hasItem(Item.STRENGTH)) {
 					mainCharacter.getCurrentRoute().updateMap(new Point(x, y));
 					stone.setCurrentDirection(mainCharacter.getCurrentDirection());
 					if (mainCharacter.getCurrentRoute().getEntities()[stone.getInteractionPoint().y][stone
@@ -187,6 +188,7 @@ public class GameController {
 	public void startFight(NPC enemy) {
 		gameFrame.addDialogue(enemy.getName() + ": " + enemy.getBeforeFightDialogue());
 		waitDialogue();
+		this.gameFrame.getBackgroundLabel().startFight(enemy.getLogo());
 		this.fighting = true;
 		this.fight = new Fighting(enemy);
 		gameFrame.startFight(fight.getPlayer(), fight.getEnemy());
@@ -353,10 +355,10 @@ public class GameController {
 		mainCharacter.setCharacterImage("talih", "front");
 		mainCharacter.setName("Talih");
 		mainCharacter.setID("999");
-		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("winterhude"));
-		mainCharacter.setCurrentPosition(10, 2);
-//		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("eigenes_zimmer"));
-//		mainCharacter.setCurrentPosition(START.x, START.y);
+//		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("ladder_test"));
+//		mainCharacter.setCurrentPosition(6, 6);
+		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("eigenes_zimmer"));
+		mainCharacter.setCurrentPosition(START.x, START.y);
 		currentBackground = new Background(mainCharacter.getCurrentRoute());
 		Pokemon player = new Pokemon(152);
 		player.getStats().generateStats((short) (10));

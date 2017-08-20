@@ -69,22 +69,6 @@ public class Player extends Character {
 		return routeHistory;
 	}
 
-	public boolean canCut() {
-		return items.contains(Item.CUT) || true;
-	}
-
-	public boolean canRocksmash() {
-		return items.contains(Item.ROCKSMASH) || true;
-	}
-
-	public boolean canSurf() {
-		return items.contains(Item.SURF) || true;
-	}
-
-	public boolean canStrength() {
-		return items.contains(Item.STRENGTH) || true;
-	}
-
 	public void addItem(Item reward) {
 		this.items.add(reward);
 	}
@@ -110,7 +94,7 @@ public class Player extends Character {
 		for(Item i : this.items) {
 			JsonObject currentItem = new JsonObject();
 			currentItem.addProperty("id", i.name());
-			routeHistory.add(currentItem);
+			items.add(currentItem);
 		}
 		saveData.add("route_history", routeHistory);
 		saveData.add("items", items);

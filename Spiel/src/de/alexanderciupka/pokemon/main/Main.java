@@ -22,7 +22,20 @@ public class Main {
 
 	public static void main(String[] args) {
 		 MenuController.getInstance();
-//		 		readDescription();
+//		 try {
+//			Thread.sleep(5000);
+//		} catch (InterruptedException e1) {
+//			e1.printStackTrace();
+//		}
+//		 for(String s : GameController.getInstance().getRouteAnalyzer().getOriginalRoutes().keySet()) {
+//			 GameController.getInstance().getGameFrame().getBackgroundLabel().changeRoute(GameController.getInstance().getRouteAnalyzer().getRouteById(s).getName());
+//			 try {
+//				Thread.sleep(1500);
+//			} catch (InterruptedException e) {
+//				e.printStackTrace();
+//			}
+//		 }
+//		readDescription();
 	}
 
 	public static void readDescription() {

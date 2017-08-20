@@ -50,21 +50,30 @@ public class RouteCreator extends JFrame {
 
 	private RouteAnalyzer routeAnalyzer;
 
-	private static final String[][] TYPES = {{"Out of Bounds", "OOB"}, {"Bett", "bed"}, {"Treppe hoch links", "WSUL"}, {"Treppe hoch rechts", "WSUR"}, {"Treppe runter links", "WSDL"}, {"Treppe runter rechts", "WSDR"}, {"St�rke", "ST"}, {"Zerschneider", "TC"}, {"Wand", "MW"}, {"Fenster", "MWW"}, {"Fenster+Gardine", "MWWC"}, {"Free", ""}, {"Tree", "T"}, {"Bookshelf", "BS"}, {"TV", "TV"}, {"SP�LE", "spuele"}, {"Laptop", "LAPTOP"}, {"Table", "TA"}, {"Chair UP", "STUHLU"}, {"Chair DOWN", "STUHLD"}, {"Chair LEFT", "STUHLL"}, {"Chair RIGHT", "STUHLR"}, {"Settle UP", "SETTLEU"}, {"Settle DOWN", "SETTLED"}, {"Settle LEFT", "SETTLEL"}, {"Settle RIGHT", "SETTLER"}, {"Grass", "G"}, {"Grassy", "GR"}, {"Mauer", "M"}, {"Pokemon Center", "P"}, {"House Small", "HS"}, {"Gym", "A"}, {"Warp", "W"}, {"Character", "C"}, {"See","S"}, {"Sand", "SA"}, {"Bridge", "B"}, {"PC", "BC"}, {"JoyHealing", "JH"}, {"MoveDown", "MD"}, {"MoveUp", "MU"}, {"MoveLeft", "ML"}, {"MoveRight", "MR"}, {"MoveStop", "MS"}, {"RockBig", "RB"}, {"RockGroup", "RG"}, {"Rock", "R"}};
+	private static final String[][] TYPES = {{"Out of Bounds", "OOB"}, {"Bett", "bed"}, {"Leiter hoch", "WLU"}, {"Leiter runter", "WLD"}, 
+			{"Treppe hoch links", "WSUL"}, {"Treppe hoch rechts", "WSUR"}, {"Treppe runter links", "WSDL"}, {"Treppe runter rechts", "WSDR"}, 
+			{"St�rke", "ST"}, {"Zerschneider", "TC"}, {"Wand", "MW"}, {"Fenster", "MWW"}, {"Fenster+Gardine", "MWWC"}, {"Free", ""}, {"Tree", "T"}, {"Snow Tree", "TS"}, 
+			{"Bookshelf", "BS"}, {"TV", "TV"}, {"SP�LE", "spuele"}, {"Laptop", "LAPTOP"}, {"Table", "TA"},{"Kaffee", "KAFFEE"}, {"Chair UP", "STUHLU"}, 
+			{"Chair DOWN", "STUHLD"}, {"Chair LEFT", "STUHLL"}, {"Chair RIGHT", "STUHLR"}, {"Settle UP", "SETTLEU"}, {"Settle DOWN", "SETTLED"}, 
+			{"Settle LEFT", "SETTLEL"}, {"Settle RIGHT", "SETTLER"}, {"Grass", "G"}, {"Grassy", "GR"}, {"Snow", "SN"}, {"Mauer", "M"}, {"Pokemon Center", "P"}, 
+			{"House Small", "HS"}, {"Gym", "A"}, {"Warp", "W"}, {"Character", "C"}, {"See","S"}, {"Sand", "SA"}, {"Bridge", "B"}, {"PC", "BC"}, 
+			{"JoyHealing", "JH"}, {"MoveDown", "MD"}, {"MoveUp", "MU"}, {"MoveLeft", "ML"}, {"MoveRight", "MR"}, {"MoveStop", "MS"}, {"Höhle vorne", "HWF"}, 
+			{"Höhle hinten", "HWB"}, {"Höhle rechts", "HWR"}, {"Höhle links", "HWL"}, {"Höhle Eingang", "WHE"}, {"Höhle linksvorne außen", "HWLF"}, 
+			{"Höhle linkshinten außen", "HWLB"}, {"Höhle rechtshinten außen", "HWRB"}, {"Höhle rechtsvorne außen", "HWRF"}, {"Höhle Mitte", "HM"},  
+			{"Höhle linksvorne innen", "HWLF"}, {"Höhle Ecke linkshinten innen", "HWLB"}, {"Höhle Ecke rechtshinten innen", "HWRB"}, 
+			{"Höhle Ecke rechtsvorne innen", "HWRF"}, {"RockBig", "RB"}, {"RockGroup", "RG"}, {"Rock", "R"}};
+	
 	private static final int SIZE = 25;
 
 	public RouteCreator() {
-		System.out.print("Breite (max: 65): ");
 		int width = Integer.parseInt(JOptionPane.showInputDialog("Breite (max: 65): "));
-		System.out.print("H�he (max: 40): ");
 		int height = Integer.parseInt(JOptionPane.showInputDialog("Höhe (max: 40): "));
-		System.out.print("Name der Route: ");
 		String name = JOptionPane.showInputDialog("Name der Route: ");
-		System.out.println(name);
+		
+		this.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		
 		
-		
-		routeAnalyzer = new RouteAnalyzer();
+		routeAnalyzer = GameController.getInstance().getRouteAnalyzer();
 		x = 0;
 		y = 0;
 		index = 0;
@@ -87,6 +96,8 @@ public class RouteCreator extends JFrame {
 		terrains.addItem("sandy");
 		terrains.addItem("bright_laminat");
 		terrains.addItem("dark_laminat");
+		terrains.addItem("cave");
+		terrains.addItem("snow");
 		terrains.setBackground(Color.WHITE);
 		save = new JButton("SAVE!");
 		save.setBounds(1750, 600, 150, 40);
@@ -139,6 +150,7 @@ public class RouteCreator extends JFrame {
 		save.setBounds(1750, terrains.getY() + 40, 150, 40);
 		buttons[0].setSelected(true);
 		actionListeners();
+		this.setVisible(true);
 	}
 
 	public void actionListeners() {
