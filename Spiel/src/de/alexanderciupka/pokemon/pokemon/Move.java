@@ -5,6 +5,7 @@ import java.util.Random;
 
 import com.google.gson.JsonObject;
 
+import de.alexanderciupka.pokemon.fighting.Target;
 import de.alexanderciupka.pokemon.map.GameController;
 
 public class Move {
@@ -21,11 +22,15 @@ public class Move {
 	private float drain;
 	private int power;
 	private int priority;
+	private int crit;
 	private String description;
 	private Ailment ailment;
 	private DamageClass damageClass;
 	private float accuracy;
+	private String category;
 	private HashMap<Integer,Integer> stat_changes;
+	
+	private Target target;
 
 	private Type moveType;
 
@@ -149,6 +154,9 @@ public class Move {
 		newMove.setDamageClass(this.damageClass);
 		newMove.setDescription(this.description);
 		newMove.setPriority(this.priority);
+		newMove.setCategory(this.category);
+		newMove.setTarget(this.target);
+		newMove.setCrit(this.crit);
 		return newMove;
 	}
 
@@ -190,10 +198,31 @@ public class Move {
 	}
 
 	public boolean checkUserBuff() {
-		if(accuracy > 100) {
+		if(this.category.contains("raise")) {
 			return true;
 		}
-		return false;
+		switch(this.target) {
+		case ALL:
+		case USER:
+			return true;
+		case OPPONENT:
+		default:
+			return false;
+		}
+	}
+
+	public boolean checkEnemyBuff() {
+		if(this.category.contains("raise")) {
+			return false;
+		}
+		switch(this.target) {
+		case ALL:
+		case OPPONENT:
+			return true;
+		case USER:
+		default:
+			return false;
+		}
 	}
 
 	public int changeStat(int index) {
@@ -249,6 +278,30 @@ public class Move {
 
 	public void setStat_changes(HashMap<Integer, Integer> stat_changes) {
 		this.stat_changes = stat_changes;
+	}
+
+	public String getCategory() {
+		return category;
+	}
+
+	public void setCategory(String category) {
+		this.category = category;
+	}
+
+	public Target getTarget() {
+		return target;
+	}
+
+	public void setTarget(Target target) {
+		this.target = target;
+	}
+
+	public int getCrit() {
+		return crit;
+	}
+
+	public void setCrit(int crit) {
+		this.crit = crit;
 	}
 
 	public JsonObject getSaveData() {

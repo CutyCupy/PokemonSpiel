@@ -8,6 +8,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import de.alexanderciupka.pokemon.fighting.FightOption;
 import de.alexanderciupka.pokemon.gui.After;
 import de.alexanderciupka.pokemon.map.GameController;
 
@@ -222,12 +223,14 @@ public class Stats {
 		this.currentHP = stats[0];
 	}
 
-	public void restoreHP(int ammount) {
+	public int restoreHP(int ammount) {
+		short oldHP = this.currentHP;
 		if (this.currentHP + ammount <= stats[0]) {
 			this.currentHP += ammount;
 		} else {
 			this.currentHP = stats[0];
 		}
+		return this.currentHP - oldHP;
 	}
 
 	public boolean loseHP(int ammount) {

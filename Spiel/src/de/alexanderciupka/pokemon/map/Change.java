@@ -2,9 +2,9 @@ package de.alexanderciupka.pokemon.map;
 
 import java.awt.Point;
 
-import de.alexanderciupka.pokemon.pokemon.Character;
-import de.alexanderciupka.pokemon.pokemon.Direction;
-import de.alexanderciupka.pokemon.pokemon.Player;
+import de.alexanderciupka.pokemon.characters.Character;
+import de.alexanderciupka.pokemon.characters.Direction;
+import de.alexanderciupka.pokemon.characters.Player;
 
 public class Change {
 	

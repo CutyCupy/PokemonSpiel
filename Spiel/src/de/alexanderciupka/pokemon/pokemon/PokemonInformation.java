@@ -7,8 +7,11 @@ import java.util.HashMap;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
+import de.alexanderciupka.pokemon.fighting.Target;
 
 public class PokemonInformation {
 
@@ -86,6 +89,9 @@ public class PokemonInformation {
 					currentMove.setMinHits(1);
 					currentMove.setMaxHits(1);
 				}
+				currentMove.setCategory(currentJson.get("category").getAsString());
+				currentMove.setTarget(currentJson.get("target") instanceof JsonNull ? Target.OPPONENT : Target.valueOf(currentJson.get("target").getAsString()));
+				currentMove.setCrit(currentJson.get("crit_rate").getAsInt());
 				switch (currentJson.get("ailment").getAsString()) {
 				case "poison":
 					currentMove.setAilment(Ailment.POISON);
@@ -168,15 +174,13 @@ public class PokemonInformation {
 				}
 				for (JsonElement moveElement : moveArray) {
 					if (moveElement.getAsJsonObject().get("id").getAsInt() - 1 < allMoves.size()) {
-						try {
-							moves.get(moveElement.getAsJsonObject().get("level_learned_at").getAsInt())
-									.add(allMoves.get(moveElement.getAsJsonObject().get("id").getAsInt() - 1).clone());
-						} catch (Exception e) {
-							moves.put(moveElement.getAsJsonObject().get("level_learned_at").getAsInt(),
-									new ArrayList<Move>());
-							moves.get(moveElement.getAsJsonObject().get("level_learned_at").getAsInt())
-									.add(allMoves.get(moveElement.getAsJsonObject().get("id").getAsInt() - 1).clone());
+						int level = moveElement.getAsJsonObject().get("level_learned_at").getAsInt();
+						ArrayList<Move> currentMoves = moves.get(level);
+						if(currentMoves == null) {
+							currentMoves = new ArrayList<Move>();
 						}
+						currentMoves.add(getMoveById(moveElement.getAsJsonObject().get("id").getAsInt()));
+						moves.put(level, currentMoves);
 					}
 				}
 				JsonObject evolutionObject = element.getAsJsonObject().get("evolution").getAsJsonObject();
@@ -234,7 +238,7 @@ public class PokemonInformation {
 		for (int i : allPokemonMoves.get(id).keySet()) {
 			if (i == level) {
 				for (int ammount = 0; ammount < allPokemonMoves.get(id).get(i).size(); ammount++) {
-					newMoves.add(allPokemonMoves.get(id).get(i).get(ammount));
+					newMoves.add(allPokemonMoves.get(id).get(i).get(ammount).clone());
 				}
 			}
 		}
@@ -356,11 +360,14 @@ public class PokemonInformation {
 	}
 
 	public int getLevelUpXP(Pokemon p, int nextLevel) {
+		int result = 0;
 		for(JsonElement j : this.allGrowthRates.get(p.getGrowthRate()).get("levels").getAsJsonArray()) {
-			if(j.getAsJsonObject().get("level").getAsInt() == nextLevel) {
-				return j.getAsJsonObject().get("experience").getAsInt();
+			if(j.getAsJsonObject().get("level").getAsInt() == nextLevel - 1) {
+				result -= j.getAsJsonObject().get("experience").getAsInt();
+			} else if (j.getAsJsonObject().get("level").getAsInt() == nextLevel) {
+				result += j.getAsJsonObject().get("experience").getAsInt();
 			}
 		}
-		return 0;
+		return result;
 	}
 }

@@ -1,6 +1,7 @@
 package de.alexanderciupka.pokemon.gui;
 
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 
@@ -11,12 +12,20 @@ import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.border.EmptyBorder;
 
+import de.alexanderciupka.pokemon.characters.Direction;
+import de.alexanderciupka.pokemon.characters.Player;
+import de.alexanderciupka.pokemon.fighting.FightOption;
+import de.alexanderciupka.pokemon.gui.overlay.DarkOverlay;
+import de.alexanderciupka.pokemon.gui.panels.FightPanel;
+import de.alexanderciupka.pokemon.gui.panels.InventoryPanel;
+import de.alexanderciupka.pokemon.gui.panels.NewAttackPanel;
+import de.alexanderciupka.pokemon.gui.panels.PCPanel;
+import de.alexanderciupka.pokemon.gui.panels.PokemonPanel;
+import de.alexanderciupka.pokemon.gui.panels.ReportPanel;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.menu.MenuController;
-import de.alexanderciupka.pokemon.pokemon.Direction;
-import de.alexanderciupka.pokemon.pokemon.FightOption;
+import de.alexanderciupka.pokemon.pokemon.Item;
 import de.alexanderciupka.pokemon.pokemon.Move;
-import de.alexanderciupka.pokemon.pokemon.Player;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
 
 @SuppressWarnings("serial")
@@ -25,12 +34,12 @@ public class GameFrame extends JFrame {
 	private int characterX;
 	private int characterY;
 	private FightPanel fight;
-	private JPanel bag;
 	private PokemonPanel pokemon;
 	private JPanel map;
 	private NewAttackPanel newMove;
 	private PCPanel pc;
 	private ReportPanel report;
+	private InventoryPanel inventory;
 	private BackgroundLabel imageHolder;
 	private TextLabel dialogue;
 	private GameController gController;
@@ -39,12 +48,12 @@ public class GameFrame extends JFrame {
 	private static final long COOLDOWN = 0;
 
 	public static final int GRID_SIZE = 70;
+	public static final int FRAME_SIZE = GRID_SIZE * 9;
 
 	private Direction currentDirection;
 
 	public GameFrame() {
 		currentDirection = Direction.NONE;
-
 		map = new JPanel(null);
 		setContentPane(map);
 		map.setBackground(Color.black);
@@ -52,51 +61,70 @@ public class GameFrame extends JFrame {
 		setUndecorated(true);
 		setVisible(true);
 		setResizable(false);
-		setBounds(MenuController.getToCenter(630, 630));
+		setBounds(MenuController.getToCenter(FRAME_SIZE, FRAME_SIZE));
 		characterX = 315 - gController.getMainCharacter().getCharacterImage().getWidth(null) / 2;
 		characterY = 315 - gController.getMainCharacter().getCharacterImage().getHeight(null) / 2;
 		imageHolder = new BackgroundLabel(characterX, characterY);
-		imageHolder.setBounds(0, 0, 630, 630);
+		imageHolder.setBounds(0, 0, FRAME_SIZE, FRAME_SIZE);
 		dialogue = new TextLabel();
 		dialogue.setBounds(5, 480, 600, 110);
 		dialogue.setOpaque(true);
 		dialogue.setVisible(false);
 		dialogue.setBackground(Color.WHITE);
+		inventory = new InventoryPanel();
+		pokemon = new PokemonPanel();
+		pokemon.setBorder(new EmptyBorder(5, 5, 5, 5));
+		pokemon.setLayout(null);
+		report = new ReportPanel();
 		map.add(imageHolder);
 		map.add(dialogue);
+
+		System.out.println("Dialogue: " + pokemon.getComponentZOrder(dialogue));
+
 		addActions();
 		this.paint(getGraphics());
+
 	}
 
 	@Override
 	public void paint(Graphics g) {
 		if (!gController.isFighting()) {
 			if (currentPanel != null) {
-				setContentPane(currentPanel);
+				if (!currentPanel.equals(getContentPane())) {
+					setContentPane(currentPanel);
+				}
 			} else {
-				setContentPane(map);
+				if (!map.equals(getContentPane())) {
+					setContentPane(map);
+				}
 				map.paint(g);
 				map.repaint();
 			}
 		} else {
-			setContentPane(gController.getCurrentFightPanel());
+			if (!gController.getCurrentFightPanel().equals(getContentPane())) {
+				setContentPane(gController.getCurrentFightPanel());
+			}
 		}
+	}
+
+	@Override
+	public void setContentPane(Container contentPane) {
+		System.out.println(contentPane);
+		if(dialogue != null) {
+			dialogue.setParent((JPanel) contentPane);
+		}
+		super.setContentPane(contentPane);
 	}
 
 	public void startFight(Pokemon player, Pokemon enemy) {
 		fight = new FightPanel(player, enemy);
 		fight.setBorder(new EmptyBorder(5, 5, 5, 5));
 		fight.setLayout(null);
-		bag = new BagPanel();
-		bag.setBorder(new EmptyBorder(5, 5, 5, 5));
-		bag.setLayout(null);
-		pokemon = new PokemonPanel();
-		pokemon.setBorder(new EmptyBorder(5, 5, 5, 5));
-		pokemon.setLayout(null);
-		report = new ReportPanel();
+		pokemon.update();
 		repaint();
-		if(!gController.getFight().canEscape()) {
-			this.getFightPanel().addText("Eine Herausforderung von " + gController.getFight().getEnemyCharacter().getName() + "!");
+		if (!gController.getFight().canEscape()) {
+			this.getFightPanel()
+					.addText("Eine Herausforderung von " + gController.getFight().getEnemyCharacter().getName() + "!");
 		} else {
 			this.getFightPanel().addText("Ein wildes " + enemy.getName() + " erscheint!");
 		}
@@ -105,7 +133,7 @@ public class GameFrame extends JFrame {
 	}
 
 	public void stopFight() {
-		setContentPane(map);
+		setCurrentPanel(null);
 		repaint();
 	}
 
@@ -113,12 +141,7 @@ public class GameFrame extends JFrame {
 		return fight;
 	}
 
-	public JPanel getBagPanel() {
-		return bag;
-	}
-
 	public PokemonPanel getPokemonPanel() {
-		pokemon.update();
 		return pokemon;
 	}
 
@@ -252,7 +275,6 @@ public class GameFrame extends JFrame {
 			}
 		});
 
-
 		map.getActionMap().put("stay", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -294,6 +316,34 @@ public class GameFrame extends JFrame {
 				}
 			}
 		});
+
+		pokemon.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("SPACE"), "space");
+		pokemon.getActionMap().put("space", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (gController.getInteractionPause()) {
+					dialogue.setDelay(TextLabel.FAST);
+				} else {
+					new Thread(new Runnable() {
+						@Override
+						public void run() {
+							gController.checkInteraction();
+						}
+					}).start();
+				}
+			}
+		});
+		pokemon.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released SPACE"),
+				"released space");
+		pokemon.getActionMap().put("released space", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (gController.getInteractionPause()) {
+					dialogue.setDelay(TextLabel.SLOW);
+				}
+			}
+		});
+
 		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ENTER"), "enter");
 		map.getActionMap().put("enter", new AbstractAction() {
 			@Override
@@ -303,6 +353,52 @@ public class GameFrame extends JFrame {
 				}
 			}
 		});
+
+		pokemon.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ENTER"), "enter");
+		pokemon.getActionMap().put("enter", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				dialogue.setActive();
+			}
+		});
+		
+		inventory.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("SPACE"), "space");
+		inventory.getActionMap().put("space", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (gController.getInteractionPause()) {
+					dialogue.setDelay(TextLabel.FAST);
+				} else {
+					new Thread(new Runnable() {
+						@Override
+						public void run() {
+							gController.checkInteraction();
+						}
+					}).start();
+				}
+			}
+		});
+		inventory.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released SPACE"),
+				"released space");
+		inventory.getActionMap().put("released space", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (gController.getInteractionPause()) {
+					dialogue.setDelay(TextLabel.SLOW);
+				}
+			}
+		});
+
+		inventory.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ENTER"), "enter");
+		inventory.getActionMap().put("enter", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (!gController.isFighting() && gController.getInteractionPause()) {
+					dialogue.setActive();
+				}
+			}
+		});
+
 		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ESCAPE"), "escape");
 		map.getActionMap().put("escape", new AbstractAction() {
 			@Override
@@ -317,15 +413,44 @@ public class GameFrame extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (!gController.isFighting() && !gController.getInteractionPause()) {
-					pokemon = new PokemonPanel();
-					pokemon.setBorder(new EmptyBorder(5, 5, 5, 5));
-					pokemon.setLayout(null);
-					report = new ReportPanel();
+					pokemon.update();
 					currentPanel = pokemon;
 					repaint();
 				}
 			}
 		});
+
+		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("I"), "inventory");
+		map.getActionMap().put("inventory", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (!gController.isFighting() && !gController.getInteractionPause()) {
+					inventory.update(gController.getMainCharacter());
+					currentPanel = inventory;
+					repaint();
+				}
+			}
+		});
+
+		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("F"), "flash");
+		map.getActionMap().put("flash", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				if (gController.getMainCharacter().hasItem(Item.FLASH)
+						&& gController.getMainCharacter().getCurrentRoute().isDark()) {
+					((DarkOverlay) (getBackgroundLabel().getOverlay(DarkOverlay.class))).flash();
+				}
+			}
+		});
+
+		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("C"), "cheat");
+		map.getActionMap().put("cheat", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				gController.getMainCharacter().ignoreCollisions = !gController.getMainCharacter().ignoreCollisions;
+			}
+		});
+
 	}
 
 	public void displayPC(Player owner) {
@@ -339,8 +464,12 @@ public class GameFrame extends JFrame {
 	public JPanel getReportPanel() {
 		return report;
 	}
-	
+
 	public BackgroundLabel getBackgroundLabel() {
 		return imageHolder;
+	}
+
+	public InventoryPanel getInventoryPanel() {
+		return this.inventory;
 	}
 }

@@ -1,21 +1,22 @@
 package de.alexanderciupka.pokemon.map;
 
 import java.awt.Point;
+import java.util.Random;
 
 import javax.swing.JPanel;
 
+import de.alexanderciupka.pokemon.characters.Direction;
+import de.alexanderciupka.pokemon.characters.NPC;
+import de.alexanderciupka.pokemon.characters.Player;
+import de.alexanderciupka.pokemon.fighting.FightOption;
+import de.alexanderciupka.pokemon.fighting.Fighting;
 import de.alexanderciupka.pokemon.gui.GameFrame;
-import de.alexanderciupka.pokemon.gui.ReportPanel;
 import de.alexanderciupka.pokemon.gui.TextLabel;
+import de.alexanderciupka.pokemon.gui.panels.ReportPanel;
 import de.alexanderciupka.pokemon.menu.MenuController;
 import de.alexanderciupka.pokemon.pokemon.Ailment;
-import de.alexanderciupka.pokemon.pokemon.Direction;
-import de.alexanderciupka.pokemon.pokemon.FightOption;
-import de.alexanderciupka.pokemon.pokemon.Fighting;
 import de.alexanderciupka.pokemon.pokemon.Item;
 import de.alexanderciupka.pokemon.pokemon.Move;
-import de.alexanderciupka.pokemon.pokemon.NPC;
-import de.alexanderciupka.pokemon.pokemon.Player;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
 import de.alexanderciupka.pokemon.pokemon.PokemonInformation;
 
@@ -49,6 +50,7 @@ public class GameController {
 	private void start() {
 		information = new PokemonInformation();
 		routeAnalyzer = new RouteAnalyzer();
+		routeAnalyzer.init();
 		mController = MenuController.getInstance();
 	}
 
@@ -291,7 +293,7 @@ public class GameController {
 		case FIGHT:
 			return gameFrame.getFightPanel();
 		case BAG:
-			return gameFrame.getBagPanel();
+			return gameFrame.getInventoryPanel();
 		case POKEMON:
 			return gameFrame.getPokemonPanel();
 		case NEW_ATTACK:
@@ -355,26 +357,55 @@ public class GameController {
 		mainCharacter.setCharacterImage("talih", "front");
 		mainCharacter.setName("Talih");
 		mainCharacter.setID("999");
-//		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("ladder_test"));
-//		mainCharacter.setCurrentPosition(6, 6);
-		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("eigenes_zimmer"));
-		mainCharacter.setCurrentPosition(START.x, START.y);
+		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("route_1"));
+		mainCharacter.setCurrentPosition(13, 9);
+	
+		mainCharacter.addItem(Item.POTION);	
+		mainCharacter.addItem(Item.POTION);	
+		mainCharacter.addItem(Item.POTION);	
+		mainCharacter.addItem(Item.POTION);	
+		mainCharacter.addItem(Item.POTION);	
+		mainCharacter.addItem(Item.POTION);	
+		mainCharacter.addItem(Item.POTION);	
+		mainCharacter.addItem(Item.POTION);	
+		mainCharacter.addItem(Item.POTION);	
+		mainCharacter.addItem(Item.POTION);	
+		mainCharacter.addItem(Item.POTION);
+		
+
+		mainCharacter.addItem(Item.HYPERPOTION);
+		mainCharacter.addItem(Item.HYPERPOTION);
+		mainCharacter.addItem(Item.HYPERPOTION);
+		mainCharacter.addItem(Item.HYPERPOTION);
+		mainCharacter.addItem(Item.HYPERPOTION);
+		
+
+		mainCharacter.addItem(Item.SLEEPHEAL);
+		mainCharacter.addItem(Item.SLEEPHEAL);
+		
+		mainCharacter.addItem(Item.SURF);
+		mainCharacter.addItem(Item.CUT);
+		
+		mainCharacter.addItem(Item.REPEL);
+		
+		mainCharacter.addItem(Item.POKEBALL);
+		mainCharacter.addItem(Item.SUPERBALL);
+		mainCharacter.addItem(Item.HYPERBALL);
+		mainCharacter.addItem(Item.MASTERBALL);
+		
+//		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("eigenes_zimmer"));
+//		mainCharacter.setCurrentPosition(START.x, START.y);
 		currentBackground = new Background(mainCharacter.getCurrentRoute());
 		Pokemon player = new Pokemon(152);
-		player.getStats().generateStats((short) (10));
-		player.getStats().setCurrentHP((short) 1); 
+		player.getStats().generateStats((short) (13));
 		player.setName("Mandarine");
-		player.addMove("Tackle", information.getMoveByName("Gigasauger"));
 		mainCharacter.getTeam().addPokemon(player);
-//		Random rng = new Random();
-//		for(int i = 0; i < 10000; i++) {
-//			Pokemon current = new Pokemon(rng.nextInt(649) + 1);
-//			current.getStats().generateStats((short) ((i % 100) + 1));
-//			mainCharacter.getPC().addPokemon(current);
-//			if(i % 1000 == 0) {
-//				System.out.println(i);
-//			}
-//		}
+		Random rng = new Random();
+		for(int i = 0; i < 5; i++) {
+			Pokemon current = new Pokemon(rng.nextInt(649) + 1);
+			current.getStats().generateStats((short) (rng.nextInt(100) + 1));
+			mainCharacter.getTeam().addPokemon(current);
+		}
 		gameFrame = new GameFrame();
 	}
 

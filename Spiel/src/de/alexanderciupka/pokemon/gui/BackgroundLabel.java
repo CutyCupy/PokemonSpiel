@@ -6,6 +6,12 @@ import java.util.Random;
 
 import javax.swing.JLabel;
 
+import de.alexanderciupka.pokemon.gui.overlay.CollapseOverlay;
+import de.alexanderciupka.pokemon.gui.overlay.DarkOverlay;
+import de.alexanderciupka.pokemon.gui.overlay.Form;
+import de.alexanderciupka.pokemon.gui.overlay.LogoOverlay;
+import de.alexanderciupka.pokemon.gui.overlay.Overlay;
+import de.alexanderciupka.pokemon.gui.overlay.RouteOverlay;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.map.Route;
 
@@ -67,6 +73,8 @@ public class BackgroundLabel extends JLabel {
 		for(Overlay o : overlays) {
 			if(o.created) {
 				g.drawImage(o.getOverlay(), 0, 0, null);
+			} else {
+				System.out.println(o);
 			}
 		}
 		this.overlayAccess = true;
@@ -135,12 +143,26 @@ public class BackgroundLabel extends JLabel {
 			if(newRoute.isDark()) {
 				DarkOverlay d = new DarkOverlay(this, this.getSize(), GameFrame.GRID_SIZE * 3);
 				d.createOverlay();
+				System.err.println("2");
 				this.addOverlay(d);
 			}
 			RouteOverlay r = new RouteOverlay(newRoute, this, this.getSize());
 			r.createOverlay();
 			this.addOverlay(r);
 			this.overlayAccess = true;
+			repaint();
 		}
+	}
+	
+	public Overlay getOverlay(Class<? extends Overlay> overlay) {
+		waitAccess();
+		for(int i = 0; i < this.overlays.size(); i++) {
+			if(overlay.isInstance(this.overlays.get(i))) {
+				overlayAccess = true;
+				return overlay.cast(this.overlays.get(i));
+			}
+		}
+		overlayAccess = true;
+		return null;
 	}
 }

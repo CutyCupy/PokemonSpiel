@@ -15,6 +15,7 @@ public class HPBar extends JProgressBar implements Runnable {
 	private static final double FPS = 60;
 
 	private boolean finished = true;
+	private boolean falling = false;;
 
 
 	@Override
@@ -24,6 +25,7 @@ public class HPBar extends JProgressBar implements Runnable {
 	}
 
 	public void updateValue(int n) {
+		System.out.println(n + " - " + this.getValue());
 		setFinished(false);
 		nextValue = n;
 		new Thread(this).start();
@@ -44,8 +46,10 @@ public class HPBar extends JProgressBar implements Runnable {
 	public void run() {
 		if(nextValue != -1) {
 			int delta = this.getValue() - nextValue;
+			System.out.println(delta);
+			this.falling = delta > 0;
 			double change = delta / (FPS * time);
-			for(double value = this.getValue(); delta > 0 ? value > nextValue : value < nextValue; value -= change) {
+			for(double value = this.getValue(); this.falling ? value > nextValue :  value < nextValue; value -= change) {
 				this.setValue((int) Math.round(value));
 				try {
 					Thread.sleep((long) (1000 / FPS));
@@ -57,6 +61,7 @@ public class HPBar extends JProgressBar implements Runnable {
 		} //else if(nextValue >= this.getValue()) {
 //			this.setValue(nextValue);
 //		}
+		this.falling = false;
 		setFinished(true);
 	}
 
@@ -66,5 +71,9 @@ public class HPBar extends JProgressBar implements Runnable {
 
 	public void setFinished(boolean finished) {
 		this.finished = finished;
+	}
+
+	public boolean isFalling() {
+		return this.falling && !this.finished;
 	}
 }

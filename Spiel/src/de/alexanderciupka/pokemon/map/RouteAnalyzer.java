@@ -2,6 +2,7 @@ package de.alexanderciupka.pokemon.map;
 
 import java.awt.Image;
 import java.awt.Point;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -22,15 +23,23 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import de.alexanderciupka.hoverbutton.Main;
+import de.alexanderciupka.pokemon.characters.Direction;
+import de.alexanderciupka.pokemon.characters.NPC;
 import de.alexanderciupka.pokemon.menu.MenuController;
-import de.alexanderciupka.pokemon.pokemon.Direction;
-import de.alexanderciupka.pokemon.pokemon.NPC;
+import de.alexanderciupka.pokemon.pokemon.Item;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
 
 public class RouteAnalyzer {
 
-	private File routeFolder;
-	private File logoFolder;
+	private static final File ROUTE_FOLDER = new File(Main.class.getResource("/routes/").getFile());
+	private static final File LOGO_FOLDER = new File(Main.class.getResource("/logos/").getFile());
+	private static final File ITEM_FOLDER = new File(Main.class.getResource("/items/").getFile());
+	private static final File SPRITE_FOLDER = new File(Main.class.getResource("/routes/Entities/").getFile());
+	private static final File TERRAIN_FOLDER = new File(Main.class.getResource("/routes/terrain/").getFile());
+	private static final File POKEBALL_FOLDER = new File(Main.class.getResource("/pokeballs/").getFile());
+	
+	
 	private File[] folderFiles;
 	private BufferedReader currentReader;
 	private Map<String, Route> loadedRoutes;
@@ -42,24 +51,105 @@ public class RouteAnalyzer {
 	private HashMap<String, ArrayList<Point>> events;
 	private GameController gController;
 	private HashMap<String, Image> logos;
+	private HashMap<Item, BufferedImage> items; 
+	private HashMap<String, Image> sprites;
+	private HashMap<String, Image> terrains;
+	private HashMap<Item, BufferedImage> pokeballs;
 
 	private JsonParser parser;
 
 	public RouteAnalyzer() {
 		gController = GameController.getInstance();
-		routeFolder = new File(this.getClass().getResource("/routes/").getFile());
-		logoFolder = new File(this.getClass().getResource("/logos/").getFile());
-		folderFiles = routeFolder.listFiles();
+		folderFiles = ROUTE_FOLDER.listFiles();
 		loadedRoutes = new HashMap<String, Route>();
 		originalRoutes = new HashMap<String, Route>();
 		logos = new HashMap<String, Image>();
+		items = new HashMap<Item, BufferedImage>();
+		sprites = new HashMap<String, Image>();
+		terrains = new HashMap<String, Image>();
+		pokeballs = new HashMap<Item, BufferedImage>();
 		parser = new JsonParser();
+	}
+	
+	public void init() {
+		readAllSprites();
+		readAllTerrains();
+		readAllPokeballs();
 		readAllLogos();
+		readAllItems();
 		readAllRoutes();
 	}
 	
-	public void readAllLogos() {
-		File[] logos = logoFolder.listFiles();
+	private void readAllSprites() {
+		File[] sprites = SPRITE_FOLDER.listFiles();
+		for(File currentFile : sprites) {
+			if(currentFile.isFile() && currentFile.getName().endsWith(".png")) {
+				try {
+					this.sprites.put(currentFile.getName().split("\\.")[0].toLowerCase(), ImageIO.read(currentFile));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	public Image getSpriteByName(String name) {
+		return this.sprites.get(name);
+	}
+	
+	private void readAllTerrains() {
+		File[] terrains = TERRAIN_FOLDER.listFiles();
+		for(File currentFile : terrains) {
+			if(currentFile.isFile() && currentFile.getName().endsWith(".png")) {
+				try {
+					this.terrains.put(currentFile.getName().split("\\.")[0].toLowerCase(), ImageIO.read(currentFile).getScaledInstance(70, 70, Image.SCALE_SMOOTH));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	public Image getTerrainByName(String name) {
+		return this.terrains.get(name);
+	}
+	
+	private void readAllPokeballs() {
+		File[] pokeballs = POKEBALL_FOLDER.listFiles();
+		for(File currentFile : pokeballs) {
+			if(currentFile.isFile() && currentFile.getName().endsWith(".png")) {
+				try {
+					this.pokeballs.put(Item.valueOf(currentFile.getName().split("\\.")[0].toUpperCase()), ImageIO.read(currentFile));
+				} catch (Exception e) {
+					continue;
+				}
+			}
+		}
+	}
+	
+	public BufferedImage getPokeballImage(Item i) {
+		return this.pokeballs.get(i);
+	}
+	
+	private void readAllItems() {
+		File[] items = ITEM_FOLDER.listFiles();
+		for(File currentFile : items) {
+			if(currentFile.isFile() && currentFile.getName().endsWith(".png")) {
+				try {
+					this.items.put(Item.valueOf(currentFile.getName().split("\\.")[0].toUpperCase()), ImageIO.read(currentFile));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	public BufferedImage getItemImage(Item i) {
+		return this.items.get(i);
+	}
+	
+	private void readAllLogos() {
+		File[] logos = LOGO_FOLDER.listFiles();
 		for(File currentFile : logos) {
 			if(currentFile.isFile() && currentFile.getName().endsWith(".png")) {
 				try {
@@ -106,7 +196,7 @@ public class RouteAnalyzer {
 				stones = new ArrayList<NPC>();
 				pokemons = new ArrayList<PokemonEntity>();
 				events = new HashMap<String, ArrayList<Point>>();
-				
+				ArrayList<ItemEntity> items = new ArrayList<ItemEntity>();
 				float nonGrassEncounterRate = 0;
 				switch(currentRoute.getTerrainName().toLowerCase()) {
 				case "cave":
@@ -124,7 +214,7 @@ public class RouteAnalyzer {
 						}
 						String currentString = routeDetails.get(x + "." + y).getAsString().toUpperCase();
 						if (!currentString.startsWith("W") && !currentString.startsWith("C")
-								&& !currentString.startsWith("PKM") && !currentString.startsWith("TRIGGERED")) {
+								&& !currentString.startsWith("PKM") && !currentString.startsWith("TRIGGERED") && !currentString.startsWith("ITEM")) {
 							switch (currentString) {
 							case "OOB":
 								currentEntity = new Entity(currentRoute, false, "free", 0, "free");
@@ -392,6 +482,9 @@ public class RouteAnalyzer {
 							}
 							temp.add(new Point(x, y));
 							this.events.put(currentString, temp);
+						} else if(currentString.startsWith("ITEM")) {
+							currentEntity = new ItemEntity(currentRoute, currentRoute.getTerrainName(), currentString);
+							items.add((ItemEntity) currentEntity);
 						}
 						currentEntity.setX(x);
 						currentEntity.setY(y);
@@ -483,6 +576,27 @@ public class RouteAnalyzer {
 						entity.setInteractionMessage(currentPokemon.get("interaction_message").getAsString());
 						entity.setNoInteractionMessage(currentPokemon.get("no_interaction_message").getAsString());
 						entity.importRequiredItems(currentPokemon.get("required_items"));
+						currentRoute.addEntity(entity.getX(), entity.getY(), entity);
+					}
+				}
+				
+				if (route.get("items") != null) {
+					JsonArray itemDetails = route.get("items").getAsJsonArray();
+					for (int i = 0; i < Math.min(this.items.size(), itemDetails.size()); i++) {
+						JsonObject currentItem = itemDetails.get(i).getAsJsonObject();
+						int itemIndex = i;
+						String itemID = currentItem.get("id").getAsString();
+						if (!itemID.equals(items.get(itemIndex).getId())) {
+							for (int j = 0; j < items.size(); j++) {
+								itemIndex = j;
+								if (itemID.equals(items.get(itemIndex).getId())) {
+									break;
+								}
+							}
+						}
+						ItemEntity entity = items.get(itemIndex);
+						Item item = Item.valueOf(currentItem.get("item").getAsString().toUpperCase());
+						entity.setItem(item);
 						currentRoute.addEntity(entity.getX(), entity.getY(), entity);
 					}
 				}

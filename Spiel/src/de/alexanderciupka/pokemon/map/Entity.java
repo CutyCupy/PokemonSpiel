@@ -5,15 +5,14 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.swing.ImageIcon;
-
 import com.google.gson.JsonObject;
 
-import de.alexanderciupka.pokemon.pokemon.Character;
-import de.alexanderciupka.pokemon.pokemon.Direction;
+import de.alexanderciupka.pokemon.characters.Character;
+import de.alexanderciupka.pokemon.characters.Direction;
+import de.alexanderciupka.pokemon.characters.NPC;
+import de.alexanderciupka.pokemon.characters.Player;
+import de.alexanderciupka.pokemon.gui.overlay.DarkOverlay;
 import de.alexanderciupka.pokemon.pokemon.Item;
-import de.alexanderciupka.pokemon.pokemon.NPC;
-import de.alexanderciupka.pokemon.pokemon.Player;
 
 public class Entity {
 
@@ -22,13 +21,13 @@ public class Entity {
 	private boolean top;
 	private boolean bottom;
 
-	private Image sprite;
+	protected Image sprite;
 	private float pokemonRate;
 	private Warp warp;
 	private Image terrain;
 
 	private String terrainName;
-	private String spriteName;
+	protected String spriteName;
 
 	private boolean water;
 
@@ -41,11 +40,11 @@ public class Entity {
 	private double exactY;
 
 	private Random rng;
-	private GameController gController;
+	protected GameController gController;
 
 	private TriggeredEvent event;
 	private Route parent;
-	
+
 	public Entity(String parentID, boolean left, boolean right, boolean top, boolean bottom, String spriteName,
 			float pokemonRate, String terrainName) {
 		gController = GameController.getInstance();
@@ -65,15 +64,15 @@ public class Entity {
 	}
 
 	public Entity(Route parent, boolean accessible, String spriteName, float pokemonRate, String terrainName) {
+		gController = GameController.getInstance();
 		this.parent = parent;
 		this.left = accessible;
 		this.right = accessible;
 		this.top = accessible;
 		this.bottom = accessible;
-		gController = GameController.getInstance();
 		try {
-			setSprite(spriteName);
-			setTerrain(terrainName);
+			this.setSprite(spriteName);
+			this.setTerrain(terrainName);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -83,12 +82,12 @@ public class Entity {
 
 	public Entity(Route parent, boolean left, boolean right, boolean top, boolean bottom, String spriteName,
 			float pokemonRate, String terrainName) {
+		gController = GameController.getInstance();
 		this.parent = parent;
 		this.left = left;
 		this.right = right;
 		this.top = top;
 		this.bottom = bottom;
-		gController = GameController.getInstance();
 		try {
 			setSprite(spriteName);
 			setTerrain(terrainName);
@@ -100,6 +99,9 @@ public class Entity {
 	}
 
 	public boolean isAccessible(Character c) {
+		if (c.ignoreCollisions) {
+			return true;
+		}
 		boolean accessible = false;
 		switch (c.getCurrentDirection()) {
 		case DOWN:
@@ -114,6 +116,9 @@ public class Entity {
 		case UP:
 			accessible = this.bottom;
 			break;
+		default:
+			accessible = false;
+			break;
 		}
 		return ((accessible && !this.isWater()) || (this.isWater() && c.isSurfing() && accessible))
 				&& !this.hasCharacter();
@@ -122,16 +127,15 @@ public class Entity {
 	public void setSprite(String spriteName) {
 		this.spriteName = spriteName;
 		if (spriteName.equals("grass")) {
-			this.terrain = new ImageIcon(this.getClass().getResource("/routes/terrain/grassy.png")).getImage();
+			setTerrain("grassy");
 		}
-		this.sprite = new ImageIcon(this.getClass().getResource("/routes/entities/" + spriteName + ".png")).getImage();
+		this.sprite = gController.getRouteAnalyzer().getSpriteByName(spriteName);
 	}
 
 	public void setTerrain(String terrainName) {
 		this.terrainName = terrainName;
 		try {
-			this.terrain = new ImageIcon(this.getClass().getResource("/routes/terrain/" + terrainName + ".png"))
-					.getImage();
+			this.terrain = gController.getRouteAnalyzer().getTerrainByName(terrainName);
 			this.setWater(terrainName.equals("see"));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -200,7 +204,8 @@ public class Entity {
 			if (c instanceof Player) {
 				gController.resetCharacterPositions();
 				gController.setCurrentRoute(gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()));
-				gController.getGameFrame().getBackgroundLabel().changeRoute(gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()));
+				gController.getGameFrame().getBackgroundLabel()
+						.changeRoute(gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()));
 			}
 			c.setCurrentRoute(gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()));
 			c.setCurrentPosition(warp.getNewPosition());
@@ -307,7 +312,7 @@ public class Entity {
 	}
 
 	public boolean isPC() {
-		return spriteName.equals("pc");
+		return spriteName.equals("pc") || spriteName.equals("laptop");
 	}
 
 	public int getX() {
@@ -360,7 +365,7 @@ public class Entity {
 					gController.startFight(enemy);
 				}
 			}
-		} else if (checkPokemon()) {
+		} else if (c instanceof Player && !((Player) c).isProtected() && checkPokemon()) {
 			if (!this.gController.isFighting()) {
 				gController.startFight(gController.getCurrentBackground().chooseEncounter());
 			}
@@ -390,10 +395,8 @@ public class Entity {
 		boolean flag = false;
 		if (hasCharacter()) {
 			for (NPC character : getCharacters()) {
-				if (character.getID().equals("strength")) {
-					gController.getGameFrame().addDialogue("Dieser Felsen kann bewegt werden!");
-					gController.waitDialogue();
-					return;
+				if (character.getName() == null) {
+					continue;
 				}
 				if (character.isTrainer()) {
 					if (!character.isDefeated()) {
@@ -408,12 +411,14 @@ public class Entity {
 					gController.waitDialogue();
 					if (character.getName().equals("Joy")) {
 						c.getTeam().restoreTeam();
-						for (int i = 1; i <= c.getTeam().getAmmount() + 1; i++) {
-							gController.getCurrentBackground().getCurrentRoute().getEntities()[0][1]
-									.setSprite("joyhealing" + (i % (c.getTeam().getAmmount() + 1)));
-							gController.getCurrentBackground().getCurrentRoute().updateMap(new Point(1, 0));
-							gController.getGameFrame().repaint();
-							gController.sleep(i == c.getTeam().getAmmount() ? 1500 : 750);
+						if (character.getCurrentRoute().getId().equals("pokemon_center")) {
+							for (int i = 1; i <= c.getTeam().getAmmount() + 1; i++) {
+								gController.getCurrentBackground().getCurrentRoute().getEntities()[0][1]
+										.setSprite("joyhealing" + (i % (c.getTeam().getAmmount() + 1)));
+								gController.getCurrentBackground().getCurrentRoute().updateMap(new Point(1, 0));
+								gController.getGameFrame().repaint();
+								gController.sleep(i == c.getTeam().getAmmount() ? 1500 : 750);
+							}
 						}
 						gController.getGameFrame().addDialogue("Deine Pokemon sind nun wieder topfit!");
 						gController.waitDialogue();
@@ -431,55 +436,119 @@ public class Entity {
 					c.getCurrentRoute().getEntities()[y - 1][x].onInteraction(c);
 				}
 			}
-		} else if (isWater() && !c.isSurfing()) {
-			gController.getGameFrame().addDialogue("Hier k�nnte man surfen!");
-			gController.waitDialogue();
-			if (c.hasItem(Item.SURF)) {
-				gController.getGameFrame().addDialogue("Du f�ngst an zu surfen!");
-				c.setSurfing(true);
-				gController.waitDialogue();
-				c.changePosition(c.getCurrentDirection(), true);
-			}
 		} else if (isPC()) {
 			gController.getGameFrame().displayPC(c);
-		} else if (this.spriteName.equals("rock")) {
-			gController.getGameFrame().addDialogue("Dieser Felsen könnte zertr�mmert werden!");
-			gController.waitDialogue();
-			if (c.hasItem(Item.ROCKSMASH)) {
-				gController.getGameFrame().addDialogue("Du hast den Felsen zertrümmert!");
-				this.setSprite("free");
-				this.setAccessible(true);
-				c.getCurrentRoute().updateMap(c.getInteractionPoint());
-				gController.waitDialogue();
-			}
-			gController.getGameFrame().repaint();
-		} else if (this.spriteName.equals("treecut")) {
-			if (c.hasItem(Item.CUT)) {
-				gController.getGameFrame().addDialogue("Du zerschneidest den Baum!");
-				this.setAccessible(true);
-				gController.waitDialogue();
+		}
 
-				new Thread(new Runnable() {
-					@Override
-					public void run() {
-						for (int i = 1; i <= 3; i++) {
-							setSprite("treecut" + i);
-							c.getCurrentRoute().updateMap(c.getInteractionPoint());
-							gController.getGameFrame().repaint();
-							try {
-								Thread.sleep(100);
-							} catch (InterruptedException e) {
-								e.printStackTrace();
+		for (Item i : Item.values()) {
+			if (!i.isUsableOnPokemon()) {
+				useVM(c, i);
+			}
+		}
+
+	}
+
+	public boolean useVM(Player source, Item vm) {
+		boolean result = false;
+		boolean hasItem = source.hasItem(vm);
+		switch (vm) {
+		case CUT:
+			if (this.spriteName.equals("treecut")) {
+				if (hasItem) {
+					result = true;
+					gController.getGameFrame().addDialogue("Du zerschneidest den Baum!");
+					gController.waitDialogue();
+					this.setAccessible(true);
+
+					new Thread(new Runnable() {
+						@Override
+						public void run() {
+							for (int i = 1; i <= 3; i++) {
+								setSprite("treecut" + i);
+								source.getCurrentRoute().updateMap(source.getInteractionPoint());
+								gController.getGameFrame().repaint();
+								try {
+									Thread.sleep(100);
+								} catch (InterruptedException e) {
+									e.printStackTrace();
+								}
 							}
 						}
-					}
-				}).start();
-			} else {
-				gController.getGameFrame().addDialogue("Dieser Baum k�nnte zerschnitten werden!");
-				gController.waitDialogue();
+					}).start();
+				} else {
+					gController.getGameFrame().addDialogue("Dieser Baum k�nnte zerschnitten werden!");
+				}
 			}
-			gController.getGameFrame().repaint();
+			break;
+		case FLASH:
+			if (source.getCurrentRoute().isDark()) {
+				if (hasItem) {
+					result = true;
+					((DarkOverlay) (gController.getGameFrame().getBackgroundLabel().getOverlay(DarkOverlay.class)))
+							.flash();
+				} else {
+					gController.getGameFrame().addDialogue("Ein Hilfsmitte könnte die Höhle erleuchten!");
+				}
+			}
+			break;
+		case ROCKSMASH:
+			if (this.spriteName.equals("rock")) {
+				if (hasItem) {
+					result = true;
+					gController.getGameFrame().addDialogue("Du hast den Felsen zertrümmert!");
+					this.setSprite("free");
+					this.setAccessible(true);
+					source.getCurrentRoute().updateMap(source.getInteractionPoint());
+					gController.waitDialogue();
+				} else {
+					gController.getGameFrame().addDialogue("Dieser Felsen könnte zertr�mmert werden!");
+				}
+				gController.getGameFrame().repaint();
+			} else {
+				return false;
+			}
+			break;
+		case STRENGTH:
+			boolean hasStone = false;
+			if (hasCharacter()) {
+				for (NPC character : getCharacters()) {
+					if (character.getID().equals("strength")) {
+						hasStone = true;
+						if (hasItem) {
+							result = true;
+							character.setCurrentDirection(source.getCurrentDirection());
+							character.changePosition(source.getCurrentDirection(), true);
+						} else {
+							gController.getGameFrame().addDialogue("Dieser Felsen kann bewegt werden!");
+							gController.waitDialogue();
+						}
+					}
+				}
+			}
+			if (!hasStone) {
+				return false;
+			}
+		case SURF:
+			if (isWater() && !source.isSurfing()) {
+				if (hasItem) {
+					result = true;
+					gController.getGameFrame().addDialogue("Du f�ngst an zu surfen!");
+					source.setSurfing(true);
+					gController.waitDialogue();
+					source.changePosition(source.getCurrentDirection(), true);
+				} else {
+					gController.getGameFrame().addDialogue("Hier k�nnte man surfen!");
+				}
+			} else {
+				return false;
+			}
+			break;
+		default:
+			return false;
 		}
+
+		gController.waitDialogue();
+		return result;
 	}
 
 	public void setExactX(double x) {
@@ -513,23 +582,29 @@ public class Entity {
 		}
 		return false;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
-		if(obj instanceof Entity) {
+		if (obj instanceof Entity) {
 			Entity other = (Entity) obj;
-			return (other.left == this.left && other.right == this.right && other.bottom == this.bottom && other.top == this.top &&
-					other.pokemonRate == this.pokemonRate && ((this.warp == null && other.warp == null) || (this.warp != null && this.warp.equals(other.warp))) &&
-					this.terrainName.equals(other.terrainName) && this.spriteName.equals(other.spriteName) && this.water == other.water && this.x == other.x && this.y == other.y &&
-					((this.event == null && other.event == null) || (this.event != null && this.event.equals(other.event))) && this.parent.getId().equals(other.parent.getId()));
+			return (other.left == this.left && other.right == this.right && other.bottom == this.bottom
+					&& other.top == this.top && other.pokemonRate == this.pokemonRate
+					&& ((this.warp == null && other.warp == null)
+							|| (this.warp != null && this.warp.equals(other.warp)))
+					&& this.terrainName.equals(other.terrainName) && this.spriteName.equals(other.spriteName)
+					&& this.water == other.water && this.x == other.x && this.y == other.y
+					&& ((this.event == null && other.event == null)
+							|| (this.event != null && this.event.equals(other.event)))
+					&& this.parent.getId().equals(other.parent.getId()));
 		}
 		return false;
 	}
-	
+
 	@Override
 	protected Entity clone() {
-		Entity clone = new Entity(this.parent.getId(), this.left, this.right, this.top, this.bottom, this.spriteName, this.pokemonRate, this.terrainName);
-		if(this.warp != null) {
+		Entity clone = new Entity(this.parent.getId(), this.left, this.right, this.top, this.bottom, this.spriteName,
+				this.pokemonRate, this.terrainName);
+		if (this.warp != null) {
 			clone.addWarp(this.warp.clone());
 		}
 		clone.water = this.water;
@@ -541,85 +616,86 @@ public class Entity {
 
 	public JsonObject getSaveData(Entity entity) {
 		JsonObject saveData = new JsonObject();
-		
+
 		saveData.addProperty("x", this.x);
 		saveData.addProperty("y", this.y);
-		
-		if(this.left != entity.left) {
+
+		if (this.left != entity.left) {
 			saveData.addProperty("left", this.left);
 		}
-		if(this.right != entity.right) {
+		if (this.right != entity.right) {
 			saveData.addProperty("right", this.right);
 		}
-		if(this.top != entity.top) {
+		if (this.top != entity.top) {
 			saveData.addProperty("top", this.top);
 		}
-		if(this.bottom != entity.bottom) {
+		if (this.bottom != entity.bottom) {
 			saveData.addProperty("bottom", this.bottom);
 		}
-		if(!this.terrainName.equals(entity.terrainName)) {
+		if (!this.terrainName.equals(entity.terrainName)) {
 			saveData.addProperty("terrain", this.terrainName);
-		}	
-		if(!this.spriteName.equals(entity.spriteName)) {
+		}
+		if (!this.spriteName.equals(entity.spriteName)) {
 			saveData.addProperty("sprite", this.spriteName);
 		}
-		if(this.water != entity.water) {
+		if (this.water != entity.water) {
 			saveData.addProperty("water", this.water);
 		}
-		if(this.event != entity.getEvent() && (this.event == null || entity.getEvent() == null || !this.event.equals(entity.getEvent()))) {
+		if (this.event != entity.getEvent()
+				&& (this.event == null || entity.getEvent() == null || !this.event.equals(entity.getEvent()))) {
 			saveData.add("event", this.event == null ? null : this.event.getSaveData(entity.getEvent()));
 		}
 		return saveData;
 	}
-	
+
 	public boolean importSaveData(JsonObject saveData, Entity entity) {
-		if(this.x == saveData.get("x").getAsInt() && this.y == saveData.get("y").getAsInt()) {
-			if(saveData.get("left") != null) {
+		if (this.x == saveData.get("x").getAsInt() && this.y == saveData.get("y").getAsInt()) {
+			if (saveData.get("left") != null) {
 				this.left = saveData.get("left").getAsBoolean();
 			} else {
 				this.left = entity.left;
 			}
-			if(saveData.get("right") != null) {
+			if (saveData.get("right") != null) {
 				this.right = saveData.get("right").getAsBoolean();
 			} else {
 				this.right = entity.right;
 			}
-			if(saveData.get("top") != null) {
+			if (saveData.get("top") != null) {
 				this.top = saveData.get("top").getAsBoolean();
 			} else {
 				this.top = entity.top;
 			}
-			if(saveData.get("bottom") != null) {
-				this.bottom = saveData.get("bottom").getAsBoolean();				
+			if (saveData.get("bottom") != null) {
+				this.bottom = saveData.get("bottom").getAsBoolean();
 			} else {
 				this.bottom = entity.bottom;
 			}
-			if(saveData.get("terrain") != null) {
+			if (saveData.get("terrain") != null) {
 				this.terrainName = saveData.get("terrain").getAsString();
 			} else {
 				this.terrainName = entity.terrainName;
 			}
-			if(saveData.get("sprite") != null) {
+			if (saveData.get("sprite") != null) {
 				this.spriteName = saveData.get("sprite").getAsString();
 			} else {
 				this.spriteName = entity.spriteName;
 			}
-			if(saveData.get("water") != null) {
+			if (saveData.get("water") != null) {
 				this.water = saveData.get("water").getAsBoolean();
 			} else {
 				this.water = entity.water;
 			}
-			if(saveData.get("event") != null) {
-				if(this.event != null) {
+			if (saveData.get("event") != null) {
+				if (this.event != null) {
 					event.importSaveData(saveData.get("event").getAsJsonObject(), entity.getEvent());
 				}
 			} else {
 				this.event = entity.getEvent() == null ? null : entity.getEvent().clone();
 			}
-			
+
 			return true;
 		}
 		return false;
 	}
-	
+
 }

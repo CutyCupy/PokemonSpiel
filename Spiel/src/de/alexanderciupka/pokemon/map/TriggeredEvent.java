@@ -5,10 +5,10 @@ import java.util.ArrayList;
 
 import com.google.gson.JsonObject;
 
-import de.alexanderciupka.pokemon.pokemon.Character;
-import de.alexanderciupka.pokemon.pokemon.Direction;
-import de.alexanderciupka.pokemon.pokemon.NPC;
-import de.alexanderciupka.pokemon.pokemon.Player;
+import de.alexanderciupka.pokemon.characters.Character;
+import de.alexanderciupka.pokemon.characters.Direction;
+import de.alexanderciupka.pokemon.characters.NPC;
+import de.alexanderciupka.pokemon.characters.Player;
 
 public class TriggeredEvent {
 

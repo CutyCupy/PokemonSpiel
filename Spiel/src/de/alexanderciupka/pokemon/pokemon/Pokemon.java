@@ -10,6 +10,7 @@ import javax.swing.ImageIcon;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import de.alexanderciupka.pokemon.characters.Player;
 import de.alexanderciupka.pokemon.map.GameController;
 
 public class Pokemon {
@@ -356,8 +357,11 @@ public class Pokemon {
 		return this.catchRate;
 	}
 
-	public boolean isCatched() {
-		int N = getStats().getRNG().nextInt(256);
+	public boolean isCatched(Item usedBall) {
+		if(usedBall.equals(Item.MASTERBALL)) {
+			return true;
+		}
+		int N = getStats().getRNG().nextInt(usedBall.getValue() + 1);
 		switch (getAilment()) {
 		case BURN:
 		case POISON:
@@ -379,17 +383,19 @@ public class Pokemon {
 		default:
 			break;
 		}
+		int F = (getStats().getStats()[0] * 255) / 8;
+		if(getStats().getCurrentHP() / 4 > 0) {
+			F = Math.min(255, F / (getStats().getCurrentHP() / 4));
+		}
 		int M = getStats().getRNG().nextInt(256);
-		int ball = 8;
-		int f = (getStats().getStats()[0] * 255 * 4) / (getStats().getCurrentHP() * ball);
-		if (f >= M) {
+		if (M <= F) {
 			return true;
 		}
 		return false;
 	}
 
-	public int getShakes() {
-		int d = getCatchRate() * 100 / 255;
+	public int getShakes(Item usedBall) {
+		int d = getCatchRate() * 100 / usedBall.getValue();
 		if (d >= 256) {
 			return 3;
 		} else {
@@ -465,5 +471,49 @@ public class Pokemon {
 
 	public String getGrowthRate() {
 		return this.growthRate;
+	}
+	
+	public boolean useItem(Player source, Item i) {
+		if(i.isUsableOnPokemon()) {
+			boolean effective = false;
+			switch(i) {
+			case FULLRESTORE:
+				if(this.getAilment() != Ailment.NONE) {
+					effective = true;
+					gController.getGameFrame().addDialogue(this.getName() + " ist nicht mehr " + Ailment.getText(this.getAilment()) + "!");
+					this.setAilment(Ailment.NONE);
+				}
+			case POTION:
+			case SUPERPOTION:
+			case HYPERPOTION:
+			case FULLHEAL:
+				int restore = this.stats.restoreHP(i.getValue());
+				if(restore > 0) {
+					effective = true;
+					gController.getGameFrame().addDialogue(this.getName() + " wurde um " + restore + " KP geheilt!");
+				}
+				break;
+			case BURNHEAL:
+			case PARAHEAL:
+			case FREEZEHEAL:
+			case POISONHEAL:
+			case SLEEPHEAL:
+				if(this.getAilment() == i.getAilment()) {
+					effective = true;
+					gController.getGameFrame().addDialogue(this.getName() + " ist nicht mehr " + Ailment.getText(this.getAilment()) + "!");
+					this.setAilment(Ailment.NONE);
+				}
+			default:
+				break;
+			}
+			if(effective) {
+				source.removeItem(i);
+				return true;
+			}
+			gController.getGameFrame().addDialogue("Es wird keine Wirkung haben!");
+			return false;
+		} else {
+			throw new IllegalArgumentException("Given Item must be usable on Pokemon!");
+		}
 	}
 }

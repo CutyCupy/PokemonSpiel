@@ -6,14 +6,13 @@ import java.util.ArrayList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
+import de.alexanderciupka.pokemon.characters.Player;
 import de.alexanderciupka.pokemon.pokemon.Item;
-import de.alexanderciupka.pokemon.pokemon.Player;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
 
 public class PokemonEntity extends Entity {
 
 	private ArrayList<Item> requiredItems;
-	private GameController gController;
 
 	private String noInteractionMessage;
 	private String interactionMessage;
@@ -22,7 +21,6 @@ public class PokemonEntity extends Entity {
 
 	public PokemonEntity(Route parent, String terrainName, String id) {
 		super(parent, false, "free", 0, terrainName);
-		gController = GameController.getInstance();
 		this.setId(id);
 	}
 
@@ -109,6 +107,7 @@ public class PokemonEntity extends Entity {
 				gController.waitDialogue();
 			}
 		}
+		gController.getGameFrame().repaint();
 	}
 
 	public void importRequiredItems(JsonElement je) {

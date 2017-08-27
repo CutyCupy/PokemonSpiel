@@ -15,33 +15,22 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
+import de.alexanderciupka.pokemon.fighting.Target;
 import de.alexanderciupka.pokemon.menu.MenuController;
 
 
 public class Main {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		 MenuController.getInstance();
-//		 try {
-//			Thread.sleep(5000);
-//		} catch (InterruptedException e1) {
-//			e1.printStackTrace();
-//		}
-//		 for(String s : GameController.getInstance().getRouteAnalyzer().getOriginalRoutes().keySet()) {
-//			 GameController.getInstance().getGameFrame().getBackgroundLabel().changeRoute(GameController.getInstance().getRouteAnalyzer().getRouteById(s).getName());
-//			 try {
-//				Thread.sleep(1500);
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}
-//		 }
+		 
 //		readDescription();
 	}
 
 	public static void readDescription() {
 		JsonParser parser = new JsonParser();
 		BufferedReader reader = null;
-		BufferedReader moveData = new BufferedReader(new InputStreamReader(Main.class.getResourceAsStream("/pokemon/pokemon.json")));
+		BufferedReader moveData = new BufferedReader(new InputStreamReader(Main.class.getResourceAsStream("/pokemon/moves.json")));
 		JsonArray allMoveData = null;
 		try {
 			allMoveData = parser.parse(moveData.readLine()).getAsJsonArray();
@@ -50,14 +39,15 @@ public class Main {
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
-//		int i = 1;
+		int i = 1;
 		JsonArray newData = new JsonArray();
-		for(int i = 1; i < 7; i++) {
-//		for (JsonElement element : allMoveData) {
+//		for(int i = 1; i < allMoveData.size(); i++) {
+//			System.out.println(i);
+		for (JsonElement element : allMoveData) {
 			try {
-				JsonObject currentJson = new JsonObject();
-//				JsonObject currentJson = element.getAsJsonObject();
-				URLConnection connection = new URL("http://www.pokeapi.co/api/v2/growth-rate/" + i).openConnection();
+//				JsonObject currentJson = new JsonObject();
+				JsonObject currentJson = element.getAsJsonObject();
+				URLConnection connection = new URL("http://www.pokeapi.co/api/v2/move/" + i).openConnection();
 				connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
 				connection.connect();
 				reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -67,16 +57,38 @@ public class Main {
 				while ((read = reader.read(chars)) != -1)
 					buffer.append(chars, 0, read);
 				JsonObject currentMove = (JsonObject) parser.parse(buffer.toString());
-				currentJson.addProperty("name", currentMove.get("name").getAsString());
-				currentJson.add("levels", currentMove.get("levels").getAsJsonArray());
-				String description = "";
-				for(JsonElement d : currentMove.get("descriptions").getAsJsonArray()) {
-					if(d.getAsJsonObject().get("language").getAsJsonObject().get("name").equals("de")) {
-						description = d.getAsJsonObject().get("description").getAsString();
-						break;
-					}
+				String target = null;
+				switch(currentMove.get("target").getAsJsonObject().get("name").getAsString()) {
+				case "users-field":
+				case "user-or-ally":
+				case "user":
+				case "user-and-allies":
+					target = Target.USER.name();
+					break;
+				case "opponents-field":
+				case "random-opponent":
+				case "all-other-pokemon":
+				case "selected-pokemon":
+				case "all-opponents":
+					target = Target.OPPONENT.name();
+					break;
+				case "entire-field":
+				case "all-pokemon":
+					target = Target.ALL.name();
+					break;
 				}
-				currentJson.addProperty("description", description);
+				currentJson.addProperty("target", target);
+				currentJson.addProperty("crit_rate", currentMove.get("meta").getAsJsonObject().get("crit_rate").getAsInt());
+//				currentJson.addProperty("name", currentMove.get("name").getAsString());
+//				currentJson.add("levels", currentMove.get("levels").getAsJsonArray());
+//				String description = "";
+//				for(JsonElement d : currentMove.get("descriptions").getAsJsonArray()) {
+//					if(d.getAsJsonObject().get("language").getAsJsonObject().get("name").equals("de")) {
+//						description = d.getAsJsonObject().get("description").getAsString();
+//						break;
+//					}
+//				}
+//				currentJson.addProperty("description", description);
 //				currentJson.addProperty("capture_rate", currentMove.get("capture_rate").getAsInt());
 //				currentJson.addProperty("hatch_counter", currentMove.get("hatch_counter").getAsInt());
 //				currentJson.addProperty("growth_rate", currentMove.get("growth_rate").getAsJsonObject().get("name").getAsString());
@@ -103,6 +115,7 @@ public class Main {
 //				currentJson.addProperty("ailment", currentMove.get("meta").getAsJsonObject().get("ailment").getAsJsonObject().get("name").getAsString());
 //				currentJson.addProperty("damage_class", currentMove.get("damage_class").getAsJsonObject().get("name").getAsString());
 //				currentJson.addProperty("priority", currentMove.get("priority").getAsInt());
+				System.out.println(currentJson);
 				newData.add(currentJson);
 			} catch (JsonSyntaxException e) {
 				e.printStackTrace();
@@ -111,10 +124,10 @@ public class Main {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-//			i++;
+			i++;
 		}
 		try {
-			FileWriter fw = new FileWriter(new File(Main.class.getResource("/pokemon/growth_rates.json").getFile()));
+			FileWriter fw = new FileWriter(new File(Main.class.getResource("/pokemon/moves.json").getFile()));
 			for(char c : newData.toString().toCharArray()) {
 				fw.write(c);
 				fw.flush();

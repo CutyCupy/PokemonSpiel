@@ -2,6 +2,7 @@ package de.alexanderciupka.pokemon.map;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -21,6 +22,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
@@ -60,8 +62,8 @@ public class RouteCreator extends JFrame {
 			{"JoyHealing", "JH"}, {"MoveDown", "MD"}, {"MoveUp", "MU"}, {"MoveLeft", "ML"}, {"MoveRight", "MR"}, {"MoveStop", "MS"}, {"Höhle vorne", "HWF"}, 
 			{"Höhle hinten", "HWB"}, {"Höhle rechts", "HWR"}, {"Höhle links", "HWL"}, {"Höhle Eingang", "WHE"}, {"Höhle linksvorne außen", "HWLF"}, 
 			{"Höhle linkshinten außen", "HWLB"}, {"Höhle rechtshinten außen", "HWRB"}, {"Höhle rechtsvorne außen", "HWRF"}, {"Höhle Mitte", "HM"},  
-			{"Höhle linksvorne innen", "HWLF"}, {"Höhle Ecke linkshinten innen", "HWLB"}, {"Höhle Ecke rechtshinten innen", "HWRB"}, 
-			{"Höhle Ecke rechtsvorne innen", "HWRF"}, {"RockBig", "RB"}, {"RockGroup", "RG"}, {"Rock", "R"}};
+			{"Höhle linksvorne innen", "HWLFI"}, {"Höhle linkshinten innen", "HWLBI"}, {"Höhle rechtshinten innen", "HWRBI"}, 
+			{"Höhle rechtsvorne innen", "HWRFI"}, {"RockBig", "RB"}, {"RockGroup", "RG"}, {"Rock", "R"}};
 	
 	private static final int SIZE = 25;
 
@@ -102,8 +104,6 @@ public class RouteCreator extends JFrame {
 		save = new JButton("SAVE!");
 		save.setBounds(1750, 600, 150, 40);
 		save.setBackground(Color.WHITE);
-		contentPane.add(save);
-		contentPane.add(terrains);
 		this.labels = new JLabel[height][width];
 		this.horizontal = new JButton[width];
 		this.vertical = new JButton[height];
@@ -137,18 +137,30 @@ public class RouteCreator extends JFrame {
 				}
 			}
 		}
+		JPanel entities = new JPanel(new GridLayout(TYPES.length + 2, 1));
 		group = new ButtonGroup();
 		for(int i = 0; i < TYPES.length; i++) {
 			JRadioButton currentButton = new JRadioButton(RouteCreator.TYPES[i][0]);
-			currentButton.setFont(currentButton.getFont().deriveFont(8.0f));
+			currentButton.setFont(currentButton.getFont().deriveFont(10.0f));
 			currentButton.setBounds(1750, 40 + 15 * i, 150, 10);
 			buttons[i] = currentButton;
 			group.add(currentButton);
-			add(currentButton);
+			entities.add(currentButton);
 		}
-		terrains.setBounds(1750, buttons[TYPES.length - 1].getY() + 40, 150, 40);
+		terrains.setBounds(1750, 900, 150, 40);
 		save.setBounds(1750, terrains.getY() + 40, 150, 40);
+		add(terrains);
+		add(save);
+		entities.setBounds(0, 0, 220, terrains.getY());
+		
 		buttons[0].setSelected(true);
+		
+		JScrollPane pane = new JScrollPane();
+		pane.setBounds(1700, 0, 200, terrains.getY());
+		pane.setViewportView(entities);
+		pane.createVerticalScrollBar();
+		pane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		add(pane);
 		actionListeners();
 		this.setVisible(true);
 	}
@@ -248,7 +260,11 @@ public class RouteCreator extends JFrame {
 									}
 								}
 							}
-							labels[yCoord][xCoord].setText(text);
+							if(e.getButton() == MouseEvent.BUTTON1) {
+								labels[yCoord][xCoord].setText(text);
+							} else {
+								floodFill(text, new boolean[labels[0].length][labels.length], xCoord, yCoord, xCoord, yCoord);
+							}
 							active = false;
 						}
 					}
@@ -343,5 +359,22 @@ public class RouteCreator extends JFrame {
 			e.printStackTrace();
 		}
 		routeAnalyzer.readRoute(newRoute);
+	}
+	
+	private void floodFill(String text, boolean[][] visited, int x, int y, int startX, int startY) {
+		visited[x][y] = true;
+		if(x > 0 && !visited[x-1][y] && this.labels[y][x-1].getText().equals(this.labels[startY][startX].getText())) {
+			floodFill(text, visited, x-1, y, startX, startY);
+		}
+		if(y > 0 && !visited[x][y-1] && this.labels[y-1][x].getText().equals(this.labels[startY][startX].getText())) {
+			floodFill(text, visited, x, y-1, startX, startY);
+		}
+		if(x < this.labels[0].length - 1 && !visited[x+1][y] && this.labels[y][x+1].getText().equals(this.labels[startY][startX].getText())) {
+			floodFill(text, visited, x+1, y, startX, startY);
+		}
+		if(y < this.labels.length - 1 && !visited[x][y+1] && this.labels[y+1][x].getText().equals(this.labels[startY][startX].getText())) {
+			floodFill(text, visited, x, y+1, startX, startY);
+		}
+		this.labels[y][x].setText(text);
 	}
 }

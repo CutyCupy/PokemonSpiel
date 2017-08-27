@@ -34,7 +34,7 @@ public class PokemonButton extends JButton {
 		typeOne = new TypeLabel();
 		typeTwo = new TypeLabel();
 		ailment = new AilmentLabel();
-		update();
+		update(false);
 	}
 	
 	@Override
@@ -54,7 +54,7 @@ public class PokemonButton extends JButton {
 	
 	public void setPokemon(Pokemon pokemon) {
 		this.pokemon = pokemon;
-		update();
+		update(false);
 	}
 	
 	public Pokemon getPokemon() {
@@ -69,7 +69,7 @@ public class PokemonButton extends JButton {
 		this.index = index;
 	}
 
-	public void update() {
+	public void update(boolean animated) {
 		for(Component c : this.getComponents()) {
 			this.remove(c);
 		}
@@ -86,7 +86,11 @@ public class PokemonButton extends JButton {
 				e.printStackTrace();
 			}
 			hpBar.setMaximum(pokemon.getStats().getStats()[0]);
-			hpBar.setValue(pokemon.getStats().getCurrentHP());
+			if(animated) {
+				hpBar.updateValue(pokemon.getStats().getCurrentHP());
+			} else {
+				hpBar.setValue(pokemon.getStats().getCurrentHP());
+			}
 			hpBar.setBounds(100, 32, 175, 10);
 			
 			typeOne.setType(this.pokemon.getTypes()[0]);

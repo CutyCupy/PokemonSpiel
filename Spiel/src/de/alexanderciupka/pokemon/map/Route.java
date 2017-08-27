@@ -15,8 +15,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import de.alexanderciupka.pokemon.characters.NPC;
 import de.alexanderciupka.pokemon.gui.GameFrame;
-import de.alexanderciupka.pokemon.pokemon.NPC;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
 
 public class Route {
@@ -106,7 +106,7 @@ public class Route {
 		this.characters.add(character);
 	}
 
-	public boolean removeCharacter(de.alexanderciupka.pokemon.pokemon.Character c) {
+	public boolean removeCharacter(de.alexanderciupka.pokemon.characters.Character c) {
 		for (int i = 0; i < this.characters.size(); i++) {
 			if (c.equals(this.characters.get(i))) {
 				this.characters.remove(i);
@@ -174,7 +174,7 @@ public class Route {
 				}
 			}
 		}
-		 saveMap();
+//		 saveMap();
 	}
 
 	public void updateMap(Point... updatePoint) {

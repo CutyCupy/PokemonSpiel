@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
@@ -21,7 +22,8 @@ public class TextLabel extends JLabel implements Runnable {
 	private After after;
 
 	private boolean waiting;
-
+	private JPanel parent;
+	
 	public TextLabel() {
 		super();
 		new Thread(this).start();
@@ -34,6 +36,7 @@ public class TextLabel extends JLabel implements Runnable {
 		this.setBorder(BorderFactory.createCompoundBorder(new LineBorder(Color.BLACK, 5), new EmptyBorder(2, 10, 2, 10)));
 		this.setHorizontalAlignment(SwingConstants.LEFT);
 		this.setVerticalAlignment(SwingConstants.TOP);
+		
 		delay = SLOW;
 	}
 
@@ -56,8 +59,7 @@ public class TextLabel extends JLabel implements Runnable {
 			if(isActive && !waiting) {
 				this.setVisible(true);
 				this.setText("<html>");
-				char[] currentLine = text.get(0).toCharArray();
-				for(char c : currentLine) {
+				for(char c : text.get(0).toCharArray()) {
 					this.setText(this.getText() + c);
 					repaint();
 					try {
@@ -153,5 +155,13 @@ public class TextLabel extends JLabel implements Runnable {
 
 	public boolean isWaiting() {
 		return this.waiting;
+	}
+	
+	public void setParent(JPanel parent) {
+		if(this.parent != null) {
+			this.parent.remove(this);
+		}
+		this.parent = parent;
+		this.parent.add(this);
 	}
 }
