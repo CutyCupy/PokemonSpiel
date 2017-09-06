@@ -1,7 +1,6 @@
 package de.alexanderciupka.pokemon.map;
 
 import java.awt.Point;
-import java.util.Random;
 
 import javax.swing.JPanel;
 
@@ -176,7 +175,11 @@ public class GameController {
 
 	public void setCurrentRoute(Route newRoute) {
 		mainCharacter.setCurrentRoute(newRoute);
-		currentBackground.setCurrentRoute(newRoute);
+		if(currentBackground == null) {
+			this.currentBackground = new Background(newRoute);
+		} else {
+			currentBackground.setCurrentRoute(newRoute);
+		}
 	}
 
 	public GameFrame getGameFrame() {
@@ -232,6 +235,7 @@ public class GameController {
 
 	public void escape() {
 		if (fight.canEscape()) {
+			this.fight.won = false;
 			endFight();
 		}
 	}
@@ -248,6 +252,13 @@ public class GameController {
 
 			}
 		}
+		if(this.fight.won) {
+			if(!gameFrame.getEvolutionPanel().getPokemon().isEmpty()) {
+				gameFrame.setCurrentPanel(gameFrame.getEvolutionPanel());
+				gameFrame.repaint();
+				gameFrame.getEvolutionPanel().start();
+			}
+		}
 		gameFrame.stopFight();
 	}
 
@@ -255,14 +266,22 @@ public class GameController {
 		for (Pokemon p : fight.getParticipants()) {
 			int XPGain = fight.calculateXP(p);
 			if (p.getStats().getLevel() < 100) {
-				gameFrame.getFightPanel().addText(p.getName() + " erh�lt " + XPGain + " Erfahrungspunkte!");
-				p.gainXP(XPGain / fight.getParticipants().size());
+				int xp = XPGain / fight.getParticipants().size();
+				gameFrame.getFightPanel().addText(p.getName() + " erh�lt " + xp + " Erfahrungspunkte!");
+				p.gainXP(xp);
 			}
 		}
 		if (fight.enemyDead()) {
+			this.fight.won = true;
 			if (fight.getEnemyCharacter() != null) {
 				this.getMainCharacter().addItem(fight.getEnemyCharacter().getReward());
 				gameFrame.getFightPanel().addText(fight.getEnemyCharacter().getOnDefeatDialogue());
+				String message = "Du erhälst " + fight.getEnemyCharacter().getMoney() + " Cupydollar";
+				if (fight.getEnemyCharacter().getReward() != Item.NONE) {
+					message += " und " + fight.getEnemyCharacter().getReward().getName();
+				}
+				this.getGameFrame().getFightPanel().addText(message + "!");
+				this.getMainCharacter().increaseMoney(fight.getEnemyCharacter().getMoney());
 				gameFrame.getFightPanel().pause();
 			}
 			endFight();
@@ -273,12 +292,13 @@ public class GameController {
 
 	public boolean loseFight() {
 		if (fight.playerDead()) {
-			gameFrame.getFightPanel().addText(
-					"Du hast keine kampff�higen Pokemon mehr ... Dir wird schwarz vor Augen und rennst so schnell wie m�glich zu einem Pokemon Center!");
+			this.fight.won = false;
+			gameFrame.getFightPanel().addText("Du wurdest besiegt!");
+			this.getMainCharacter().decreaseMoney((long) (this.getMainCharacter().getMoney() * 0.1));
 			gameFrame.getFightPanel().pause();
-			endFight();
 			resetCharacterPositions();
 			mainCharacter.warpToPokemonCenter();
+			endFight();
 			return true;
 		}
 		return false;
@@ -310,12 +330,13 @@ public class GameController {
 	}
 
 	public void checkInteraction() {
-		if (!interactionPause) {
+		Point interactionPoint = mainCharacter.getInteractionPoint();
+		if (!interactionPause && 
+				interactionPoint.y >= 0 && interactionPoint.y < mainCharacter.getCurrentRoute().getHeight() &&
+				interactionPoint.x >= 0 && interactionPoint.x < mainCharacter.getCurrentRoute().getWidth()) {
 			setInteractionPause(true);
-			Point interactionPoint = mainCharacter.getInteractionPoint();
 			currentBackground.getCurrentRoute().getEntities()[interactionPoint.y][interactionPoint.x]
 					.onInteraction(mainCharacter);
-
 			setInteractionPause(false);
 		}
 	}
@@ -357,63 +378,51 @@ public class GameController {
 		mainCharacter.setCharacterImage("talih", "front");
 		mainCharacter.setName("Talih");
 		mainCharacter.setID("999");
-		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("route_1"));
-		mainCharacter.setCurrentPosition(13, 9);
-	
-		mainCharacter.addItem(Item.POTION);	
-		mainCharacter.addItem(Item.POTION);	
-		mainCharacter.addItem(Item.POTION);	
-		mainCharacter.addItem(Item.POTION);	
-		mainCharacter.addItem(Item.POTION);	
-		mainCharacter.addItem(Item.POTION);	
-		mainCharacter.addItem(Item.POTION);	
-		mainCharacter.addItem(Item.POTION);	
-		mainCharacter.addItem(Item.POTION);	
-		mainCharacter.addItem(Item.POTION);	
-		mainCharacter.addItem(Item.POTION);
-		
+		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("winterhude"));
+		mainCharacter.setCurrentPosition(4, 4);
 
-		mainCharacter.addItem(Item.HYPERPOTION);
-		mainCharacter.addItem(Item.HYPERPOTION);
-		mainCharacter.addItem(Item.HYPERPOTION);
-		mainCharacter.addItem(Item.HYPERPOTION);
-		mainCharacter.addItem(Item.HYPERPOTION);
-		
+		for (int i = 0; i < 5; i++) {
+			mainCharacter.addItem(Item.POKEBALL);
+		}
 
-		mainCharacter.addItem(Item.SLEEPHEAL);
-		mainCharacter.addItem(Item.SLEEPHEAL);
-		
-		mainCharacter.addItem(Item.SURF);
-		mainCharacter.addItem(Item.CUT);
-		
-		mainCharacter.addItem(Item.REPEL);
-		
-		mainCharacter.addItem(Item.POKEBALL);
-		mainCharacter.addItem(Item.SUPERBALL);
-		mainCharacter.addItem(Item.HYPERBALL);
-		mainCharacter.addItem(Item.MASTERBALL);
-		
-//		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("eigenes_zimmer"));
-//		mainCharacter.setCurrentPosition(START.x, START.y);
+//		 for(Item i : Item.values()) {
+//			 if(i.name().contains("BALL")) {
+//				 mainCharacter.addItem(i);
+//				 mainCharacter.addItem(i);
+//				 mainCharacter.addItem(i);
+//				 mainCharacter.addItem(i);
+//			 }
+//		 }
+
+//		 mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("eigenes_zimmer"));
+//		 mainCharacter.setCurrentPosition(START.x, START.y);
 		currentBackground = new Background(mainCharacter.getCurrentRoute());
 		Pokemon player = new Pokemon(152);
-		player.getStats().generateStats((short) (13));
 		player.setName("Mandarine");
+		player.getStats().generateStats((short) 5);
+		player.addMove("Kugelsaat");
 		mainCharacter.getTeam().addPokemon(player);
-		Random rng = new Random();
-		for(int i = 0; i < 5; i++) {
-			Pokemon current = new Pokemon(rng.nextInt(649) + 1);
-			current.getStats().generateStats((short) (rng.nextInt(100) + 1));
-			mainCharacter.getTeam().addPokemon(current);
-		}
+		
+		// Random rng = new Random();
+		// for(int i = 0; i < 5; i++) {
+		// Pokemon current = new Pokemon(rng.nextInt(649) + 1);
+		// current.getStats().generateStats((short) (rng.nextInt(100) + 1));
+		// mainCharacter.getTeam().addPokemon(current);
+		// }
 		gameFrame = new GameFrame();
+
+		gameFrame.getBackgroundLabel().changeRoute(getCurrentBackground().getCurrentRoute());
+		
+		currentBackground.getCamera().setCharacter(getMainCharacter(), false);
+		
+		
+		information.getGender(300);
 	}
 
 	public boolean loadGame(String path) {
 		mainCharacter = new Player();
 		mainCharacter.setCharacterImage("talih", "front");
 		if (routeAnalyzer.loadGame(path)) {
-			currentBackground = new Background(mainCharacter.getCurrentRoute());
 			gameFrame = new GameFrame();
 			this.repaint();
 			return true;
@@ -469,6 +478,7 @@ public class GameController {
 		}
 		((ReportPanel) this.gameFrame.getReportPanel()).setPokemon(pokemon, this.gameFrame.getPokemonPanel());
 		this.gameFrame.setCurrentPanel(this.gameFrame.getReportPanel());
+		this.repaint();
 	}
 
 	public void setInteractionPause(boolean b) {

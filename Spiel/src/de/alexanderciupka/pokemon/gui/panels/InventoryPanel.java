@@ -109,10 +109,10 @@ public class InventoryPanel extends JPanel {
 				if(gController.isFighting()) {
 					gController.getFight().setCurrentFightOption(FightOption.FIGHT);
 				} else {
-					gController.getGameFrame().setCurrentPanel(null);
+					gController.getGameFrame().setCurrentPanel(gController.getGameFrame().getLastPanel());
 				}
-				gController.getGameFrame().repaint();
 				e.getComponent().setBackground(Color.WHITE);
+				gController.getGameFrame().repaint();
 			}
 			
 			@Override
@@ -162,6 +162,8 @@ public class InventoryPanel extends JPanel {
 	}
 
 	private void updateItems() {
+		spriteL.setIcon(null);
+		descriptionL.setText(" ");
 		if (this.currentPlayer != null) {
 			GridBagConstraints gbc = new GridBagConstraints();
 
@@ -174,88 +176,89 @@ public class InventoryPanel extends JPanel {
 			int row = 0;
 
 			for (Item i : currentItems.keySet()) {
-				if (i != Item.NONE && currentItems.get(i) > 0) {
-					System.out.println(i);
-					JLabel itemL = new JLabel(i.getName());
-					itemL.setOpaque(true);
-					itemL.setFont(FONT);
-					
-					System.out.println(itemL.getBackground().getRGB());
-
-					itemL.setName(String.valueOf(row));
-
-					gbc.gridx = 0;
-					gbc.gridy = row;
-
-					gbc.fill = GridBagConstraints.BOTH;
-					gbc.weightx = 0.5;
-					gbc.weighty = 0;
-
-					itemL.addMouseListener(new MouseAdapter() {
-						@Override
-						public void mouseExited(MouseEvent e) {
-							JLabel source = (JLabel) e.getComponent();
-							source.setBackground(LABEL_BACKGROUND);
-							descriptionL.setText("");
-							spriteL.setIcon(null);
-						}
-
-						@Override
-						public void mouseEntered(MouseEvent e) {
-							JLabel source = (JLabel) e.getComponent();
-							source.setBackground(HOVER_BACKGROUND);
-							Item item = Item.getItemByName(source.getText());
-							descriptionL.setFont(FONT.deriveFont(20f));
-							descriptionL.setText(formatText(descriptionL.getWidth(), item.getDescription(),
-									getFontMetrics(descriptionL.getFont()), 5));
-							spriteL.setIcon(itemSprites.get(item));
-						}
-
-						@Override
-						public void mouseClicked(MouseEvent e) {
-							new Thread(new Runnable() {
-								@Override
-								public void run() {
-									JLabel source = (JLabel) e.getComponent();
-									Item i = Item.getItemByName(source.getText());
-									if(i.isUsableOnPokemon()) {
-										gController.getGameFrame().getPokemonPanel().update(i);
-										gController.getGameFrame().setCurrentPanel(gController.getGameFrame().getPokemonPanel());
-									} else {
-										if(currentPlayer.useItem(i)) {
-											if(gController.isFighting()) {
-												gController.getFight().setCurrentFightOption(FightOption.FIGHT);
-											} else {
-												gController.getGameFrame().setCurrentPanel(null);
+				int amount = currentItems.get(i);
+				if (i != Item.NONE && amount > 0) {
+					while(amount > 0) {
+						JLabel itemL = new JLabel(i.getName());
+						itemL.setOpaque(true);
+						itemL.setFont(FONT);
+						
+						itemL.setName(String.valueOf(row));
+						
+						gbc.gridx = 0;
+						gbc.gridy = row;
+						
+						gbc.fill = GridBagConstraints.BOTH;
+						gbc.weightx = 0.5;
+						gbc.weighty = 0;
+						
+						itemL.addMouseListener(new MouseAdapter() {
+							@Override
+							public void mouseExited(MouseEvent e) {
+								JLabel source = (JLabel) e.getComponent();
+								source.setBackground(LABEL_BACKGROUND);
+								descriptionL.setText("");
+								spriteL.setIcon(null);
+							}
+							
+							@Override
+							public void mouseEntered(MouseEvent e) {
+								JLabel source = (JLabel) e.getComponent();
+								source.setBackground(HOVER_BACKGROUND);
+								Item item = Item.getItemByName(source.getText());
+								descriptionL.setFont(FONT.deriveFont(20f));
+								descriptionL.setText(formatText(descriptionL.getWidth(), item.getDescription(),
+										getFontMetrics(descriptionL.getFont()), 5));
+								spriteL.setIcon(itemSprites.get(item));
+							}
+							
+							@Override
+							public void mouseClicked(MouseEvent e) {
+								new Thread(new Runnable() {
+									@Override
+									public void run() {
+										JLabel source = (JLabel) e.getComponent();
+										Item i = Item.getItemByName(source.getText());
+										if(i.isUsableOnPokemon()) {
+											gController.getGameFrame().getPokemonPanel().update(i);
+											gController.getGameFrame().setCurrentPanel(gController.getGameFrame().getPokemonPanel());
+										} else {
+											if(currentPlayer.useItem(i)) {
+												if(gController.isFighting()) {
+													gController.getFight().setCurrentFightOption(FightOption.FIGHT);
+												} else {
+													gController.getGameFrame().setCurrentPanel(null);
+												}
 											}
 										}
+										source.setBackground(LABEL_BACKGROUND);
+										gController.getGameFrame().repaint();
 									}
-									gController.getGameFrame().repaint();
-									source.setBackground(LABEL_BACKGROUND);
-								}
-							}).start();
-						}
-					});
-
-					panel.add(itemL, gbc);
-					JLabel amountL = new JLabel("x" + currentItems.get(i));
-					amountL.setFont(FONT);
-
-					amountL.setName(String.valueOf(row));
-
-					gbc.gridx = 1;
-					gbc.gridy = row;
-
-					gbc.fill = GridBagConstraints.BOTH;
-					gbc.weightx = 0.5;
-					gbc.weighty = 0;
-
-					panel.add(amountL, gbc);
-
-					itemNameLabels.put(row, itemL);
-					itemAmountLabels.put(row, amountL);
-
-					row++;
+								}).start();
+							}
+						});
+						
+						panel.add(itemL, gbc);
+						JLabel amountL = new JLabel("x" + (amount > 99 ? 99 : amount));
+						amount -= 99;
+						amountL.setFont(FONT);
+						
+						amountL.setName(String.valueOf(row));
+						
+						gbc.gridx = 1;
+						gbc.gridy = row;
+						
+						gbc.fill = GridBagConstraints.BOTH;
+						gbc.weightx = 0.5;
+						gbc.weighty = 0;
+						
+						panel.add(amountL, gbc);
+						
+						itemNameLabels.put(row, itemL);
+						itemAmountLabels.put(row, amountL);
+						
+						row++;
+					}
 				}
 			}
 			

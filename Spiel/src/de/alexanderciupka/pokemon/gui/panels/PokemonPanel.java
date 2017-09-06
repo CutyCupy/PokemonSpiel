@@ -14,6 +14,7 @@ import javax.swing.JPanel;
 import de.alexanderciupka.pokemon.fighting.FightOption;
 import de.alexanderciupka.pokemon.gui.PokemonButton;
 import de.alexanderciupka.pokemon.map.GameController;
+import de.alexanderciupka.pokemon.pokemon.Ailment;
 import de.alexanderciupka.pokemon.pokemon.Item;
 
 //630 * 630
@@ -111,9 +112,19 @@ public class PokemonPanel extends JPanel {
 									gController.getGameFrame().getFightPanel().updatePanels();
 									gController.getFight().setCurrentFightOption(FightOption.FIGHT);
 								} else {
-									gController.getGameFrame().setCurrentPanel(gController.getGameFrame().getInventoryPanel());
+									if(!gController.getGameFrame().getEvolutionPanel().getPokemon().isEmpty()) {
+										gController.getGameFrame().setCurrentPanel(gController.getGameFrame().getEvolutionPanel());
+										gController.getGameFrame().repaint();
+										gController.getGameFrame().getEvolutionPanel().start();
+									}
 								}
 								gController.getGameFrame().getInventoryPanel().update(gController.getGameFrame().getInventoryPanel().getCurrentPlayer());
+								update();
+								if(currentItem != null) {
+									gController.getGameFrame().setCurrentPanel(gController.getGameFrame().getPokemonPanel());
+								} else {
+									gController.getGameFrame().setCurrentPanel(gController.getGameFrame().getLastPanel(false));
+								}
 								gController.getGameFrame().repaint();
 								for(PokemonButton p : pokemonButtons) {
 									if(p.getPokemon() != null) {
@@ -124,10 +135,10 @@ public class PokemonPanel extends JPanel {
 								gController.setInteractionPause(false);
 								
 								if(result && gController.isFighting()) {
-									System.out.println("bla");
 									gController.getGameFrame().getFightPanel().checkEnemyAttack();
 									gController.getGameFrame().getFightPanel().showMenu();
 								}
+								source.repaint();
 							}
 						}).start();
 					}
@@ -143,7 +154,6 @@ public class PokemonPanel extends JPanel {
 		backButton.setBackground(Color.WHITE);
 		add(backButton);
 		
-		System.out.println("Back: " + getComponentZOrder(backButton));
 		addActionListeners();
 	}
 
@@ -154,18 +164,26 @@ public class PokemonPanel extends JPanel {
 				if (gController.isFighting()) {
 					gController.getFight().setCurrentFightOption(FightOption.FIGHT);
 				} else {
-					gController.getGameFrame().setCurrentPanel(null);
-					gController.getGameFrame().stopFight();
+					gController.getGameFrame().setCurrentPanel(gController.getGameFrame().getLastPanel());
 				}
-				gController.repaint();
+				gController.getGameFrame().repaint();
 			}
 		});
 	}
 
 	public void update() {
-		this.currentItem = null;
+		if(this.currentItem != null && this.gController.getGameFrame().getInventoryPanel().getCurrentPlayer().getItems().get(currentItem) == 0) {
+			gController.getGameFrame().addDialogue("Du hast deinen letzten " + this.currentItem.getName() + " benutzt!");
+			gController.waitDialogue();
+			this.currentItem = null;
+		}
 		for (int i = 0; i < pokemonButtons.length; i++) {
 			pokemonButtons[i].update(false);
+		}
+		if(gController.isFighting() && gController.getFight().getPlayer().getAilment() == Ailment.FAINTED) {
+			this.backButton.setEnabled(false);
+		} else {
+			this.backButton.setEnabled(true);
 		}
 	}
 	

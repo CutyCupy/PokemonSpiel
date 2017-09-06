@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
+import java.util.Stack;
 
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
@@ -16,6 +17,7 @@ import de.alexanderciupka.pokemon.characters.Direction;
 import de.alexanderciupka.pokemon.characters.Player;
 import de.alexanderciupka.pokemon.fighting.FightOption;
 import de.alexanderciupka.pokemon.gui.overlay.DarkOverlay;
+import de.alexanderciupka.pokemon.gui.panels.EvolutionPanel;
 import de.alexanderciupka.pokemon.gui.panels.FightPanel;
 import de.alexanderciupka.pokemon.gui.panels.InventoryPanel;
 import de.alexanderciupka.pokemon.gui.panels.NewAttackPanel;
@@ -40,6 +42,7 @@ public class GameFrame extends JFrame {
 	private PCPanel pc;
 	private ReportPanel report;
 	private InventoryPanel inventory;
+	private EvolutionPanel evolution;
 	private BackgroundLabel imageHolder;
 	private TextLabel dialogue;
 	private GameController gController;
@@ -51,6 +54,8 @@ public class GameFrame extends JFrame {
 	public static final int FRAME_SIZE = GRID_SIZE * 9;
 
 	private Direction currentDirection;
+	private Stack<JPanel> panelHistory;
+	private boolean back;
 
 	public GameFrame() {
 		currentDirection = Direction.NONE;
@@ -76,13 +81,16 @@ public class GameFrame extends JFrame {
 		pokemon.setBorder(new EmptyBorder(5, 5, 5, 5));
 		pokemon.setLayout(null);
 		report = new ReportPanel();
+		evolution = new EvolutionPanel();
 		map.add(imageHolder);
 		map.add(dialogue);
+		
+		panelHistory = new Stack<JPanel>();
 
-		System.out.println("Dialogue: " + pokemon.getComponentZOrder(dialogue));
 
 		addActions();
 		this.paint(getGraphics());
+		
 
 	}
 
@@ -97,7 +105,6 @@ public class GameFrame extends JFrame {
 				if (!map.equals(getContentPane())) {
 					setContentPane(map);
 				}
-				map.paint(g);
 				map.repaint();
 			}
 		} else {
@@ -109,11 +116,14 @@ public class GameFrame extends JFrame {
 
 	@Override
 	public void setContentPane(Container contentPane) {
-		System.out.println(contentPane);
 		if(dialogue != null) {
 			dialogue.setParent((JPanel) contentPane);
 		}
 		super.setContentPane(contentPane);
+	}
+	
+	public JPanel getCurrentPanel() {
+		return this.currentPanel;
 	}
 
 	public void startFight(Pokemon player, Pokemon enemy) {
@@ -133,6 +143,7 @@ public class GameFrame extends JFrame {
 	}
 
 	public void stopFight() {
+		gController.waitDialogue();
 		setCurrentPanel(null);
 		repaint();
 	}
@@ -170,7 +181,11 @@ public class GameFrame extends JFrame {
 			this.newMove.setBorder(new EmptyBorder(5, 5, 5, 5));
 		}
 		this.newMove.set(pokemon, newMove);
-		this.gController.getFight().setCurrentFightOption(FightOption.NEW_ATTACK);
+		if(gController.isFighting()) {
+			this.gController.getFight().setCurrentFightOption(FightOption.NEW_ATTACK);
+		} else {
+			this.setCurrentPanel(this.newMove);
+		}
 		gController.repaint();
 	}
 
@@ -183,13 +198,21 @@ public class GameFrame extends JFrame {
 	}
 
 	public void setCurrentPanel(JPanel currentPanel) {
+		if(!this.back && (currentPanel != null || this.currentPanel != null) &&
+				((currentPanel != null && !currentPanel.getClass().isInstance(this.currentPanel)) || 
+						(this.currentPanel != null && !this.currentPanel.getClass().isInstance(currentPanel)))) {
+			
+			this.panelHistory.push(this.currentPanel);
+		}
 		this.currentPanel = currentPanel;
 		if (this.gController.isFighting() && currentPanel instanceof PokemonPanel) {
 			this.gController.getFight().setCurrentFightOption(FightOption.POKEMON);
 		} else if (this.gController.isFighting() && currentPanel instanceof ReportPanel) {
 			this.gController.getFight().setCurrentFightOption(FightOption.REPORT);
+		} else if(this.gController.isFighting() && currentPanel instanceof InventoryPanel) {
+			this.gController.getFight().setCurrentFightOption(FightOption.BAG);
 		}
-		this.repaint();
+		this.back = false;
 	}
 
 	private void addActions() {
@@ -358,7 +381,38 @@ public class GameFrame extends JFrame {
 		pokemon.getActionMap().put("enter", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				
 				dialogue.setActive();
+			}
+		}); 	
+		
+		evolution.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("SPACE"), "space");
+		evolution.getActionMap().put("space", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (gController.getInteractionPause()) {
+					dialogue.setDelay(TextLabel.FAST);
+				}
+			}
+		});
+		evolution.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released SPACE"),
+				"released space");
+		evolution.getActionMap().put("released space", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (gController.getInteractionPause()) {
+					dialogue.setDelay(TextLabel.SLOW);
+				}
+			}
+		});
+
+		evolution.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ENTER"), "enter");
+		evolution.getActionMap().put("enter", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (!gController.isFighting() && gController.getInteractionPause()) {
+					dialogue.setActive();
+				}
 			}
 		});
 		
@@ -368,13 +422,6 @@ public class GameFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (gController.getInteractionPause()) {
 					dialogue.setDelay(TextLabel.FAST);
-				} else {
-					new Thread(new Runnable() {
-						@Override
-						public void run() {
-							gController.checkInteraction();
-						}
-					}).start();
 				}
 			}
 		});
@@ -450,7 +497,7 @@ public class GameFrame extends JFrame {
 				gController.getMainCharacter().ignoreCollisions = !gController.getMainCharacter().ignoreCollisions;
 			}
 		});
-
+		
 	}
 
 	public void displayPC(Player owner) {
@@ -459,6 +506,7 @@ public class GameFrame extends JFrame {
 		}
 		this.pc.setPC(owner.getPC());
 		this.setCurrentPanel(this.pc.getContentPane());
+		this.repaint();
 	}
 
 	public JPanel getReportPanel() {
@@ -471,5 +519,31 @@ public class GameFrame extends JFrame {
 
 	public InventoryPanel getInventoryPanel() {
 		return this.inventory;
+	}
+	
+	public EvolutionPanel getEvolutionPanel() {
+		return this.evolution;
+	}
+	
+	public JPanel getLastPanel() {
+		return getLastPanel(false);
+	}
+	
+	public JPanel getLastPanel(boolean withEvolution) {
+		this.back = true;
+		if(panelHistory.isEmpty()) {
+			return null;
+		} else {
+			JPanel p = panelHistory.pop();
+			if(this.currentPanel.getClass().isInstance(p)) {
+				return getLastPanel(withEvolution);
+			}
+			if(!withEvolution) {
+				if(p instanceof EvolutionPanel) {
+					return getLastPanel(withEvolution);
+				}
+			}
+			return p;
+		}
 	}
 }

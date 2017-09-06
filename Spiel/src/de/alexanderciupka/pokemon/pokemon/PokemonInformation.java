@@ -1,9 +1,16 @@
 package de.alexanderciupka.pokemon.pokemon;
 
+import java.awt.Image;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Random;
+
+import javax.imageio.ImageIO;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -11,30 +18,31 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import de.alexanderciupka.hoverbutton.Main;
 import de.alexanderciupka.pokemon.fighting.Target;
+import de.alexanderciupka.pokemon.map.GameController;
 
 public class PokemonInformation {
 
-	private JsonArray allPokemon;
 	private HashMap<Integer, String> names;
 	private JsonArray allPokemonData;
 	private ArrayList<Move> allMoves;
 	private JsonArray allMoveData;
 	private JsonArray allPokemonMoveData;
+
 	private HashMap<String, JsonObject> allGrowthRates;
 	private HashMap<Integer, HashMap<Integer, ArrayList<Move>>> allPokemonMoves;
-	private HashMap<Integer, HashMap<Integer, Integer>> allEvolutions;
+	private HashMap<Integer, JsonArray> allEvolutions;
 	private HashMap<Integer, Type[]> allPokemonTypes;
+	private HashMap<String, Image> frontSprites;
+	private HashMap<String, Image> backSprites;
 	private JsonParser parser;
-	private BufferedReader pokemonNames;
 	private BufferedReader pokemonData;
 	private BufferedReader moveData;
 	private BufferedReader pokemonMoveData;
 	private BufferedReader growthRates;
 
 	public PokemonInformation() {
-		pokemonNames = new BufferedReader(
-				new InputStreamReader(this.getClass().getResourceAsStream("/pokemon/names.json")));
 		pokemonData = new BufferedReader(
 				new InputStreamReader(this.getClass().getResourceAsStream("/pokemon/pokemon.json")));
 		moveData = new BufferedReader(
@@ -43,29 +51,27 @@ public class PokemonInformation {
 				new InputStreamReader(this.getClass().getResourceAsStream("/pokemon/pokemonMoves.json")));
 		growthRates = new BufferedReader(
 				new InputStreamReader(this.getClass().getResourceAsStream("/pokemon/growth_rates.json")));
+		frontSprites = new HashMap<>();
+		backSprites = new HashMap<>();
 		names = new HashMap<Integer, String>();
 		allMoves = new ArrayList<Move>();
 		allPokemonMoves = new HashMap<Integer, HashMap<Integer, ArrayList<Move>>>();
-		allEvolutions = new HashMap<Integer, HashMap<Integer, Integer>>();
+		allEvolutions = new HashMap<Integer, JsonArray>();
 		allPokemonTypes = new HashMap<Integer, Type[]>();
 		allGrowthRates = new HashMap<String, JsonObject>();
 		parser = new JsonParser();
+
 		readData();
 	}
 
 	private void readData() {
 		try {
-			allPokemon = parser.parse(pokemonNames.readLine()).getAsJsonArray();
 			allPokemonData = parser.parse(pokemonData.readLine()).getAsJsonArray();
 			allMoveData = parser.parse(moveData.readLine()).getAsJsonArray();
 			allPokemonMoveData = parser.parse(pokemonMoveData.readLine()).getAsJsonArray();
 			JsonArray allGrowthRates = parser.parse(growthRates.readLine()).getAsJsonArray();
-			for(JsonElement element : allGrowthRates) {
+			for (JsonElement element : allGrowthRates) {
 				this.allGrowthRates.put(element.getAsJsonObject().get("name").getAsString(), element.getAsJsonObject());
-			}
-			for (JsonElement element : allPokemon) {
-				names.put(element.getAsJsonObject().get("id").getAsInt(),
-						element.getAsJsonObject().get("name").getAsString());
 			}
 			for (JsonElement element : allMoveData) {
 				JsonObject currentJson = element.getAsJsonObject();
@@ -90,7 +96,8 @@ public class PokemonInformation {
 					currentMove.setMaxHits(1);
 				}
 				currentMove.setCategory(currentJson.get("category").getAsString());
-				currentMove.setTarget(currentJson.get("target") instanceof JsonNull ? Target.OPPONENT : Target.valueOf(currentJson.get("target").getAsString()));
+				currentMove.setTarget(currentJson.get("target") instanceof JsonNull ? Target.OPPONENT
+						: Target.valueOf(currentJson.get("target").getAsString()));
 				currentMove.setCrit(currentJson.get("crit_rate").getAsInt());
 				switch (currentJson.get("ailment").getAsString()) {
 				case "poison":
@@ -141,7 +148,7 @@ public class PokemonInformation {
 				} catch (Exception e) {
 					currentMove.setPower(0);
 				}
-				currentMove.setAilmentChance(currentJson.get("ailment_chance").getAsFloat());
+				currentMove.setAilmentChance(currentJson.get("ailment_chance").getAsInt());
 				if (currentJson.get("category").getAsString().equals("ailment")) {
 					currentMove.setAilmentChance(100);
 				}
@@ -154,17 +161,24 @@ public class PokemonInformation {
 				currentMove.setDrain(currentJson.get("drain").getAsFloat());
 				for (JsonElement currentStatChange : currentJson.get("stat_changes").getAsJsonArray()) {
 					int change = currentStatChange.getAsJsonObject().get("change").getAsInt();
-					String[] url = currentStatChange.getAsJsonObject().get("stat").getAsJsonObject().get("url")
-							.getAsString().split("/");
-					int stat = Integer.parseInt(url[url.length - 1]);
-					currentMove.addStatChange(stat - 2, change);
+					try {
+						currentMove.addStatChange(
+								Stat.valueOf(
+										currentStatChange.getAsJsonObject().get("stat").getAsJsonObject()
+										.get("name").getAsString().toUpperCase()),
+								change);
+					} catch (Exception e) {
+						e.printStackTrace();
+						continue;
+					}
 				}
 				allMoves.add(currentMove);
 			}
 			for (JsonElement element : allPokemonData) {
 				int key = element.getAsJsonObject().get("id").getAsInt();
+				names.put(key,
+						element.getAsJsonObject().get("name").getAsString());
 				HashMap<Integer, ArrayList<Move>> moves = new HashMap<Integer, ArrayList<Move>>();
-				HashMap<Integer, Integer> evolutions = new HashMap<Integer, Integer>(1);
 				JsonArray moveArray = null;
 				try {
 					moveArray = getMoves(key);
@@ -176,20 +190,16 @@ public class PokemonInformation {
 					if (moveElement.getAsJsonObject().get("id").getAsInt() - 1 < allMoves.size()) {
 						int level = moveElement.getAsJsonObject().get("level_learned_at").getAsInt();
 						ArrayList<Move> currentMoves = moves.get(level);
-						if(currentMoves == null) {
+						if (currentMoves == null) {
 							currentMoves = new ArrayList<Move>();
 						}
 						currentMoves.add(getMoveById(moveElement.getAsJsonObject().get("id").getAsInt()));
 						moves.put(level, currentMoves);
 					}
 				}
-				JsonObject evolutionObject = element.getAsJsonObject().get("evolution").getAsJsonObject();
-				try {
-					evolutions.put(evolutionObject.get("min_level").getAsInt(), evolutionObject.get("id").getAsInt());
-				} catch (Exception e) {
-				}
 				allPokemonMoves.put(key, moves);
-				allEvolutions.put(key, evolutions);
+				allEvolutions.put(key, element.getAsJsonObject().get("evolution").getAsJsonArray());
+
 			}
 			for (JsonElement element : allPokemonData) {
 				int id = element.getAsJsonObject().get("id").getAsInt();
@@ -233,24 +243,126 @@ public class PokemonInformation {
 		return null;
 	}
 
-	public ArrayList<Move> getNewMove(int id, int level) {
+	public ArrayList<Move> getNewMove(Pokemon p, int level) {
 		ArrayList<Move> newMoves = new ArrayList<Move>();
-		for (int i : allPokemonMoves.get(id).keySet()) {
+		for (int i : allPokemonMoves.get(p.getId()).keySet()) {
 			if (i == level) {
-				for (int ammount = 0; ammount < allPokemonMoves.get(id).get(i).size(); ammount++) {
-					newMoves.add(allPokemonMoves.get(id).get(i).get(ammount).clone());
+				for (int ammount = 0; ammount < allPokemonMoves.get(p.getId()).get(i).size(); ammount++) {
+					Move newMove = allPokemonMoves.get(p.getId()).get(i).get(ammount).clone();
+					if (!p.knowsMove(newMove)) {
+						newMoves.add(newMove);
+					}
 				}
 			}
 		}
 		return newMoves;
 	}
 
-	public int checkEvolution(int id, int level) {
-		try {
-			return allEvolutions.get(id).get(level);
-		} catch (Exception e) {
-			return 0;
+	/**
+	 * Checks the evolution of a Pokemon - if used is Item.NONE -> LEVELUP
+	 * 
+	 * @param p
+	 * @param used
+	 * @return
+	 */
+	public int checkEvolution(Pokemon p, Item used) {
+		EvolveType type = used == Item.NONE ? EvolveType.LEVELUP : EvolveType.USEITEM;
+		for (JsonElement j : this.allEvolutions.get(p.getId())) {
+			JsonArray jArray = j.getAsJsonObject().get("details").getAsJsonArray();
+			for (JsonElement k : jArray) {
+				JsonObject curJson = k.getAsJsonObject();
+				if (type == EvolveType.valueOf(curJson.get("trigger").getAsString().toUpperCase())) {
+					boolean evolve = true;
+					if (!(curJson.get("min_level") instanceof JsonNull)) {
+						evolve &= curJson.get("min_level").getAsInt() <= p.getStats().getLevel();
+					}
+					int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+					switch (curJson.get("time_of_day").getAsString()) {
+					case "day":
+						evolve &= hour >= 8 && hour < 20;
+						break;
+					case "night":
+						evolve &= hour < 8 || hour >= 20;
+						break;
+					default:
+						break;
+					}
+					if (!(curJson.get("relative_physical_stats") instanceof JsonNull)) {
+						short attack = p.getStats().getStats().get(Stat.ATTACK);
+						short defense = p.getStats().getStats().get(Stat.DEFENSE);
+						switch (curJson.get("relative_physical_stats").getAsString()) {
+						case "-1":
+							evolve &= attack < defense;
+							break;
+						case "0":
+							evolve &= attack == defense;
+							break;
+						case "1":
+							evolve &= attack > defense;
+							break;
+						}
+					}
+					if (!(curJson.get("item") instanceof JsonNull)) {
+						evolve &= used == Item.valueOf(curJson.get("item").getAsString().toUpperCase());
+					}
+					if (!(curJson.get("gender") instanceof JsonNull)) {
+						switch (curJson.get("gender").getAsInt()) {
+						case 1:
+							evolve &= p.getGender() == Gender.FEMALE;
+							break;
+						case 2:
+							evolve &= p.getGender() == Gender.MALE;
+							break;
+						case 3:
+							evolve &= p.getGender() == Gender.GENDERLESS;
+							break;
+						}
+					}
+					if (!(curJson.get("known_move_type") instanceof JsonNull)) {
+						Type t = Type.valueOf(curJson.get("known_move_type").getAsString().toUpperCase());
+						boolean has = false;
+						for (Move m : p.getMoves()) {
+							if (m != null && m.getMoveType() == t) {
+								has = true;
+								break;
+							}
+						}
+						evolve &= has;
+					}
+					if (!(curJson.get("party_type") instanceof JsonNull)) {
+						Type t = Type.valueOf(curJson.get("known_move_type").getAsString().toUpperCase());
+						boolean has = false;
+						for (Pokemon poke : GameController.getInstance().getMainCharacter().getTeam().getTeam()) {
+							if (poke != null && !p.equals(poke)) {
+								for (Type ty : poke.getTypes()) {
+									if (t.equals(ty)) {
+										has = true;
+										break;
+									}
+								}
+							}
+							if (has) {
+								break;
+							}
+						}
+						evolve &= has;
+					}
+					// Trade?
+					// held_item
+					if (!(curJson.get("known_move") instanceof JsonNull)) {
+						// Change type
+					}
+					if (!(curJson.get("location") instanceof JsonNull)) {
+						// Change routes names
+					}
+					if (evolve) {
+						return j.getAsJsonObject().get("id").getAsInt();
+					}
+				}
+
+			}
 		}
+		return 0;
 	}
 
 	public Type[] getTypes(int id) {
@@ -263,15 +375,15 @@ public class PokemonInformation {
 	}
 
 	public int getID(String name) {
-		for (JsonElement e : allPokemon) {
-			if (e.getAsJsonObject().get("name").getAsString().toLowerCase().equals(name)) {
-				return e.getAsJsonObject().get("id").getAsInt();
+		for (Integer id : names.keySet()) {
+			if (names.get(id).equals(name)) {
+				return id;
 			}
 		}
 		return 0;
 	}
 
-	public short[] getBaseStats(int id) {
+	public HashMap<Stat, Short> getBaseStats(int id) {
 		JsonObject pokemon = null;
 		for (JsonElement je : allPokemonData) {
 			if (je.getAsJsonObject().get("id").getAsInt() == id) {
@@ -280,19 +392,15 @@ public class PokemonInformation {
 			}
 		}
 		if (pokemon != null) {
-			short[] stats = new short[6];
+			HashMap<Stat, Short> stats = new HashMap<Stat, Short>();
 			for (JsonElement cs : pokemon.get("stats").getAsJsonArray()) {
 				JsonObject currentStat = cs.getAsJsonObject();
-				for (int i = 0; i < Stats.STAT_SAVE_NAMES.length; i++) {
-					if (currentStat.get("name").getAsString().equals(Stats.STAT_SAVE_NAMES[i])) {
-						stats[i] = currentStat.get("base_stat").getAsShort();
-						break;
-					}
-				}
+				stats.put(Stat.valueOf(currentStat.get("name").getAsString().toUpperCase()),
+						currentStat.get("base_stat").getAsShort());
 			}
 			return stats;
 		}
-		return new short[] { 0, 0, 0, 0, 0, 0 };
+		return null;
 	}
 
 	public int getWeight(int id) {
@@ -322,7 +430,7 @@ public class PokemonInformation {
 		return 0;
 	}
 
-	public HashMap<String, Short> getEvBonus(int id) {
+	public HashMap<Stat, Short> getEvBonus(int id) {
 		JsonObject pokemon = null;
 		for (JsonElement je : allPokemonData) {
 			if (je.getAsJsonObject().get("id").getAsInt() == id) {
@@ -331,10 +439,11 @@ public class PokemonInformation {
 			}
 		}
 		if (pokemon != null) {
-			HashMap<String, Short> stats = new HashMap<String, Short>();
+			HashMap<Stat, Short> stats = new HashMap<Stat, Short>();
 			for (JsonElement cs : pokemon.get("stats").getAsJsonArray()) {
 				JsonObject currentStat = cs.getAsJsonObject();
-				stats.put(currentStat.get("name").getAsString(), currentStat.get("effort").getAsShort());
+				stats.put(Stat.valueOf(currentStat.get("name").getAsString().toUpperCase()),
+						currentStat.get("effort").getAsShort());
 			}
 			return stats;
 		}
@@ -361,13 +470,107 @@ public class PokemonInformation {
 
 	public int getLevelUpXP(Pokemon p, int nextLevel) {
 		int result = 0;
-		for(JsonElement j : this.allGrowthRates.get(p.getGrowthRate()).get("levels").getAsJsonArray()) {
-			if(j.getAsJsonObject().get("level").getAsInt() == nextLevel - 1) {
+		for (JsonElement j : this.allGrowthRates.get(p.getGrowthRate()).get("levels").getAsJsonArray()) {
+			if (j.getAsJsonObject().get("level").getAsInt() == nextLevel - 1) {
 				result -= j.getAsJsonObject().get("experience").getAsInt();
 			} else if (j.getAsJsonObject().get("level").getAsInt() == nextLevel) {
 				result += j.getAsJsonObject().get("experience").getAsInt();
 			}
 		}
 		return result;
+	}
+
+	public int getBaseHappiness(int id) {
+		for (JsonElement je : allPokemonData) {
+			if (je.getAsJsonObject().get("id").getAsInt() == id) {
+				return je.getAsJsonObject().get("base_happiness").getAsInt();
+			}
+		}
+		return 255;
+	}
+
+	// TODO: Egg-Groups
+
+	public boolean isBaby(int id) {
+		for (JsonElement je : allPokemonData) {
+			if (je.getAsJsonObject().get("id").getAsInt() == id) {
+				return je.getAsJsonObject().get("is_baby").getAsBoolean();
+			}
+		}
+		return false;
+	}
+
+	public Gender getGender(int id) {
+		for (JsonElement je : allPokemonData) {
+			if (je.getAsJsonObject().get("id").getAsInt() == id) {
+				double femaleChance = je.getAsJsonObject().get("female_rate").getAsDouble();
+				if (femaleChance < 0) {
+					return Gender.GENDERLESS;
+				} else if (femaleChance == 0) {
+					return Gender.MALE;
+				} else if (femaleChance == 1) {
+					return Gender.FEMALE;
+				} else {
+					Random rng = new Random();
+					return rng.nextFloat() < femaleChance ? Gender.FEMALE : Gender.MALE;
+				}
+			}
+		}
+		return Gender.GENDERLESS;
+	}
+
+	public Image getFrontSprite(int id, Gender g, boolean shiny) {
+		String s = id + g.getText() + (shiny ? "s" : "");
+		Image img = this.frontSprites.get(s);
+		if (img == null) {
+			try {
+				img = ImageIO.read(new File(this.getClass().getResource("/pokemon/front/" + s + ".png").getFile()));
+				this.frontSprites.put(s, img);
+			} catch (Exception e) {
+				try {
+					img = this.frontSprites.get(id + (shiny ? "s" : ""));
+					if (img == null) {
+						img = ImageIO.read(new File(this.getClass()
+								.getResource("/pokemon/front/" + id + (shiny ? "s" : "") + ".png").getFile()));
+						this.frontSprites.put(id + (shiny ? "s" : ""), img);
+					}
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+		return img;
+	}
+
+	public Image getBackSprite(int id, Gender g, boolean shiny) {
+		String s = id + g.getText() + (shiny ? "s" : "");
+		Image img = this.backSprites.get(s);
+		if (img == null) {
+			try {
+				img = ImageIO.read(new File(this.getClass().getResource("/pokemon/back/" + s + ".png").getFile()));
+				this.backSprites.put(s, img);
+			} catch (Exception e) {
+				try {
+					img = this.backSprites.get(id + (shiny ? "s" : ""));
+					if (img == null) {
+						img = ImageIO.read(new File(this.getClass()
+								.getResource("/pokemon/back/" + id + (shiny ? "s" : "") + ".png").getFile()));
+						this.backSprites.put(id + (shiny ? "s" : ""), img);
+					}
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+		return img;
+	}
+
+	public Image getGenderImage(Gender g) {
+		try {
+			return ImageIO.read(new File(Main.class.getResource("/icons/" + g.name().toLowerCase() + ".png").getFile()));
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 }

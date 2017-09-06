@@ -8,11 +8,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -32,6 +29,7 @@ import de.alexanderciupka.pokemon.painting.Painting;
 import de.alexanderciupka.pokemon.pokemon.DamageClass;
 import de.alexanderciupka.pokemon.pokemon.Move;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
+import de.alexanderciupka.pokemon.pokemon.Stat;
 import de.alexanderciupka.pokemon.pokemon.Stats;
 import de.alexanderciupka.pokemon.pokemon.Type;
 
@@ -68,16 +66,14 @@ public class ReportPanel extends JPanel {
 	private JLabel damageClassLabel;
 	private JLabel descriptionLabel;
 	private AilmentLabel ailmentLabel;
+	
+	private JLabel genderLabel;
 
 	public ReportPanel() {
 		setBounds(0, 0, 630, 630);
 		setLayout(null);
 
-		try {
-			pokemonLabel = new JLabel(new ImageIcon(ImageIO.read(new File(this.getClass().getResource("/pokemon/front/1.png").getFile())).getScaledInstance(200, 200, Image.SCALE_SMOOTH)));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		pokemonLabel = new JLabel();
 		pokemonLabel.setBounds(75, 115, 150, 150);
 		add(pokemonLabel);
 
@@ -94,7 +90,13 @@ public class ReportPanel extends JPanel {
 		back.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				GameController.getInstance().getGameFrame().setCurrentPanel(parent);
+				GameController gController = GameController.getInstance();
+				if(gController.isFighting()) {
+					gController.getGameFrame().setCurrentPanel(parent);
+				} else {
+					gController.getGameFrame().setCurrentPanel(gController.getGameFrame().getLastPanel());
+				}
+				GameController.getInstance().getGameFrame().repaint();
 			}
 		});
 		back.setBounds(125, 530, 360, 40);
@@ -128,14 +130,16 @@ public class ReportPanel extends JPanel {
 		idLabel.setBounds(50, 83, 60, 25);
 		add(idLabel);
 
-		//TODO: Description
+		genderLabel = new JLabel();
+		genderLabel.setBounds(120, 83, 25, 25);
+		add(genderLabel);
 
 		firstTypeLabel = new TypeLabel();
-		firstTypeLabel.setLocation(120, 83);
+		firstTypeLabel.setLocation(155, 83);
 		add(firstTypeLabel);
 
 		secondTypeLabel = new TypeLabel();
-		secondTypeLabel.setLocation(185, 83);
+		secondTypeLabel.setLocation(220, 83);
 		add(secondTypeLabel);
 
 		moveTypeLabel = new TypeLabel();
@@ -177,7 +181,7 @@ public class ReportPanel extends JPanel {
 
 
 		for(int i = 0; i < moves.length; i++) {
-			MoveButton currentMove = new MoveButton();
+			MoveButton currentMove = new MoveButton(false);
 			currentMove.setBounds(125 + 185 * (i % 2), 430 + 50 * (i / 2), 175, 40);
 			currentMove.setName(String.valueOf(i));
 
@@ -244,7 +248,7 @@ public class ReportPanel extends JPanel {
 
 		stats = new JLabel[5];
 		for(int i = 0; i < stats.length; i++) {
-			JLabel currentLabel = new JLabel(Stats.STAT_NAMES[i] + ": ");
+			JLabel currentLabel = new JLabel(Stat.values()[i].getText() + ": ");
 			currentLabel.setFont(new Font("Tahoma", Font.PLAIN, 15));
 			currentLabel.setBounds(290, 120 + 40 * i, 165, 25);
 			currentLabel.setBorder(new CompoundBorder(new LineBorder(new Color(0, 0, 0), 1, true), new EmptyBorder(0, 5, 0, 0)));
@@ -274,6 +278,11 @@ public class ReportPanel extends JPanel {
 		this.pokemonLabel.setIcon(new ImageIcon(Painting.toBufferedImage(this.pokemon.getSpriteFront()).getScaledInstance(150, 150, Image.SCALE_SMOOTH)));
 		this.nameLabel.setText("Name: " + this.pokemon.getName());
 		this.idLabel.setText("ID: " + this.pokemon.getId());
+		Image img = GameController.getInstance().getInformation().getGenderImage(this.pokemon.getGender());
+		if(img != null) {
+			img = img.getScaledInstance(25, 25, Image.SCALE_SMOOTH);
+		}
+		this.genderLabel.setIcon(new ImageIcon(img));
 		this.firstTypeLabel.setType(this.pokemon.getTypes()[0]);
 		this.secondTypeLabel.setType(this.pokemon.getTypes()[1]);
 
@@ -283,14 +292,14 @@ public class ReportPanel extends JPanel {
 		this.xpBar.setValue(stats.getCurrentXP());
 		this.levelLabel.setText("Level: " + stats.getLevel());
 		//KP
-		this.kpLabel.setText(stats.getCurrentHP() + " / " + stats.getStats()[0]);
-		this.hpBar.setMaximum(stats.getStats()[0]);
+		this.kpLabel.setText(stats.getCurrentHP() + " / " + stats.getStats().get(Stat.HP));
+		this.hpBar.setMaximum(stats.getStats().get(Stat.HP));
 		this.hpBar.setValue(stats.getCurrentHP());
 		this.hpBar.setForeground(stats.getHPColor());
 		this.ailmentLabel.setAilment(this.pokemon.getAilment());
 		//Stats
-		for(int i = 1; i < stats.getStats().length; i++) {
-			this.stats[i-1].setText(Stats.STAT_NAMES[i-1] + ": " + stats.getStats()[i]);
+		for(int i = 0; i < this.stats.length; i++) {
+			this.stats[i].setText(Stat.values()[i].getText() + ": " + stats.getStats().get(Stat.values()[i]));
 		}
 		setVisible(true);
 	}

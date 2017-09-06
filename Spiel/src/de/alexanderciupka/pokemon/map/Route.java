@@ -17,6 +17,8 @@ import com.google.gson.JsonObject;
 
 import de.alexanderciupka.pokemon.characters.NPC;
 import de.alexanderciupka.pokemon.gui.GameFrame;
+import de.alexanderciupka.pokemon.gui.overlay.RainType;
+import de.alexanderciupka.pokemon.map.entities.Entity;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
 
 public class Route {
@@ -30,8 +32,10 @@ public class Route {
 	private ArrayList<SimpleEntry<Integer, Short>> pokemonPool;
 	private ArrayList<NPC> characters;
 	private BufferedImage map;
+	private RainType rain;
 
 	private String terrainName;
+	private RouteType type;
 
 	public Route() {
 		this.pokemonPool = new ArrayList<SimpleEntry<Integer, Short>>();
@@ -174,7 +178,7 @@ public class Route {
 				}
 			}
 		}
-//		 saveMap();
+//		saveMap();
 	}
 
 	public void updateMap(Point... updatePoint) {
@@ -187,10 +191,10 @@ public class Route {
 					g.drawImage(entities[p.y][p.x].getSprite(), (int) (entities[p.y][p.x].getExactX() * 70),
 							(int) (entities[p.y][p.x].getExactY() * 70), null);
 					if (entities[p.y][p.x].hasCharacter()) {
-						for (NPC npc : entities[p.y][p.x].getCharacters()) {
-							g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70),
-									(int) (npc.getExactY() * 70), null);
-						}
+//						for (NPC npc : entities[p.y][p.x].getCharacters()) {
+//							g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70),
+//									(int) (npc.getExactY() * 70), null);
+//						}
 					}
 					repainted[p.y][p.x] = true;
 					for (int x = Math.max(0, p.x - 4); x < Math.min(width, p.x + 4); x++) {
@@ -204,16 +208,16 @@ public class Route {
 								g.drawImage(entities[y][x].getSprite(), (int) (entities[y][x].getExactX() * 70),
 										(int) (entities[y][x].getExactY() * 70), null);
 								if (entities[y][x].hasCharacter()) {
-									for (NPC npc : entities[y][x].getCharacters()) {
-										g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70),
-												(int) (npc.getExactY() * 70), null);
-									}
+//									for (NPC npc : entities[y][x].getCharacters()) {
+//										g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70),
+//												(int) (npc.getExactY() * 70), null);
+//									}
 								}
 							}
-							for (NPC npc : entities[y][x].getCharacters()) {
-								g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70),
-										(int) (npc.getExactY() * 70), null);
-							}
+//							for (NPC npc : entities[y][x].getCharacters()) {
+//								g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70),
+//										(int) (npc.getExactY() * 70), null);
+//							}
 							repainted[y][x] = true;
 						}
 					}
@@ -221,27 +225,27 @@ public class Route {
 					e.printStackTrace();
 				}
 			}
-			for (int x = 0; x < width; x++) {
-				for (int y = 0; y < height; y++) {
-					if (this.entities[y][x].getSpriteName().startsWith("house")
-							|| this.entities[y][x].getSpriteName().startsWith("pokecenter")) {
-						g.drawImage(entities[y][x].getTerrain(), x * 70, y * 70, null);
-						g.drawImage(entities[y][x].getSprite(), (int) (entities[y][x].getExactX() * 70),
-								(int) (entities[y][x].getExactY() * 70), null);
-						if (entities[y][x].hasCharacter()) {
-							for (NPC npc : entities[y][x].getCharacters()) {
-								g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70),
-										(int) (npc.getExactY() * 70), null);
-							}
-						}
-					}
-					for (NPC npc : entities[y][x].getCharacters()) {
-						g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70), (int) (npc.getExactY() * 70),
-								null);
-
-					}
-				}
-			}
+//			for (int x = 0; x < width; x++) {
+//				for (int y = 0; y < height; y++) {
+//					if (this.entities[y][x].getSpriteName().startsWith("house")
+//							|| this.entities[y][x].getSpriteName().startsWith("pokecenter")) {
+//						g.drawImage(entities[y][x].getTerrain(), x * 70, y * 70, null);
+//						g.drawImage(entities[y][x].getSprite(), (int) (entities[y][x].getExactX() * 70),
+//								(int) (entities[y][x].getExactY() * 70), null);
+//						if (entities[y][x].hasCharacter()) {
+////							for (NPC npc : entities[y][x].getCharacters()) {
+////								g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70),
+////										(int) (npc.getExactY() * 70), null);
+////							}
+//						}
+//					}
+////					for (NPC npc : entities[y][x].getCharacters()) {
+////						g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70), (int) (npc.getExactY() * 70),
+////								null);
+////
+////					}
+//				}
+//			}
 			// saveMap();
 		}
 
@@ -254,6 +258,12 @@ public class Route {
 			for (int y = 0; y < height; y++) {
 				for (int x = 0; x < width; x++) {
 					try {
+						if(entities[y][x].hasCharacter()) {
+							for (NPC npc : entities[y][x].getCharacters()) {
+								g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70),
+										(int) (npc.getExactY() * 70), null);
+							}
+						}
 						g.setColor(Color.black);
 						g.drawRect(GameFrame.GRID_SIZE * x, GameFrame.GRID_SIZE * y, GameFrame.GRID_SIZE,
 								GameFrame.GRID_SIZE);
@@ -293,6 +303,22 @@ public class Route {
 			}
 		}
 		return null;
+	}
+
+	public RainType getRain() {
+		return rain;
+	}
+
+	public void setRain(RainType rain) {
+		this.rain = rain;
+	}
+
+	public RouteType getType() {
+		return type;
+	}
+
+	public void setType(RouteType type) {
+		this.type = type;
 	}
 
 	public boolean equals(Object obj, boolean withCharacters) {
@@ -360,6 +386,12 @@ public class Route {
 				this.pokemonPool = new ArrayList<>(route.pokemonPool);
 			}
 			
+			try {
+				this.setRain(RainType.valueOf(saveData.get("rain").getAsString().toUpperCase()));
+			} catch(Exception e) {
+				this.setRain(route.getRain());
+			}
+			
 			createEntities();
 			if(saveData.get("entities") != null) {
 				for(JsonElement j : saveData.get("entities").getAsJsonArray()) {
@@ -403,6 +435,9 @@ public class Route {
 		}
 		if(entities != null) {
 			saveData.add("entities", entities);
+		}
+		if(this.rain != null) {
+			saveData.addProperty("rain", rain.name());
 		}
 		if (!this.pokemonPool.equals(oldRoute.pokemonPool)) {
 			JsonArray pool = new JsonArray();

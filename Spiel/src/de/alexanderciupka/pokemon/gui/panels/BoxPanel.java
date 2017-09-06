@@ -90,7 +90,8 @@ public class BoxPanel extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (parent.getPC().getOwner().getTeam().getAmmount() > 0) {
-					GameController.getInstance().getGameFrame().setCurrentPanel(null);
+					GameController.getInstance().getGameFrame().setCurrentPanel(GameController.getInstance().getGameFrame().getLastPanel());
+					GameController.getInstance().getGameFrame().repaint();
 				} else {
 					JOptionPane.showMessageDialog(GameController.getInstance().getGameFrame(),
 							"Du brauchst mindestens ein Pokemon im Team!", "Team", JOptionPane.ERROR_MESSAGE, null);

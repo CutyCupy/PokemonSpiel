@@ -6,12 +6,16 @@ import java.util.Random;
 
 import javax.swing.JLabel;
 
+import de.alexanderciupka.pokemon.characters.NPC;
 import de.alexanderciupka.pokemon.gui.overlay.CollapseOverlay;
 import de.alexanderciupka.pokemon.gui.overlay.DarkOverlay;
 import de.alexanderciupka.pokemon.gui.overlay.Form;
 import de.alexanderciupka.pokemon.gui.overlay.LogoOverlay;
 import de.alexanderciupka.pokemon.gui.overlay.Overlay;
+import de.alexanderciupka.pokemon.gui.overlay.RainOverlay;
 import de.alexanderciupka.pokemon.gui.overlay.RouteOverlay;
+import de.alexanderciupka.pokemon.gui.overlay.SpottedOverlay;
+import de.alexanderciupka.pokemon.map.Camera;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.map.Route;
 
@@ -32,8 +36,12 @@ public class BackgroundLabel extends JLabel {
 	@Override
 	public void paint(Graphics g) {
 		g.clearRect(0, 0, this.getWidth(), this.getHeight());
-		double x = (gController.getMainCharacter().getExactX() - 4);
-		double y = (gController.getMainCharacter().getExactY() - 4);
+		
+		Camera c = gController.getCurrentBackground().getCamera();
+		
+		double x = (c.getX() - 4.5);
+		double y = (c.getY() - 4.5);
+		
 		double w = 9;
 		double h = 9;
 
@@ -59,6 +67,15 @@ public class BackgroundLabel extends JLabel {
 		g.drawImage(gController.getCurrentBackground().getCurrentRoute().getMap().getSubimage((int) (x * GameFrame.GRID_SIZE), (int) (y * GameFrame.GRID_SIZE), (int) (w * GameFrame.GRID_SIZE),
 				(int) (h * GameFrame.GRID_SIZE)),
 				(int) (xOffset * GameFrame.GRID_SIZE), (int) (yOffset * GameFrame.GRID_SIZE), null);
+		for(NPC npc : gController.getCurrentBackground().getCurrentRoute().getCharacters()) {
+			int npcX = (int) ((npc.getExactX() - x + xOffset) * GameFrame.GRID_SIZE);
+			int npcY = (int) ((npc.getExactY() - y + yOffset) * GameFrame.GRID_SIZE);
+			if(npcX > -GameFrame.GRID_SIZE && npcX < GameFrame.GRID_SIZE * w ||
+					npcX > -GameFrame.GRID_SIZE && npcY < GameFrame.GRID_SIZE * h) {
+				g.drawImage(npc.getCharacterImage(), (int) ((npc.getExactX() - x + xOffset) * GameFrame.GRID_SIZE), 
+						(int) ((npc.getExactY() - y + yOffset) * GameFrame.GRID_SIZE), null);
+			}
+		}
 		g.drawImage(gController.getMainCharacter().getCharacterImage(), (int) ((gController.getMainCharacter().getExactX() - x + xOffset) * GameFrame.GRID_SIZE),
 				(int) ((gController.getMainCharacter().getExactY() - y + yOffset) * GameFrame.GRID_SIZE), null);
 		
@@ -73,8 +90,6 @@ public class BackgroundLabel extends JLabel {
 		for(Overlay o : overlays) {
 			if(o.created) {
 				g.drawImage(o.getOverlay(), 0, 0, null);
-			} else {
-				System.out.println(o);
 			}
 		}
 		this.overlayAccess = true;
@@ -92,7 +107,16 @@ public class BackgroundLabel extends JLabel {
 	}
 	
 	public void addOverlay(Overlay ov) {
+		waitAccess();
 		this.overlays.add(ov);
+		this.overlayAccess = true;
+	}
+	
+	public void spotted(de.alexanderciupka.pokemon.characters.Character spotter) {
+		SpottedOverlay s = new SpottedOverlay(this, spotter);
+		this.addOverlay(s);
+		s.createOverlay();
+		wait(s);
 	}
 
 	public void startEncounter() {
@@ -135,21 +159,26 @@ public class BackgroundLabel extends JLabel {
 			waitAccess();
 			for(int i = 0; i < this.overlays.size(); i++) {
 				if(this.overlays.get(i) instanceof RouteOverlay ||
-						this.overlays.get(i) instanceof DarkOverlay) {
+						this.overlays.get(i) instanceof DarkOverlay ||
+						this.overlays.get(i) instanceof RainOverlay) {
 					this.overlays.remove(i);
 					i--;
 				}
 			}
+			this.overlayAccess = true;
 			if(newRoute.isDark()) {
 				DarkOverlay d = new DarkOverlay(this, this.getSize(), GameFrame.GRID_SIZE * 3);
 				d.createOverlay();
-				System.err.println("2");
 				this.addOverlay(d);
+			}
+			if(newRoute.getRain() != null) {
+				RainOverlay rain = new RainOverlay(this, this.getSize(), newRoute.getRain());
+				rain.startAnimation();
+				this.addOverlay(rain);
 			}
 			RouteOverlay r = new RouteOverlay(newRoute, this, this.getSize());
 			r.createOverlay();
 			this.addOverlay(r);
-			this.overlayAccess = true;
 			repaint();
 		}
 	}

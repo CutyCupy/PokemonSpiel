@@ -114,7 +114,7 @@ public class NPC extends Character {
 				y = -1;
 				break;
 			}
-			for(int i = 1; i < 8; i++) {
+			for(int i = 1; i < 5; i++) {
 				if(currentPosition.x + (i*x) == mainX && currentPosition.y + (i*y) == mainY) {
 					break;
 				} else if(!currentRoute.getEntities()[currentPosition.y + (i*y)][currentPosition.x + (i*x)].isAccessible(this)) {
@@ -135,6 +135,7 @@ public class NPC extends Character {
 				gController.getMainCharacter().setCurrentDirection(Direction.DOWN);
 				break;
 			}
+			gController.getGameFrame().getBackgroundLabel().spotted(this);
 			gController.getGameFrame().repaint();
 			while (!(currentPosition.x + x == mainX && currentPosition.y + y == mainY)) {
 				currentRoute.updateMap(currentPosition);
@@ -217,7 +218,7 @@ public class NPC extends Character {
 	public void setLogo(String logo) {
 		this.logo = logo;
 	}
-
+	
 	@Override
 	public JsonObject getSaveData() {
 		JsonObject saveData = super.getSaveData();

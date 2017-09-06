@@ -16,7 +16,7 @@ public class Move {
 	private int currentPP;
 	private int minHits;
 	private int maxHits;
-	private float ailmentChance;
+	private int ailmentChance;
 	private float statChance;
 	private float healing;
 	private float drain;
@@ -28,19 +28,25 @@ public class Move {
 	private DamageClass damageClass;
 	private float accuracy;
 	private String category;
-	private HashMap<Integer,Integer> stat_changes;
+	private HashMap<Stat, Integer> statChanges;
 	
 	private Target target;
 
 	private Type moveType;
 
 	public Move(int id) {
-		stat_changes = new HashMap<Integer,Integer>();
+		statChanges = new HashMap<Stat, Integer>();
+		for(Stat s : Stat.values()) {
+			statChanges.put(s, 0);
+		}
 		this.id = id;
 	}
 
 	public Move(String name) {
-		stat_changes = new HashMap<Integer,Integer>();
+		statChanges = new HashMap<Stat, Integer>();
+		for(Stat s : Stat.values()) {
+			statChanges.put(s, 0);
+		}
 		this.name = name;
 	}
 
@@ -93,7 +99,7 @@ public class Move {
 		return ailmentChance;
 	}
 
-	public void setAilmentChance(float ailmentChance) {
+	public void setAilmentChance(int ailmentChance) {
 		this.ailmentChance = ailmentChance;
 	}
 
@@ -131,7 +137,10 @@ public class Move {
 
 	@Override
 	public boolean equals(Object obj) {
-		return super.equals(obj);
+		if(obj instanceof Move) {
+			return ((Move) obj).getName().equals(this.getName());
+		}
+		return false;
 	}
 
 	@Override
@@ -148,7 +157,7 @@ public class Move {
 		newMove.setPp(this.pp);
 		newMove.setStatChance(this.statChance);
 		newMove.setCurrentPP(this.currentPP);
-		newMove.stat_changes = (HashMap<Integer, Integer>) stat_changes.clone();
+		newMove.statChanges = new HashMap<>(statChanges);
 		newMove.setMoveType(this.moveType);
 		newMove.setAilment(this.ailment);
 		newMove.setDamageClass(this.damageClass);
@@ -184,9 +193,8 @@ public class Move {
 		this.currentPP = pp;
 	}
 
-	public void addStatChange(int index, int change) {
-		if(index >= 0 && index < 5)
-			stat_changes.put(index, change);
+	public void addStatChange(Stat s, int change) {
+		statChanges.put(s, change);
 	}
 
 	public boolean checkStatChange() {
@@ -225,10 +233,11 @@ public class Move {
 		}
 	}
 
-	public int changeStat(int index) {
-		if(stat_changes.containsKey(index)) {
-			return stat_changes.get(index);
+	public int changeStat(Stat s) {
+		if(statChanges.containsKey(s)) {
+			return statChanges.get(s);
 		}
+		System.out.println("doesnt exist!");
 		return 0;
 	}
 
@@ -272,12 +281,12 @@ public class Move {
 		this.damageClass = damageClass;
 	}
 
-	public HashMap<Integer, Integer> getStat_changes() {
-		return stat_changes;
+	public HashMap<Stat, Integer> getstatChanges() {
+		return statChanges;
 	}
 
-	public void setStat_changes(HashMap<Integer, Integer> stat_changes) {
-		this.stat_changes = stat_changes;
+	public void setStatChanges(HashMap<Stat, Integer> statChanges) {
+		this.statChanges = new HashMap<>(statChanges);
 	}
 
 	public String getCategory() {

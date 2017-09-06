@@ -60,7 +60,7 @@ public class Warp {
 	}
 	
 	@Override
-	protected Warp clone() {
+	public Warp clone() {
 		return new Warp(this.warpString, this.oldRoute, this.newRoute, new Point(this.newPosition));
 	}
 }

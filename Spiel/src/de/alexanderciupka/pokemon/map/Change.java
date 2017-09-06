@@ -1,10 +1,12 @@
 package de.alexanderciupka.pokemon.map;
 
 import java.awt.Point;
+import java.util.HashMap;
 
 import de.alexanderciupka.pokemon.characters.Character;
 import de.alexanderciupka.pokemon.characters.Direction;
 import de.alexanderciupka.pokemon.characters.Player;
+import de.alexanderciupka.pokemon.pokemon.Item;
 
 public class Change {
 	
@@ -22,6 +24,10 @@ public class Change {
 	private String afterFightUpdate;
 	private String spriteUpdate;
 	private boolean heal;
+	private HashMap<Item, Integer> item;
+	private Point camPosition;
+	private boolean camAnimation;
+	private boolean centerCharacter;
 	
 	private Character character;
 	private Route route;
@@ -40,6 +46,7 @@ public class Change {
 		this.character = this.character == null ? source : this.character;
 		this.path = this.character.moveTowards(this.move.x == -1 ? this.character.getCurrentPosition().x : this.move.x, 
 				this.move.y == -1 ? this.character.getCurrentPosition().y : this.move.y);
+		this.item = new HashMap<Item, Integer>();
 	}
 	
 	
@@ -128,6 +135,38 @@ public class Change {
 		this.heal = heal;
 	}
 	
+	public HashMap<Item, Integer> getItem() {
+		return item;
+	}
+
+	public void addItem(Item i, int ammount) {
+		this.item.put(i, ammount);
+	}
+
+	public Point getCamPosition() {
+		return camPosition;
+	}
+
+	public void setCamPosition(Point camPosition) {
+		this.camPosition = camPosition;
+	}
+
+	public boolean isCamAnimation() {
+		return camAnimation;
+	}
+
+	public void setCamAnimation(boolean camAnimation) {
+		this.camAnimation = camAnimation;
+	}
+
+	public boolean isCenterCharacter() {
+		return centerCharacter;
+	}
+
+	public void setCenterCharacter(boolean centerCharacter) {
+		this.centerCharacter = centerCharacter;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof Change) {
@@ -139,14 +178,17 @@ public class Change {
 					((this.beforeFightUpdate == null && other.beforeFightUpdate == null) || (this.beforeFightUpdate != null && this.beforeFightUpdate.equals(other.beforeFightUpdate))) &&
 					((this.noFightUpdate == null && other.noFightUpdate == null) || (this.noFightUpdate != null && this.noFightUpdate.equals(other.noFightUpdate))) &&
 					((this.afterFightUpdate == null && other.afterFightUpdate == null) || (this.afterFightUpdate != null && this.afterFightUpdate.equals(other.afterFightUpdate))) &&
-					((this.spriteUpdate == null && other.spriteUpdate == null) || (this.spriteUpdate != null && this.spriteUpdate.equals(other.spriteUpdate))));
+					((this.spriteUpdate == null && other.spriteUpdate == null) || (this.spriteUpdate != null && this.spriteUpdate.equals(other.spriteUpdate))) &&
+					(this.item == null && other.item == null) || (this.item != null && this.item.equals(other.item)) && 
+					this.camAnimation == other.camAnimation && this.centerCharacter == other.centerCharacter &&
+					(this.camPosition == null && other.camPosition == null) || (this.camPosition != null && this.camPosition.equals(other.camPosition)));
 		}
 		return false;
 	}
 
 	
 	@Override
-	protected Change clone() {
+	public Change clone() {
 		Change clone = new Change();
 		clone.setAfterFightUpdate(this.afterFightUpdate);
 		clone.setBeforeFightUpdate(this.beforeFightUpdate);
@@ -160,6 +202,9 @@ public class Change {
 		clone.setPositionUpdate(this.positionUpdate);
 		clone.setRouteID(this.routeID);
 		clone.setSpriteUpdate(this.spriteUpdate);
+		clone.setCamAnimation(this.camAnimation);
+		clone.setCamPosition(this.camPosition);
+		clone.setCenterCharacter(this.centerCharacter);
 		return clone;
 	}
 }

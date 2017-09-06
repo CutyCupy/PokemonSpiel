@@ -5,7 +5,10 @@ import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -106,10 +109,16 @@ public class MainMenuFrame extends JFrame {
 	}
 	
 	public void createBalls() {
-		pokeball = new ImageIcon(getClass().getResource("/pokeballs/pokeball.png")).getImage().getScaledInstance(75, 75, Image.SCALE_SMOOTH);
-		superball = new ImageIcon(getClass().getResource("/pokeballs/superball.png")).getImage().getScaledInstance(75, 75, Image.SCALE_SMOOTH);
-		hyperball = new ImageIcon(getClass().getResource("/pokeballs/hyperball.png")).getImage().getScaledInstance(75, 75, Image.SCALE_SMOOTH);
-		masterball = new ImageIcon(getClass().getResource("/pokeballs/masterball.png")).getImage().getScaledInstance(75, 75, Image.SCALE_SMOOTH);
+		try {
+			BufferedImage ball = ImageIO.read(getClass().getResource("/pokeballs/pokeball.png"));
+			double ratio = ball.getHeight() / (ball.getWidth() * 1.0);
+			pokeball = ball.getScaledInstance(75, (int) (75 * ratio), Image.SCALE_SMOOTH);
+			superball = ImageIO.read(getClass().getResource("/pokeballs/superball.png")).getScaledInstance(75, (int) (75 * ratio), Image.SCALE_SMOOTH);
+			hyperball = ImageIO.read(getClass().getResource("/pokeballs/hyperball.png")).getScaledInstance(75, (int) (75 * ratio), Image.SCALE_SMOOTH);
+			masterball = ImageIO.read(getClass().getResource("/pokeballs/masterball.png")).getScaledInstance(75, (int) (75 * ratio), Image.SCALE_SMOOTH);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		JLabel pokeLabel = new JLabel(new ImageIcon(pokeball));
 		JLabel pokeLabel2 = new JLabel(new ImageIcon(pokeball));
 		JLabel superLabel = new JLabel(new ImageIcon(superball));

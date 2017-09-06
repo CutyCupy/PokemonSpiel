@@ -25,7 +25,6 @@ public class HPBar extends JProgressBar implements Runnable {
 	}
 
 	public void updateValue(int n) {
-		System.out.println(n + " - " + this.getValue());
 		setFinished(false);
 		nextValue = n;
 		new Thread(this).start();
@@ -46,7 +45,6 @@ public class HPBar extends JProgressBar implements Runnable {
 	public void run() {
 		if(nextValue != -1) {
 			int delta = this.getValue() - nextValue;
-			System.out.println(delta);
 			this.falling = delta > 0;
 			double change = delta / (FPS * time);
 			for(double value = this.getValue(); this.falling ? value > nextValue :  value < nextValue; value -= change) {

@@ -5,10 +5,7 @@ import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
-import java.io.IOException;
 
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -25,6 +22,7 @@ import de.alexanderciupka.pokemon.painting.Painting;
 import de.alexanderciupka.pokemon.pokemon.DamageClass;
 import de.alexanderciupka.pokemon.pokemon.Move;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
+import de.alexanderciupka.pokemon.pokemon.Stat;
 import de.alexanderciupka.pokemon.pokemon.Stats;
 import de.alexanderciupka.pokemon.pokemon.Type;
 
@@ -67,11 +65,7 @@ public class NewAttackPanel extends JPanel {
 		setBounds(0, 0, 630, 630);
 		setLayout(null);
 		
-		try {
-			pokemonLabel = new JLabel(new ImageIcon(ImageIO.read(new File(this.getClass().getResource("/pokemon/front/1.png").getFile())).getScaledInstance(200, 200, Image.SCALE_SMOOTH)));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		pokemonLabel = new JLabel();
 		pokemonLabel.setBounds(75, 115, 150, 150);
 		add(pokemonLabel);
 		
@@ -84,7 +78,7 @@ public class NewAttackPanel extends JPanel {
 		xpLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		add(xpLabel);
 		
-		newMoveButton = new MoveButton();
+		newMoveButton = new MoveButton(false);
 		newMoveButton.addMouseListener(new MouseAdapter() {
 			
 			@Override
@@ -92,9 +86,16 @@ public class NewAttackPanel extends JPanel {
 				new Thread(new Runnable() {
 					@Override
 					public void run() {
-						gController.getFight().setCurrentFightOption(FightOption.FIGHT);
-						gController.repaint();
-						gController.getGameFrame().getFightPanel().addText(pokemon.getName() + " hat " + newMove.getName() + " nicht erlernt!");
+						if(gController.isFighting()) {
+							gController.getFight().setCurrentFightOption(FightOption.FIGHT);
+							gController.repaint();
+							gController.getGameFrame().getFightPanel().addText(pokemon.getName() + " hat " + newMove.getName() + " nicht erlernt!");
+						} else {
+							gController.getGameFrame().setCurrentPanel(gController.getGameFrame().getLastPanel());
+							gController.repaint();
+							gController.getGameFrame().addDialogue(pokemon.getName() + " hat " + newMove.getName() + " nicht erlernt!");
+							gController.waitDialogue();
+						}
 					}
 				}).start();
 			}
@@ -202,7 +203,7 @@ public class NewAttackPanel extends JPanel {
 		
 		
 		for(int i = 0; i < moves.length; i++) {
-			MoveButton currentMove = new MoveButton();
+			MoveButton currentMove = new MoveButton(false);
 			currentMove.setBounds(125 + 185 * (i % 2), 430 + 50 * (i / 2), 175, 40);
 			currentMove.setName(String.valueOf(i));
 			
@@ -216,10 +217,19 @@ public class NewAttackPanel extends JPanel {
 							@Override
 							public void run() {
 								pokemon.addMove(pokemon.getMoves()[Integer.parseInt(e.getComponent().getName())].getName(), newMove);
-								gController.getGameFrame().getFightPanel().setPlayer();
-								gController.getFight().setCurrentFightOption(FightOption.FIGHT);
-								gController.repaint();
-								gController.getGameFrame().getFightPanel().addText(pokemon.getName() + " hat " + ((MoveButton) e.getComponent()).getMove().getName() + " vergessen und " + newMove.getName() + " erlernt!");
+								if(gController.isFighting()) {
+									gController.getGameFrame().getFightPanel().setPlayer();
+									gController.getFight().setCurrentFightOption(FightOption.FIGHT);
+									gController.repaint();
+									gController.getGameFrame().getFightPanel().addText(pokemon.getName() + " hat " + ((MoveButton) e.getComponent()).getMove().getName() + " vergessen und " + newMove.getName() + " erlernt!");
+								} else {
+									gController.getGameFrame().setCurrentPanel(gController.getGameFrame().getLastPanel(true));
+									gController.repaint();
+									gController.getGameFrame().addDialogue(
+											pokemon.getName() + " hat " + ((MoveButton) e.getComponent()).getMove().getName() + 
+											" vergessen und " + newMove.getName() + " erlernt!");
+									gController.waitDialogue();
+								}
 							}
 						}).start();
 						isActive = false;
@@ -266,7 +276,7 @@ public class NewAttackPanel extends JPanel {
 		
 		stats = new JLabel[5];
 		for(int i = 0; i < stats.length; i++) {
-			JLabel currentLabel = new JLabel(Stats.STAT_NAMES[i] + ": ");
+			JLabel currentLabel = new JLabel(Stat.values()[i].getText() + ": ");
 			currentLabel.setFont(new Font("Tahoma", Font.PLAIN, 15));
 			currentLabel.setBounds(290, 120 + 40 * i, 165, 25);
 			add(currentLabel);
@@ -305,14 +315,14 @@ public class NewAttackPanel extends JPanel {
 		this.xpBar.setValue(stats.getCurrentXP());
 		this.levelLabel.setText("Level: " + stats.getLevel());
 		//KP
-		this.kpLabel.setText(stats.getCurrentHP() + " / " + stats.getStats()[0]);
-		this.hpBar.setMaximum(stats.getStats()[0]);
+		this.kpLabel.setText(stats.getCurrentHP() + " / " + stats.getStats().get(Stat.HP));
+		this.hpBar.setMaximum(stats.getStats().get(Stat.HP));
 		this.hpBar.setValue(stats.getCurrentHP());
 		this.hpBar.setForeground(stats.getHPColor());
 		this.ailmentLabel.setAilment(this.pokemon.getAilment());
 		//Stats
-		for(int i = 1; i < stats.getStats().length; i++) {
-			this.stats[i-1].setText(Stats.STAT_NAMES[i-1] + ": " + stats.getStats()[i]);
+		for(int i = 0; i < Stat.values().length - 1; i++) {
+			this.stats[i].setText(Stat.values()[i].getText() + ": " + stats.getStats().get(Stat.values()[i]));
 		}
 		setVisible(true);
 	}
@@ -320,118 +330,3 @@ public class NewAttackPanel extends JPanel {
 
 
 
-//package de.alexanderciupka.sarahspiel.gui;
-//
-//import java.awt.Color;
-//import java.awt.Image;
-//import java.awt.event.ActionEvent;
-//import java.awt.event.ActionListener;
-//
-//import javax.swing.ImageIcon;
-//import javax.swing.JButton;
-//import javax.swing.JLabel;
-//import javax.swing.JPanel;
-//
-//import de.alexanderciupka.sarahspiel.map.GameController;
-//import de.alexanderciupka.sarahspiel.pokemon.FightOption;
-//import de.alexanderciupka.sarahspiel.pokemon.Move;
-//import de.alexanderciupka.sarahspiel.pokemon.Pokemon;
-//
-//public class NewAttackPanel extends JPanel {
-//
-//	private GameController gController;
-//	private JLabel pokemonLabel;
-//	private Pokemon currentPokemon;
-//	private JButton[] currentMoves;
-//	private JButton currentFirstMove;
-//	private JButton currentSecondMove;
-//	private JButton currentThirdMove;
-//	private JButton currentFourthMove;
-//	private JButton newMove;
-//	private boolean isActive;
-//	
-//	public NewAttackPanel() {
-//		super();
-//		setLayout(null);
-//		setBounds(0, 0, 630, 630);
-//		gController = GameController.getInstance();
-//		pokemonLabel = new JLabel();
-//		pokemonLabel.setBounds(200, 100, 230, 230);
-//		
-//		
-//		currentFirstMove = new JButton();
-//		currentFirstMove.setBounds(110, 470, 200, 40);
-//		currentFirstMove.setBackground(Color.WHITE);
-//		currentSecondMove = new JButton();
-//		currentSecondMove.setBounds(320, 470, 200, 40);
-//		currentSecondMove.setBackground(Color.WHITE);
-//		currentThirdMove = new JButton();
-//		currentThirdMove.setBounds(110, 520, 200, 40);
-//		currentThirdMove.setBackground(Color.WHITE);
-//		currentFourthMove = new JButton();
-//		currentFourthMove.setBounds(320, 520, 200, 40);
-//		currentFourthMove.setBackground(Color.WHITE);
-//		newMove = new JButton();
-//		newMove.setBounds(190, 570, 200, 40);
-//		newMove.setBackground(Color.WHITE);
-//		currentMoves = new JButton[]{currentFirstMove, currentSecondMove, currentThirdMove, currentFourthMove};
-//		add(pokemonLabel);
-//		add(currentFirstMove);
-//		add(currentSecondMove);
-//		add(currentThirdMove);
-//		add(currentFourthMove);
-//		add(newMove);
-//		addActionListener();
-//	}
-//	
-//	private void addActionListener() {
-//		for (int i = 0; i < currentMoves.length; i++) {
-//			currentMoves[i].addActionListener(new ActionListener() {
-//				@Override
-//				public void actionPerformed(ActionEvent e) {
-//					if(!isActive) {
-//						isActive = true;
-//						new Thread(new Runnable() {
-//							@Override
-//							public void run() {
-//								currentPokemon.addMove(((JButton) e.getSource()).getText(), gController.getInformation().getMoveByName(newMove.getText()));
-//								gController.getGameFrame().getFightPanel().setPlayer();
-//								gController.getFight().setCurrentFightOption(FightOption.FIGHT);
-//								gController.repaint();
-//								gController.getGameFrame().getFightPanel().addText(currentPokemon.getName() + " hat " + ((JButton) e.getSource()).getText() + " vergessen und " + newMove.getText() + " erlernt!");
-//							}
-//						}).start();
-//						isActive = false;
-//					}
-//				}
-//			});
-//		}
-//		newMove.addActionListener(new ActionListener() {
-//			@Override
-//			public void actionPerformed(ActionEvent e) {
-//				new Thread(new Runnable() {
-//					@Override
-//					public void run() {
-//						gController.getFight().setCurrentFightOption(FightOption.FIGHT);
-//						gController.repaint();
-//						gController.getGameFrame().getFightPanel().addText(currentPokemon.getName() + " hat " + newMove.getText() + " nicht erlernt!");
-//					}
-//				}).start();
-//			}
-//		});
-//	}
-//
-//	public void update(Pokemon pokemon, Move newMove) {
-//		currentPokemon = pokemon;
-//		for (int i = 0; i < currentMoves.length; i++) {
-//			if (currentPokemon.getMoves()[i] != null) {
-//				currentMoves[i].setText(currentPokemon.getMoves()[i].getName());
-//			} else {
-//				currentMoves[i].setEnabled(false);
-//			}
-//		}
-//		this.newMove.setText(newMove.getName());
-//		this.pokemonLabel.setIcon(new ImageIcon(pokemon.getSpriteFront().getScaledInstance(230, 230, Image.SCALE_SMOOTH)));
-//	}
-//	
-//}

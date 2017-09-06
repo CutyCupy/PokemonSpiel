@@ -10,9 +10,9 @@ import javax.swing.ImageIcon;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 
-import de.alexanderciupka.pokemon.map.Entity;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.map.Route;
+import de.alexanderciupka.pokemon.map.entities.Entity;
 
 public class Character implements Runnable {
 

@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -15,7 +14,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
-import de.alexanderciupka.pokemon.fighting.Target;
 import de.alexanderciupka.pokemon.menu.MenuController;
 
 
@@ -23,31 +21,34 @@ public class Main {
 
 	public static void main(String[] args) throws Exception {
 		 MenuController.getInstance();
-		 
 //		readDescription();
 	}
 
 	public static void readDescription() {
 		JsonParser parser = new JsonParser();
 		BufferedReader reader = null;
-		BufferedReader moveData = new BufferedReader(new InputStreamReader(Main.class.getResourceAsStream("/pokemon/moves.json")));
-		JsonArray allMoveData = null;
+		BufferedReader pokemonData = new BufferedReader(new InputStreamReader(Main.class.getResourceAsStream("/pokemon/pokemon.json")));
+		JsonArray allPokemonData = null;
 		try {
-			allMoveData = parser.parse(moveData.readLine()).getAsJsonArray();
+			allPokemonData = parser.parse(pokemonData.readLine()).getAsJsonArray();
 		} catch (JsonSyntaxException e1) {
 			e1.printStackTrace();
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
-		int i = 1;
+//		int i = 1;
 		JsonArray newData = new JsonArray();
-//		for(int i = 1; i < allMoveData.size(); i++) {
+//		for(int i = 1; i < 337; i++) {
 //			System.out.println(i);
-		for (JsonElement element : allMoveData) {
+		for (JsonElement element : allPokemonData) {
+			JsonObject currentJson = element.getAsJsonObject();
+			if(currentJson.get("is_baby") != null) {
+				newData.add(currentJson);
+				continue;
+			}
+			System.out.println(currentJson.get("id").getAsInt());
 			try {
-//				JsonObject currentJson = new JsonObject();
-				JsonObject currentJson = element.getAsJsonObject();
-				URLConnection connection = new URL("http://www.pokeapi.co/api/v2/move/" + i).openConnection();
+				URLConnection connection = new URL("http://www.pokeapi.co/api/v2/pokemon-species/" + currentJson.get("id").getAsInt()).openConnection();
 				connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
 				connection.connect();
 				reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -56,29 +57,83 @@ public class Main {
 				char[] chars = new char[1024];
 				while ((read = reader.read(chars)) != -1)
 					buffer.append(chars, 0, read);
-				JsonObject currentMove = (JsonObject) parser.parse(buffer.toString());
-				String target = null;
-				switch(currentMove.get("target").getAsJsonObject().get("name").getAsString()) {
-				case "users-field":
-				case "user-or-ally":
-				case "user":
-				case "user-and-allies":
-					target = Target.USER.name();
-					break;
-				case "opponents-field":
-				case "random-opponent":
-				case "all-other-pokemon":
-				case "selected-pokemon":
-				case "all-opponents":
-					target = Target.OPPONENT.name();
-					break;
-				case "entire-field":
-				case "all-pokemon":
-					target = Target.ALL.name();
-					break;
+				JsonObject currentSpecies = (JsonObject) parser.parse(buffer.toString());
+				
+				currentJson.addProperty("base_happiness", currentSpecies.get("base_happiness").getAsInt());
+				
+				for(JsonElement j : currentSpecies.get("flavor_text_entries").getAsJsonArray()) {
+					JsonObject current = j.getAsJsonObject();
+					if(current.get("version").getAsJsonObject().get("name").getAsString().equals("alpha-sapphire") &&
+							current.get("language").getAsJsonObject().get("name").getAsString().equals("de")) {
+						currentJson.addProperty("description", current.get("flavor_text").getAsString());
+					}
 				}
-				currentJson.addProperty("target", target);
-				currentJson.addProperty("crit_rate", currentMove.get("meta").getAsJsonObject().get("crit_rate").getAsInt());
+				JsonArray eggGroups = new JsonArray();
+				for(JsonElement j : currentSpecies.get("egg_groups").getAsJsonArray()) {
+					JsonObject current = new JsonObject();
+					current.addProperty("name", j.getAsJsonObject().get("name").getAsString());
+					eggGroups.add(current);
+				}
+				currentJson.add("egg_groups", eggGroups);
+				currentJson.addProperty("has_gender_differences", currentSpecies.get("has_gender_differences").getAsBoolean());
+				currentJson.addProperty("is_baby", currentSpecies.get("is_baby").getAsBoolean());
+				currentJson.addProperty("female_rate", (currentSpecies.get("gender_rate").getAsInt()) / 8.0);
+				
+//				while(!chains.isEmpty()) {
+//					currentChain = chains.pop();
+//					JsonObject currentJson = null;
+//					int id = Integer.valueOf(currentChain.get("species").getAsJsonObject().get("url").getAsString().split("/")[6]);
+//					if(id > 649) {
+//						continue;
+//					}
+//					currentJson = allPokemonData.get(id - 1).getAsJsonObject();
+//					JsonArray evolutionData = new JsonArray();
+//					if(currentChain.get("evolves_to").getAsJsonArray().size() > 0) {
+//						for(JsonElement je : currentChain.get("evolves_to").getAsJsonArray()) {
+//							JsonObject bla = new JsonObject();
+//							JsonObject j = je.getAsJsonObject();
+//							JsonArray details = j.get("evolution_details").getAsJsonArray();
+//							for(int x = 0; x < details.size(); x++) {
+//								JsonObject y = details.get(x).getAsJsonObject();
+//								for(String s : new String[]{"item", "trigger", "known_move_type", "party_type", "trade_species", "party_species", "held_item", "known_move", "location"}) {
+//									if(!(y.get(s) instanceof JsonNull)) {
+//										y.addProperty(s, y.get(s).getAsJsonObject().get("name").getAsString());
+//									}
+//								}
+//							}
+//							bla.add("details", details);
+//							bla.addProperty("id", j.get("species").getAsJsonObject().get("url").getAsString().split("/")[6]);
+//							evolutionData.add(bla);
+//							chains.push(j);
+//						}
+//					}
+//					currentJson.add("evolution", evolutionData);
+//					System.out.println(currentJson);
+//					newData.add(currentJson);
+//				}
+				
+//				String target = null;
+//				switch(currentMove.get("target").getAsJsonObject().get("name").getAsString()) {
+//				case "users-field":
+//				case "user-or-ally":
+//				case "user":
+//				case "user-and-allies":
+//					target = Target.USER.name();
+//					break;
+//				case "opponents-field":
+//				case "random-opponent":
+//				case "all-other-pokemon":
+//				case "selected-pokemon":
+//				case "all-opponents":
+//					target = Target.OPPONENT.name();
+//					break;
+//				case "entire-field":
+//				case "all-pokemon":
+//					target = Target.ALL.name();
+//					break;
+//				}
+//				currentJson.addProperty("target", target);
+//				currentJson.addProperty("crit_rate", currentMove.get("meta").getAsJsonObject().get("crit_rate").getAsInt());
 //				currentJson.addProperty("name", currentMove.get("name").getAsString());
 //				currentJson.add("levels", currentMove.get("levels").getAsJsonArray());
 //				String description = "";
@@ -115,19 +170,14 @@ public class Main {
 //				currentJson.addProperty("ailment", currentMove.get("meta").getAsJsonObject().get("ailment").getAsJsonObject().get("name").getAsString());
 //				currentJson.addProperty("damage_class", currentMove.get("damage_class").getAsJsonObject().get("name").getAsString());
 //				currentJson.addProperty("priority", currentMove.get("priority").getAsInt());
-				System.out.println(currentJson);
-				newData.add(currentJson);
-			} catch (JsonSyntaxException e) {
-				e.printStackTrace();
-			} catch (MalformedURLException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
+			} catch (Exception e) {
+				System.err.println(currentJson);
 			}
-			i++;
+			newData.add(currentJson);
+//			i++;
 		}
 		try {
-			FileWriter fw = new FileWriter(new File(Main.class.getResource("/pokemon/moves.json").getFile()));
+			FileWriter fw = new FileWriter(new File(Main.class.getResource("/pokemon/pokemon.json").getFile()));
 			for(char c : newData.toString().toCharArray()) {
 				fw.write(c);
 				fw.flush();

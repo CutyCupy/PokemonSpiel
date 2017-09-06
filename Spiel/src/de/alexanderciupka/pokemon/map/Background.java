@@ -15,8 +15,10 @@ public class Background {
 	private Route currentRoute;
 	private Random rng;
 	private BufferedImage terrain;
+	private Camera cam;
 
 	public Background(Route currentRoute) {
+		this.cam = new Camera(0, 0);
 		background = currentRoute.getMap();
 		this.currentRoute = currentRoute;
 		rng = new Random();
@@ -25,6 +27,10 @@ public class Background {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public Camera getCamera() {
+		return this.cam;
 	}
 
 	public Pokemon chooseEncounter() {

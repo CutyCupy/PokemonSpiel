@@ -4,7 +4,7 @@ import com.google.gson.JsonArray;
 
 import de.alexanderciupka.pokemon.pokemon.Ailment;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
-import de.alexanderciupka.pokemon.pokemon.Stats;
+import de.alexanderciupka.pokemon.pokemon.Stat;
 
 public class Team {
 
@@ -142,12 +142,12 @@ public class Team {
 			}
 			if(owner instanceof NPC) {
 				if(owner.getName().contains("Arenaleiter")) {
-					for(String stat : Stats.STAT_SAVE_NAMES) {
-						p.getStats().setDV(stat, 15);
+					for(Stat s : Stat.values()) {
+						p.getStats().setDV(s, 15);
 					}
 				} else {
-					for(String stat : Stats.STAT_SAVE_NAMES) {
-						p.getStats().setDV(stat, 0);
+					for(Stat s : Stat.values()) {
+						p.getStats().setDV(s, 0);
 					}
 				}
 			}

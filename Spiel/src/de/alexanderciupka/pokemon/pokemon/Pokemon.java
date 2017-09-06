@@ -33,20 +33,48 @@ public class Pokemon {
 	private int weight;
 	private int height;
 	private int baseExperience;
-	private HashMap<String, Short> evBonus;
+	private HashMap<Stat, Short> evBonus;
 
 	private Random rng;
 
 	private boolean nameChanged;
+	private int evolves;
 	private String growthRate;
+	
+	private Gender gender;
+	private boolean shiny;
 
 	public Pokemon(int id) {
 		this.id = id;
 		gController = GameController.getInstance();
 		this.name = gController.getInformation().getName(id);
 		this.types = gController.getInformation().getTypes(id);
-		this.spriteFront = new ImageIcon(this.getClass().getResource("/pokemon/front/" + id + ".png")).getImage();
-		this.spriteBack = new ImageIcon(this.getClass().getResource("/pokemon/back/" + id + ".png")).getImage();
+		this.shiny = new Random().nextFloat() < 0.01;
+		this.gender = gController.getInformation().getGender(this.id);
+		this.spriteFront = gController.getInformation().getFrontSprite(this.id, this.gender, this.shiny);
+		this.spriteBack = gController.getInformation().getBackSprite(this.id, this.gender, this.shiny);
+		this.moves = new Move[4];
+		this.ailment = Ailment.NONE;
+		this.rng = new Random();
+		this.weight = gController.getInformation().getWeight(id);
+		this.height = gController.getInformation().getHeight(id);
+		this.evBonus = gController.getInformation().getEvBonus(id);
+		this.growthRate = gController.getInformation().getGrowthRate(id);
+		this.catchRate = gController.getInformation().getCaptureRate(id);
+		this.setBaseExperience(gController.getInformation().getBaseExperience(id));
+		this.stats = new Stats(this);
+	}
+
+	public Pokemon(String name) {
+		this.name = name;
+		gController = GameController.getInstance();
+		this.id = gController.getInformation().getID(name);
+		this.name = gController.getInformation().getName(id);
+		this.types = gController.getInformation().getTypes(id);
+		this.shiny = new Random().nextFloat() < 0.01;
+		this.gender = gController.getInformation().getGender(this.id);
+		this.spriteFront = gController.getInformation().getFrontSprite(this.id, this.gender, this.shiny);
+		this.spriteBack = gController.getInformation().getBackSprite(this.id, this.gender, this.shiny);
 		this.moves = new Move[4];
 		this.ailment = Ailment.NONE;
 		this.rng = new Random();
@@ -175,19 +203,16 @@ public class Pokemon {
 	}
 
 	public boolean evolve(int newID) {
-		if (newID != 0) {
-			this.id = newID;
-			update();
-			if (gController.isFighting()) {
-				gController.getGameFrame().getFightPanel().setPlayer();
-			}
+		if(newID != 0 && this.evolves == 0) {
+			this.evolves = newID;
+			gController.getGameFrame().getEvolutionPanel().addPokemon(this);
 			return true;
 		}
 		return false;
 	}
 
 	private void update() {
-		if(!this.nameChanged) {
+		if (!this.nameChanged) {
 			this.name = gController.getInformation().getName(id);
 		}
 		this.spriteFront = new ImageIcon(this.getClass().getResource("/pokemon/front/" + id + ".png")).getImage();
@@ -205,14 +230,14 @@ public class Pokemon {
 	}
 
 	public Move getMove(Pokemon player) {
-		if(gController.getFight().canEscape()) {
+		if (gController.getFight().canEscape()) {
 			return this.getMoves()[rng.nextInt(this.getAmmountOfMoves())];
 		} else {
 			double highscore = -1;
 			ArrayList<Integer> index = new ArrayList<Integer>();
 			for (int i = 0; i < this.getAmmountOfMoves(); i++) {
-				if(this.getMoves()[i].getPower() <= 0) {
-					if(highscore <= 0) {
+				if (this.getMoves()[i].getPower() <= 0) {
+					if (highscore <= 0) {
 						index.add(i);
 					}
 					continue;
@@ -226,7 +251,7 @@ public class Pokemon {
 					index.add(i);
 				}
 			}
-			if(index.isEmpty()) {
+			if (index.isEmpty()) {
 				return this.getMoves()[rng.nextInt(this.getAmmountOfMoves())];
 			}
 			return this.getMoves()[index.get(rng.nextInt(index.size()))];
@@ -289,12 +314,12 @@ public class Pokemon {
 	public void afterTurnDamage() {
 		switch (this.ailment) {
 		case BURN:
-			this.stats.loseHP((int) (this.stats.getStats()[0] * (1 / 16.0)));
+			this.stats.loseHP((int) (this.stats.getStats().get(Stat.HP) * (1 / 16.0)));
 			this.gController.getGameFrame().getFightPanel()
 					.addText(this.name + " wurde durch die Verbrennung verletzt!", true);
 			break;
 		case POISON:
-			this.stats.loseHP((int) (this.stats.getStats()[0] * (1 / 8.0)));
+			this.stats.loseHP((int) (this.stats.getStats().get(Stat.HP) * (1 / 8.0)));
 			this.gController.getGameFrame().getFightPanel().addText(this.name + " wurde durch die Vergiftung verletzt!",
 					true);
 			break;
@@ -343,7 +368,8 @@ public class Pokemon {
 		for (int i = 0; i < Math.min(result.getMoves().length, saveData.get("moves").getAsJsonArray().size()); i++) {
 			result.addMove(Move.importSaveData(saveData.get("moves").getAsJsonArray().get(i).getAsJsonObject()));
 		}
-		result.setNameChanged(saveData.get("name_changed") != null ? saveData.get("name_changed").getAsBoolean() : false);
+		result.setNameChanged(
+				saveData.get("name_changed") != null ? saveData.get("name_changed").getAsBoolean() : false);
 		result.setAilment(Ailment.valueOf(saveData.get("ailment").getAsString()));
 		return result;
 	}
@@ -358,73 +384,73 @@ public class Pokemon {
 	}
 
 	public boolean isCatched(Item usedBall) {
-		if(usedBall.equals(Item.MASTERBALL)) {
+		System.out.println(this.getCatchRate());
+		if (usedBall.equals(Item.MASTERBALL)) {
 			return true;
 		}
-		int N = getStats().getRNG().nextInt(usedBall.getValue() + 1);
+		int Z = getStats().getRNG().nextInt(usedBall.getValue() + 1);
+		int ailmentValue = 0;
 		switch (getAilment()) {
 		case BURN:
 		case POISON:
 		case PARALYSIS:
-			if (N < 12) {
-				return true;
-			} else if (N - 12 > getCatchRate()) {
-				return false;
-			}
+			ailmentValue = 12;
 			break;
 		case FREEZE:
 		case SLEEP:
-			if (N < 25) {
-				return true;
-			} else if (N - 25 > getCatchRate()) {
-				return false;
-			}
+			ailmentValue = 25;
 			break;
 		default:
 			break;
 		}
-		int F = (getStats().getStats()[0] * 255) / 8;
-		if(getStats().getCurrentHP() / 4 > 0) {
+		int F = (getStats().getStats().get(Stat.HP) * 255) / (usedBall == Item.SUPERBALL ? 8 : 12);
+		if (getStats().getCurrentHP() / 4 > 0) {
 			F = Math.min(255, F / (getStats().getCurrentHP() / 4));
 		}
-		int M = getStats().getRNG().nextInt(256);
-		if (M <= F) {
-			return true;
+		System.out.println("Z: " + Z);
+		System.out.println("F: " + F);
+		if(Z - ailmentValue <= getCatchRate()) {
+			int M = getStats().getRNG().nextInt(256);
+			System.out.println("M: " + M);
+			if (M <= F) {
+				return true;
+			}
 		}
 		return false;
 	}
 
 	public int getShakes(Item usedBall) {
-		int d = getCatchRate() * 100 / usedBall.getValue();
-		if (d >= 256) {
-			return 3;
-		} else {
-			int ball = 8;
-			int f = (getStats().getStats()[0] * 255 * 4) / (getStats().getCurrentHP() * ball);
-			int x = d * f / 255;
-			switch (getAilment()) {
-			case SLEEP:
-			case FREEZE:
-				x += 10;
-				break;
-			case PARALYSIS:
-			case POISON:
-			case BURN:
-				x += 5;
-				break;
-			default:
-				break;
-			}
-			if(x < 10) {
-				return 0;
-			} else if (x < 30) {
-				return 1;
-			} else if(x < 70) {
-				return 2;
-			} else {
-				return 3;
-			}
-		}
+//		int d = getCatchRate() * 100 / usedBall.getValue();
+//		if (d >= 256) {
+//			return 3;
+//		} else {
+//			int ball = 8;
+//			int f = (getStats().getStats().get(Stat.HP) * 255 * 4) / (getStats().getCurrentHP() * ball);
+//			int x = d * f / 255;
+//			switch (getAilment()) {
+//			case SLEEP:
+//			case FREEZE:
+//				x += 10;
+//				break;
+//			case PARALYSIS:
+//			case POISON:
+//			case BURN:
+//				x += 5;
+//				break;
+//			default:
+//				break;
+//			}
+//			if (x < 10) {
+//				return 0;
+//			} else if (x < 30) {
+//				return 1;
+//			} else if (x < 70) {
+//				return 2;
+//			} else {
+//				return 3;
+//			}
+//		}
+		return rng.nextInt(4);
 	}
 
 	public int getBaseExperience() {
@@ -451,13 +477,16 @@ public class Pokemon {
 		this.height = height;
 	}
 
-	public HashMap<String, Short> getEVBonus() {
+	public HashMap<Stat, Short> getEVBonus() {
 		return this.evBonus;
 	}
 
 	public void increaseEV(Pokemon enemy) {
-		for(int i = 0; i < Stats.STAT_SAVE_NAMES.length; i++) {
-			this.stats.increaseEV(Stats.STAT_SAVE_NAMES[i], enemy.getEVBonus().get(Stats.STAT_SAVE_NAMES[i]));
+		for (Stat s : Stat.values()) {
+			if(s.equals(Stat.ACCURACY) || s.equals(Stat.EVASION)) {
+				continue;
+			}
+			this.stats.increaseEV(s, enemy.getEVBonus().get(s));
 		}
 	}
 
@@ -472,15 +501,25 @@ public class Pokemon {
 	public String getGrowthRate() {
 		return this.growthRate;
 	}
-	
+
 	public boolean useItem(Player source, Item i) {
-		if(i.isUsableOnPokemon()) {
+		if (i.isUsableOnPokemon()) {
 			boolean effective = false;
-			switch(i) {
-			case FULLRESTORE:
-				if(this.getAilment() != Ailment.NONE) {
+			switch (i) {
+			case REVIVE:
+			case MAXREVIVE:
+				if (this.getAilment() == Ailment.FAINTED) {
 					effective = true;
-					gController.getGameFrame().addDialogue(this.getName() + " ist nicht mehr " + Ailment.getText(this.getAilment()) + "!");
+					this.getStats().restoreHP((int) (this.getStats().getStats().get(Stat.HP) * (i.getValue() / 100.0)));
+					this.setAilment(Ailment.NONE);
+					gController.getGameFrame().addDialogue(this.getName() + " wurde wiederbelebt!");
+				}
+				break;
+			case FULLRESTORE:
+				if (this.getAilment() != Ailment.NONE) {
+					effective = true;
+					gController.getGameFrame().addDialogue(
+							this.getName() + " ist nicht mehr " + Ailment.getText(this.getAilment()) + "!");
 					this.setAilment(Ailment.NONE);
 				}
 			case POTION:
@@ -488,7 +527,7 @@ public class Pokemon {
 			case HYPERPOTION:
 			case FULLHEAL:
 				int restore = this.stats.restoreHP(i.getValue());
-				if(restore > 0) {
+				if (restore > 0) {
 					effective = true;
 					gController.getGameFrame().addDialogue(this.getName() + " wurde um " + restore + " KP geheilt!");
 				}
@@ -498,15 +537,60 @@ public class Pokemon {
 			case FREEZEHEAL:
 			case POISONHEAL:
 			case SLEEPHEAL:
-				if(this.getAilment() == i.getAilment()) {
+				if (this.getAilment() == i.getAilment()) {
 					effective = true;
-					gController.getGameFrame().addDialogue(this.getName() + " ist nicht mehr " + Ailment.getText(this.getAilment()) + "!");
+					gController.getGameFrame().addDialogue(
+							this.getName() + " ist nicht mehr " + Ailment.getText(this.getAilment()) + "!");
 					this.setAilment(Ailment.NONE);
 				}
+				break;
+			case HYPERHEAL:
+				if (this.getAilment() != Ailment.NONE) {
+					effective = true;
+					gController.getGameFrame().addDialogue(
+							this.getName() + " ist nicht mehr " + Ailment.getText(this.getAilment()) + "!");
+					this.setAilment(Ailment.NONE);
+				}
+			case RARECANDY:
+				if (this.getStats().levelUP()) {
+					effective = true;
+					this.getStats().setCurrentXP(0);
+				}
+				break;
+
+			case DAWNSTONE:
+			case DUSKSTONE:
+			case FIRESTONE:
+			case LEAFSTONE:
+			case MOONSTONE:
+			case SHINYSTONE:
+			case SUNSTONE:
+			case THUNDERSTONE:
+			case WATERSTONE:
+				if (this.evolve(gController.getInformation().checkEvolution(this, i))) {
+					effective = true;
+					gController.getGameFrame().addDialogue(this.getName() + " reagiert auf den " + i.getName() + "!");
+				}
+				break;
+			case CALCIUM:
+			case CARBON:
+			case HPUP:
+			case PROTEIN:
+			case IRON:
+			case ZINC:
+				Stat s = i.getIncrease();
+				if(this.getStats().getEv(s) < 100) {
+					effective = true;
+					gController.getGameFrame().addDialogue(i.getName() + " hat " + s.getArticle() + " " + s.getText() + 
+							" von " + this.getName() + " erhöht!");
+					this.stats.increaseEV(s, (short) 10);
+				}
+				break;
 			default:
 				break;
 			}
-			if(effective) {
+			if (effective) {
+				this.getStats().updateStats();
 				source.removeItem(i);
 				return true;
 			}
@@ -515,5 +599,40 @@ public class Pokemon {
 		} else {
 			throw new IllegalArgumentException("Given Item must be usable on Pokemon!");
 		}
+	}
+	
+	public int getEvolves() {
+		return this.evolves;
+	}
+	
+	public boolean isShiny() {
+		return this.shiny;
+	}
+	
+	public Gender getGender() {
+		return this.gender;
+	}
+	
+	public void setGender(Gender g) {
+		this.gender = g;
+	}
+
+	public void startEvolution() {
+		if (this.evolves != 0) {
+			this.id = this.evolves;
+			this.evolves = 0;
+			update();
+			this.stats.newMoves();
+			gController.getGameFrame().getPokemonPanel().update();
+		}
+	}
+
+	public boolean knowsMove(Move newMove) {
+		for(int i = 0; i < this.getAmmountOfMoves(); i++) {
+			if(newMove.equals(this.getMoves()[i])) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

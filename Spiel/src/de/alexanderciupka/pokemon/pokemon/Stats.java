@@ -10,25 +10,25 @@ import com.google.gson.JsonObject;
 
 import de.alexanderciupka.pokemon.fighting.FightOption;
 import de.alexanderciupka.pokemon.gui.After;
+import de.alexanderciupka.pokemon.gui.panels.NewAttackPanel;
 import de.alexanderciupka.pokemon.map.GameController;
 
 //TODO: Unique stats for different Pokemons
 public class Stats {
 
-	public static final String[] STAT_NAMES = { "Angriff", "Verteidigung", "Spezialangriff", "Spezialverteidigung",
-			"Initiative" };
-
-	public static final String[] STAT_SAVE_NAMES = {"hp", "attack", "defense", "special-attack", "special-defense", "speed"};
-
 	private Pokemon pokemon;
 	private short level;
 	// HP,ATTACK,DEFENSE,SPATTACK,SPDEFENSE,SPEED
-	private short[] baseStats;
-	private short[] stats;
-	private short[] fightStats;
-	private short[] fightStatsChanges;
-	private HashMap<String, Short> dvs;
-	private HashMap<String, Short> evs;
+	private HashMap<Stat, Short> baseStats;
+	private HashMap<Stat, Short> stats;
+	private HashMap<Stat, Double> fightStats;
+	private HashMap<Stat, Short> fightStatsChanges;
+//	private short[] baseStats;
+//	private short[] stats;
+//	private short[] fightStats;
+//	private short[] fightStatsChanges;
+	private HashMap<Stat, Short> dvs;
+	private HashMap<Stat, Short> evs;
 	private int currentXP;
 	private int levelUpXP;
 	private int allTimeXP;
@@ -37,6 +37,8 @@ public class Stats {
 	private boolean generated;
 
 	private Random rng;
+	
+	private static final int MAX_CHANGE = 6;
 
 	public Stats(Pokemon pokemon) {
 		gController = GameController.getInstance();
@@ -47,90 +49,157 @@ public class Stats {
 		currentXP = 0;
 		allTimeXP = 0;
 		baseStats = gController.getInformation().getBaseStats(pokemon.getId());
-		stats = new short[6];
-		dvs = new HashMap<String, Short>();
-		evs = new HashMap<String, Short>();
+		stats = new HashMap<Stat, Short>();
+		dvs = new HashMap<Stat, Short>();
+		evs = new HashMap<Stat, Short>();
 
-		for(String s : STAT_SAVE_NAMES) {
+		for(Stat s : Stat.values()) {
+			stats.put(s, (short) 0);
 			dvs.put(s, (short) rng.nextInt(32));
 			evs.put(s, (short) 0);
 		}
-
-		this.currentHP = stats[0];
+		
+		this.currentHP = stats.get(Stat.HP);
 		updateStats();
 	}
 
 	public void updateStats() {
-		short oldHP = stats[0];
-		stats[0] = (short) ((2 * baseStats[0] + dvs.get(STAT_SAVE_NAMES[0]) + (evs.get(STAT_SAVE_NAMES[0]) / 4) + 100) * (level / 100.0) + 10);
-		currentHP += stats[0] - oldHP;
-		for(int i = 1; i < Math.min(stats.length, baseStats.length); i++) {
-			stats[i] = (short) ((2 * baseStats[i] + dvs.get(STAT_SAVE_NAMES[i]) + (evs.get(STAT_SAVE_NAMES[i]) / 4)) * (level / 100.0) + 5);
+		short oldHP = stats.get(Stat.HP).shortValue();
+		stats.put(Stat.HP, (short) ((2 * baseStats.get(Stat.HP) + dvs.get(Stat.HP) + (evs.get(Stat.HP) / 4) + 100) * (level / 100.0) + 10));
+		currentHP += stats.get(Stat.HP) - oldHP; 
+		for(Stat s : Stat.values()) {
+			if(s.equals(Stat.HP)) {
+				continue;
+			} else if(s.equals(Stat.ACCURACY) || s.equals(Stat.EVASION)) {
+				stats.put(s, (short) 1);
+				continue;
+			}
+			stats.put(s, (short) ((2 * baseStats.get(s) + dvs.get(s) + (evs.get(s) / 4)) * (level / 100.0) + 5));
 		}
 		if (fightStats != null) {
 			calcFightStats();
 		}
 	}
 
-	public void levelUP() {
+	public boolean levelUP() {
+		boolean result = this.level < 100;
 		if (level < 99) {
 			level++;
 			if(gController.isFighting()) {
 				gController.getGameFrame().getFightPanel().updatePanels();
 				gController.getGameFrame().getFightPanel().addText(pokemon.getName() + " erreicht Level " + this.level + "!");
+			} else {
+				if(!generated) {
+					gController.getGameFrame().addDialogue(pokemon.getName() + " erreicht Level " + this.level + "!");
+				}
 			}
 			levelUpXP = calculateLevelUpXP();
 			newMoves();
-			evolve();
 		} else {
 			this.level = 100;
 			if(gController.isFighting()) {
 				gController.getGameFrame().getFightPanel().updatePanels();
 				gController.getGameFrame().getFightPanel().addText(pokemon.getName() + " erreicht Level " + this.level + "!");
+			} else {
+				if(!generated) {
+					gController.getGameFrame().addDialogue(pokemon.getName() + " erreicht Level " + this.level + "!");
+				}
 			}
 			this.currentXP = 0;
 			levelUpXP = 0;
 			newMoves();
-			evolve();
+		}
+		if(!generated) {
+			evolve(Item.NONE);
 		}
 		updateStats();
+		return result;
 	}
 
 	private void calcFightStats() {
-		this.fightStats = stats.clone();
-		int i = 0;
-		short[] fightStatsChanges = this.fightStatsChanges.clone();
-		this.fightStatsChanges = new short[fightStatsChanges.length];
-		for (short change : fightStatsChanges) {
-			if (change > 0) {
-				increaseStat(i, change);
-			} else if (change < 0) {
-				decreaseStat(i, Math.abs(change));
-			}
-			i++;
+		this.fightStats = new HashMap<>();
+		if(this.fightStatsChanges == null) {
+			this.fightStatsChanges = new HashMap<Stat, Short>();
 		}
+		for(Stat s : this.stats.keySet()) {
+			if(this.fightStatsChanges.get(s) == null) {
+				this.fightStatsChanges.put(s, (short) 0);
+			}
+			fightStats.put(s, this.stats.get(s).doubleValue() * calcStatFactor(s, this.fightStatsChanges.get(s)));
+		}
+//		System.err.println(this.fightStatsChanges);
+//		HashMap<Stat, Short> fightStatsChanges = new HashMap<>(this.fightStatsChanges);
+//		this.fightStatsChanges = new HashMap<>();
+//		for (Stat s : fightStatsChanges.keySet()) {
+//			short change = fightStatsChanges.get(s);
+//			if (change > 0) {
+//				increaseStat(s, change);
+//			} else if (change < 0) {
+//				decreaseStat(s, -change);
+//			}
+//		}
+	}
+	
+	private double calcStatFactor(Stat s, short value) {
+		if(value == 0) {
+			return 1;
+		}
+		switch(s) {
+		case ACCURACY:
+		case EVASION:
+			if(value > 0) {
+				return (3 + value) / 3.0;
+			} else if(value < 0) {
+				return 3.0 / (3 + Math.abs(value));
+			}
+			break;
+		default: 
+			if(value > 0) {
+				return (2 + value) / 2.0;
+			} else if(value < 0) {
+				return 2.0 / (2 + Math.abs(value));
+			}
+			break;
+		}
+		return 1;
 	}
 
 	public void newMoves() {
-		for (Move newMove : gController.getInformation().getNewMove(this.pokemon.getId(), this.level)) {
+		for (Move newMove : gController.getInformation().getNewMove(this.pokemon, this.level)) {
 			if (this.pokemon.getAmmountOfMoves() != 4) {
 				try {
 					if (!generated) {
-						gController.getGameFrame().getFightPanel()
-								.addText(this.pokemon.getName() + " erlernt " + newMove.getName() + "!");
+						if(gController.isFighting()) {
+							gController.getGameFrame().getFightPanel()
+							.addText(this.pokemon.getName() + " erlernt " + newMove.getName() + "!");
+						} else {
+							gController.getGameFrame().addDialogue(this.pokemon.getName() + " erlernt " + newMove.getName() + "!");
+						}
 					}
 					this.pokemon.addMove(newMove.getName());
 				} catch (Exception e) {
 				}
 			} else {
 				if (!generated) {
-					gController.getGameFrame().getFightPanel().addText(this.pokemon.getName() + " versucht "
-							+ newMove.getName()
-							+ " zu erlernen! M�chtest du eine andere Attacke vergessen oder deine momentanen Attacken behalten?");
-					gController.getGameFrame().getFightPanel().getTextLabel().setAfter(After.NEW_ATTACK);
-					gController.getGameFrame().displayNewMove(this.pokemon, newMove);
-					while (this.gController.getFight().getCurrentFightOption() == FightOption.NEW_ATTACK) {
-						gController.sleep(50);
+					if(gController.isFighting()) {
+						gController.getGameFrame().getFightPanel().addText(this.pokemon.getName() + " versucht "
+								+ newMove.getName()
+								+ " zu erlernen! M�chtest du eine andere Attacke vergessen oder deine momentanen Attacken behalten?");
+						gController.getGameFrame().getFightPanel().getTextLabel().setAfter(After.NEW_ATTACK);
+						gController.getGameFrame().displayNewMove(this.pokemon, newMove);
+						while (this.gController.getFight().getCurrentFightOption() == FightOption.NEW_ATTACK) {
+							gController.sleep(50);
+						}
+					} else {
+						gController.getGameFrame().addDialogue(this.pokemon.getName() + " versucht "
+								+ newMove.getName()
+								+ " zu erlernen! M�chtest du eine andere Attacke vergessen oder deine momentanen Attacken behalten?");
+						gController.waitDialogue();
+						gController.getGameFrame().getDialogue().setAfter(After.NEW_ATTACK);
+						gController.getGameFrame().displayNewMove(this.pokemon, newMove);
+						while (this.gController.getGameFrame().getContentPane() instanceof NewAttackPanel) {
+							gController.sleep(50);
+						}
 					}
 				} else {
 					if(newMove.getPower() > 0) {
@@ -141,14 +210,22 @@ public class Stats {
 		}
 	}
 
-	public void evolve() {
-		if (this.pokemon.evolve(gController.getInformation().checkEvolution(this.pokemon.getId(), this.level))) {
-			newMoves();
+	public void evolve(Item i) {
+		if(this.pokemon.evolve(gController.getInformation().checkEvolution(this.pokemon, i))) {
+//			newMoves();
 		}
 	}
 
-	public short[] getStats() {
-		return this.stats;
+	public HashMap<Stat, Short> getStats() {
+		HashMap<Stat, Short> result = new HashMap<Stat, Short>();
+		for(Stat s : Stat.values()) {
+			result.put(s, this.stats.get(s).shortValue());
+		}
+		return result;
+	}
+	
+	public Short getEv(Stat s) {
+		return this.evs.get(s);
 	}
 
 	public void generateStats(short level) {
@@ -172,12 +249,12 @@ public class Stats {
 			short speed, int currentXP) {
 		this.level = level;
 		this.currentHP = hp;
-		stats[0] = hp;
-		stats[1] = attack;
-		stats[2] = defense;
-		stats[3] = spattack;
-		stats[4] = spdefense;
-		stats[5] = speed;
+		stats.put(Stat.HP, hp);
+		stats.put(Stat.ATTACK, attack);
+		stats.put(Stat.DEFENSE, defense);
+		stats.put(Stat.SPECIALATTACK, spattack);
+		stats.put(Stat.SPECIALDEFENSE, spdefense);
+		stats.put(Stat.SPECIALATTACK, speed);
 		setLevelUpXP(level);
 		this.currentXP = currentXP;
 	}
@@ -220,15 +297,15 @@ public class Stats {
 	}
 
 	public void restoreFullHP() {
-		this.currentHP = stats[0];
+		this.currentHP = stats.get(Stat.HP);
 	}
 
 	public int restoreHP(int ammount) {
 		short oldHP = this.currentHP;
-		if (this.currentHP + ammount <= stats[0]) {
+		if (this.currentHP + ammount <= stats.get(Stat.HP)) {
 			this.currentHP += ammount;
 		} else {
-			this.currentHP = stats[0];
+			this.currentHP = stats.get(Stat.HP);
 		}
 		return this.currentHP - oldHP;
 	}
@@ -244,52 +321,94 @@ public class Stats {
 	}
 
 	public void startFight() {
-		this.fightStats = stats.clone();
-		this.fightStatsChanges = new short[5];
+		this.fightStats = new HashMap<>();
+		this.fightStatsChanges = new HashMap<>();
+		calcFightStats();
 	}
 
-	public boolean increaseStat(int index, int ammount) {
-		if (fightStatsChanges[index] + ammount > 7) {
+	public boolean increaseStat(Stat s, int value) {
+		short currentChange = fightStatsChanges.get(s);
+		if(currentChange == MAX_CHANGE) {
 			gController.getGameFrame().getFightPanel().addText(
-					STAT_NAMES[index] + " von " + this.pokemon.getName() + " kann nicht weiter " + "erhöht werden!");
+					s.getText() + " von " + this.pokemon.getName() + " kann nicht weiter erhöht werden!");
 			return false;
-		}
-		for (int i = 0; i < ammount; i++) {
-			if (fightStatsChanges[index] < 0) {
-				fightStats[index + 1] = (short) (fightStats[index + 1] * (3 / 2.0));
-			} else {
-				fightStats[index + 1] = (short) (fightStats[index + 1] * (5 / 4.0));
+		} else {
+			boolean multipleBoost = value > 1;
+			if(currentChange + value > MAX_CHANGE) {
+				if(MAX_CHANGE - currentChange  <= 1) {
+					multipleBoost = false;
+				}
 			}
-			fightStatsChanges[index]++;
+			this.fightStatsChanges.put(s, (short) Math.min(currentChange + value, MAX_CHANGE));
+			this.calcFightStats();
+			gController.getGameFrame().getFightPanel().addText(s.getText() + " von " + this.pokemon.getName() + 
+					" wurde " + (multipleBoost ? "sehr stark " : "") + "erhöht!");
+			return true;
 		}
-		return true;
+		
+//		if (fightStatsChanges.get(s) + value > 7) {
+//			gController.getGameFrame().getFightPanel().addText(
+//					s.getText() + " von " + this.pokemon.getName() + " kann nicht weiter erhöht werden!");
+//			return false;
+//		}
+//		for (int i = 0; i < value; i++) {
+//			if (fightStatsChanges.get(s) < 0) {
+//				fightStats.put(s, (fightStats.get(s) * (3 / 2.0)));
+//			} else {
+//				fightStats.put(s, (fightStats.get(s) * (5 / 4.0)));
+//			}
+//			fightStatsChanges.put(s, (short) (fightStatsChanges.get(s) + 1));
+//		}
+//		return true;
 	}
 
-	public boolean decreaseStat(int index, int ammount) {
-		if (fightStatsChanges[index] - ammount < -7) {
+	public boolean decreaseStat(Stat s, int value) {
+		short currentChange = fightStatsChanges.get(s);
+		if(currentChange == -MAX_CHANGE) {
 			gController.getGameFrame().getFightPanel().addText(
-					STAT_NAMES[index] + " von " + this.pokemon.getName() + " kann nicht weiter gesenkt werden!");
+					s.getText() + " von " + this.pokemon.getName() + " kann nicht weiter gesenkt werden!");
 			return false;
-		}
-		for (int i = 0; i < ammount; i++) {
-			if (fightStatsChanges[index] <= 0) {
-				fightStats[index + 1] = (short) (fightStats[index + 1] * (2 / 3.0));
-			} else {
-				fightStats[index + 1] = (short) (fightStats[index + 1] * (4 / 5.0));
+		} else {
+			boolean multipleBoost = value > 1;
+			if(currentChange - value < -MAX_CHANGE) {
+				if(currentChange + MAX_CHANGE <= 1) {
+					multipleBoost = false;
+				}
 			}
-			fightStatsChanges[index]--;
+			this.fightStatsChanges.put(s, (short) Math.max(currentChange - value, -MAX_CHANGE));
+			this.calcFightStats();
+			gController.getGameFrame().getFightPanel().addText(s.getText() + " von " + this.pokemon.getName() + 
+					" wurde " + (multipleBoost ? "sehr stark " : "") + "gesenkt!");
+			System.out.println(s + " - " + this.fightStats.get(s));
+			return true;
 		}
-		return true;
+//		if(fightStatsChanges.get(s) == null) {
+//			fightStatsChanges.put(s, (short) 0);
+//		}
+//		if (fightStatsChanges.get(s) + value > 7) {
+//			gController.getGameFrame().getFightPanel().addText(
+//					s.getText() + " von " + this.pokemon.getName() + " kann nicht weiter gesenkt werden!");
+//			return false;
+//		}
+//		for (int i = 0; i < value; i++) {
+//			if (fightStatsChanges.get(s) <= 0) {
+//				fightStats.put(s, (fightStats.get(s) * (2 / 3.0)));
+//			} else {
+//				fightStats.put(s, (fightStats.get(s) * (4 / 5.0)));
+//			}
+//			fightStatsChanges.put(s, (short) (fightStatsChanges.get(s) - 1));
+//		}
+//		return true;
 	}
 
-	public short[] getFightStats() {
-		short[] result = this.fightStats.clone();
+	public HashMap<Stat, Double> getFightStats() {
+		HashMap<Stat, Double> result = new HashMap<Stat, Double>(this.fightStats);
 		switch (this.pokemon.getAilment()) {
 		case BURN:
-			result[1] *= 0.5;
+			result.put(Stat.ATTACK, (result.get(Stat.ATTACK) * 0.5));
 			break;
 		case PARALYSIS:
-			result[5] *= 0.5;
+			result.put(Stat.SPEED, (result.get(Stat.SPEED) * 0.25));
 		default:
 			break;
 		}
@@ -309,11 +428,11 @@ public class Stats {
 	}
 
 	private int calculateLevelUpXP() {
-		return gController.getInformation().getLevelUpXP(this.pokemon, level);
+		return gController.getInformation().getLevelUpXP(this.pokemon, level + 1);
 	}
 
 	public Color getHPColor() {
-		double life = (this.currentHP) / ((double) this.stats[0]);
+		double life = (this.currentHP) / (this.stats.get(Stat.HP));
 		if (life > 0.5) {
 			return Color.GREEN;
 		} else if (life > 0.15) {
@@ -329,19 +448,14 @@ public class Stats {
 		data.addProperty("current_xp", this.currentXP);
 		data.addProperty("current_hp", this.currentHP);
 		JsonArray dvEvArray = new JsonArray();
-		for(int i = 0; i < STAT_SAVE_NAMES.length; i++) {
+		for(Stat s : Stat.values()) {
 			JsonObject currentDV = new JsonObject();
-			currentDV.addProperty("name", STAT_SAVE_NAMES[i]);
-			currentDV.addProperty("dv", dvs.get(STAT_SAVE_NAMES[i]));
-			currentDV.addProperty("ev", evs.get(STAT_SAVE_NAMES[i]));
+			currentDV.addProperty("name", s.name());
+			currentDV.addProperty("dv", dvs.get(s));
+			currentDV.addProperty("ev", evs.get(s));
 			dvEvArray.add(currentDV);
 		}
 		data.add("dvev", dvEvArray);
-		JsonObject statData = new JsonObject();
-		for (int i = 0; i < stats.length; i++) {
-			statData.addProperty(String.valueOf(i), stats[i]);
-		}
-		data.add("stats", statData);
 		return data;
 	}
 
@@ -349,8 +463,9 @@ public class Stats {
 		if(saveData.get("dvev") != null) {
 			for(JsonElement je : saveData.get("dvev").getAsJsonArray()) {
 				JsonObject currentDVEV = je.getAsJsonObject();
-				this.dvs.put(currentDVEV.get("name").getAsString(), currentDVEV.get("dv").getAsShort());
-				this.evs.put(currentDVEV.get("name").getAsString(), currentDVEV.get("ev").getAsShort());
+				Stat currentStat = Stat.valueOf(currentDVEV.get("name").getAsString().toUpperCase());
+				this.dvs.put(currentStat, currentDVEV.get("dv").getAsShort());
+				this.evs.put(currentStat, currentDVEV.get("ev").getAsShort());
 			}
 		}
 		this.generateStats(saveData.get("level").getAsShort());
@@ -366,18 +481,24 @@ public class Stats {
 		return this.rng;
 	}
 
-	public void setBaseStats(short[] baseStats) {
-		this.baseStats = baseStats.clone();
+	public void setBaseStats(HashMap<Stat, Short> baseStats) {
+		this.baseStats = new HashMap<>(baseStats);
 		updateStats();
 	}
 
-	public void increaseEV(String name, short value) {
-		short temp = (short) (this.evs.get(name) + value);
-		this.evs.put(name, temp < 252 ? temp : 252);
-		updateStats();
+	public void increaseEV(Stat stat, short value) {
+		short sum = 0;
+		for(Stat s : evs.keySet()) {
+			sum += evs.get(s);
+		}
+		if(sum < 510) {
+			short temp = (short) (this.evs.get(stat) + (sum + value > 510 ? 510 - sum : value));
+			this.evs.put(stat, temp < 252 ? temp : 252);
+			updateStats();
+		}
 	}
 
-	public void setDV(String stat, int value) {
+	public void setDV(Stat stat, int value) {
 		this.dvs.put(stat, (short) value);
 		this.updateStats();
 	}

@@ -55,6 +55,9 @@ public class Player extends Character {
 
 	@Override
 	public void setCurrentRoute(Route currentRoute) {
+		if(gController.getGameFrame() != null) {
+			gController.getGameFrame().getBackgroundLabel().changeRoute(currentRoute);
+		}
 		for(int i = 0; i < routeHistory.size(); i++) {
 			if(routeHistory.get(i).equals(currentRoute.getId())) {
 				routeHistory.remove(i);
@@ -69,7 +72,7 @@ public class Player extends Character {
 		String routeID = "eigenes_zimmer";
 		int x = 5;
 		int y = 4;
-		Direction d = Direction.RIGHT;
+		Direction d = Direction.DOWN;
 		
 		for(int centerIndex = this.routeHistory.size() - 1; centerIndex >= 0; centerIndex--) {
 			if(this.routeHistory.get(centerIndex).equals("pokemon_center")) {
@@ -85,6 +88,8 @@ public class Player extends Character {
 		this.setCurrentRoute(gController.getRouteAnalyzer().getRouteById(routeID));
 		gController.setCurrentRoute(this.getCurrentRoute());
 		team.restoreTeam();
+		gController.getCurrentBackground().getCamera().setCharacter(this, false);
+//		gController.getGameFrame().repaint();
 	}
 
 	public ArrayList<String> getRouteHistory() {
@@ -168,8 +173,6 @@ public class Player extends Character {
 
 	public boolean useItem(Item i) {
 		gController.setInteractionPause(true);
-		gController.getGameFrame().setCurrentPanel(null);
-		gController.getGameFrame().repaint();
 		boolean result = false;
 		switch (i) {
 		case CUT:
@@ -191,17 +194,23 @@ public class Player extends Character {
 		case MASTERBALL:
 		case POKEBALL:
 		case SUPERBALL:
+		case HEALBALL:
+		case PREMIERBALL:
 			if(gController.isFighting()) {
 				result = true;
 				gController.getGameFrame().getFightPanel().throwBall(i);
+			} else {
+				gController.getGameFrame().addDialogue("Es wird keine Wirkung haben.");
 			}
 			break;
 		default:
-			gController.setInteractionPause(false);
+			gController.getGameFrame().addDialogue("Es wird keine Wirkung haben.");
 			result = false;
 		}
 		if(result) {
 			removeItem(i);
+			gController.getGameFrame().setCurrentPanel(null);
+			gController.getGameFrame().repaint();
 		}
 		gController.waitDialogue();
 		gController.setInteractionPause(false);

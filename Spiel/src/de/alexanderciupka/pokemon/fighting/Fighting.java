@@ -11,6 +11,7 @@ import de.alexanderciupka.pokemon.pokemon.Ailment;
 import de.alexanderciupka.pokemon.pokemon.DamageClass;
 import de.alexanderciupka.pokemon.pokemon.Move;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
+import de.alexanderciupka.pokemon.pokemon.Stat;
 import de.alexanderciupka.pokemon.pokemon.Stats;
 import de.alexanderciupka.pokemon.pokemon.Type;
 
@@ -26,6 +27,8 @@ public class Fighting {
 	private Random rng;
 	private GameController gController;
 	private boolean escape;
+
+	public boolean won;
 
 	public Fighting(Pokemon pokemonTwo) {
 		gController = GameController.getInstance();
@@ -68,26 +71,15 @@ public class Fighting {
 		participants.add(player);
 	}
 
-	public Pokemon[] getOrder() {
-		Pokemon[] order = new Pokemon[2];
-		if (player.getStats().getFightStats()[5] >= enemy.getStats().getFightStats()[5]) {
-			order[0] = player;
-			order[1] = enemy;
-		} else {
-			order[0] = enemy;
-			order[1] = player;
-		}
-		return order;
-	}
-
 	public boolean isPlayerStart(Move playerMove, Move enemyMove) {
 		if (playerMove.getPriority() > enemyMove.getPriority()) {
 			return true;
 		} else if (playerMove.getPriority() == enemyMove.getPriority()) {
-			if (player.getStats().getFightStats()[5] > enemy.getStats().getFightStats()[5]) {
+			if (player.getStats().getFightStats().get(Stat.SPEED) > enemy.getStats().getFightStats().get(Stat.SPEED)) {
 				return true;
-			} else if (player.getStats().getFightStats()[5] == enemy.getStats().getFightStats()[5]) {
-				return new Random().nextBoolean();
+			} else if (player.getStats().getFightStats().get(Stat.SPEED) == enemy.getStats().getFightStats()
+					.get(Stat.SPEED)) {
+				return rng.nextBoolean();
 			} else {
 				return false;
 			}
@@ -128,7 +120,7 @@ public class Fighting {
 				if (move.checkUserBuff()) {
 					buff(player, move);
 				}
-				if (move.checkEnemyBuff()){
+				if (move.checkEnemyBuff()) {
 					buff(enemy, move);
 				}
 			}
@@ -139,7 +131,7 @@ public class Fighting {
 	public boolean enemyAttack() {
 		return enemyAttack(enemy.getMove(this.player));
 	}
- 
+
 	public boolean enemyAttack(Move move) {
 		String message = enemy.canAttack();
 		if (message != null) {
@@ -175,7 +167,7 @@ public class Fighting {
 			if (move.checkStatChange()) {
 				if (move.checkUserBuff()) {
 					buff(enemy, move);
-				} 
+				}
 				if (move.checkEnemyBuff()) {
 					buff(player, move);
 				}
@@ -186,54 +178,37 @@ public class Fighting {
 	}
 
 	public boolean playerHit(Move playerMove) {
-		if (rng.nextFloat() * 100 < playerMove.getAccuracy() && playerMove.getCurrentPP() > 0) {
+		double hitChance = playerMove.getAccuracy() * (player.getStats().getFightStats().get(Stat.ACCURACY)
+				/ enemy.getStats().getFightStats().get(Stat.EVASION));
+		if (rng.nextFloat() * 100 < hitChance && playerMove.getCurrentPP() > 0) {
 			playerMove.reducePP();
-			int ammount = rng.nextInt(playerMove.getMaxHits() - playerMove.getMinHits() + 1);
-			for (int i = 0; i < playerMove.getMinHits() + ammount; i++) {
-				damageCalculation(player, enemy, playerMove);
-				gController.sleep(150);
-			}
+			damageCalculation(player, enemy, playerMove,
+					rng.nextInt(playerMove.getMaxHits() - playerMove.getMinHits() + 1) + playerMove.getMinHits());
+			gController.sleep(150);
 			return true;
 		}
 		return false;
 	}
 
 	public boolean enemyHit(Move enemyMove) {
-		if (rng.nextFloat() < enemyMove.getAccuracy() && enemyMove.getCurrentPP() > 0) {
+		double hitChance = enemyMove.getAccuracy() * (enemy.getStats().getFightStats().get(Stat.ACCURACY)
+				/ player.getStats().getFightStats().get(Stat.EVASION));
+		if (enemyMove.getAccuracy() > 100 || rng.nextFloat() * 100 < hitChance && enemyMove.getCurrentPP() > 0) {
 			enemyMove.reducePP();
-			int ammount = rng.nextInt(enemyMove.getMaxHits() - enemyMove.getMinHits() + 1);
-			for (int i = 0; i < enemyMove.getMinHits() + ammount; i++) {
-				damageCalculation(enemy, player, enemyMove);
-				gController.sleep(150);
-			}
+			damageCalculation(enemy, player, enemyMove,
+					rng.nextInt(enemyMove.getMaxHits() - enemyMove.getMinHits() + 1) + enemyMove.getMinHits());
 			return true;
 		}
 		return false;
 	}
 
 	public void buff(Pokemon pokemon, Move move) {
-		for (int i = 0; i < pokemon.getStats().getStats().length; i++) {
-			int change = move.changeStat(i);
+		for (Stat s : Stat.values()) {
+			int change = move.changeStat(s);
 			if (change < 0) {
-				if (pokemon.getStats().decreaseStat(i, Math.abs(change))) {
-					if (change == -1) {
-						gController.getGameFrame().getFightPanel()
-								.addText(Stats.STAT_NAMES[i] + " von " + pokemon.getName() + " wurde gesenkt!");
-					} else if (change <= -2) {
-						gController.getGameFrame().getFightPanel().addText(
-								Stats.STAT_NAMES[i] + " von " + pokemon.getName() + " wurde sehr stark gesenkt!");
-					}
-				}
+				pokemon.getStats().decreaseStat(s, Math.abs(change));
 			} else if (change > 0) {
-				if (pokemon.getStats().increaseStat(i, change)) {
-					if (change == 1) {
-						gController.getGameFrame().getFightPanel()
-								.addText(Stats.STAT_NAMES[i] + " von " + pokemon.getName() + " ist gestiegen!");
-					} else if (change >= 2) {
-						gController.getGameFrame().getFightPanel().addText(
-								Stats.STAT_NAMES[i] + " von " + pokemon.getName() + " ist sehr stark gestiegen!");
-					}
-				}
+				pokemon.getStats().increaseStat(s, change);
 			}
 		}
 	}
@@ -241,50 +216,70 @@ public class Fighting {
 	public void selfAttack(Pokemon pokemon) {
 		Stats stats = pokemon.getStats();
 		double damage = 40;
-		int def = stats.getFightStats()[2];
-		int atk = stats.getFightStats()[1];
+		double def = stats.getFightStats().get(Stat.DEFENSE);
+		double atk = stats.getFightStats().get(Stat.ATTACK);
 		stats.loseHP((int) (((stats.getLevel() * (2 / 5.0) + 2) * damage * (atk / (50.0 * def)) + 2)
 				* ((rng.nextFloat() * 0.15f + 0.85) / 1)));
 	}
 
-	private void damageCalculation(Pokemon attacker, Pokemon defense, Move usedMove) {
+	private void damageCalculation(Pokemon attacker, Pokemon defense, Move usedMove, int ammount) {
 		Stats attackerStats = attacker.getStats();
 		Stats defenderStats = defense.getStats();
-		double damage = usedMove.getPower() * Type.calcSTAB(attacker, usedMove);
-		int crit = 1;
 		double weakness = Type.getEffectiveness(usedMove.getMoveType(), defense.getTypes());
+		double damage = usedMove.getPower() * Type.calcSTAB(attacker, usedMove);
 		if (damage > 0 || usedMove.getDamageClass() != DamageClass.NO_DAMAGE) {
-			int def = 0;
-			int atk = 0;
+			double def = 0;
+			double atk = 0;
 			switch (usedMove.getDamageClass()) {
 			case PHYSICAL:
-				def = defenderStats.getFightStats()[2];
-				atk = attackerStats.getFightStats()[1];
+				def = defenderStats.getFightStats().get(Stat.DEFENSE);
+				atk = attackerStats.getFightStats().get(Stat.ATTACK);
 				break;
 			case SPECIAL:
-				def = defenderStats.getFightStats()[4];
-				atk = attackerStats.getFightStats()[3];
+				def = defenderStats.getFightStats().get(Stat.SPECIALDEFENSE);
+				atk = attackerStats.getFightStats().get(Stat.SPECIALDEFENSE);
 				break;
 			default:
 				break;
 			}
-			float p_crit = rng.nextFloat();
-			switch(usedMove.getCrit() + 1) {
-			case 1:
-				crit = p_crit < 0.0625 ? 2 : 1;
-				break;
-			case 2:
-				crit = p_crit < 0.125 ? 2 : 1;
-				break;
-			case 3:
-				crit = p_crit < 0.5 ? 2 : 1;
-				break;
-			default:
-				crit = 2;
-				break;
-			}
-			if (crit == 2) {
-				gController.getGameFrame().getFightPanel().addText("Ein Volltreffer!", true);
+			System.out.println(ammount);
+			for (int i = 0; i < ammount; i++) {
+				int crit = 1;
+				float pCrit = rng.nextFloat();
+				switch (usedMove.getCrit() + 1) {
+				case 1:
+					crit = pCrit < 0.0625 ? 2 : 1;
+					break;
+				case 2:
+					crit = pCrit < 0.125 ? 2 : 1;
+					break;
+				case 3:
+					crit = pCrit < 0.5 ? 2 : 1;
+					break;
+				default:
+					crit = 2;
+					break;
+				}
+				if (crit == 2) {
+					gController.getGameFrame().getFightPanel().addText("Ein Volltreffer!", true);
+				}
+				damage = (weakness * ((attackerStats.getLevel() * (2 / 5.0) + 2) * damage * (atk / (50.0 * def)) + 2)
+						* crit * ((rng.nextFloat() * 0.15f + 0.85) / 1));
+				System.out.println(damage);
+				damage = Math.max(damage, 1);
+				defenderStats.loseHP((int) damage);
+				if (usedMove.getDrain() > 0) {
+					attackerStats.restoreHP((int) (damage * (usedMove.getDrain() / 100)));
+					gController.getGameFrame().getFightPanel().addText(defense.getName() + " wurde Energie abgesaugt!",
+							true);
+				} else if (usedMove.getDrain() < 0) {
+					attackerStats.loseHP((int) (damage * (usedMove.getDrain() / 100)));
+					gController.getGameFrame().getFightPanel()
+							.addText(attacker.getName() + " hat sich durch den Rückstoß verletzt!", true);
+				}
+				damage = usedMove.getPower() * Type.calcSTAB(attacker, usedMove);
+				gController.getGameFrame().getFightPanel().updatePanels();
+				gController.sleep(150);
 			}
 			if (weakness == Type.STRONG) {
 				gController.getGameFrame().getFightPanel().addText("Die Attacke war sehr effektiv!", true);
@@ -293,21 +288,12 @@ public class Fighting {
 			} else if (weakness == Type.USELESS) {
 				gController.getGameFrame().getFightPanel().addText("Die Attacke zeigte keine Wirkung!", true);
 			}
-			damage = (weakness * ((attackerStats.getLevel() * (2 / 5.0) + 2) * damage * (atk / (50.0 * def)) + 2)
-					* crit * ((rng.nextFloat() * 0.15f + 0.85) / 1));
-			defenderStats.loseHP((int) damage);
-			if(usedMove.getDrain() > 0) {
-				attackerStats.restoreHP((int) (damage * (usedMove.getDrain() / 100)));
-				gController.getGameFrame().getFightPanel().addText(defense.getName() + " wurde Energie abgesaugt!", true);
-			} else if(usedMove.getDrain() < 0) {
-				attackerStats.loseHP((int) (damage * (usedMove.getDrain() / 100)));
-				gController.getGameFrame().getFightPanel().addText(attacker.getName() + " hat sich durch den Rückstoß verletzt!", true);
-			}
 		}
-		
-		if(usedMove.getHealing() > 0) {
-			attackerStats.restoreHP((int) (attackerStats.getStats()[0] * (usedMove.getHealing() / 100)));
-			gController.getGameFrame().getFightPanel().addText("Die KP von " + attacker.getName() + " wurden aufgefrischt!", true);
+
+		if (usedMove.getHealing() > 0) {
+			attackerStats.restoreHP((int) (attackerStats.getStats().get(Stat.HP) * (usedMove.getHealing() / 100)));
+			gController.getGameFrame().getFightPanel()
+					.addText("Die KP von " + attacker.getName() + " wurden aufgefrischt!", true);
 		}
 
 		if (rng.nextFloat() * 100 < usedMove.getAilmentChance()) {
@@ -338,10 +324,11 @@ public class Fighting {
 		if (!participants.contains(player)) {
 			participants.add(player);
 		}
-//		gController.getGameFrame().getFightPanel().addText("Du schaffst das " + this.player.getName() + "!");
+		// gController.getGameFrame().getFightPanel().addText("Du schaffst das "
+		// + this.player.getName() + "!");
 		gController.updateFight();
 	}
-	
+
 	public Pokemon getEnemy() {
 		return enemy;
 	}
@@ -358,6 +345,7 @@ public class Fighting {
 		}
 		participants.remove(player);
 		gController.getFight().setCurrentFightOption(FightOption.POKEMON);
+		gController.getGameFrame().getPokemonPanel().update();
 		return false;
 	}
 
@@ -401,11 +389,16 @@ public class Fighting {
 	}
 
 	public int calculateXP(Pokemon player) {
+		int base = enemy.getBaseExperience();
+		double OTFactor = 1;
+		double itemFactor = 1;
+		double friendshipFactor = 1;
+		double evolveFactor = player.getEvolves() != 0 ? 1.2 : 1;
 		int enemyLevel = enemy.getStats().getLevel();
-		int xp = (int) (((enemy.getBaseExperience() * enemyLevel) / 5.0) * (Math.pow(2 * enemyLevel + 10, 2.5) / Math.pow(enemyLevel + player.getStats().getLevel() + 10, 2.5)) + 1);
-		if(!canEscape()) {
-			xp *= 1.5;
-		}
+		int playerLevel = player.getStats().getLevel();
+		int xp = (int) ((((base * enemyLevel) / 5.0)
+				* (Math.pow(2 * enemyLevel + 10, 2.5) / Math.pow(enemyLevel + playerLevel + 10, 2.5)) + 1) * OTFactor
+				* itemFactor * friendshipFactor * evolveFactor);
 		player.increaseEV(enemy);
 		return xp;
 	}

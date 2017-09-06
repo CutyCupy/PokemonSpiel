@@ -26,6 +26,12 @@ import com.google.gson.JsonParser;
 import de.alexanderciupka.hoverbutton.Main;
 import de.alexanderciupka.pokemon.characters.Direction;
 import de.alexanderciupka.pokemon.characters.NPC;
+import de.alexanderciupka.pokemon.gui.overlay.RainType;
+import de.alexanderciupka.pokemon.map.entities.Entity;
+import de.alexanderciupka.pokemon.map.entities.ItemEntity;
+import de.alexanderciupka.pokemon.map.entities.PokemonEntity;
+import de.alexanderciupka.pokemon.map.entities.SignEntity;
+import de.alexanderciupka.pokemon.map.entities.TriggeredEvent;
 import de.alexanderciupka.pokemon.menu.MenuController;
 import de.alexanderciupka.pokemon.pokemon.Item;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
@@ -44,11 +50,6 @@ public class RouteAnalyzer {
 	private BufferedReader currentReader;
 	private Map<String, Route> loadedRoutes;
 	private Map<String, Route> originalRoutes;
-	private ArrayList<Warp> warps;
-	private ArrayList<NPC> characters;
-	private ArrayList<NPC> stones;
-	private ArrayList<PokemonEntity> pokemons;
-	private HashMap<String, ArrayList<Point>> events;
 	private GameController gController;
 	private HashMap<String, Image> logos;
 	private HashMap<Item, BufferedImage> items; 
@@ -121,6 +122,7 @@ public class RouteAnalyzer {
 				try {
 					this.pokeballs.put(Item.valueOf(currentFile.getName().split("\\.")[0].toUpperCase()), ImageIO.read(currentFile));
 				} catch (Exception e) {
+					System.err.println(currentFile);
 					continue;
 				}
 			}
@@ -191,12 +193,20 @@ public class RouteAnalyzer {
 				currentRoute.setHeight(routeDetails.get("height").getAsInt());
 				currentRoute.setWidth(routeDetails.get("width").getAsInt());
 				currentRoute.setDark(routeDetails.get("dark") != null ? routeDetails.get("dark").getAsBoolean() : false);
-				warps = new ArrayList<Warp>();
-				characters = new ArrayList<NPC>();
-				stones = new ArrayList<NPC>();
-				pokemons = new ArrayList<PokemonEntity>();
-				events = new HashMap<String, ArrayList<Point>>();
+				currentRoute.setType(RouteType.valueOf(routeDetails.get("type") != null ? 
+						routeDetails.get("type").getAsString().toUpperCase() : "CITY"));
+				try {
+					currentRoute.setRain(RainType.valueOf(routeDetails.get("rain").getAsString().toUpperCase()));
+				} catch(Exception e) {
+					currentRoute.setRain(null);
+				}
+				ArrayList<Warp> warps = new ArrayList<Warp>();
+				ArrayList<NPC> characters = new ArrayList<NPC>();
+				ArrayList<NPC> stones = new ArrayList<NPC>();
+				HashMap<String, ArrayList<Point>> events = new HashMap<String, ArrayList<Point>>();
+				ArrayList<PokemonEntity> pokemons = new ArrayList<PokemonEntity>();
 				ArrayList<ItemEntity> items = new ArrayList<ItemEntity>();
+				ArrayList<SignEntity> signs = new ArrayList<SignEntity>();
 				float nonGrassEncounterRate = 0;
 				switch(currentRoute.getTerrainName().toLowerCase()) {
 				case "cave":
@@ -214,7 +224,8 @@ public class RouteAnalyzer {
 						}
 						String currentString = routeDetails.get(x + "." + y).getAsString().toUpperCase();
 						if (!currentString.startsWith("W") && !currentString.startsWith("C")
-								&& !currentString.startsWith("PKM") && !currentString.startsWith("TRIGGERED") && !currentString.startsWith("ITEM")) {
+								&& !currentString.startsWith("PKM") && !currentString.startsWith("TRIGGERED") 
+								&& !currentString.startsWith("ITEM")) {
 							switch (currentString) {
 							case "OOB":
 								currentEntity = new Entity(currentRoute, false, "free", 0, "free");
@@ -223,7 +234,8 @@ public class RouteAnalyzer {
 								currentEntity = new Entity(currentRoute, false, "tree", 0, "grassy");
 								break;
 							case "SI":
-								currentEntity = new Entity(currentRoute, false, "sign", 0, currentRoute.getTerrainName());
+								currentEntity = new SignEntity(currentRoute);
+								signs.add((SignEntity) currentEntity);
 								break;
 							case "TA": // Table
 								currentEntity = new Entity(currentRoute, false, "table", 0, currentRoute.getTerrainName());
@@ -457,7 +469,7 @@ public class RouteAnalyzer {
 									currentEntity = new Entity(currentRoute, false, false, false, true, "ladder_up", 0, 
 											currentRoute.getTerrainName());
 								} else {
-									currentEntity = new Entity(currentRoute, false, false, true, false, "ladder_down", 0, 
+									currentEntity = new Entity(currentRoute, false, false, true, true, "ladder_down", 0, 
 											currentRoute.getTerrainName());
 								}
 							} else {
@@ -476,14 +488,14 @@ public class RouteAnalyzer {
 							pokemons.add((PokemonEntity) currentEntity);
 						} else if (currentString.startsWith("TRIGGERED")) {
 							currentEntity = new Entity(currentRoute, true, "warp", 0, currentRoute.getTerrainName());
-							ArrayList<Point> temp = this.events.get(currentString);
+							ArrayList<Point> temp = events.get(currentString);
 							if (temp == null) {
 								temp = new ArrayList<Point>();
 							}
 							temp.add(new Point(x, y));
-							this.events.put(currentString, temp);
+							events.put(currentString, temp);
 						} else if(currentString.startsWith("ITEM")) {
-							currentEntity = new ItemEntity(currentRoute, currentRoute.getTerrainName(), currentString);
+							currentEntity = new ItemEntity(currentRoute, currentRoute.getTerrainName(), currentString, false);
 							items.add((ItemEntity) currentEntity);
 						}
 						currentEntity.setX(x);
@@ -555,7 +567,7 @@ public class RouteAnalyzer {
 
 				if (route.get("pokemons") != null) {
 					JsonArray pokemonDetails = route.get("pokemons").getAsJsonArray();
-					for (int i = 0; i < Math.min(this.pokemons.size(), pokemonDetails.size()); i++) {
+					for (int i = 0; i < Math.min(pokemons.size(), pokemonDetails.size()); i++) {
 						JsonObject currentPokemon = pokemonDetails.get(i).getAsJsonObject();
 						int pokemonIndex = i;
 						String pokemonID = currentPokemon.get("entity_id").getAsString();
@@ -580,12 +592,12 @@ public class RouteAnalyzer {
 					}
 				}
 				
-				if (route.get("items") != null) {
+				if(route.get("items") != null) {
 					JsonArray itemDetails = route.get("items").getAsJsonArray();
-					for (int i = 0; i < Math.min(this.items.size(), itemDetails.size()); i++) {
+					for (int i = 0; i < Math.min(items.size(), itemDetails.size()); i++) {
 						JsonObject currentItem = itemDetails.get(i).getAsJsonObject();
 						int itemIndex = i;
-						String itemID = currentItem.get("id").getAsString();
+						String itemID = currentItem.get("entity_id").getAsString();
 						if (!itemID.equals(items.get(itemIndex).getId())) {
 							for (int j = 0; j < items.size(); j++) {
 								itemIndex = j;
@@ -595,56 +607,98 @@ public class RouteAnalyzer {
 							}
 						}
 						ItemEntity entity = items.get(itemIndex);
-						Item item = Item.valueOf(currentItem.get("item").getAsString().toUpperCase());
-						entity.setItem(item);
+
+						entity.setItem(Item.valueOf(currentItem.get("name").getAsString().toUpperCase()));
+						if(currentItem.get("sprite") != null) {
+							entity.setSprite(currentItem.get("sprite").getAsString().toLowerCase());
+						}
+						if(currentItem.get("terrain") != null) {
+							entity.setTerrain(currentItem.get("terrain").getAsString().toLowerCase());
+						}
+						if(currentItem.get("hidden") != null) {
+							entity.setHidden(currentItem.get("hidden").getAsBoolean());
+						}
 						currentRoute.addEntity(entity.getX(), entity.getY(), entity);
 					}
 				}
-
+				
 				if (route.get("events") != null) {
 					JsonObject eventDetails = route.get("events").getAsJsonObject();
-					for (String event : this.events.keySet()) {
+					for (String event : events.keySet()) {
 						JsonArray currentEvent = eventDetails.get(event.toLowerCase()).getAsJsonArray();
 						TriggeredEvent te = new TriggeredEvent(event);
 						for (JsonElement step : currentEvent) {
 							JsonArray currentStep = step.getAsJsonArray();
 							ArrayList<Change> changes = new ArrayList<Change>();
 							for (JsonElement current : currentStep) {
+								JsonObject j = current.getAsJsonObject();
 								Change currentChange = new Change();
-								currentChange.setParticipant(current.getAsJsonObject().get("character").getAsString());
-								currentChange.setRouteID(current.getAsJsonObject().get("route") != null
-										? current.getAsJsonObject().get("route").getAsString() : currentRoute.getId());
+								currentChange.setParticipant(j.get("character").getAsString());
+								currentChange.setRouteID(j.get("route") != null
+										? j.get("route").getAsString() : currentRoute.getId());
 								currentChange.setMove(new Point(
-										current.getAsJsonObject().get("target_x") != null
-												? current.getAsJsonObject().get("target_x").getAsInt() : -1,
-										current.getAsJsonObject().get("target_y") != null
-												? current.getAsJsonObject().get("target_y").getAsInt() : -1));
-								currentChange.setDialog(current.getAsJsonObject().get("dialog") != null
-										? current.getAsJsonObject().get("dialog").getAsString() : null);
-								currentChange.setDirection(current.getAsJsonObject().get("direction") != null
+										j.get("target_x") != null
+												? j.get("target_x").getAsInt() : -1,
+										j.get("target_y") != null
+												? j.get("target_y").getAsInt() : -1));
+								currentChange.setDialog(j.get("dialog") != null
+										? j.get("dialog").getAsString() : null);
+								currentChange.setDirection(j.get("direction") != null
 										? Direction.valueOf(
-												current.getAsJsonObject().get("direction").getAsString().toUpperCase())
+												j.get("direction").getAsString().toUpperCase())
 										: null);
-								currentChange.setPositionUpdate(current.getAsJsonObject().get("update") != null
-										? current.getAsJsonObject().get("update").getAsBoolean() : false);
-								currentChange.setFight(current.getAsJsonObject().get("fight") != null
-										? current.getAsJsonObject().get("fight").getAsBoolean() : false);
-								currentChange.setAfterFightUpdate(current.getAsJsonObject().get("after_fight") != null
-										? current.getAsJsonObject().get("after_fight").getAsString() : null);
-								currentChange.setBeforeFightUpdate(current.getAsJsonObject().get("before_fight") != null
-										? current.getAsJsonObject().get("before_fight").getAsString() : null);
-								currentChange.setNoFightUpdate(current.getAsJsonObject().get("no_fight") != null
-										? current.getAsJsonObject().get("no_fight").getAsString() : null);
-								currentChange.setSpriteUpdate(current.getAsJsonObject().get("sprite_update") != null
-										? current.getAsJsonObject().get("sprite_update").getAsString() : null);
-								currentChange.setHeal(current.getAsJsonObject().get("heal") != null
-										? current.getAsJsonObject().get("heal").getAsBoolean() : false);
+								currentChange.setPositionUpdate(j.get("update") != null
+										? j.get("update").getAsBoolean() : false);
+								currentChange.setFight(j.get("fight") != null
+										? j.get("fight").getAsBoolean() : false);
+								currentChange.setAfterFightUpdate(j.get("after_fight") != null
+										? j.get("after_fight").getAsString() : null);
+								currentChange.setBeforeFightUpdate(j.get("before_fight") != null
+										? j.get("before_fight").getAsString() : null);
+								currentChange.setNoFightUpdate(j.get("no_fight") != null
+										? j.get("no_fight").getAsString() : null);
+								currentChange.setSpriteUpdate(j.get("sprite_update") != null
+										? j.get("sprite_update").getAsString() : null);
+								currentChange.setHeal(j.get("heal") != null
+										? j.get("heal").getAsBoolean() : false);
+								if(j.get("item") != null) {
+									for(JsonElement x : j.get("item").getAsJsonArray()) {
+										JsonObject currentItem = x.getAsJsonObject();
+										currentChange.addItem(Item.valueOf(currentItem.get("name").getAsString().toUpperCase()), 
+												currentItem.get("amount") != null ? currentItem.get("amount").getAsInt() : 1);
+										
+									}
+								}
+								currentChange.setCamPosition(new Point(j.get("cam_x") != null
+										? j.get("cam_x").getAsInt() : -1, j.get("cam_y") != null
+										? j.get("cam_y").getAsInt() : -1));
+								currentChange.setCamAnimation(j.get("cam_animation") != null
+										? j.get("cam_animation").getAsBoolean() : false);
+								currentChange.setCenterCharacter(j.get("cam_center") != null
+										? j.get("cam_center").getAsBoolean() : false);
 								changes.add(currentChange);
 							}
 							te.addChanges(changes.toArray(new Change[changes.size()]));
 						}
-						for (Point p : this.events.get(event)) {
+						for (Point p : events.get(event)) {
 							currentRoute.getEntities()[p.y][p.x].setEvent(te);
+						}
+					}
+				}
+				
+				for(int i = 0; i < signs.size(); i++) {
+					signs.get(i).setInformation("Wer stellt ein leeres Schild auf?");
+				}
+				
+				if(route.get("signs") != null) {
+					JsonArray signsData = route.get("signs").getAsJsonArray();
+					for(int i = 0; i < Math.min(signsData.size(), signs.size()); i++) {
+						JsonObject current = signsData.get(i).getAsJsonObject();
+						if(current.get("terrain") != null) {
+							signs.get(i).setTerrain(current.get("terrain").getAsString());
+						}
+						if(current.get("information") != null) {
+							signs.get(i).setInformation(current.get("information").getAsString());
 						}
 					}
 				}
@@ -660,6 +714,7 @@ public class RouteAnalyzer {
 							currentEncounter.get("level").getAsShort());
 					currentRoute.addPokemon(encounter);
 				}
+//				warps.clear();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -669,7 +724,6 @@ public class RouteAnalyzer {
 			} else {
 				originalRoutes.put(routeID, currentRoute);
 			}
-			warps.clear();
 		}
 	}
 
@@ -704,6 +758,7 @@ public class RouteAnalyzer {
 			
 			data.add("characters", charData);
 			data.add("routes", routeData);
+			data.add("cam", gController.getCurrentBackground().getCamera().getSaveData());
 			
 			for (char c : data.toString().toCharArray()) {
 				writer.write(c);
@@ -752,7 +807,11 @@ public class RouteAnalyzer {
 					loadedRoutes.get(s).createMap();
 				}
 			}
+			
+			gController.setCurrentRoute(gController.getMainCharacter().getCurrentRoute());
 
+			
+			gController.getCurrentBackground().getCamera().importSaveData(data.get("cam").getAsJsonObject());
 
 			return true;
 		} catch(Exception e) {

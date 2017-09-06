@@ -44,7 +44,7 @@ public class RouteOverlay extends Overlay {
 		 int x = (int) (rectX + (rectWidth - stringBounds.getWidth()) / 2);
 		 int y = rectY + ((rectHeight - g.getFontMetrics().getHeight()) / 2) + g.getFontMetrics().getAscent();
 		
-		g.drawString("Route" /**this.route.getName()**/, x, y);
+		g.drawString(this.route.getName(), x, y);
 		
 		g.setStroke(new BasicStroke(5));
 		g.drawRect(rectX, rectY, rectWidth, rectHeight);

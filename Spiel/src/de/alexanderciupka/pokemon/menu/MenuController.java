@@ -14,6 +14,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import de.alexanderciupka.hoverbutton.Main;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.map.RouteCreator;
 import de.alexanderciupka.pokemon.painting.PaintingController;
@@ -27,7 +28,7 @@ public class MenuController {
 	private JFileChooser fileChooser;
 	private MainMenuFrame menuFrame;
 	private PaintingNameFrame paintingFrame;
-	public static final String SAVE_PATH = System.getProperty("user.home") + "/KajasSpielSpeicherdaten/";
+	public static final String SAVE_PATH = System.getProperty("user.home") + "/SpielSpeicherdaten/";
 
 	public static final Dimension SCREEN_SIZE = Toolkit.getDefaultToolkit().getScreenSize();
 
@@ -41,7 +42,7 @@ public class MenuController {
 		pController = PaintingController.getInstance();
 		new File(SAVE_PATH).mkdir();
 		fileChooser = new JFileChooser(SAVE_PATH);
-		fileChooser.setFileFilter(new FileNameExtensionFilter("Kajas Speicherdateien",
+		fileChooser.setFileFilter(new FileNameExtensionFilter("Speicherdateien",
 	            "ks"));
 		menuFont = importFont("/fonts/pokemon_solid.ttf");
 		menuFrame = new MainMenuFrame();
@@ -70,8 +71,8 @@ public class MenuController {
 		return this.menuFont;
 	}
 
-	public Font importFont(String path) {
-		InputStream is = getClass().getResourceAsStream(path);
+	public static Font importFont(String path) {
+		InputStream is = Main.class.getResourceAsStream(path);
 		try {
 			Font f = Font.createFont(Font.TRUETYPE_FONT, is);
 			GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(f);
