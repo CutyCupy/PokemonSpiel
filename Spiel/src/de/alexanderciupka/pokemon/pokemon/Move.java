@@ -142,6 +142,11 @@ public class Move {
 		}
 		return false;
 	}
+	
+	@Override
+	public String toString() {
+		return this.getName();
+	}
 
 	@Override
 	public Move clone() {

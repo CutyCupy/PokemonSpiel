@@ -16,6 +16,8 @@ import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.map.Route;
 import de.alexanderciupka.pokemon.map.Warp;
 import de.alexanderciupka.pokemon.pokemon.Item;
+import de.alexanderciupka.pokemon.pokemon.Pokemon;
+import de.alexanderciupka.pokemon.pokemon.PokemonPool;
 
 public class Entity {
 
@@ -45,6 +47,7 @@ public class Entity {
 	private Random rng;
 	protected GameController gController;
 
+	private PokemonPool pokemonPool;
 	private TriggeredEvent event;
 	private Route parent;
 
@@ -184,7 +187,9 @@ public class Entity {
 	}
 
 	public boolean checkPokemon() {
-		if (pokemonRate > 0 && gController.getCurrentBackground().getCurrentRoute().getPokemonPool().size() != 0) {
+		if (pokemonRate > 0 && ((this.pokemonPool != null && this.pokemonPool.getPokemonPool().size() > 0) || 
+				(gController.getMainCharacter().getCurrentRoute().getPokemonPool() != null && 
+						gController.getMainCharacter().getCurrentRoute().getPokemonPool().getPokemonPool().size() > 0))) {
 			if (rng.nextFloat() <= pokemonRate) {
 				gController.getGameFrame().getBackgroundLabel().startEncounter();
 				return true;
@@ -316,6 +321,14 @@ public class Entity {
 		return exactY;
 	}
 
+	public PokemonPool getPokemonPool() {
+		return pokemonPool;
+	}
+
+	public void setPokemonPool(PokemonPool pokemonPool) {
+		this.pokemonPool = pokemonPool;
+	}
+
 	public void onStep(Character c) {
 		if (!startWarp(c)) {
 			onStepNoWarp(c);
@@ -342,7 +355,14 @@ public class Entity {
 			}
 		} else if (c instanceof Player && !((Player) c).isProtected() && checkPokemon()) {
 			if (!this.gController.isFighting()) {
-				gController.startFight(gController.getCurrentBackground().chooseEncounter());
+				Pokemon encounter = null;
+				if(this.pokemonPool != null) {
+					encounter = this.pokemonPool.getEncounter();
+				}
+				if(encounter == null) {
+					encounter = gController.getCurrentBackground().chooseEncounter();
+				}
+				gController.startFight(encounter);
 			}
 		} else {
 			if (this.spriteName.startsWith("move")) {

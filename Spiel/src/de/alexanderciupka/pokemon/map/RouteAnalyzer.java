@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
@@ -35,6 +36,7 @@ import de.alexanderciupka.pokemon.map.entities.TriggeredEvent;
 import de.alexanderciupka.pokemon.menu.MenuController;
 import de.alexanderciupka.pokemon.pokemon.Item;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
+import de.alexanderciupka.pokemon.pokemon.PokemonPool;
 
 public class RouteAnalyzer {
 
@@ -79,6 +81,17 @@ public class RouteAnalyzer {
 		readAllLogos();
 		readAllItems();
 		readAllRoutes();
+		
+		for(String s : loadedRoutes.keySet()) {
+			System.out.println("Loaded: " + loadedRoutes.get(s).getName());
+		}
+		
+		HashMap<Integer, HashSet<String>> locations = getAllPokemonLocations();
+		for(int i = 1; i < 650; i++) {
+			if(!locations.get(i).isEmpty())
+				System.out.println(gController.getInformation().getName(i) + " - " + locations.get(i));
+		}
+		
 	}
 	
 	private void readAllSprites() {
@@ -204,6 +217,7 @@ public class RouteAnalyzer {
 				ArrayList<NPC> characters = new ArrayList<NPC>();
 				ArrayList<NPC> stones = new ArrayList<NPC>();
 				HashMap<String, ArrayList<Point>> events = new HashMap<String, ArrayList<Point>>();
+				HashMap<String, ArrayList<Entity>> pokemonPools = new HashMap<>();
 				ArrayList<PokemonEntity> pokemons = new ArrayList<PokemonEntity>();
 				ArrayList<ItemEntity> items = new ArrayList<ItemEntity>();
 				ArrayList<SignEntity> signs = new ArrayList<SignEntity>();
@@ -225,7 +239,8 @@ public class RouteAnalyzer {
 						String currentString = routeDetails.get(x + "." + y).getAsString().toUpperCase();
 						if (!currentString.startsWith("W") && !currentString.startsWith("C")
 								&& !currentString.startsWith("PKM") && !currentString.startsWith("TRIGGERED") 
-								&& !currentString.startsWith("ITEM")) {
+								&& !currentString.startsWith("ITEM") && !currentString.startsWith("GRASS")
+								&& !currentString.startsWith("SEE")) {
 							switch (currentString) {
 							case "OOB":
 								currentEntity = new Entity(currentRoute, false, "free", 0, "free");
@@ -292,10 +307,6 @@ public class RouteAnalyzer {
 							case "": // Alternative way to create a "Free" Entity
 								currentEntity = new Entity(currentRoute, true, "free", nonGrassEncounterRate, currentRoute.getTerrainName());
 								break;
-							case "G": // Grass
-								currentEntity = new Entity(currentRoute, true, "grass", Entity.POKEMON_GRASS_RATE,
-										"grassy");
-								break;
 							case "GR":
 								currentEntity = new Entity(currentRoute, true, "free", 0, "grassy");
 								break;
@@ -331,9 +342,6 @@ public class RouteAnalyzer {
 							case "A":
 								currentEntity = new Entity(currentRoute, false, "house_gym", 0,
 										currentRoute.getTerrainName());
-								break;
-							case "S": // See
-								currentEntity = new Entity(currentRoute, true, "free", Entity.POKEMON_GRASS_RATE, "see");
 								break;
 							case "SA": // Sand
 								currentEntity = new Entity(currentRoute, true, "free", 0, "sandy");
@@ -497,6 +505,17 @@ public class RouteAnalyzer {
 						} else if(currentString.startsWith("ITEM")) {
 							currentEntity = new ItemEntity(currentRoute, currentRoute.getTerrainName(), currentString, false);
 							items.add((ItemEntity) currentEntity);
+						} else if(currentString.startsWith("GRASS") || currentString.startsWith("SEE")) {
+							currentEntity = new Entity(currentRoute, true, 
+									currentString.startsWith("GRASS") ? "grass" : "free", 
+											Entity.POKEMON_GRASS_RATE, 
+											currentString.startsWith("GRASS") ? "grassy" : "see");
+							ArrayList<Entity> temp = pokemonPools.get(currentString);
+							if (temp == null) {
+								temp = new ArrayList<Entity>();
+							}
+							temp.add(currentEntity);
+							pokemonPools.put(currentString, temp);
 						}
 						currentEntity.setX(x);
 						currentEntity.setY(y);
@@ -706,17 +725,46 @@ public class RouteAnalyzer {
 				for (int i = 0; i < stones.size(); i++) {
 					currentRoute.addCharacter(stones.get(i));
 				}
-
-				JsonArray encounterDetails = route.get("encounters").getAsJsonArray();
-				for (JsonElement j : encounterDetails) {
-					JsonObject currentEncounter = j.getAsJsonObject();
-					SimpleEntry<Integer, Short> encounter = new SimpleEntry<Integer, Short>(currentEncounter.get("id").getAsInt(),
-							currentEncounter.get("level").getAsShort());
-					currentRoute.addPokemon(encounter);
+				
+				if(route.get("encounters") != null) {
+					JsonObject encounterDetails = route.get("encounters").getAsJsonObject();
+					if(encounterDetails.get("DEFAULT") != null) {
+						PokemonPool pool = new PokemonPool("DEFAULT");
+						for (JsonElement j : encounterDetails.get("DEFAULT").getAsJsonArray()) {
+							JsonObject currentEncounter = j.getAsJsonObject();
+							int ammount = currentEncounter.get("ammount") != null ? 
+									currentEncounter.get("ammount").getAsInt() : 1;
+									for(int i = 0; i < ammount; i++) {
+										pool.addPokemon(currentEncounter.get("id").getAsInt(), 
+												currentEncounter.get("level").getAsShort());
+									}
+						}
+					}
+					for(String s : pokemonPools.keySet()) {
+						PokemonPool pool = new PokemonPool(s);
+						if(encounterDetails.get(s) != null) {
+							for (JsonElement j : encounterDetails.get(s).getAsJsonArray()) {
+								JsonObject currentEncounter = j.getAsJsonObject();
+								int ammount = currentEncounter.get("ammount") != null ? 
+										currentEncounter.get("ammount").getAsInt() : 1;
+										for(int i = 0; i < ammount; i++) {
+											pool.addPokemon(currentEncounter.get("id").getAsInt(), 
+													currentEncounter.get("level").getAsShort());
+										}
+							}
+						} else {
+							pool.addPokemon(25, (short) 1);
+						}
+						for(int i = 0; i < pokemonPools.get(s).size(); i++) {
+							pokemonPools.get(s).get(i).setPokemonPool(pool);
+						}
+					}
 				}
 //				warps.clear();
 			} catch (Exception e) {
+				System.out.println(currentRoute.getName());
 				e.printStackTrace();
+				continue;
 			}
 			if(counter == 0) {
 				currentRoute.createMap();
@@ -826,6 +874,32 @@ public class RouteAnalyzer {
 
 	public Image getLogoByName(String logo) {
 		return this.logos.get(logo);
+	}
+	
+	public HashMap<Integer, HashSet<String>> getAllPokemonLocations() {
+		HashMap<Integer, HashSet<String>> allLocations = new HashMap<>();
+		for(int i = 1; i < 650; i++) {
+			allLocations.put(i, new HashSet<String>());
+		}
+		for(String s : loadedRoutes.keySet()) {
+			Route r = loadedRoutes.get(s);
+			ArrayList<String> checkedPools = new ArrayList<String>();
+			for(int x = 0; x < r.getWidth(); x++) {
+				for(int y = 0; y < r.getHeight(); y++) {
+					Entity e = r.getEntities()[y][x];
+					if(e.getPokemonPool() != null && !checkedPools.contains(e.getPokemonPool().getId())) {
+						checkedPools.add(e.getPokemonPool().getId());
+						for(SimpleEntry<Integer, Short> id : e.getPokemonPool().getPokemonPool()) {
+							HashSet<String> temp = allLocations.get(id.getKey());
+							temp.add(s);
+							allLocations.put(id.getKey(), temp);
+						}
+					}
+				}
+			}
+		}
+		return allLocations;
+		
 	}
 
 }

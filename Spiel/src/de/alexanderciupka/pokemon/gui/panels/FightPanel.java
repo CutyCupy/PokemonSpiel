@@ -28,6 +28,7 @@ import de.alexanderciupka.pokemon.gui.PokeballLabel;
 import de.alexanderciupka.pokemon.gui.StatLabel;
 import de.alexanderciupka.pokemon.gui.TextLabel;
 import de.alexanderciupka.pokemon.map.GameController;
+import de.alexanderciupka.pokemon.map.RouteType;
 import de.alexanderciupka.pokemon.painting.Painting;
 import de.alexanderciupka.pokemon.pokemon.Item;
 import de.alexanderciupka.pokemon.pokemon.Move;
@@ -116,7 +117,10 @@ public class FightPanel extends JPanel {
 		playerStats = new StatLabel();
 		playerStats.setVerticalAlignment(SwingConstants.TOP);
 		enemyStats.setVerticalAlignment(SwingConstants.TOP);
-		background = new JLabel(new ImageIcon(gController.getMainCharacter().getCurrentRoute().getType().getBattleBackground()));
+		background = new JLabel(new ImageIcon(gController.getMainCharacter().getCurrentRoute().getEntities()
+				[gController.getMainCharacter().getCurrentPosition().y][gController.getMainCharacter().getCurrentPosition().x]
+						.isWater() ? RouteType.WATER.getBattleBackground() : 
+							gController.getMainCharacter().getCurrentRoute().getType().getBattleBackground()));
 //		playerStats.setBorder(
 //				BorderFactory.createCompoundBorder(new LineBorder(Color.BLACK), new EmptyBorder(2, 10, 2, 10)));
 //		enemyStats.setBorder(

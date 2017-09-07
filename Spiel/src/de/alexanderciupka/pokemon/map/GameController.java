@@ -228,6 +228,7 @@ public class GameController {
 
 	public boolean checkPlayerDead() {
 		if (fight.getPlayer().getStats().getCurrentHP() == 0) {
+			fight.getPlayer().changeHappiness(-1);
 			return true;
 		}
 		return false;
@@ -400,8 +401,12 @@ public class GameController {
 		Pokemon player = new Pokemon(152);
 		player.setName("Mandarine");
 		player.getStats().generateStats((short) 5);
-		player.addMove("Kugelsaat");
 		mainCharacter.getTeam().addPokemon(player);
+		
+		Pokemon foo = new Pokemon(108);
+		foo.getStats().generateStats((short) 5);
+		foo.addMove("Walzer");
+		mainCharacter.getTeam().addPokemon(foo);
 		
 		// Random rng = new Random();
 		// for(int i = 0; i < 5; i++) {

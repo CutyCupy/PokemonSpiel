@@ -84,6 +84,7 @@ public class PokemonButton extends JButton {
 			this.pokemon = gController.getMainCharacter().getTeam().getTeam()[this.index];
 		}
 		if(pokemon != null) {
+			System.out.println("enabled");
 			setEnabled(true);
 			hpBar.setMaximum(pokemon.getStats().getStats().get(Stat.HP));
 			if(animated) {

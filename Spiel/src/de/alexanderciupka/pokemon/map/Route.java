@@ -5,9 +5,7 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
-import java.util.Random;
 
 import javax.imageio.ImageIO;
 
@@ -19,7 +17,7 @@ import de.alexanderciupka.pokemon.characters.NPC;
 import de.alexanderciupka.pokemon.gui.GameFrame;
 import de.alexanderciupka.pokemon.gui.overlay.RainType;
 import de.alexanderciupka.pokemon.map.entities.Entity;
-import de.alexanderciupka.pokemon.pokemon.Pokemon;
+import de.alexanderciupka.pokemon.pokemon.PokemonPool;
 
 public class Route {
 
@@ -29,7 +27,7 @@ public class Route {
 	private int height;
 	private boolean dark;
 	private Entity[][] entities;
-	private ArrayList<SimpleEntry<Integer, Short>> pokemonPool;
+	private PokemonPool pokemonPool;
 	private ArrayList<NPC> characters;
 	private BufferedImage map;
 	private RainType rain;
@@ -38,7 +36,7 @@ public class Route {
 	private RouteType type;
 
 	public Route() {
-		this.pokemonPool = new ArrayList<SimpleEntry<Integer, Short>>();
+		this.pokemonPool = new PokemonPool("DEFAULT");
 		this.characters = new ArrayList<NPC>();
 	}
 
@@ -126,11 +124,11 @@ public class Route {
 		}
 	}
 
-	public void addPokemon(SimpleEntry<Integer, Short> encounter) {
-		this.pokemonPool.add(encounter);
+	public void setDefaultPokemonPool(PokemonPool defaultPool) {
+		this.pokemonPool = defaultPool;
 	}
 
-	public ArrayList<SimpleEntry<Integer, Short>> getPokemonPool() {
+	public PokemonPool getPokemonPool() {
 		return this.pokemonPool;
 	}
 
@@ -141,15 +139,7 @@ public class Route {
 	public void clearCharacters() {
 		this.characters.clear();
 	}
-
-	public Pokemon getEncounter() {
-		Random rng = new Random();
-		SimpleEntry<Integer, Short> encounter = pokemonPool.get(rng.nextInt(pokemonPool.size()));
-		Pokemon result = new Pokemon(encounter.getKey());
-		result.getStats().generateStats(encounter.getValue());
-		return result;
-	}
-
+	
 	public void createMap() {
 		map = new BufferedImage(width * 70, height * 70, BufferedImage.TYPE_4BYTE_ABGR);
 		Graphics g = map.getGraphics();
@@ -376,15 +366,16 @@ public class Route {
 			} else {
 				this.name = route.name;
 			}
-			if(saveData.get("pokemon_pool") != null && saveData.get("pokemon_pool").isJsonArray()) {
-				JsonArray pool = saveData.get("pokemon_pool").getAsJsonArray();	
-				this.pokemonPool.clear();
-				for(JsonElement je : pool) {
-					this.pokemonPool.add(new SimpleEntry<Integer, Short>(je.getAsJsonObject().get("id").getAsInt(), je.getAsJsonObject().get("level").getAsShort()));
-				}
-			} else {
-				this.pokemonPool = new ArrayList<>(route.pokemonPool);
-			}
+//			if(saveData.get("pokemon_pool") != null && saveData.get("pokemon_pool").isJsonArray()) {
+//				JsonArray pool = saveData.get("pokemon_pool").getAsJsonArray();	
+//				this.pokemonPool = new PokemonPool("DEFAULT");
+//				for(JsonElement je : pool) {
+//					this.pokemonPool.addPokemon(je.getAsJsonObject().get("id").getAsInt(), je.getAsJsonObject().get("level").getAsShort());
+//				}
+//			} else {
+//				this.pokemonPool = route.pokemonPool.clone();
+//			}
+			this.pokemonPool = route.pokemonPool;
 			
 			try {
 				this.setRain(RainType.valueOf(saveData.get("rain").getAsString().toUpperCase()));
@@ -439,16 +430,16 @@ public class Route {
 		if(this.rain != null) {
 			saveData.addProperty("rain", rain.name());
 		}
-		if (!this.pokemonPool.equals(oldRoute.pokemonPool)) {
-			JsonArray pool = new JsonArray();
-			for(SimpleEntry<Integer, Short> pokemon : this.pokemonPool) {
-				JsonObject json = new JsonObject();
-				json.addProperty("id", pokemon.getKey());
-				json.addProperty("level", pokemon.getValue());
-				pool.add(json);
-			}
-			saveData.add("pokemon_pool", pool);
-		}
+//		if (!this.pokemonPool.equals(oldRoute.pokemonPool)) {
+//			JsonArray pool = new JsonArray();
+//			for(SimpleEntry<Integer, Short> pokemon : this.pokemonPool) {
+//				JsonObject json = new JsonObject();
+//				json.addProperty("id", pokemon.getKey());
+//				json.addProperty("level", pokemon.getValue());
+//				pool.add(json);
+//			}
+//			saveData.add("pokemon_pool", pool);
+//		}
 		return saveData;
 	}
 }

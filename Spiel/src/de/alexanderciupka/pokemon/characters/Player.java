@@ -220,11 +220,13 @@ public class Player extends Character {
 	public void onMovement() {
 		this.stepCounter++;
 		if(this.stepCounter % 8 == 0) {
-			for(int i = 0; i < this.team.getTeam().length; i++) {
-				if(this.team.getTeam()[i] == null) {
-					return;
-				}
+			for(int i = 0; i < this.team.getAmmount(); i++) {
 				this.team.getTeam()[i].afterWalkingDamage();
+			}
+		}
+		if(this.stepCounter % 128 == 0) {
+			for(int i = 0; i < this.team.getAmmount(); i++) {
+				this.team.getTeam()[i].changeHappiness(1);
 			}
 		}
 		if(this.protectedSteps > 0) {

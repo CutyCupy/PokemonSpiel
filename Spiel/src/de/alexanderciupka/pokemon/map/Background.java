@@ -34,7 +34,7 @@ public class Background {
 	}
 
 	public Pokemon chooseEncounter() {
-		return currentRoute.getEncounter();
+		return currentRoute.getPokemonPool().getEncounter();
 	}
 
 	public int getHeight() {

@@ -109,6 +109,17 @@ public class Stats {
 			levelUpXP = 0;
 			newMoves();
 		}
+		if(result) {
+			if(gController.isFighting()) {
+				if(pokemon.getHappiness() < 100) {
+					pokemon.changeHappiness(5);
+				} else if(pokemon.getHappiness() > 200) {
+					pokemon.changeHappiness(3);
+				} else {
+					pokemon.changeHappiness(2);
+				}
+			}
+		}
 		if(!generated) {
 			evolve(Item.NONE);
 		}

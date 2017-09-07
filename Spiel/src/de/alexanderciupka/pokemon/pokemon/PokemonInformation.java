@@ -73,6 +73,7 @@ public class PokemonInformation {
 			for (JsonElement element : allGrowthRates) {
 				this.allGrowthRates.put(element.getAsJsonObject().get("name").getAsString(), element.getAsJsonObject());
 			}
+			ArrayList<Move> foo = new ArrayList<Move>();
 			for (JsonElement element : allMoveData) {
 				JsonObject currentJson = element.getAsJsonObject();
 				Move currentMove = new Move(currentJson.get("id").getAsInt());
@@ -172,8 +173,12 @@ public class PokemonInformation {
 						continue;
 					}
 				}
+				if(!foo.contains(currentMove)) {
+					foo.add(currentMove);
+				}
 				allMoves.add(currentMove);
 			}
+			System.out.println(foo.size());
 			for (JsonElement element : allPokemonData) {
 				int key = element.getAsJsonObject().get("id").getAsInt();
 				names.put(key,
@@ -194,13 +199,18 @@ public class PokemonInformation {
 							currentMoves = new ArrayList<Move>();
 						}
 						currentMoves.add(getMoveById(moveElement.getAsJsonObject().get("id").getAsInt()));
+						if(foo.contains(getMoveById(moveElement.getAsJsonObject().get("id").getAsInt()))) {
+							foo.remove(getMoveById(moveElement.getAsJsonObject().get("id").getAsInt()));
+						}
 						moves.put(level, currentMoves);
 					}
 				}
 				allPokemonMoves.put(key, moves);
 				allEvolutions.put(key, element.getAsJsonObject().get("evolution").getAsJsonArray());
-
 			}
+//			for(Move m : foo) {
+//				System.out.println(m);
+//			}
 			for (JsonElement element : allPokemonData) {
 				int id = element.getAsJsonObject().get("id").getAsInt();
 				Type[] currentTypes = { Type.get(element.getAsJsonObject().get("firstType").getAsString()),
@@ -350,7 +360,17 @@ public class PokemonInformation {
 					// Trade?
 					// held_item
 					if (!(curJson.get("known_move") instanceof JsonNull)) {
-						// Change type
+						String move = curJson.get("known_move").getAsString().toLowerCase();
+						boolean has = false;
+						for (Move m : p.getMoves()) {
+							System.out.println(m.getName());
+							System.out.println(move);
+							if (m != null && m.getName().toLowerCase().equals(move)) {
+								has = true;
+								break;
+							}
+						}
+						evolve &= has;
 					}
 					if (!(curJson.get("location") instanceof JsonNull)) {
 						// Change routes names
@@ -573,4 +593,5 @@ public class PokemonInformation {
 			return null;
 		}
 	}
+	
 }

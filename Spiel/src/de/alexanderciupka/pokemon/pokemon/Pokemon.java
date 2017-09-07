@@ -39,6 +39,7 @@ public class Pokemon {
 
 	private boolean nameChanged;
 	private int evolves;
+	private int happiness;
 	private String growthRate;
 	
 	private Gender gender;
@@ -55,6 +56,7 @@ public class Pokemon {
 		this.spriteBack = gController.getInformation().getBackSprite(this.id, this.gender, this.shiny);
 		this.moves = new Move[4];
 		this.ailment = Ailment.NONE;
+		this.happiness = gController.getInformation().getBaseHappiness(this.id);
 		this.rng = new Random();
 		this.weight = gController.getInformation().getWeight(id);
 		this.height = gController.getInformation().getHeight(id);
@@ -358,6 +360,8 @@ public class Pokemon {
 		data.add("moves", moveData);
 		data.addProperty("ailment", this.ailment.name());
 		data.addProperty("name_changed", this.nameChanged);
+		data.addProperty("gender", this.gender.name());
+		data.addProperty("happiness", this.happiness);
 		return data;
 	}
 
@@ -371,6 +375,8 @@ public class Pokemon {
 		result.setNameChanged(
 				saveData.get("name_changed") != null ? saveData.get("name_changed").getAsBoolean() : false);
 		result.setAilment(Ailment.valueOf(saveData.get("ailment").getAsString()));
+		result.setGender(Gender.valueOf(saveData.get("gender").getAsString().toUpperCase()));
+		result.happiness = saveData.get("happiness").getAsInt();
 		return result;
 	}
 
@@ -420,36 +426,6 @@ public class Pokemon {
 	}
 
 	public int getShakes(Item usedBall) {
-//		int d = getCatchRate() * 100 / usedBall.getValue();
-//		if (d >= 256) {
-//			return 3;
-//		} else {
-//			int ball = 8;
-//			int f = (getStats().getStats().get(Stat.HP) * 255 * 4) / (getStats().getCurrentHP() * ball);
-//			int x = d * f / 255;
-//			switch (getAilment()) {
-//			case SLEEP:
-//			case FREEZE:
-//				x += 10;
-//				break;
-//			case PARALYSIS:
-//			case POISON:
-//			case BURN:
-//				x += 5;
-//				break;
-//			default:
-//				break;
-//			}
-//			if (x < 10) {
-//				return 0;
-//			} else if (x < 30) {
-//				return 1;
-//			} else if (x < 70) {
-//				return 2;
-//			} else {
-//				return 3;
-//			}
-//		}
 		return rng.nextInt(4);
 	}
 
@@ -584,6 +560,13 @@ public class Pokemon {
 					gController.getGameFrame().addDialogue(i.getName() + " hat " + s.getArticle() + " " + s.getText() + 
 							" von " + this.getName() + " erhöht!");
 					this.stats.increaseEV(s, (short) 10);
+					if(getHappiness() < 100) {
+						changeHappiness(5);
+					} else if(getHappiness() > 200) {
+						changeHappiness(3);
+					} else {
+						changeHappiness(2);
+					}
 				}
 				break;
 			default:
@@ -615,6 +598,15 @@ public class Pokemon {
 	
 	public void setGender(Gender g) {
 		this.gender = g;
+	}
+
+	public int getHappiness() {
+		return happiness;
+	}
+
+	public void changeHappiness(int value) {
+		this.happiness = Math.min(255, Math.max(0, this.happiness + value));
+		System.out.println(this.happiness);
 	}
 
 	public void startEvolution() {

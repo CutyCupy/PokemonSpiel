@@ -107,6 +107,7 @@ public class PokemonPanel extends JPanel {
 								backButton.setEnabled(false);
 								boolean result = source.getPokemon().useItem(gController.getMainCharacter(), currentItem);
 								source.update(true);
+								source.setEnabled(false);
 								gController.waitDialogue();
 								if(gController.isFighting()) {
 									gController.getGameFrame().getFightPanel().updatePanels();
@@ -161,6 +162,7 @@ public class PokemonPanel extends JPanel {
 		backButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				currentItem = null;
 				if (gController.isFighting()) {
 					gController.getFight().setCurrentFightOption(FightOption.FIGHT);
 				} else {
@@ -174,8 +176,8 @@ public class PokemonPanel extends JPanel {
 	public void update() {
 		if(this.currentItem != null && this.gController.getGameFrame().getInventoryPanel().getCurrentPlayer().getItems().get(currentItem) == 0) {
 			gController.getGameFrame().addDialogue("Du hast deinen letzten " + this.currentItem.getName() + " benutzt!");
-			gController.waitDialogue();
 			this.currentItem = null;
+			gController.waitDialogue();
 		}
 		for (int i = 0; i < pokemonButtons.length; i++) {
 			pokemonButtons[i].update(false);
