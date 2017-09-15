@@ -53,7 +53,8 @@ public class GameController {
 		mController = MenuController.getInstance();
 	}
 
-	public void move(Direction moveDirection) {
+	public boolean move(Direction moveDirection) {
+		boolean result = false;
 		if (!interactionPause) {
 			setInteractionPause(true);
 			gameFrame.setDelay(TextLabel.SLOW);
@@ -61,16 +62,16 @@ public class GameController {
 			if (mainCharacter.getCurrentDirection() == moveDirection) {
 				switch (moveDirection) {
 				case UP:
-					updatePosition(possiblePoint.x, possiblePoint.y - 1);
+					result = updatePosition(possiblePoint.x, possiblePoint.y - 1);
 					break;
 				case DOWN:
-					updatePosition(possiblePoint.x, possiblePoint.y + 1);
+					result = updatePosition(possiblePoint.x, possiblePoint.y + 1);
 					break;
 				case LEFT:
-					updatePosition(possiblePoint.x - 1, possiblePoint.y);
+					result = updatePosition(possiblePoint.x - 1, possiblePoint.y);
 					break;
 				case RIGHT:
-					updatePosition(possiblePoint.x + 1, possiblePoint.y);
+					result = updatePosition(possiblePoint.x + 1, possiblePoint.y);
 					break;
 				}
 			} else {
@@ -83,28 +84,31 @@ public class GameController {
 			}
 			setInteractionPause(false);
 		}
+		return result;
 	}
 
-	public void slide(Direction slideDirection) {
+	public boolean slide(Direction slideDirection) {
+		boolean result = false;
 		if (!interactionPause) {
 			setInteractionPause(true);
 			Point possiblePoint = mainCharacter.getCurrentPosition();
 			switch (slideDirection) {
 			case UP:
-				updatePosition(possiblePoint.x, possiblePoint.y - 1);
+				result = updatePosition(possiblePoint.x, possiblePoint.y - 1);
 				break;
 			case DOWN:
-				updatePosition(possiblePoint.x, possiblePoint.y + 1);
+				result = updatePosition(possiblePoint.x, possiblePoint.y + 1);
 				break;
 			case LEFT:
-				updatePosition(possiblePoint.x - 1, possiblePoint.y);
+				result = updatePosition(possiblePoint.x - 1, possiblePoint.y);
 				break;
 			case RIGHT:
-				updatePosition(possiblePoint.x + 1, possiblePoint.y);
+				result = updatePosition(possiblePoint.x + 1, possiblePoint.y);
 				break;
 			}
 			setInteractionPause(false);
 		}
+		return result;
 	}
 
 	private boolean updatePosition(int x, int y) {
@@ -194,15 +198,15 @@ public class GameController {
 		gameFrame.addDialogue(enemy.getName() + ": " + enemy.getBeforeFightDialogue());
 		waitDialogue();
 		this.gameFrame.getBackgroundLabel().startFight(enemy.getLogo());
-		this.fighting = true;
 		this.fight = new Fighting(enemy);
+		this.fighting = true;
 		gameFrame.startFight(fight.getPlayer(), fight.getEnemy());
 		gameFrame.getFightPanel().showMenu();
 	}
 
 	public void startFight(Pokemon enemy) {
-		this.fighting = true;
 		this.fight = new Fighting(enemy);
+		this.fighting = true;
 		gameFrame.startFight(fight.getPlayer(), fight.getEnemy());
 		gameFrame.getFightPanel().showMenu();
 	}
@@ -256,7 +260,7 @@ public class GameController {
 		if(this.fight.won) {
 			if(!gameFrame.getEvolutionPanel().getPokemon().isEmpty()) {
 				gameFrame.setCurrentPanel(gameFrame.getEvolutionPanel());
-				gameFrame.repaint();
+//				gameFrame.repaint();
 				gameFrame.getEvolutionPanel().start();
 			}
 		}
@@ -361,7 +365,7 @@ public class GameController {
 	}
 
 	public void repaint() {
-		gameFrame.paint(gameFrame.getGraphics());
+//		gameFrame.paint(gameFrame.getGraphics());
 	}
 
 	public void resetCharacterPositions() {
@@ -380,7 +384,7 @@ public class GameController {
 		mainCharacter.setName("Talih");
 		mainCharacter.setID("999");
 		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("winterhude"));
-		mainCharacter.setCurrentPosition(4, 4);
+		mainCharacter.setCurrentPosition(10, 4);
 
 		for (int i = 0; i < 5; i++) {
 			mainCharacter.addItem(Item.POKEBALL);
@@ -403,10 +407,12 @@ public class GameController {
 		player.getStats().generateStats((short) 5);
 		mainCharacter.getTeam().addPokemon(player);
 		
-		Pokemon foo = new Pokemon(108);
-		foo.getStats().generateStats((short) 5);
-		foo.addMove("Walzer");
-		mainCharacter.getTeam().addPokemon(foo);
+		
+//		for(int i = 0; i < 3; i++) {
+//			Pokemon foo = new Pokemon(new Random().nextInt(649) + 1);
+//			foo.getStats().generateStats((short) 100);
+//			mainCharacter.getPC().getBoxes()[0].addPokemon(foo, i * 10);
+//		}
 		
 		// Random rng = new Random();
 		// for(int i = 0; i < 5; i++) {
@@ -420,8 +426,12 @@ public class GameController {
 		
 		currentBackground.getCamera().setCharacter(getMainCharacter(), false);
 		
+//		SnowOverlay s = new SnowOverlay(gameFrame.getBackgroundLabel(), new Dimension(630, 630), SnowType.BLIZZARD);
+//		s.createOverlay();
+//		gameFrame.getBackgroundLabel().addOverlay(s);
+//		s.startAnimation();
 		
-		information.getGender(300);
+//		information.getGender(300);
 	}
 
 	public boolean loadGame(String path) {
@@ -429,6 +439,7 @@ public class GameController {
 		mainCharacter.setCharacterImage("talih", "front");
 		if (routeAnalyzer.loadGame(path)) {
 			gameFrame = new GameFrame();
+			gameFrame.getBackgroundLabel().changeRoute(currentBackground.getCurrentRoute());
 			this.repaint();
 			return true;
 		}
@@ -477,11 +488,11 @@ public class GameController {
 
 	}
 
-	public void displayReport(Pokemon pokemon) {
+	public void displayReport(Pokemon pokemon, Pokemon[] others) {
 		if (isFighting()) {
 			this.fight.setCurrentFightOption(FightOption.REPORT);
 		}
-		((ReportPanel) this.gameFrame.getReportPanel()).setPokemon(pokemon, this.gameFrame.getPokemonPanel());
+		((ReportPanel) this.gameFrame.getReportPanel()).setPokemon(pokemon, others, this.gameFrame.getPokemonPanel());
 		this.gameFrame.setCurrentPanel(this.gameFrame.getReportPanel());
 		this.repaint();
 	}

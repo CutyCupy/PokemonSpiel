@@ -1,123 +1,231 @@
 package de.alexanderciupka.pokemon.main;
 
+import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.HashSet;
+import java.util.HashMap;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
 
+import de.alexanderciupka.pokemon.gui.GameFrame;
+import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.menu.MenuController;
 
 
 public class Main {
+	
+	public static final double FPS = 60;
 
 	public static void main(String[] args) throws Exception {
-		 MenuController.getInstance();
+		MenuController.getInstance();
+		
+		System.out.println(-1 % 4);
+		
+		Thread repainter = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				long startTime = 0;
+				GameController gController = null;
+				GameFrame frame = null;
+				while(gController == null) {
+					gController = GameController.getInstance();
+				}
+				while(frame == null) {
+					frame = gController.getGameFrame();
+				}
+				boolean firstDialogue = true;
+				boolean wait = false;
+				int waitFrames = 0;
+				while(true) {
+					startTime = System.currentTimeMillis();
+					wait = false;
+					if(!frame.getDialogue().isVisible() || 
+							(gController.isFighting() && 
+							!frame.getFightPanel().getTextLabel().isVisible())) {
+						wait = true;
+						firstDialogue = true;
+						waitFrames = 0;
+					} else {
+						if(waitFrames <= 5) {
+							waitFrames++;
+						}
+					}
+					
+					if(firstDialogue) {
+						frame.repaint();
+						if(waitFrames > 5) {
+							firstDialogue = false;
+						}
+					} else {
+						if(frame.getDialogue().isVisible()) {
+							frame.getDialogue().repaint();
+							wait = true;
+						} else if(frame.getFightPanel().getTextLabel().isVisible()) {
+							frame.getFightPanel().getTextLabel().repaint();
+							wait = true;
+						}
+					}
+					
+					if(wait) {
+						try {
+							System.out.println(System.currentTimeMillis() - startTime);
+							Thread.sleep((long) Math.max(1000.0 / Main.FPS - (System.currentTimeMillis() - startTime), 0));
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+		});
+		repainter.setName("REPAINTER");
+		repainter.start();
+		
 //		readDescription();
 	}
 
 	public static void readDescription() {
 		JsonParser parser = new JsonParser();
-		BufferedReader reader = null;
-		BufferedReader pokemonData = null;
-		try {
-			pokemonData = new BufferedReader(new FileReader(new File("C:/Users/alexa/Desktop/names.json")));
-		} catch (FileNotFoundException e1) {
-			e1.printStackTrace();
+		JsonObject currentObject = null;
+		BufferedReader currentRoute = null;
+		HashMap<String, Point> charLocations = null; 
+		for(File f : new File(Main.class.getResource("/routes/").getFile()).listFiles()) {
+			if(f.getName().endsWith(".route")) {
+//				System.out.println(f);
+				try {
+					currentRoute = new BufferedReader(new FileReader(f));
+					String data = "";
+					String currentLine = null;
+					while((currentLine = currentRoute.readLine()) != null) {
+						data += currentLine;
+					}
+					currentObject = parser.parse(data).getAsJsonObject();
+					
+					charLocations = new HashMap<String, Point>();
+					JsonObject routeDetails = currentObject.get("route").getAsJsonObject();
+					for(int x = 0; x < routeDetails.get("width").getAsInt(); x++) {
+						for(int y = 0; y < routeDetails.get("height").getAsInt(); y++) {
+							if(routeDetails.get(x + "." + y).getAsString().startsWith("C")) {
+//								charLocations.put(routeDetails.get(x + "." + y).getAsString(), 
+//										new Point(x, y));
+								routeDetails.addProperty(x + "." + y, "");
+							}
+						}
+					}
+					
+//					for(JsonElement j : currentObject.get("characters").getAsJsonArray()) {
+//						JsonObject currentChar = j.getAsJsonObject();
+//						Point p = charLocations.get(currentChar.get("id").getAsString());
+//						currentChar.addProperty("x", p.x);
+//						currentChar.addProperty("y", p.y);
+//						currentChar.remove("sprite");
+//					}
+					
+					FileWriter fw = new FileWriter(f);
+					for(char c : currentObject.toString().toCharArray()) {
+						fw.write(c);
+						fw.flush();
+					}
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+			}
 		}
-		JsonArray allPokemonData = null;
-		try {
-			allPokemonData = parser.parse(pokemonData.readLine()).getAsJsonArray();
-		} catch (JsonSyntaxException e1) {
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
-		HashSet<Integer> foo = new HashSet<>();
-		for(int i = 1; i < 650; i++) {
-			foo.add(i);
-		}
+//		BufferedReader reader = null;
+//		BufferedReader pokemonData = null;
+//		try {
+//			pokemonData = new BufferedReader(new FileReader(new File("C:/Users/alexa/Desktop/names.json")));
+//		} catch (FileNotFoundException e1) {
+//			e1.printStackTrace();
+//		}
+//		JsonArray allPokemonData = null;
+//		try {
+//			allPokemonData = parser.parse(pokemonData.readLine()).getAsJsonArray();
+//		} catch (JsonSyntaxException e1) {
+//			e1.printStackTrace();
+//		} catch (IOException e1) {
+//			e1.printStackTrace();
+//		}
+//		HashSet<Integer> foo = new HashSet<>();
+//		for(int i = 1; i < 650; i++) {
+//			foo.add(i);
+//		}
 //		int i = 1;
-		JsonArray newData = new JsonArray();
-		for(int i = 1; i < 650; i++) {
+//		JsonArray newData = new JsonArray();
+//		for(int i = 1; i < 650; i++) {
 //			System.out.println(i);
 //		for (JsonElement element : allPokemonData) {
 //			JsonObject currentJson = element.getAsJsonObject();
-			JsonObject currentJson = new JsonObject();
+//			JsonObject currentJson = new JsonObject();
 //			if(currentJson.get("is_baby") != null) {
 //				newData.add(currentJson);
 //				foo.remove(currentJson.get("id").getAsInt());
 //				continue;
 //			}
 //			System.err.println(currentJson.get("id").getAsInt());
-//			String name =  currentJson.get("name").getAsString();
-			try {
+//			try {
+//				URLConnection connection = new URL("http://www.pokeapi.co/api/v2/pokemon/" + i).openConnection();
+//				connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
+//				connection.connect();
+//				reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+//				StringBuffer buffer = new StringBuffer();
+//				int read;
+//				char[] chars = new char[1024];
+//				while ((read = reader.read(chars)) != -1)
+//					buffer.append(chars, 0, read);
+//				JsonObject currentSpecies = (JsonObject) parser.parse(buffer.toString());
+//				
+//				currentJson.addProperty("name", currentSpecies.get("name").getAsString());
+//				newData.add(currentJson);
+//				System.out.println(currentJson);
+//				String name = currentSpecies.get("name").getAsString();
 //				try {
+//					new File("C:/Users/alexa/Desktop/sprites/front/" + i + ".gif").createNewFile();
 //					ImageIO.write(ImageIO.read(new URL("http://www.pokestadium.com/sprites/xy/" + name + ".gif")), 
 //							"gif", 
-//							new File("C:/Users/alex/Desktop/sprites/front/" + i + ".gif"));
+//							new File("C:/Users/alexa/Desktop/sprites/front/" + i + ".gif"));
 //					ImageIO.write(ImageIO.read(new URL("http://www.pokestadium.com/sprites/xy/back/" + name + ".gif")), 
 //							"gif", 
-//							new File("C:/Users/alex/Desktop/sprites/back/" + i + "s.gif"));
+//							new File("C:/Users/alexa/Desktop/sprites/back/" + i + "s.gif"));
 //				} catch(Exception e) {
 //					e.printStackTrace();
 //				}
 //				try {
 //					ImageIO.write(ImageIO.read(new URL("http://www.pokestadium.com/sprites/xy/shiny/" + name + ".gif")), 
 //							"gif", 
-//							new File("C:/Users/alex/Desktop/sprites/front/" + i + "s.gif"));
+//							new File("C:/Users/alexa/Desktop/sprites/front/" + i + "s.gif"));
 //					ImageIO.write(ImageIO.read(new URL("http://www.pokestadium.com/sprites/xy/shiny/back/" + name + ".gif")), 
 //							"gif", 
-//							new File("C:/Users/alex/Desktop/sprites/back/" + i + "s.gif"));
+//							new File("C:/Users/alexa/Desktop/sprites/back/" + i + "s.gif"));
 //				} catch(Exception e) {
 //					e.printStackTrace();
 //				}
 //				try {
 //					ImageIO.write(ImageIO.read(new URL("http://www.pokestadium.com/sprites/xy/" + name + "-female.gif")), 
 //							"gif", 
-//							new File("C:/Users/alex/Desktop/sprites/front/" + i + "f.gif"));
+//							new File("C:/Users/alexa/Desktop/sprites/front/" + i + "f.gif"));
 //					ImageIO.write(ImageIO.read(new URL("http://www.pokestadium.com/sprites/xy/back/" + name + "-female.gif")), 
 //							"gif", 
-//							new File("C:/Users/alex/Desktop/sprites/back/" + i + "f.gif"));
+//							new File("C:/Users/alexa/Desktop/sprites/back/" + i + "f.gif"));
 //				} catch(Exception e) {
 //					e.printStackTrace();
 //				}
 //				try {
 //					ImageIO.write(ImageIO.read(new URL("http://www.pokestadium.com/sprites/xy/shiny/" + name + "-female.gif")), 
 //							"gif", 
-//							new File("C:/Users/alex/Desktop/sprites/front/" + i + "fs.gif"));
+//							new File("C:/Users/alexa/Desktop/sprites/front/" + i + "fs.gif"));
 //					ImageIO.write(ImageIO.read(new URL("http://www.pokestadium.com/sprites/xy/shiny/back/" + name + "-female.gif")), 
 //							"gif", 
-//							new File("C:/Users/alex/Desktop/sprites/back/" + i + "fs.gif"));
+//							new File("C:/Users/alexa/Desktop/sprites/back/" + i + "fs.gif"));
 //				} catch(Exception e) {
 //					e.printStackTrace();
 //				}
 //				i++;
 //				break;
-				URLConnection connection = new URL("http://www.pokeapi.co/api/v2/pokemon/" + i).openConnection();
-				connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.95 Safari/537.11");
-				connection.connect();
-				reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-				StringBuffer buffer = new StringBuffer();
-				int read;
-				char[] chars = new char[1024];
-				while ((read = reader.read(chars)) != -1)
-					buffer.append(chars, 0, read);
-				JsonObject currentSpecies = (JsonObject) parser.parse(buffer.toString());
-				
-				currentJson.addProperty("name", currentSpecies.get("name").getAsString());
-				newData.add(currentJson);
-				System.out.println(currentJson);
 //				
 //				currentJson.addProperty("base_happiness", currentSpecies.get("base_happiness").getAsInt());
 //				
@@ -230,22 +338,22 @@ public class Main {
 //				currentJson.addProperty("ailment", currentMove.get("meta").getAsJsonObject().get("ailment").getAsJsonObject().get("name").getAsString());
 //				currentJson.addProperty("damage_class", currentMove.get("damage_class").getAsJsonObject().get("name").getAsString());
 //				currentJson.addProperty("priority", currentMove.get("priority").getAsInt());
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
 //			newData.add(currentJson);
 //			i++;
-		}
+//		}
 //		System.out.println(foo);
-		try {
-			FileWriter fw = new FileWriter(new File("C:/Users/alexa/Desktop/names.json"));
-			for(char c : newData.toString().toCharArray()) {
-				fw.write(c);
-				fw.flush();
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+//		try {
+//			FileWriter fw = new FileWriter(new File("C:/Users/alexa/Desktop/names.json"));
+//			for(char c : newData.toString().toCharArray()) {
+//				fw.write(c);
+//				fw.flush();
+//			}
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
 	}
 
 //	public void readAllRoutes() {

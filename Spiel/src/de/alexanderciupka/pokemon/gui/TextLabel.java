@@ -61,7 +61,7 @@ public class TextLabel extends JLabel implements Runnable {
 				this.setText("<html>");
 				for(char c : text.get(0).toCharArray()) {
 					this.setText(this.getText() + c);
-					repaint();
+//					repaint();
 					try {
 						Thread.sleep(delay);
 					} catch (InterruptedException e) {

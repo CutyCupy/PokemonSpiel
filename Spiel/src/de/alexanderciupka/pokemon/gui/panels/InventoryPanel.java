@@ -76,7 +76,7 @@ public class InventoryPanel extends JPanel {
 			public void mouseClicked(MouseEvent e) {
 				gController.getGameFrame().getPokemonPanel().update();
 				gController.getGameFrame().setCurrentPanel(gController.getGameFrame().getPokemonPanel());
-				gController.getGameFrame().repaint();
+//				gController.getGameFrame().repaint();
 				e.getComponent().setBackground(Color.WHITE);
 			}
 			
@@ -112,7 +112,7 @@ public class InventoryPanel extends JPanel {
 					gController.getGameFrame().setCurrentPanel(gController.getGameFrame().getLastPanel());
 				}
 				e.getComponent().setBackground(Color.WHITE);
-				gController.getGameFrame().repaint();
+//				gController.getGameFrame().repaint();
 			}
 			
 			@Override
@@ -232,7 +232,7 @@ public class InventoryPanel extends JPanel {
 											}
 										}
 										source.setBackground(LABEL_BACKGROUND);
-										gController.getGameFrame().repaint();
+//										gController.getGameFrame().repaint();
 									}
 								}).start();
 							}

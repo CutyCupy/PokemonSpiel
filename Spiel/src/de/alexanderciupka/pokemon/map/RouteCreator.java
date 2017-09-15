@@ -3,6 +3,7 @@ package de.alexanderciupka.pokemon.map;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -12,6 +13,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -43,7 +45,7 @@ public class RouteCreator extends JFrame {
 	private int warpCounter;
 	private int characterCounter;
 	private ArrayList<Warp> warps;
-	private ArrayList<String> characters;
+	private HashMap<String, Point> characters;
 	private String routeName;
 	private String routeID;
 	private JButton save;
@@ -84,7 +86,7 @@ public class RouteCreator extends JFrame {
 		routeName = name;
 		routeID = routeName.toLowerCase().replace(" ", "_");
 		warps = new ArrayList<Warp>();
-		characters = new ArrayList<String>();
+		characters = new HashMap<String, Point>();
 		this.setTitle(routeName);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(0, 0, 1920, 1080);
@@ -100,6 +102,7 @@ public class RouteCreator extends JFrame {
 		terrains.addItem("dark_laminat");
 		terrains.addItem("cave");
 		terrains.addItem("snow");
+		terrains.addItem("ice");
 		terrains.setBackground(Color.WHITE);
 		save = new JButton("SAVE!");
 		save.setBounds(1750, 600, 150, 40);
@@ -254,8 +257,9 @@ public class RouteCreator extends JFrame {
 										warpCounter++;
 										text = newWarp.getWarpString();
 									} else if(text.equals("C")) {
-										characters.add(JOptionPane.showInputDialog("New Character Name: "));
-										text += characterCounter;
+										characters.put(text + characterCounter, new Point(xCoord, yCoord));
+										JOptionPane.showMessageDialog(null, text + characterCounter + " added!");
+										text = "";
 										characterCounter++;
 									}
 								}
@@ -333,15 +337,18 @@ public class RouteCreator extends JFrame {
 				warpDetails.add(warp);
 			}
 			JsonArray characterDetails = new JsonArray();
-			for(int i = 0; i < characters.size(); i++) {
+			for(String s : characters.keySet()) {
+				
+//			for(int i = 0; i < characters.size(); i++) {
 				JsonObject currentCharacter = new JsonObject();
-				currentCharacter.addProperty("id", "C" + i);
-				currentCharacter.addProperty("name", characters.get(i));
+				currentCharacter.addProperty("id", s);
+				currentCharacter.addProperty("x", characters.get(s).x);
+				currentCharacter.addProperty("y", characters.get(s).y);
+				currentCharacter.addProperty("name", "");
 				currentCharacter.addProperty("char_sprite", "man");
 				currentCharacter.addProperty("direction", "todo");
 				currentCharacter.addProperty("is_trainer", "todo");
-				currentCharacter.addProperty("sprite", "free");
-				currentCharacter.addProperty("terrain", this.terrains.getItemAt(terrains.getSelectedIndex()));
+//				currentCharacter.addProperty("terrain", this.terrains.getItemAt(terrains.getSelectedIndex()));
 				currentCharacter.addProperty("surfing", "todo");
 				characterDetails.add(currentCharacter);
 			}
@@ -349,7 +356,7 @@ public class RouteCreator extends JFrame {
 			route.add("route", routeDetails);
 			route.add("warps", warpDetails);
 			route.add("characters", characterDetails);
-			route.add("encounters", new JsonArray());
+			route.add("encounters", new JsonObject());
 			BufferedWriter bWriter = new BufferedWriter(new FileWriter(newRoute));
 			for(char c : route.toString().toCharArray()) {
 				bWriter.write(c);
@@ -359,6 +366,7 @@ public class RouteCreator extends JFrame {
 			e.printStackTrace();
 		}
 		routeAnalyzer.readRoute(newRoute);
+//		routeAnalyzer.getRouteById(routeID).saveMap();
 	}
 	
 	private void floodFill(String text, boolean[][] visited, int x, int y, int startX, int startY) {

@@ -5,6 +5,9 @@ import java.awt.Image;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
 
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
+
 import de.alexanderciupka.pokemon.characters.Player;
 import de.alexanderciupka.pokemon.map.Route;
 import de.alexanderciupka.pokemon.pokemon.Item;
@@ -93,7 +96,56 @@ public class ItemEntity extends Entity {
 		} else {
 			super.onInteraction(c);
 		}
-		gController.getGameFrame().repaint();
+//		gController.getGameFrame().repaint();
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof ItemEntity) {
+			ItemEntity other = (ItemEntity) obj;
+			return ((this.item == null && other.item == null) || (this.item != null && this.item.equals(other.item))) &&
+					(this.hidden == other.hidden) && super.equals(obj);
+		} 
+		return false;
+	}
+	
+	@Override
+	public JsonObject getSaveData(Entity entity) {
+		ItemEntity origin = (ItemEntity) entity;
+		JsonObject saveData = super.getSaveData(entity);
+		saveData.addProperty("id", id);
+		if((this.item != null || origin.item != null) || (this.item != null && !this.item.equals(origin.item))) {
+			saveData.addProperty("item", this.item != null ? this.item.name() : null);
+		}
+		if(this.hidden != origin.hidden) {
+			saveData.addProperty("hidden", this.hidden);
+		}
+		return saveData;
+	}
+	
+	@Override
+	public boolean importSaveData(JsonObject saveData, Entity entity) {
+		if(super.importSaveData(saveData, entity) && entity instanceof ItemEntity) {
+			ItemEntity other = (ItemEntity) entity;
+			if(saveData.get("id") != null) {
+				this.id = saveData.get("id").getAsString();
+			} else {
+				this.id = other.id;
+			}
+			if(saveData.get("item") != null) {
+				this.item = saveData.get("item") instanceof JsonNull ? null : 
+					Item.valueOf(saveData.get("item").getAsString().toUpperCase());
+			} else {
+				this.item = other.item;
+			}
+			if(saveData.get("hidden") != null) {
+				this.hidden = saveData.get("hidden").getAsBoolean();
+			} else {
+				this.hidden = other.hidden;
+			}
+			return true;
+		}
+		return false;
 	}
 	
 }

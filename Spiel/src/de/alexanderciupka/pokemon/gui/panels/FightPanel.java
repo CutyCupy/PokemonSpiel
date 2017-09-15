@@ -276,6 +276,7 @@ public class FightPanel extends JPanel {
 					moves[i].setVisible(true);
 				}
 				back.setVisible(true);
+				repaint();
 			}
 		});
 		escape.addActionListener(new ActionListener() {
@@ -301,6 +302,7 @@ public class FightPanel extends JPanel {
 					moves[i].setVisible(false);
 				}
 				back.setVisible(false);
+				repaint();
 			}
 		});
 		for (int i = 0; i < moves.length; i++) {
@@ -346,7 +348,7 @@ public class FightPanel extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				gController.getGameFrame().getInventoryPanel().update(gController.getMainCharacter());
 				gController.getFight().setCurrentFightOption(FightOption.BAG);
-				gController.getGameFrame().repaint();
+//				gController.getGameFrame().repaint();
 				enemyAttack = true;
 			}
 		});
@@ -499,7 +501,11 @@ public class FightPanel extends JPanel {
 		if(playerHPBar.getValue() == 0) {
 			playerHPBar.setValue(mine.getStats().getCurrentHP());
 		} else {
-			playerHPBar.updateValue(mine.getStats().getCurrentHP());
+			if(playerHPBar.getMaximum()  != mine.getStats().getStats().get(Stat.HP)) {
+				playerHPBar.setValue(mine.getStats().getCurrentHP());
+			} else {
+				playerHPBar.updateValue(mine.getStats().getCurrentHP());
+			}
 		}
 		if(enemyHPBar.getValue() == 0) {
 			enemyHPBar.setValue(enemy.getStats().getCurrentHP());
@@ -557,6 +563,7 @@ public class FightPanel extends JPanel {
 		}
 		back.setVisible(false);
 		textLabel.setVisible(false);
+		repaint();
 	}
 
 	public void checkEnemyAttack() {
@@ -580,6 +587,7 @@ public class FightPanel extends JPanel {
 		}
 		back.setVisible(false);
 		textLabel.setVisible(true);
+		repaint();
 	}
 
 	public void addText(String text) {

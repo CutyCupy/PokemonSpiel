@@ -115,5 +115,20 @@ public class Box {
 	public void setNumber(int asInt) {
 		this.number = asInt;
 	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj instanceof Box) {
+			Box other = (Box) obj;
+			for(int i = 0; i < this.pokemons.length; i++) {
+				if(this.pokemons[i] == null ? other.pokemons[i] != null : !this.pokemons[i].equals(other.pokemons[i])) {
+					return false;
+				}
+			}
+			System.out.println( this.number == other.number && this.name.equals(other.name));
+			return this.number == other.number && this.name.equals(other.name);
+		}
+		return false;
+	}
 
 }

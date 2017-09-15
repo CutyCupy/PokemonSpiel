@@ -4,6 +4,7 @@ import java.awt.Image;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.UUID;
 
 import javax.swing.ImageIcon;
 
@@ -44,6 +45,8 @@ public class Pokemon {
 	
 	private Gender gender;
 	private boolean shiny;
+	
+	private String uniqueID = UUID.randomUUID().toString();
 
 	public Pokemon(int id) {
 		this.id = id;
@@ -626,5 +629,14 @@ public class Pokemon {
 			}
 		}
 		return false;
+	}
+	
+	public String getUniqueID() {
+		return uniqueID;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof Pokemon ? ((Pokemon) obj).uniqueID.equals(this.uniqueID) : false;
 	}
 }

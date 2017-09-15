@@ -57,6 +57,12 @@ public class GameFrame extends JFrame {
 	private Stack<JPanel> panelHistory;
 	private boolean back;
 
+	@Override
+	public void repaint() {
+		// TODO Auto-generated method stub
+		super.repaint();
+	}
+	
 	public GameFrame() {
 		currentDirection = Direction.NONE;
 		map = new JPanel(null);
@@ -108,10 +114,12 @@ public class GameFrame extends JFrame {
 				map.repaint();
 			}
 		} else {
-			if (!gController.getCurrentFightPanel().equals(getContentPane())) {
+			if (gController.getCurrentFightPanel() != null && 
+					!gController.getCurrentFightPanel().equals(getContentPane())) {
 				setContentPane(gController.getCurrentFightPanel());
 			}
 		}
+		getContentPane().repaint();
 	}
 
 	@Override
@@ -131,7 +139,7 @@ public class GameFrame extends JFrame {
 		fight.setBorder(new EmptyBorder(5, 5, 5, 5));
 		fight.setLayout(null);
 		pokemon.update();
-		repaint();
+//		repaint();
 		if (!gController.getFight().canEscape()) {
 			this.getFightPanel()
 					.addText("Eine Herausforderung von " + gController.getFight().getEnemyCharacter().getName() + "!");
@@ -145,7 +153,7 @@ public class GameFrame extends JFrame {
 	public void stopFight() {
 		gController.waitDialogue();
 		setCurrentPanel(null);
-		repaint();
+//		repaint();
 	}
 
 	public FightPanel getFightPanel() {
@@ -232,7 +240,7 @@ public class GameFrame extends JFrame {
 								} catch (InterruptedException e) {
 									e.printStackTrace();
 								}
-								repaint();
+//								repaint();
 							}
 							active = false;
 						}
@@ -376,12 +384,11 @@ public class GameFrame extends JFrame {
 				}
 			}
 		});
-
+		
 		pokemon.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ENTER"), "enter");
 		pokemon.getActionMap().put("enter", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				
 				dialogue.setActive();
 			}
 		}); 	
@@ -462,7 +469,7 @@ public class GameFrame extends JFrame {
 				if (!gController.isFighting() && !gController.getInteractionPause()) {
 					pokemon.update();
 					currentPanel = pokemon;
-					repaint();
+//					repaint();
 				}
 			}
 		});
@@ -474,7 +481,7 @@ public class GameFrame extends JFrame {
 				if (!gController.isFighting() && !gController.getInteractionPause()) {
 					inventory.update(gController.getMainCharacter());
 					currentPanel = inventory;
-					repaint();
+//					repaint();
 				}
 			}
 		});
@@ -506,7 +513,7 @@ public class GameFrame extends JFrame {
 		}
 		this.pc.setPC(owner.getPC());
 		this.setCurrentPanel(this.pc.getContentPane());
-		this.repaint();
+//		this.repaint();
 	}
 
 	public JPanel getReportPanel() {

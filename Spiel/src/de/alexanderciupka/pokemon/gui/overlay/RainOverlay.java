@@ -85,7 +85,10 @@ public class RainOverlay extends Overlay {
 				}
 			}
 		}).start();
-		;
+	}
+	
+	public ArrayList<Raindrop> getRaindrops() {
+		return raindrops;
 	}
 
 }

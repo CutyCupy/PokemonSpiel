@@ -36,6 +36,9 @@ public class Raindrop {
 	public void fall() {
 		this.y += speed;
 		this.x += WIND;
+		while(this.x < 0) {
+			this.x += GameFrame.FRAME_SIZE;
+		}
 		this.x %= GameFrame.FRAME_SIZE;
 		if(this.y > GameFrame.FRAME_SIZE) {
 			reset();
@@ -56,6 +59,18 @@ public class Raindrop {
 
 	public double getSpeed() {
 		return speed;
+	}
+
+	public void offset(double x, double y) {
+		this.x += x;
+		this.y += y;
+		while(this.x < 0) {
+			this.x += GameFrame.FRAME_SIZE;
+		}
+		this.x %= GameFrame.FRAME_SIZE;
+		if(this.y > GameFrame.FRAME_SIZE) {
+			reset();
+		}
 	}
 	
 

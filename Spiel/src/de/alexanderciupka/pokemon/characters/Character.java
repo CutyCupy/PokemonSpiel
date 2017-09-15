@@ -47,6 +47,7 @@ public class Character implements Runnable {
 
 	private boolean surfing;
 	private boolean controllable = true;
+	private boolean spinning;
 
 
 	private Thread uncontrollable;
@@ -147,9 +148,12 @@ public class Character implements Runnable {
 				currentPosition.x += 1;
 				break;
 			}
-			new Thread(this).start();
-			this.moving = true;
-			waiting(waiting);
+			if(waiting) {
+				run();
+			} else {
+				new Thread(this).start();
+				this.moving = true;
+			}
 			setSurfing(this.getCurrentRoute().getEntities()[currentPosition.y][currentPosition.x].isWater());
 		}
 	}
@@ -171,9 +175,7 @@ public class Character implements Runnable {
 			currentPosition.x += 1;
 			break;
 		}
-		new Thread(this).start();
-		this.moving = true;
-		waiting(true);
+		run();
 	}
 
 	public Team getTeam() {
@@ -436,108 +438,50 @@ public class Character implements Runnable {
 	public void run() {
 		this.exactX = oldPosition.x;
 		this.exactY = oldPosition.y;
+		double xChange = 0;
+		double yChange = 0;
 		switch (this.currentDirection) {
 		case UP:
-			for (int i = 0; i < 10; i++) {
-				this.exactY -= 0.1;
-				if (!this.isControllable()) {
-					if(i % 2 == 0 && i != 0) {
-						this.currentDirection = next();
-					}
-				} else if (i % 2 == 0 && i != 0) {
-					currentWalking = (currentWalking + 1) % 4;
-				}
-				if (this instanceof NPC) {
-					currentRoute.updateMap(oldPosition, currentPosition);
-				}
-				gController.getGameFrame().repaint();
-				try {
-					if(i != 9) {
-						Thread.sleep(this.speed);
-					}
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
+			yChange = -0.1;
 			break;
 		case DOWN:
-			for (int i = 0; i < 10; i++) {
-				this.exactY += 0.1;
-
-				if (!this.isControllable()) {
-					if(i % 2 == 0 && i != 0) {
-						this.currentDirection = next();
-					}
-				} else if (i % 2 == 0 && i != 0) {
-					currentWalking = (currentWalking + 1) % 4;
-				}
-				if (this instanceof NPC) {
-					currentRoute.updateMap(oldPosition, currentPosition);
-				}
-				gController.getGameFrame().repaint();
-				try {
-					if(i != 9) {
-						Thread.sleep(this.speed);
-					}
-
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
+			yChange = 0.1;
 			break;
 		case LEFT:
-			for (int i = 0; i < 10; i++) {
-				this.exactX -= 0.1;
-				if (this instanceof NPC) {
-					currentRoute.updateMap(oldPosition, currentPosition);
-				}
-				if (!this.isControllable()) {
-					if(i % 2 == 0 && i != 0) {
-						this.currentDirection = next();
-					}
-				} else if (i % 2 == 0 && i != 0) {
-					currentWalking = (currentWalking + 1) % 4;
-				}
-				if (this instanceof NPC) {
-					currentRoute.updateMap(oldPosition, currentPosition);
-				}
-				gController.getGameFrame().repaint();
-				try {
-					if(i != 9) {
-						Thread.sleep(this.speed);
-					}
-
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
+			xChange = -0.1;
 			break;
 		case RIGHT:
-			for (int i = 0; i < 10; i++) {
-				this.exactX += 0.1;
-
-				if (!this.isControllable()) {
-					if(i % 2 == 0 && i != 0) {
-						this.currentDirection = next();
-					}
-				} else if (i % 2 == 0 && i != 0) {
-					currentWalking = (currentWalking + 1) % 4;
-				}
-				if (this instanceof NPC) {
-					currentRoute.updateMap(oldPosition, currentPosition);
-				}
-				gController.getGameFrame().repaint();
-				try {
-					if(i != 9) {
-						Thread.sleep(this.speed);
-					}
-
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
+			xChange = 0.1;
+			break;
+		case NONE:
+			break;
+		default:
 			break;
 		}
+		for (int i = 0; i < 10; i++) {
+			this.exactY += yChange;
+			this.exactX += xChange;
+			if (!this.isControllable() && spinning) {
+				if(i % 2 == 0 && i != 0) {
+					this.currentDirection = next();
+				}
+			} else if (this.isControllable() && i % 2 == 0 && i != 0) {
+				currentWalking = (currentWalking + 1) % 4;
+			}
+			if (this instanceof NPC) {
+				currentRoute.updateMap(oldPosition, currentPosition);
+			}
+//			gController.getGameFrame().repaint();
+			try {
+				if(i != 9) {
+					Thread.sleep(this.speed);
+				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		this.exactX = currentPosition.x;
+		this.exactY = currentPosition.y;
 		currentWalking = 0;
 		this.currentRoute.getEntities()[currentPosition.y][currentPosition.x].onStep(this);
 		this.currentRoute.updateMap(currentPosition);
@@ -576,8 +520,9 @@ public class Character implements Runnable {
 		this.controllable = controllable;
 	}
 
-	public void startUncontrollableMove(Direction dir) {
+	public void startUncontrollableMove(Direction dir, boolean spinning, int newSpeed) {
 		this.setControllable(false);
+		this.spinning = spinning;
 		if (this.uncontrollableDir == null) {
 			this.originalSpeed = this.speed;
 		}
@@ -589,7 +534,7 @@ public class Character implements Runnable {
 			@Override
 			public void run() {
 				while (!isControllable() && uncontrollableDir == dir) {
-					speed = VERY_SLOW;
+					speed = newSpeed;
 					currentDirection = dir;
 					gController.slide(currentDirection);
 				}
@@ -716,5 +661,9 @@ public class Character implements Runnable {
 
 	public String getSpriteName() {
 		return this.spriteName;
+	}
+
+	public boolean isSpinning() {
+		return this.spinning;
 	}
 }

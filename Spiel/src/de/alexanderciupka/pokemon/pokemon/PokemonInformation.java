@@ -173,12 +173,12 @@ public class PokemonInformation {
 						continue;
 					}
 				}
-				if(!foo.contains(currentMove)) {
+				if(!foo.contains(currentMove) && currentMove.getCategory().equals("unique")) {
 					foo.add(currentMove);
 				}
 				allMoves.add(currentMove);
 			}
-			System.out.println(foo.size());
+			System.out.println(foo);
 			for (JsonElement element : allPokemonData) {
 				int key = element.getAsJsonObject().get("id").getAsInt();
 				names.put(key,
@@ -208,9 +208,7 @@ public class PokemonInformation {
 				allPokemonMoves.put(key, moves);
 				allEvolutions.put(key, element.getAsJsonObject().get("evolution").getAsJsonArray());
 			}
-//			for(Move m : foo) {
-//				System.out.println(m);
-//			}
+
 			for (JsonElement element : allPokemonData) {
 				int id = element.getAsJsonObject().get("id").getAsInt();
 				Type[] currentTypes = { Type.get(element.getAsJsonObject().get("firstType").getAsString()),

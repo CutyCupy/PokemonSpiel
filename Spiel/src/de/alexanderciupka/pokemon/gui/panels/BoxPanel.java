@@ -46,11 +46,14 @@ public class BoxPanel extends JPanel {
 
 	private static final Color teamColor = new Color(153, 255, 255);
 	private static final Color boxColor = new Color(153, 255, 153);
+	
+	private GameController gController;
 
 	private Box next;
 	private Box before;
 
 	public BoxPanel(PCPanel parent) {
+		this.gController = GameController.getInstance();
 		this.setLayout(null);
 		this.setBounds(0, 0, 630, 630);
 		this.parent = parent;
@@ -91,7 +94,7 @@ public class BoxPanel extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				if (parent.getPC().getOwner().getTeam().getAmmount() > 0) {
 					GameController.getInstance().getGameFrame().setCurrentPanel(GameController.getInstance().getGameFrame().getLastPanel());
-					GameController.getInstance().getGameFrame().repaint();
+//					GameController.getInstance().getGameFrame().repaint();
 				} else {
 					JOptionPane.showMessageDialog(GameController.getInstance().getGameFrame(),
 							"Du brauchst mindestens ein Pokemon im Team!", "Team", JOptionPane.ERROR_MESSAGE, null);
@@ -131,10 +134,33 @@ public class BoxPanel extends JPanel {
 				currentPokemon.addMouseListener(new MouseAdapter() {
 					@Override
 					public void mouseClicked(MouseEvent e) {
+						JLabel source = (JLabel) e.getComponent();
+						int index = Integer.parseInt(source.getName().substring(1));
 						if (selected == null) {
-							selectedBox = box;
-							selected = (JLabel) e.getComponent();
-							selected.setBorder(BorderFactory.createLineBorder(Color.black, 1, true));
+							if(source.getIcon() != null) {
+								int result = JOptionPane.showOptionDialog(null, "Was möchtest du tun?", "Pokemon",
+										JOptionPane.YES_NO_OPTION, JOptionPane.YES_NO_OPTION,
+										source.getIcon(), new String[] { "Bericht", "Tauschen" },
+										null);
+								switch (result) {
+								case 0:
+									if(source.getName().startsWith("t")) {
+										gController.displayReport(box.getPc().getOwner().getTeam().getTeam()[index], box.getPc().getOwner().getTeam().getTeam());
+									} else {
+										gController.displayReport(box.getPokemons()[index], box.getPokemons());
+									}
+									break;
+								case 1:
+									selectedBox = box;
+									selected = (JLabel) e.getComponent();
+									selected.setBorder(BorderFactory.createLineBorder(Color.black, 1, true));
+									break;
+								}
+							} else {
+								selectedBox = box;
+								selected = (JLabel) e.getComponent();
+								selected.setBorder(BorderFactory.createLineBorder(Color.black, 1, true));
+							}
 						} else {
 							JLabel second = (JLabel) e.getComponent();
 							boolean firstTeam = selected.getName().startsWith("t");
@@ -179,6 +205,17 @@ public class BoxPanel extends JPanel {
 				currentPokemon.setBounds(SIZE * j, SIZE + SIZE * i, SIZE, SIZE);
 				currentPokemon.setOpaque(true);
 				this.add(currentPokemon);
+			}
+		}
+		if(selected != null) {
+			for(Component c : this.getComponents()) {
+				if(c.getName() == null) {
+					continue;
+				}
+				if((selectedBox.equals(box) || selected.getName().startsWith("t")) && c.getName().equals(selected.getName())) {
+					((JLabel) c).setBorder(BorderFactory.createLineBorder(Color.black, 1, true));
+					break;
+				}
 			}
 		}
 	}

@@ -250,7 +250,7 @@ public class Entity {
 				}
 				gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()).updateMap(c.getCurrentPosition());
 			}
-			gController.getGameFrame().repaint();
+//			gController.getGameFrame().repaint();
 			c.getCurrentRoute().getEntities()[c.getCurrentPosition().y][c.getCurrentPosition().x].onStepNoWarp(c);
 			return true;
 		}
@@ -345,6 +345,18 @@ public class Entity {
 			}).start();
 			return;
 		}
+		if(this.terrainName.equals("ice")) {
+			c.startUncontrollableMove(c.getCurrentDirection(), false, Character.FAST);
+//			if(gController.slide(c.getCurrentDirection())) {
+//				gController.setInteractionPause(true);
+//				return;
+//			}
+//			gController.setInteractionPause(true);
+		} else {
+			if(!c.isControllable() && !c.isSpinning()) {
+				c.setControllable(true);
+			}
+		}
 		int characterIndex = gController.checkStartFight();
 		if (c instanceof Player && characterIndex >= 0) {
 			NPC enemy = gController.getCurrentBackground().getCurrentRoute().getCharacters().get(characterIndex);
@@ -368,16 +380,16 @@ public class Entity {
 			if (this.spriteName.startsWith("move")) {
 				switch (spriteName) {
 				case "moveleft":
-					c.startUncontrollableMove(Direction.LEFT);
+					c.startUncontrollableMove(Direction.LEFT, true, Character.VERY_SLOW);
 					break;
 				case "moveright":
-					c.startUncontrollableMove(Direction.RIGHT);
+					c.startUncontrollableMove(Direction.RIGHT, true, Character.VERY_SLOW);
 					break;
 				case "moveup":
-					c.startUncontrollableMove(Direction.UP);
+					c.startUncontrollableMove(Direction.UP, true, Character.VERY_SLOW);
 					break;
 				case "movedown":
-					c.startUncontrollableMove(Direction.DOWN);
+					c.startUncontrollableMove(Direction.DOWN, true, Character.VERY_SLOW);
 					break;
 				case "movestop":
 					c.setControllable(true);
@@ -411,7 +423,7 @@ public class Entity {
 								gController.getCurrentBackground().getCurrentRoute().getEntities()[0][1]
 										.setSprite("joyhealing" + (i % (c.getTeam().getAmmount() + 1)));
 								gController.getCurrentBackground().getCurrentRoute().updateMap(new Point(1, 0));
-								gController.getGameFrame().repaint();
+//								gController.getGameFrame().repaint();
 								gController.sleep(i == c.getTeam().getAmmount() ? 1500 : 750);
 							}
 						}
@@ -461,7 +473,7 @@ public class Entity {
 							for (int i = 1; i <= 3; i++) {
 								setSprite("treecut" + i);
 								source.getCurrentRoute().updateMap(source.getInteractionPoint());
-								gController.getGameFrame().repaint();
+//								gController.getGameFrame().repaint();
 								try {
 									Thread.sleep(100);
 								} catch (InterruptedException e) {
@@ -498,7 +510,7 @@ public class Entity {
 				} else {
 					gController.getGameFrame().addDialogue("Dieser Felsen könnte zertr�mmert werden!");
 				}
-				gController.getGameFrame().repaint();
+//				gController.getGameFrame().repaint();
 			} else {
 				return false;
 			}

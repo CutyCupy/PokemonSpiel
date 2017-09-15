@@ -59,7 +59,9 @@ public class MoveButton extends JButton {
 				break;
 			}
 		} else {
+			setText("");
 			setBackground(Color.LIGHT_GRAY);
+			setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY, 5));
 			setEnabled(false);
 		}
 	}

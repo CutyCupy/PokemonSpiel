@@ -59,7 +59,8 @@ public class NPC extends Character {
 			break;
 		}
 		currentRoute.updateMap(currentPosition);
-		gController.repaint();
+//		gController.sleep(50);
+//		gController.repaint();
 	}
 	
 	public void setBeforeFightDialogue(String dialog) {
@@ -136,7 +137,7 @@ public class NPC extends Character {
 				break;
 			}
 			gController.getGameFrame().getBackgroundLabel().spotted(this);
-			gController.getGameFrame().repaint();
+//			gController.getGameFrame().repaint();
 			while (!(currentPosition.x + x == mainX && currentPosition.y + y == mainY)) {
 				currentRoute.updateMap(currentPosition);
 				this.changePosition(this.getCurrentDirection(), true);

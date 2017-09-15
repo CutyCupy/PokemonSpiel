@@ -90,11 +90,11 @@ public class TriggeredEvent {
 					Camera cam = gController.getCurrentBackground().getCamera();
 					if(currentChanges[j].isCenterCharacter()) {
 						cam.setCharacter(currentChanges[j].getCharacter(), 
-								/**currentChanges[j].isCamAnimation()**/ true);
+								currentChanges[j].isCamAnimation());
 					} else {
 						Point camPosition = currentChanges[j].getCamPosition();
 						if(camPosition.x != -1 && camPosition.y != -1) {
-							cam.moveTowards(camPosition.x, camPosition.y, /**currentChanges[j].isCamAnimation()**/ true);
+							cam.moveTowards(camPosition.x, camPosition.y, currentChanges[j].isCamAnimation());
 						}
 					}
 				}
@@ -112,7 +112,7 @@ public class TriggeredEvent {
 							currentChar.setCurrentDirection(currentChanges[c].getDirection());
 						}
 					}
-					GameController.getInstance().getGameFrame().repaint();
+//					GameController.getInstance().getGameFrame().repaint();
 				}
 				if(max == 0) {
 					for(int c = 0; c < currentChanges.length; c++) {
@@ -122,7 +122,7 @@ public class TriggeredEvent {
 							currentChar.setCurrentDirection(currentChanges[c].getDirection());
 						}
 					}
-					GameController.getInstance().getGameFrame().repaint();
+//					GameController.getInstance().getGameFrame().repaint();
 				}
 				for(int j = 0; j < currentChanges.length; j++) {
 					currentChar = currentChanges[j].getCharacter();
@@ -176,7 +176,7 @@ public class TriggeredEvent {
 					if(currentChanges[j].isFight() && currentChar instanceof NPC && currentChar.isTrainer() && !currentChar.isDefeated()) {
 						NPC enemy = (NPC) currentChar;
 						gController.startFight(enemy);
-						gController.getGameFrame().repaint();
+//						gController.getGameFrame().repaint();
 						do {
 							try {
 								Thread.sleep(5);
@@ -227,7 +227,7 @@ public class TriggeredEvent {
 							}
 							triggered = false;
 							gController.setInteractionPause(false);
-							gController.getGameFrame().repaint();
+//							gController.getGameFrame().repaint();
 							return;
 						}
 					}
@@ -301,7 +301,7 @@ public class TriggeredEvent {
 		clone.triggered = this.triggered;
 		for(int i = 0; i < changes.size(); i++) {
 			Change[] changes = new Change[this.changes.get(i).length];
-			for(int j = 0; j < this.changes.get(i).length; i++) {
+			for(int j = 0; j < this.changes.get(i).length; j++) {
 				changes[j] = this.changes.get(i)[j].clone();
 			}
 			clone.addChanges(changes);

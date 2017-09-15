@@ -9,6 +9,7 @@ import javax.imageio.ImageIO;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import de.alexanderciupka.hoverbutton.Main;
 import de.alexanderciupka.pokemon.characters.Player;
@@ -32,14 +33,16 @@ public class PokemonEntity extends Entity {
 
 	public void setRequiredItems(Item... items) {
 		requiredItems = new ArrayList<Item>(items.length);
-		for(Item i : items) {
+		for (Item i : items) {
 			addRequiredItem(i);
 		}
 	}
 
 	public void addRequiredItem(Item item) {
-		if(item == null) {return;}
-		if(requiredItems == null) {
+		if (item == null) {
+			return;
+		}
+		if (requiredItems == null) {
 			requiredItems = new ArrayList<Item>();
 		}
 		requiredItems.add(item);
@@ -48,7 +51,6 @@ public class PokemonEntity extends Entity {
 	public ArrayList<Item> getRequiredItems() {
 		return this.requiredItems;
 	}
-
 
 	public String getNoInteractionMessage() {
 		return noInteractionMessage;
@@ -68,19 +70,20 @@ public class PokemonEntity extends Entity {
 
 	public void setPokemon(Pokemon pokemon) {
 		this.pokemon = pokemon;
-		if(pokemon != null) {
+		if (pokemon != null) {
 			this.setSprite(String.valueOf(pokemon.getId()));
 		} else {
 			super.setSprite("free");
 			this.setAccessible(true);
 		}
 	}
-	
+
 	@Override
 	public void setSprite(String spriteName) {
 		this.spriteName = spriteName;
 		try {
-			this.sprite = ImageIO.read(new File(Main.class.getResource("/characters/pokemon/" + spriteName + "/front_0.png").getFile()));
+			this.sprite = ImageIO.read(
+					new File(Main.class.getResource("/characters/pokemon/" + spriteName + "/front_0.png").getFile()));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -101,16 +104,16 @@ public class PokemonEntity extends Entity {
 	@Override
 	public void onInteraction(Player c) {
 		boolean isInteractable = true;
-		if(requiredItems != null) {
-			for(Item i : this.requiredItems) {
-				if(!c.hasItem(i)) {
+		if (requiredItems != null) {
+			for (Item i : this.requiredItems) {
+				if (!c.hasItem(i)) {
 					isInteractable = false;
 					break;
 				}
 			}
 		}
-		if(isInteractable) {
-			if(!interactionMessage.isEmpty()) {
+		if (isInteractable) {
+			if (!interactionMessage.isEmpty()) {
 				gController.getGameFrame().addDialogue(interactionMessage);
 				gController.waitDialogue();
 			}
@@ -118,23 +121,77 @@ public class PokemonEntity extends Entity {
 			setPokemon(null);
 			c.getCurrentRoute().updateMap(new Point(getX(), getY()));
 		} else {
-			if(!noInteractionMessage.isEmpty()) {
+			if (!noInteractionMessage.isEmpty()) {
 				gController.getGameFrame().addDialogue(noInteractionMessage);
 				gController.waitDialogue();
 			}
 		}
-		gController.getGameFrame().repaint();
+//		gController.getGameFrame().repaint();
 	}
 
 	public void importRequiredItems(JsonElement je) {
 		this.requiredItems = new ArrayList<Item>();
-		if(je != null) {
+		if (je != null) {
 			JsonArray items = je.getAsJsonArray();
-			for(JsonElement i : items) {
+			for (JsonElement i : items) {
 				try {
 					this.addRequiredItem(Item.valueOf(i.getAsJsonObject().get("item").getAsString().toUpperCase()));
-				} catch(Exception e) {}
+				} catch (Exception e) {
+				}
 			}
 		}
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (super.equals(obj) && obj instanceof PokemonEntity) {
+			PokemonEntity other = (PokemonEntity) obj;
+			return this.id.equals(other.id) && this.interactionMessage.equals(other.interactionMessage)
+					&& this.interactionMessage.equals(other.noInteractionMessage)
+					&& this.requiredItems.equals(other.requiredItems) && 
+					(this.pokemon == null ? other.pokemon == null : this.pokemon.equals(other.pokemon));
+		}
+		return false;
+	}
+
+	@Override
+	public JsonObject getSaveData(Entity entity) {
+		JsonObject saveData = super.getSaveData(entity);
+		PokemonEntity other = (PokemonEntity) entity;
+		saveData.addProperty("id", this.id);
+		if (!other.interactionMessage.equals(this.interactionMessage)) {
+			saveData.addProperty("interaction_message", this.interactionMessage);
+		}
+		if (!other.noInteractionMessage.equals(this.noInteractionMessage)) {
+			saveData.addProperty("no_interaction_message", this.noInteractionMessage);
+		}
+		if (this.pokemon != null) {
+			saveData.add("pokemon", this.pokemon.getSaveData());
+		}
+		return saveData;
+	}
+
+	@Override
+	public boolean importSaveData(JsonObject saveData, Entity entity) {
+		if(super.importSaveData(saveData, entity)) {
+			PokemonEntity other = (PokemonEntity) entity;
+			if(saveData.get("interaction_message") != null) {
+				this.interactionMessage = saveData.get("interaction_message").getAsString();
+			} else {
+				this.interactionMessage = other.interactionMessage;
+			}
+			if(saveData.get("no_interaction_message") != null) {
+				this.noInteractionMessage = saveData.get("no_interaction_message").getAsString();
+			} else {
+				this.noInteractionMessage = other.noInteractionMessage;
+			}
+			if(saveData.get("pokemon") != null) {
+				this.pokemon = Pokemon.importSaveData(saveData.get("pokemon").getAsJsonObject());
+			} else {
+				this.pokemon = null;
+			}
+			return true;
+		}
+		return false;
 	}
 }

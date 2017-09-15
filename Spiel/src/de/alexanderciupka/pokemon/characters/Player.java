@@ -210,7 +210,7 @@ public class Player extends Character {
 		if(result) {
 			removeItem(i);
 			gController.getGameFrame().setCurrentPanel(null);
-			gController.getGameFrame().repaint();
+//			gController.getGameFrame().repaint();
 		}
 		gController.waitDialogue();
 		gController.setInteractionPause(false);

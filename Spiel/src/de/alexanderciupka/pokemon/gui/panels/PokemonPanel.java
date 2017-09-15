@@ -61,7 +61,7 @@ public class PokemonPanel extends JPanel {
 						}
 						switch (result) {
 						case 0:
-							gController.displayReport(source.getPokemon());
+							gController.displayReport(source.getPokemon(), gController.getMainCharacter().getTeam().getTeam());
 							break;
 						case 1:
 							if (gController.isFighting()) {
@@ -115,7 +115,7 @@ public class PokemonPanel extends JPanel {
 								} else {
 									if(!gController.getGameFrame().getEvolutionPanel().getPokemon().isEmpty()) {
 										gController.getGameFrame().setCurrentPanel(gController.getGameFrame().getEvolutionPanel());
-										gController.getGameFrame().repaint();
+//										gController.getGameFrame().repaint();
 										gController.getGameFrame().getEvolutionPanel().start();
 									}
 								}
@@ -126,7 +126,7 @@ public class PokemonPanel extends JPanel {
 								} else {
 									gController.getGameFrame().setCurrentPanel(gController.getGameFrame().getLastPanel(false));
 								}
-								gController.getGameFrame().repaint();
+//								gController.getGameFrame().repaint();
 								for(PokemonButton p : pokemonButtons) {
 									if(p.getPokemon() != null) {
 										p.setEnabled(true);
@@ -168,7 +168,7 @@ public class PokemonPanel extends JPanel {
 				} else {
 					gController.getGameFrame().setCurrentPanel(gController.getGameFrame().getLastPanel());
 				}
-				gController.getGameFrame().repaint();
+//				gController.getGameFrame().repaint();
 			}
 		});
 	}

@@ -1,6 +1,5 @@
 package de.alexanderciupka.pokemon.map;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
@@ -11,11 +10,12 @@ import javax.imageio.ImageIO;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 
 import de.alexanderciupka.pokemon.characters.NPC;
-import de.alexanderciupka.pokemon.gui.GameFrame;
 import de.alexanderciupka.pokemon.gui.overlay.RainType;
+import de.alexanderciupka.pokemon.gui.overlay.SnowType;
 import de.alexanderciupka.pokemon.map.entities.Entity;
 import de.alexanderciupka.pokemon.pokemon.PokemonPool;
 
@@ -31,6 +31,7 @@ public class Route {
 	private ArrayList<NPC> characters;
 	private BufferedImage map;
 	private RainType rain;
+	private SnowType snow;
 
 	private String terrainName;
 	private RouteType type;
@@ -139,7 +140,7 @@ public class Route {
 	public void clearCharacters() {
 		this.characters.clear();
 	}
-	
+
 	public void createMap() {
 		map = new BufferedImage(width * 70, height * 70, BufferedImage.TYPE_4BYTE_ABGR);
 		Graphics g = map.getGraphics();
@@ -168,7 +169,7 @@ public class Route {
 				}
 			}
 		}
-//		saveMap();
+		// saveMap();
 	}
 
 	public void updateMap(Point... updatePoint) {
@@ -181,10 +182,11 @@ public class Route {
 					g.drawImage(entities[p.y][p.x].getSprite(), (int) (entities[p.y][p.x].getExactX() * 70),
 							(int) (entities[p.y][p.x].getExactY() * 70), null);
 					if (entities[p.y][p.x].hasCharacter()) {
-//						for (NPC npc : entities[p.y][p.x].getCharacters()) {
-//							g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70),
-//									(int) (npc.getExactY() * 70), null);
-//						}
+						// for (NPC npc : entities[p.y][p.x].getCharacters()) {
+						// g.drawImage(npc.getCharacterImage(), (int)
+						// (npc.getExactX() * 70),
+						// (int) (npc.getExactY() * 70), null);
+						// }
 					}
 					repainted[p.y][p.x] = true;
 					for (int x = Math.max(0, p.x - 4); x < Math.min(width, p.x + 4); x++) {
@@ -198,16 +200,19 @@ public class Route {
 								g.drawImage(entities[y][x].getSprite(), (int) (entities[y][x].getExactX() * 70),
 										(int) (entities[y][x].getExactY() * 70), null);
 								if (entities[y][x].hasCharacter()) {
-//									for (NPC npc : entities[y][x].getCharacters()) {
-//										g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70),
-//												(int) (npc.getExactY() * 70), null);
-//									}
+									// for (NPC npc :
+									// entities[y][x].getCharacters()) {
+									// g.drawImage(npc.getCharacterImage(),
+									// (int) (npc.getExactX() * 70),
+									// (int) (npc.getExactY() * 70), null);
+									// }
 								}
 							}
-//							for (NPC npc : entities[y][x].getCharacters()) {
-//								g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70),
-//										(int) (npc.getExactY() * 70), null);
-//							}
+							// for (NPC npc : entities[y][x].getCharacters()) {
+							// g.drawImage(npc.getCharacterImage(), (int)
+							// (npc.getExactX() * 70),
+							// (int) (npc.getExactY() * 70), null);
+							// }
 							repainted[y][x] = true;
 						}
 					}
@@ -215,56 +220,63 @@ public class Route {
 					e.printStackTrace();
 				}
 			}
-//			for (int x = 0; x < width; x++) {
-//				for (int y = 0; y < height; y++) {
-//					if (this.entities[y][x].getSpriteName().startsWith("house")
-//							|| this.entities[y][x].getSpriteName().startsWith("pokecenter")) {
-//						g.drawImage(entities[y][x].getTerrain(), x * 70, y * 70, null);
-//						g.drawImage(entities[y][x].getSprite(), (int) (entities[y][x].getExactX() * 70),
-//								(int) (entities[y][x].getExactY() * 70), null);
-//						if (entities[y][x].hasCharacter()) {
-////							for (NPC npc : entities[y][x].getCharacters()) {
-////								g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70),
-////										(int) (npc.getExactY() * 70), null);
-////							}
-//						}
-//					}
-////					for (NPC npc : entities[y][x].getCharacters()) {
-////						g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70), (int) (npc.getExactY() * 70),
-////								null);
-////
-////					}
-//				}
-//			}
+			// for (int x = 0; x < width; x++) {
+			// for (int y = 0; y < height; y++) {
+			// if (this.entities[y][x].getSpriteName().startsWith("house")
+			// || this.entities[y][x].getSpriteName().startsWith("pokecenter"))
+			// {
+			// g.drawImage(entities[y][x].getTerrain(), x * 70, y * 70, null);
+			// g.drawImage(entities[y][x].getSprite(), (int)
+			// (entities[y][x].getExactX() * 70),
+			// (int) (entities[y][x].getExactY() * 70), null);
+			// if (entities[y][x].hasCharacter()) {
+			//// for (NPC npc : entities[y][x].getCharacters()) {
+			//// g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() *
+			// 70),
+			//// (int) (npc.getExactY() * 70), null);
+			//// }
+			// }
+			// }
+			//// for (NPC npc : entities[y][x].getCharacters()) {
+			//// g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() *
+			// 70), (int) (npc.getExactY() * 70),
+			//// null);
+			////
+			//// }
+			// }
+			// }
 			// saveMap();
 		}
 
 	}
 
-	private void saveMap() {
+	void saveMap() {
 		try {
 			Graphics g = map.getGraphics();
 			g.setFont(g.getFont().deriveFont(20.0f));
-			for (int y = 0; y < height; y++) {
-				for (int x = 0; x < width; x++) {
-					try {
-						if(entities[y][x].hasCharacter()) {
-							for (NPC npc : entities[y][x].getCharacters()) {
-								g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70),
-										(int) (npc.getExactY() * 70), null);
-							}
-						}
-						g.setColor(Color.black);
-						g.drawRect(GameFrame.GRID_SIZE * x, GameFrame.GRID_SIZE * y, GameFrame.GRID_SIZE,
-								GameFrame.GRID_SIZE);
-						g.setColor(Color.red);
-						g.drawString(x + "|" + y, x * GameFrame.GRID_SIZE + 10, (int) ((y + .5) * GameFrame.GRID_SIZE));
-
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			}
+			// for (int y = 0; y < height; y++) {
+			// for (int x = 0; x < width; x++) {
+			// try {
+			// if(entities[y][x].hasCharacter()) {
+			// for (NPC npc : entities[y][x].getCharacters()) {
+			// g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() *
+			// 70),
+			// (int) (npc.getExactY() * 70), null);
+			// }
+			// }
+			// g.setColor(Color.black);
+			// g.drawRect(GameFrame.GRID_SIZE * x, GameFrame.GRID_SIZE * y,
+			// GameFrame.GRID_SIZE,
+			// GameFrame.GRID_SIZE);
+			// g.setColor(Color.red);
+			// g.drawString(x + "|" + y, x * GameFrame.GRID_SIZE + 10, (int) ((y
+			// + .5) * GameFrame.GRID_SIZE));
+			//
+			// } catch (Exception e) {
+			// e.printStackTrace();
+			// }
+			// }
+			// }
 			ImageIO.write(map, "png", new File("./res/routes/" + this.id + ".png"));
 			System.out.println(this.getName() + " wurde gespeichert!");
 		} catch (Exception e) {
@@ -303,6 +315,14 @@ public class Route {
 		this.rain = rain;
 	}
 
+	public SnowType getSnow() {
+		return snow;
+	}
+
+	public void setSnow(SnowType snow) {
+		this.snow = snow;
+	}
+
 	public RouteType getType() {
 		return type;
 	}
@@ -326,76 +346,87 @@ public class Route {
 					}
 				}
 			}
-			if (!this.pokemonPool.equals(other.pokemonPool)) {
-				return false;
-			}
-			if(this.characters.size() != other.characters.size()) {
+			if (this.characters.size() != other.characters.size()) {
 				System.err.println("wrong character size");
 				return false;
 			}
-			if(withCharacters) {
-				for(int i = 0; i < this.characters.size(); i++) {
+			if (withCharacters) {
+				for (int i = 0; i < this.characters.size(); i++) {
 					boolean contains = false;
-					for(int j = 0; j < other.characters.size(); j++) {
-						if(!other.characters.get(j).equals(this.characters.get(i))) {
+					for (int j = 0; j < other.characters.size(); j++) {
+						if (!other.characters.get(j).equals(this.characters.get(i))) {
 							contains = true;
 							break;
 						}
 					}
-					if(!contains) {
+					if (!contains) {
 						System.err.println("wrong character " + this.characters.get(i).getName());
 						return false;
 					}
 				}
 			}
+			System.out.println("finished");
 			return (this.id.equals(other.id) && this.name.equals(other.name)
-					&& this.terrainName.equals(other.terrainName));
+					&& this.terrainName.equals(other.terrainName) && ((this.rain == null && other.rain == null)
+							|| (this.rain != null && this.rain.equals(other.rain))));
 		}
 		return false;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		return equals(obj, true);
 	}
-	
+
 	public boolean importSaveData(JsonObject saveData, Route route) {
-		if(this.id.equals(saveData.get("id").getAsString())) {
-			if(saveData.get("name") != null) {
+		if (this.id.equals(saveData.get("id").getAsString())) {
+			if (saveData.get("name") != null) {
 				this.name = saveData.get("name").getAsString();
 			} else {
 				this.name = route.name;
 			}
-//			if(saveData.get("pokemon_pool") != null && saveData.get("pokemon_pool").isJsonArray()) {
-//				JsonArray pool = saveData.get("pokemon_pool").getAsJsonArray();	
-//				this.pokemonPool = new PokemonPool("DEFAULT");
-//				for(JsonElement je : pool) {
-//					this.pokemonPool.addPokemon(je.getAsJsonObject().get("id").getAsInt(), je.getAsJsonObject().get("level").getAsShort());
-//				}
-//			} else {
-//				this.pokemonPool = route.pokemonPool.clone();
-//			}
 			this.pokemonPool = route.pokemonPool;
-			
-			try {
-				this.setRain(RainType.valueOf(saveData.get("rain").getAsString().toUpperCase()));
-			} catch(Exception e) {
+
+			JsonElement rain = saveData.get("rain");
+			if (rain != null && rain instanceof JsonNull) {
+				this.rain = null;
+			} else if (rain != null) {
+				try {
+					this.setRain(RainType.valueOf(rain.getAsString().toUpperCase()));
+				} catch(Exception e) {
+					this.setRain(route.getRain());
+				}
+			} else {
 				this.setRain(route.getRain());
 			}
 			
+			JsonElement snow = saveData.get("snow");
+			if (snow != null && snow instanceof JsonNull) {
+				this.snow = null;
+			} else if (snow != null) {
+				try {
+					this.setSnow(SnowType.valueOf(snow.getAsString().toUpperCase()));
+				} catch(Exception e) {
+					this.setSnow(route.getSnow());
+				}
+			} else {
+				this.setSnow(route.getSnow());
+			}
+			
+
 			createEntities();
-			if(saveData.get("entities") != null) {
-				for(JsonElement j : saveData.get("entities").getAsJsonArray()) {
+			if (saveData.get("entities") != null) {
+				for (JsonElement j : saveData.get("entities").getAsJsonArray()) {
 					JsonObject currentEntity = j.getAsJsonObject();
 					int x = currentEntity.get("x").getAsInt();
 					int y = currentEntity.get("y").getAsInt();
 					this.entities[y][x].importSaveData(currentEntity, route.getEntities()[y][x]);
 				}
 			} else {
-				for(int x = 0; x < this.width; x++) {
-					for(int y = 0; y < this.height; y++) {
+				for (int x = 0; x < this.width; x++) {
+					for (int y = 0; y < this.height; y++) {
 						this.entities[y][x] = route.getEntities()[y][x].clone();
-						if(route.getId().equals("wald_von_hamburg")) {
+						if (route.getId().equals("wald_von_hamburg")) {
 							this.entities[y][x].getSpriteName();
 						}
 					}
@@ -408,38 +439,35 @@ public class Route {
 	}
 
 	public JsonObject getSaveData(Route oldRoute) {
+		if (this.equals(oldRoute, false)) {
+			return null;
+		}
 		JsonObject saveData = new JsonObject();
 		saveData.addProperty("id", this.id);
-		if(!this.name.equals(oldRoute.name)) {
+		if (!this.name.equals(oldRoute.name)) {
 			saveData.addProperty("name", this.name);
 		}
 		JsonArray entities = null;
-		for(int x = 0; x < this.width; x++) {
-			for(int y = 0; y < this.height; y++) {
-				if(!this.entities[y][x].equals(oldRoute.entities[y][x])) {
-					if(entities == null) {
+		for (int x = 0; x < this.width; x++) {
+			for (int y = 0; y < this.height; y++) {
+				if (!this.entities[y][x].equals(oldRoute.entities[y][x])) {
+					if (entities == null) {
 						entities = new JsonArray();
 					}
 					entities.add(this.entities[y][x].getSaveData(oldRoute.entities[y][x]));
 				}
 			}
 		}
-		if(entities != null) {
+		if (entities != null) {
 			saveData.add("entities", entities);
 		}
-		if(this.rain != null) {
+		if (this.rain == null ? oldRoute.rain != null : !this.rain.equals(oldRoute.rain)) {
 			saveData.addProperty("rain", rain.name());
 		}
-//		if (!this.pokemonPool.equals(oldRoute.pokemonPool)) {
-//			JsonArray pool = new JsonArray();
-//			for(SimpleEntry<Integer, Short> pokemon : this.pokemonPool) {
-//				JsonObject json = new JsonObject();
-//				json.addProperty("id", pokemon.getKey());
-//				json.addProperty("level", pokemon.getValue());
-//				pool.add(json);
-//			}
-//			saveData.add("pokemon_pool", pool);
-//		}
+		if (this.snow == null ? oldRoute.snow != null : !this.snow.equals(oldRoute.snow)) {
+			saveData.addProperty("snow", this.snow != null ? snow.name() : null);
+		}
+		System.out.println(saveData);
 		return saveData;
 	}
 }
