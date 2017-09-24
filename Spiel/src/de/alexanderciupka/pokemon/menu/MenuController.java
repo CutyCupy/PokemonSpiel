@@ -24,11 +24,13 @@ public class MenuController {
 	private static MenuController instance;
 	private PaintingController pController;
 	private GameController gController;
+	private SoundController sController;
 	private Font menuFont;
 	private JFileChooser fileChooser;
 	private MainMenuFrame menuFrame;
 	private PaintingNameFrame paintingFrame;
 	public static final String SAVE_PATH = System.getProperty("user.home") + "/SpielSpeicherdaten/";
+
 
 	public static final Dimension SCREEN_SIZE = Toolkit.getDefaultToolkit().getScreenSize();
 
@@ -40,6 +42,7 @@ public class MenuController {
 	public void start() {
 		gController = GameController.getInstance();
 		pController = PaintingController.getInstance();
+		sController = SoundController.getInstance();
 		new File(SAVE_PATH).mkdir();
 		fileChooser = new JFileChooser(SAVE_PATH);
 		fileChooser.setFileFilter(new FileNameExtensionFilter("Speicherdateien",
@@ -119,7 +122,7 @@ public class MenuController {
 
 	public int returnToMenu() {
 		return JOptionPane.showOptionDialog(null, "Was möchtest du tun?", "Menü", JOptionPane.YES_NO_CANCEL_OPTION,  JOptionPane.QUESTION_MESSAGE, null,
-				new Object[]{"Speichern", "Speichern und zum Hauptmenü", "Laden", "Abbrechen"}, "Speichern");
+				new Object[]{"Speichern", "Speichern und zum Hauptmenü", "Laden", "Zur�ck zum Hauptmen�"}, "Speichern");
 	}
 
 	public void showMenu() {

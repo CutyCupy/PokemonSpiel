@@ -26,7 +26,7 @@ public class PokemonPanel extends JPanel {
 	private GameController gController;
 	private JButton backButton;
 	private int firstOne;
-	
+
 	private Item currentItem;
 
 	public PokemonPanel() {
@@ -66,13 +66,12 @@ public class PokemonPanel extends JPanel {
 						case 1:
 							if (gController.isFighting()) {
 								if (source.getIndex() != 0) {
-									gController.getFight().setCurrentFightOption(FightOption.FIGHT);
-									if (gController.getFight().newPlayerPokemon(source.getIndex())) {
+									if (gController.getFight().canBeSendOut(source.getIndex())) {
 										new Thread(new Runnable() {
 											@Override
 											public void run() {
-												gController.repaint();
-												gController.getCurrentFightPanel().repaint();
+												gController.getFight().setCurrentFightOption(FightOption.FIGHT);
+												gController.getFight().sendOut(source.getIndex());
 												gController.getGameFrame().getFightPanel().checkEnemyAttack();
 												gController.getGameFrame().getFightPanel().showMenu();
 											}
@@ -134,7 +133,7 @@ public class PokemonPanel extends JPanel {
 								}
 								backButton.setEnabled(true);
 								gController.setInteractionPause(false);
-								
+
 								if(result && gController.isFighting()) {
 									gController.getGameFrame().getFightPanel().checkEnemyAttack();
 									gController.getGameFrame().getFightPanel().showMenu();
@@ -154,7 +153,7 @@ public class PokemonPanel extends JPanel {
 		backButton.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		backButton.setBackground(Color.WHITE);
 		add(backButton);
-		
+
 		addActionListeners();
 	}
 
@@ -188,7 +187,7 @@ public class PokemonPanel extends JPanel {
 			this.backButton.setEnabled(true);
 		}
 	}
-	
+
 	public void update(Item i) {
 		update();
 		this.currentItem = i;

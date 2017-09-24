@@ -15,6 +15,7 @@ import de.alexanderciupka.pokemon.gui.overlay.DarkOverlay;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.map.Route;
 import de.alexanderciupka.pokemon.map.Warp;
+import de.alexanderciupka.pokemon.menu.SoundController;
 import de.alexanderciupka.pokemon.pokemon.Item;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
 import de.alexanderciupka.pokemon.pokemon.PokemonPool;
@@ -187,11 +188,10 @@ public class Entity {
 	}
 
 	public boolean checkPokemon() {
-		if (pokemonRate > 0 && ((this.pokemonPool != null && this.pokemonPool.getPokemonPool().size() > 0) || 
-				(gController.getMainCharacter().getCurrentRoute().getPokemonPool() != null && 
+		if (pokemonRate > 0 && ((this.pokemonPool != null && this.pokemonPool.getPokemonPool().size() > 0) ||
+				(gController.getMainCharacter().getCurrentRoute().getPokemonPool() != null &&
 						gController.getMainCharacter().getCurrentRoute().getPokemonPool().getPokemonPool().size() > 0))) {
 			if (rng.nextFloat() <= pokemonRate) {
-				gController.getGameFrame().getBackgroundLabel().startEncounter();
 				return true;
 			}
 		}
@@ -212,6 +212,7 @@ public class Entity {
 			if (c instanceof Player) {
 				gController.resetCharacterPositions();
 				gController.setCurrentRoute(gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()));
+//				SoundController.getInstance().playSound(SoundController.WARP);
 //				gController.getGameFrame().getBackgroundLabel()
 //						.changeRoute(gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()));
 			}
@@ -424,7 +425,12 @@ public class Entity {
 										.setSprite("joyhealing" + (i % (c.getTeam().getAmmount() + 1)));
 								gController.getCurrentBackground().getCurrentRoute().updateMap(new Point(1, 0));
 //								gController.getGameFrame().repaint();
-								gController.sleep(i == c.getTeam().getAmmount() ? 1500 : 750);
+								if(i == c.getTeam().getAmmount()) {
+									SoundController.getInstance().playSound(SoundController.POKECENTER_HEAL);
+									gController.sleep(1500);
+								} else {
+									gController.sleep(750);
+								}
 							}
 						}
 						gController.getGameFrame().addDialogue("Deine Pokemon sind nun wieder topfit!");
@@ -470,6 +476,7 @@ public class Entity {
 					new Thread(new Runnable() {
 						@Override
 						public void run() {
+							SoundController.getInstance().playSound(SoundController.CUT);
 							for (int i = 1; i <= 3; i++) {
 								setSprite("treecut" + i);
 								source.getCurrentRoute().updateMap(source.getInteractionPoint());
@@ -503,6 +510,7 @@ public class Entity {
 				if (hasItem) {
 					result = true;
 					gController.getGameFrame().addDialogue("Du hast den Felsen zertrümmert!");
+					SoundController.getInstance().playSound(SoundController.ROCKSMASH);
 					this.setSprite("free");
 					this.setAccessible(true);
 					source.getCurrentRoute().updateMap(source.getInteractionPoint());

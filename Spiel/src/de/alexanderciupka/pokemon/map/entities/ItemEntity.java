@@ -17,7 +17,7 @@ public class ItemEntity extends Entity {
 	private String id;
 	private Item item;
 	private boolean hidden;
-	
+
 	public ItemEntity(Route parent, String terrainName, String id, boolean hidden) {
 		super(parent, hidden, "warp", 0, terrainName);
 		this.hidden = hidden;
@@ -50,7 +50,7 @@ public class ItemEntity extends Entity {
 			this.setAccessible(true);
 		}
 	}
-	
+
 	@Override
 	public void setSprite(String spriteName) {
 		if(this.item != null) {
@@ -59,7 +59,7 @@ public class ItemEntity extends Entity {
 			super.setSprite(spriteName);
 		}
 	}
-	
+
 	private void setSprite(Item item, String spriteName) {
 		super.setSprite(spriteName);
 		if(!hidden) {
@@ -70,7 +70,7 @@ public class ItemEntity extends Entity {
 			this.sprite = temp;
 		}
 	}
-	
+
 	public boolean isHidden() {
 		return hidden;
 	}
@@ -98,17 +98,17 @@ public class ItemEntity extends Entity {
 		}
 //		gController.getGameFrame().repaint();
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof ItemEntity) {
 			ItemEntity other = (ItemEntity) obj;
 			return ((this.item == null && other.item == null) || (this.item != null && this.item.equals(other.item))) &&
 					(this.hidden == other.hidden) && super.equals(obj);
-		} 
+		}
 		return false;
 	}
-	
+
 	@Override
 	public JsonObject getSaveData(Entity entity) {
 		ItemEntity origin = (ItemEntity) entity;
@@ -122,7 +122,7 @@ public class ItemEntity extends Entity {
 		}
 		return saveData;
 	}
-	
+
 	@Override
 	public boolean importSaveData(JsonObject saveData, Entity entity) {
 		if(super.importSaveData(saveData, entity) && entity instanceof ItemEntity) {
@@ -133,7 +133,7 @@ public class ItemEntity extends Entity {
 				this.id = other.id;
 			}
 			if(saveData.get("item") != null) {
-				this.item = saveData.get("item") instanceof JsonNull ? null : 
+				this.item = saveData.get("item") instanceof JsonNull ? null :
 					Item.valueOf(saveData.get("item").getAsString().toUpperCase());
 			} else {
 				this.item = other.item;
@@ -147,5 +147,5 @@ public class ItemEntity extends Entity {
 		}
 		return false;
 	}
-	
+
 }

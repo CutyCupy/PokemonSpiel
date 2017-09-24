@@ -29,6 +29,7 @@ import de.alexanderciupka.pokemon.gui.StatLabel;
 import de.alexanderciupka.pokemon.gui.TextLabel;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.map.RouteType;
+import de.alexanderciupka.pokemon.menu.SoundController;
 import de.alexanderciupka.pokemon.painting.Painting;
 import de.alexanderciupka.pokemon.pokemon.Item;
 import de.alexanderciupka.pokemon.pokemon.Move;
@@ -78,10 +79,10 @@ public class FightPanel extends JPanel {
 
 	private Image coloredPokeball;
 	private Image grayPokeball;
-	
+
 	public static HashMap<Item, BufferedImage> pokeballImages;
 	public static HashMap<Item, BufferedImage> openPokeballImages;
-	
+
 	private final static Font FONT = new Font(Font.MONOSPACED, Font.BOLD, 18);
 
 	public FightPanel(Pokemon mine, Pokemon enemy) {
@@ -119,21 +120,21 @@ public class FightPanel extends JPanel {
 		enemyStats.setVerticalAlignment(SwingConstants.TOP);
 		background = new JLabel(new ImageIcon(gController.getMainCharacter().getCurrentRoute().getEntities()
 				[gController.getMainCharacter().getCurrentPosition().y][gController.getMainCharacter().getCurrentPosition().x]
-						.isWater() ? RouteType.WATER.getBattleBackground() : 
+						.isWater() ? RouteType.WATER.getBattleBackground() :
 							gController.getMainCharacter().getCurrentRoute().getType().getBattleBackground()));
 //		playerStats.setBorder(
 //				BorderFactory.createCompoundBorder(new LineBorder(Color.BLACK), new EmptyBorder(2, 10, 2, 10)));
 //		enemyStats.setBorder(
 //				BorderFactory.createCompoundBorder(new LineBorder(Color.BLACK), new EmptyBorder(2, 10, 2, 10)));
-		
+
 		pokeball.setVisible(false);
 		pokeball.setOpaque(false);
 		attack = new JButton("KAMPF");
-		
+
 		attack.setBackground(Color.WHITE);
 		attack.setFocusable(false);
 		bag = new JButton("BEUTEL");
-		
+
 		bag.setBackground(Color.WHITE);
 		bag.setFocusable(false);
 		pokemon = new JButton("POKÉMON");
@@ -223,22 +224,22 @@ public class FightPanel extends JPanel {
 				}
 			}
 		}
-		
+
 
 		background.setBounds(0, 0, 630, 420);
-		
+
 		enemyPokemon.setBounds(395, 100, 160, 160); //475, 180 mitte
-		enemyStatPanel.setBounds(45, 150, 180, 40); 
+		enemyStatPanel.setBounds(45, 150, 180, 40);
 		ownPokemon.setBounds(50, 260, 160, 160);	//130, 250
 		playerStatPanel.setBounds(375, 275, 180, 40);
-		
+
 		enemyStats.setLocation(0, 0);
 		enemyStats.setSize(enemyStatPanel.getSize());
-		
+
 		playerStats.setLocation(0, 0);
 		playerStats.setSize(playerStatPanel.getSize());
-		
-		
+
+
 		attack.setFont(FONT);
 		bag.setFont(FONT);
 		pokemon.setFont(FONT);
@@ -247,7 +248,7 @@ public class FightPanel extends JPanel {
 		bag.setBounds(25, 575, 175, 50);
 		pokemon.setBounds(431, 575, 175, 50);
 		escape.setBounds(228, 580, 175, 50);
-		
+
 		firstMove.setFont(FONT);
 		secondMove.setFont(FONT);
 		thirdMove.setFont(FONT);
@@ -257,11 +258,11 @@ public class FightPanel extends JPanel {
 		secondMove.setBounds(325, 440, 280, 50);
 		thirdMove.setBounds(25, 500, 280, 50);
 		fourthMove.setBounds(325, 500, 280, 50);
-		
+
 		back.setBounds(50, 570, 530, 60);
-		
-		
-		
+
+
+
 		addActionListener();
 		addComponents();
 	}
@@ -353,7 +354,7 @@ public class FightPanel extends JPanel {
 			}
 		});
 	}
-	
+
 	public void throwBall(Item ball) {
 		if (!throwPokeball) {
 			throwPokeball = true;
@@ -369,6 +370,7 @@ public class FightPanel extends JPanel {
 						pokeball.drop();
 						if (enemy.isCatched(ball)) {
 							pokeball.shake(4);
+							SoundController.getInstance().playSound(SoundController.POKEMON_CAUGHT);
 							addText(enemy.getName() + " wurde gefangen!");
 							if (!gController.getMainCharacter().getTeam().addPokemon(enemy)) {
 								addText("Dein Team ist voll!");
@@ -434,7 +436,9 @@ public class FightPanel extends JPanel {
 	}
 
 	public void setPlayer() {
+		ownPokemon.setVisible(false);
 		this.mine = gController.getFight().getPlayer();
+		addText("Los " + mine.getName() + "!", false);
 		for (int i = 0; i < playerPokemons.length; i++) {
 			playerPokemons[i].setVisible(true);
 			if (gController.getMainCharacter().getTeam().getTeam()[i] != null) {
@@ -448,9 +452,11 @@ public class FightPanel extends JPanel {
 			}
 		}
 		ownPokemon.setIcon(new ImageIcon(mine.getSpriteBack()));
+		ownPokemon.setVisible(true);
 		updateMoves();
 		updatePanels();
 		playerStatPanel.setVisible(true);
+		SoundController.getInstance().playBattlecry(mine.getId());
 	}
 
 	public void updateMoves() {
@@ -487,27 +493,30 @@ public class FightPanel extends JPanel {
 				.setIcon(new ImageIcon(enemy.getSpriteFront()));
 		updatePanels();
 		enemyStatPanel.setVisible(true);
+		SoundController.getInstance().playBattlecry(enemy.getId());
 	}
 
 	public void updatePanels() {
+		Pokemon oldPlayer = playerStats.getPokemon();
+		Pokemon oldEnemy = enemyStats.getPokemon();
 		playerStats.setPokemon(mine);
 		enemyStats.setPokemon(enemy);
 		playerStats.repaint();
 		enemyStats.repaint();
-		
+
 		playerHPBar.setMaximum(mine.getStats().getStats().get(Stat.HP));
 		enemyHPBar.setMaximum(enemy.getStats().getStats().get(Stat.HP));
 
-		if(playerHPBar.getValue() == 0) {
+		if(playerHPBar.getValue() == 0 || !mine.equals(oldPlayer)) {
 			playerHPBar.setValue(mine.getStats().getCurrentHP());
 		} else {
-			if(playerHPBar.getMaximum()  != mine.getStats().getStats().get(Stat.HP)) {
+			if(playerHPBar.getMaximum() != mine.getStats().getStats().get(Stat.HP)) {
 				playerHPBar.setValue(mine.getStats().getCurrentHP());
 			} else {
 				playerHPBar.updateValue(mine.getStats().getCurrentHP());
 			}
 		}
-		if(enemyHPBar.getValue() == 0) {
+		if(enemyHPBar.getValue() == 0 || !enemy.equals(oldEnemy)) {
 			enemyHPBar.setValue(enemy.getStats().getCurrentHP());
 		} else {
 			enemyHPBar.updateValue(enemy.getStats().getCurrentHP());

@@ -11,12 +11,12 @@ public class CollapseOverlay extends Overlay {
 
 	public int visionSize;
 	public Form type;
-	
+
 	public CollapseOverlay(BackgroundLabel parent, Dimension size, Form type) {
 		super(parent, size);
 		this.type = type;
 	}
-	
+
 	@Override
 	public void createOverlay() {
 		BufferedImage foo = new BufferedImage(size.width, size.height, BufferedImage.TYPE_4BYTE_ABGR);
@@ -24,7 +24,7 @@ public class CollapseOverlay extends Overlay {
 			this.overlay = new BufferedImage(size.width, size.height, BufferedImage.TYPE_4BYTE_ABGR);
 		}
 		Graphics g = foo.getGraphics();
-		
+
 		g.setColor(Color.RED);
 		switch(type) {
 		case CIRCLE:
@@ -34,7 +34,7 @@ public class CollapseOverlay extends Overlay {
 			g.fillRect(this.size.width / 2 - (visionSize / 2), this.size.height / 2 - (visionSize / 2), visionSize, visionSize);
 			break;
 		}
-		
+
 		for(int x = 0; x < foo.getWidth(); x++) {
 			for(int y = 0; y < foo.getHeight(); y++) {
 				if(foo.getRGB(x, y) != Color.RED.getRGB()) {
@@ -47,17 +47,17 @@ public class CollapseOverlay extends Overlay {
 		this.overlay = foo;
 		created = true;
 	}
-	
+
 	public void update(int visionSize) {
 		this.visionSize = visionSize;
 		createOverlay();
-		parent.repaint();
+//		parent.repaint();
 	}
-	
+
 	public int getVisionSize() {
 		return this.visionSize;
 	}
-	
+
 	public void startAnimation(int stepSize, int pause) {
 		new Thread(new Runnable() {
 			@Override
@@ -74,7 +74,7 @@ public class CollapseOverlay extends Overlay {
 				while(visionSize != 0) {
 					visionSize = visionSize - stepSize > 0 ? visionSize - stepSize : 0;
 					update(visionSize);
-					parent.repaint();
+//					parent.repaint();
 					try {
 						Thread.sleep(pause);
 					} catch (InterruptedException e) {
@@ -82,7 +82,7 @@ public class CollapseOverlay extends Overlay {
 					}
 				}
 				finished = true;
-				parent.repaint();
+//				parent.repaint();
 			}
 		}).start();
 	}

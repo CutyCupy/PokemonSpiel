@@ -35,6 +35,7 @@ import de.alexanderciupka.pokemon.map.entities.PokemonEntity;
 import de.alexanderciupka.pokemon.map.entities.SignEntity;
 import de.alexanderciupka.pokemon.map.entities.TriggeredEvent;
 import de.alexanderciupka.pokemon.menu.MenuController;
+import de.alexanderciupka.pokemon.menu.SoundController;
 import de.alexanderciupka.pokemon.pokemon.Item;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
 import de.alexanderciupka.pokemon.pokemon.PokemonPool;
@@ -47,15 +48,15 @@ public class RouteAnalyzer {
 	private static final File SPRITE_FOLDER = new File(Main.class.getResource("/routes/Entities/").getFile());
 	private static final File TERRAIN_FOLDER = new File(Main.class.getResource("/routes/terrain/").getFile());
 	private static final File POKEBALL_FOLDER = new File(Main.class.getResource("/pokeballs/").getFile());
-	
-	
+
+
 	private File[] folderFiles;
 	private BufferedReader currentReader;
 	private Map<String, Route> loadedRoutes;
 	private Map<String, Route> originalRoutes;
 	private GameController gController;
 	private HashMap<String, Image> logos;
-	private HashMap<Item, BufferedImage> items; 
+	private HashMap<Item, BufferedImage> items;
 	private HashMap<String, Image> sprites;
 	private HashMap<String, Image> terrains;
 	private HashMap<Item, BufferedImage> pokeballs;
@@ -74,7 +75,7 @@ public class RouteAnalyzer {
 		pokeballs = new HashMap<Item, BufferedImage>();
 		parser = new JsonParser();
 	}
-	
+
 	public void init() {
 		readAllSprites();
 		readAllTerrains();
@@ -82,19 +83,19 @@ public class RouteAnalyzer {
 		readAllLogos();
 		readAllItems();
 		readAllRoutes();
-		
+
 		for(String s : loadedRoutes.keySet()) {
 			System.out.println("Loaded: " + loadedRoutes.get(s).getName());
 		}
-		
+
 		HashMap<Integer, HashSet<String>> locations = getAllPokemonLocations();
 		for(int i = 1; i < 650; i++) {
 			if(!locations.get(i).isEmpty())
 				System.out.println(gController.getInformation().getName(i) + " - " + locations.get(i));
 		}
-		
+
 	}
-	
+
 	private void readAllSprites() {
 		File[] sprites = SPRITE_FOLDER.listFiles();
 		for(File currentFile : sprites) {
@@ -107,11 +108,11 @@ public class RouteAnalyzer {
 			}
 		}
 	}
-	
+
 	public Image getSpriteByName(String name) {
 		return this.sprites.get(name);
 	}
-	
+
 	private void readAllTerrains() {
 		File[] terrains = TERRAIN_FOLDER.listFiles();
 		for(File currentFile : terrains) {
@@ -124,11 +125,11 @@ public class RouteAnalyzer {
 			}
 		}
 	}
-	
+
 	public Image getTerrainByName(String name) {
 		return this.terrains.get(name);
 	}
-	
+
 	private void readAllPokeballs() {
 		File[] pokeballs = POKEBALL_FOLDER.listFiles();
 		for(File currentFile : pokeballs) {
@@ -142,11 +143,11 @@ public class RouteAnalyzer {
 			}
 		}
 	}
-	
+
 	public BufferedImage getPokeballImage(Item i) {
 		return this.pokeballs.get(i);
 	}
-	
+
 	private void readAllItems() {
 		File[] items = ITEM_FOLDER.listFiles();
 		for(File currentFile : items) {
@@ -159,11 +160,11 @@ public class RouteAnalyzer {
 			}
 		}
 	}
-	
+
 	public BufferedImage getItemImage(Item i) {
 		return this.items.get(i);
 	}
-	
+
 	private void readAllLogos() {
 		File[] logos = LOGO_FOLDER.listFiles();
 		for(File currentFile : logos) {
@@ -199,7 +200,6 @@ public class RouteAnalyzer {
 			Route currentRoute = new Route();
 			String routeID = file.getName().split("\\.")[0];
 			try {
-				System.out.println(routeID);
 				JsonObject route = parser.parse(currentReader).getAsJsonObject();
 				JsonObject routeDetails = route.get("route").getAsJsonObject();
 				currentRoute.setId(routeDetails.get("id").getAsString());
@@ -208,7 +208,7 @@ public class RouteAnalyzer {
 				currentRoute.setHeight(routeDetails.get("height").getAsInt());
 				currentRoute.setWidth(routeDetails.get("width").getAsInt());
 				currentRoute.setDark(routeDetails.get("dark") != null ? routeDetails.get("dark").getAsBoolean() : false);
-				currentRoute.setType(RouteType.valueOf(routeDetails.get("type") != null ? 
+				currentRoute.setType(RouteType.valueOf(routeDetails.get("type") != null ?
 						routeDetails.get("type").getAsString().toUpperCase() : "CITY"));
 				try {
 					currentRoute.setRain(RainType.valueOf(routeDetails.get("rain").getAsString().toUpperCase()));
@@ -233,10 +233,10 @@ public class RouteAnalyzer {
 				case "cave":
 					nonGrassEncounterRate = Entity.POKEMON_GRASS_RATE;
 					break;
-				default:		
+				default:
 					break;
 				}
-				
+
 				for (int y = 0; y < currentRoute.getHeight(); y++) {
 					for (int x = 0; x < currentRoute.getWidth(); x++) {
 						Entity currentEntity = null;
@@ -245,7 +245,7 @@ public class RouteAnalyzer {
 						}
 						String currentString = routeDetails.get(x + "." + y).getAsString().toUpperCase();
 						if (!currentString.startsWith("W")
-								&& !currentString.startsWith("PKM") && !currentString.startsWith("TRIGGERED") 
+								&& !currentString.startsWith("PKM") && !currentString.startsWith("TRIGGERED")
 								&& !currentString.startsWith("ITEM") && !currentString.startsWith("GRASS")
 								&& !currentString.startsWith("SEE") && !currentString.startsWith("CAVE")) {
 							switch (currentString) {
@@ -483,14 +483,14 @@ public class RouteAnalyzer {
 									break;
 								}
 							} else if(currentString.startsWith("WHE")) {
-								currentEntity = new Entity(currentRoute, false, false, false, true, "cave_entrance_front", 0, 
+								currentEntity = new Entity(currentRoute, false, false, false, true, "cave_entrance_front", 0,
 										currentRoute.getTerrainName());
 							} else if(currentString.startsWith("WL")) {
 								if(currentString.startsWith("WLU")) {
-									currentEntity = new Entity(currentRoute, false, false, false, true, "ladder_up", 0, 
+									currentEntity = new Entity(currentRoute, false, false, false, true, "ladder_up", 0,
 											currentRoute.getTerrainName());
 								} else {
-									currentEntity = new Entity(currentRoute, false, false, true, true, "ladder_down", 0, 
+									currentEntity = new Entity(currentRoute, false, false, true, true, "ladder_down", 0,
 											currentRoute.getTerrainName());
 								}
 							} else {
@@ -513,7 +513,7 @@ public class RouteAnalyzer {
 							currentEntity = new ItemEntity(currentRoute, currentRoute.getTerrainName(), currentString, false);
 							items.add((ItemEntity) currentEntity);
 						} else if(currentString.startsWith("GRASS")) {
-							currentEntity = new Entity(currentRoute, true, "grass", 
+							currentEntity = new Entity(currentRoute, true, "grass",
 											Entity.POKEMON_GRASS_RATE, "grassy");
 							ArrayList<Entity> temp = pokemonPools.get(currentString);
 							if (temp == null) {
@@ -522,7 +522,7 @@ public class RouteAnalyzer {
 							temp.add(currentEntity);
 							pokemonPools.put(currentString, temp);
 						} else if(currentString.startsWith("SEE")) {
-							currentEntity = new Entity(currentRoute, true, "free", 
+							currentEntity = new Entity(currentRoute, true, "free",
 											Entity.POKEMON_GRASS_RATE, "see");
 							ArrayList<Entity> temp = pokemonPools.get(currentString);
 							if (temp == null) {
@@ -531,7 +531,7 @@ public class RouteAnalyzer {
 							temp.add(currentEntity);
 							pokemonPools.put(currentString, temp);
 						} else if(currentString.startsWith("CAVE")) {
-							currentEntity = new Entity(currentRoute, true, "free", 
+							currentEntity = new Entity(currentRoute, true, "free",
 									Entity.POKEMON_GRASS_RATE, "cave");
 							ArrayList<Entity> temp = pokemonPools.get(currentString);
 							if (temp == null) {
@@ -567,7 +567,7 @@ public class RouteAnalyzer {
 				for (int y = 0; y < characterDetails.size(); y++) {
 					JsonObject currentChar = characterDetails.get(y).getAsJsonObject();
 					NPC currentCharacter = new NPC(currentChar.get("id").getAsString());
-					currentCharacter.setCurrentPosition(currentChar.get("x").getAsInt(), 
+					currentCharacter.setCurrentPosition(currentChar.get("x").getAsInt(),
 							currentChar.get("y").getAsInt());
 					currentCharacter.setCurrentRoute(currentRoute);
 					currentCharacter.setCharacterImage(currentChar.get("char_sprite").getAsString(),
@@ -617,7 +617,7 @@ public class RouteAnalyzer {
 						currentRoute.addEntity(entity.getX(), entity.getY(), entity);
 					}
 				}
-				
+
 				if(route.get("items") != null) {
 					JsonArray itemDetails = route.get("items").getAsJsonArray();
 					for (int i = 0; i < Math.min(items.size(), itemDetails.size()); i++) {
@@ -647,7 +647,7 @@ public class RouteAnalyzer {
 						currentRoute.addEntity(entity.getX(), entity.getY(), entity);
 					}
 				}
-				
+
 				if (route.get("events") != null) {
 					JsonObject eventDetails = route.get("events").getAsJsonObject();
 					for (String event : events.keySet()) {
@@ -690,9 +690,9 @@ public class RouteAnalyzer {
 								if(j.get("item") != null) {
 									for(JsonElement x : j.get("item").getAsJsonArray()) {
 										JsonObject currentItem = x.getAsJsonObject();
-										currentChange.addItem(Item.valueOf(currentItem.get("name").getAsString().toUpperCase()), 
+										currentChange.addItem(Item.valueOf(currentItem.get("name").getAsString().toUpperCase()),
 												currentItem.get("amount") != null ? currentItem.get("amount").getAsInt() : 1);
-										
+
 									}
 								}
 								currentChange.setCamPosition(new Point(j.get("cam_x") != null
@@ -711,11 +711,11 @@ public class RouteAnalyzer {
 						}
 					}
 				}
-				
+
 				for(int i = 0; i < signs.size(); i++) {
 					signs.get(i).setInformation("Wer stellt ein leeres Schild auf?");
 				}
-				
+
 				if(route.get("signs") != null) {
 					JsonArray signsData = route.get("signs").getAsJsonArray();
 					for(int i = 0; i < Math.min(signsData.size(), signs.size()); i++) {
@@ -732,17 +732,17 @@ public class RouteAnalyzer {
 				for (int i = 0; i < stones.size(); i++) {
 					currentRoute.addCharacter(stones.get(i));
 				}
-				
+
 				if(route.get("encounters") != null) {
 					JsonObject encounterDetails = route.get("encounters").getAsJsonObject();
 					if(encounterDetails.get("DEFAULT") != null) {
 						PokemonPool pool = new PokemonPool("DEFAULT");
 						for (JsonElement j : encounterDetails.get("DEFAULT").getAsJsonArray()) {
 							JsonObject currentEncounter = j.getAsJsonObject();
-							int ammount = currentEncounter.get("ammount") != null ? 
+							int ammount = currentEncounter.get("ammount") != null ?
 									currentEncounter.get("ammount").getAsInt() : 1;
 									for(int i = 0; i < ammount; i++) {
-										pool.addPokemon(currentEncounter.get("id").getAsInt(), 
+										pool.addPokemon(currentEncounter.get("id").getAsInt(),
 												currentEncounter.get("level").getAsShort());
 									}
 						}
@@ -752,10 +752,10 @@ public class RouteAnalyzer {
 						if(encounterDetails.get(s) != null) {
 							for (JsonElement j : encounterDetails.get(s).getAsJsonArray()) {
 								JsonObject currentEncounter = j.getAsJsonObject();
-								int ammount = currentEncounter.get("ammount") != null ? 
+								int ammount = currentEncounter.get("ammount") != null ?
 										currentEncounter.get("ammount").getAsInt() : 1;
 										for(int i = 0; i < ammount; i++) {
-											pool.addPokemon(currentEncounter.get("id").getAsInt(), 
+											pool.addPokemon(currentEncounter.get("id").getAsInt(),
 													currentEncounter.get("level").getAsShort());
 										}
 							}
@@ -769,7 +769,7 @@ public class RouteAnalyzer {
 				}
 //				warps.clear();
 			} catch (Exception e) {
-				System.out.println(currentRoute.getName());
+				System.out.println(currentRoute.getId());
 				e.printStackTrace();
 				continue;
 			}
@@ -802,24 +802,25 @@ public class RouteAnalyzer {
 					charData.add(currentCharacter.getSaveData());
 				}
 			}
-			
+
 			JsonArray routeData = new JsonArray();
-			
+
 			for(String s : loadedRoutes.keySet()) {
 				if(!loadedRoutes.get(s).equals(originalRoutes.get(s), false)) {
 					routeData.add(loadedRoutes.get(s).getSaveData(originalRoutes.get(s)));
 				}
 			}
-			
+
 			data.add("characters", charData);
 			data.add("routes", routeData);
 			data.add("cam", gController.getCurrentBackground().getCamera().getSaveData());
-			
+
 			for (char c : data.toString().toCharArray()) {
 				writer.write(c);
 				writer.flush();
 			}
 			writer.close();
+			SoundController.getInstance().playSound(SoundController.SAVE);
 			JOptionPane.showMessageDialog(null, "Das Spiel wurde erfolgreich gespeichert!", "Speichern ...", JOptionPane.INFORMATION_MESSAGE);
 			return true;
 		} catch (Exception e) {
@@ -834,7 +835,7 @@ public class RouteAnalyzer {
 			JsonParser parser = new JsonParser();
 
 			JsonObject data = parser.parse(reader).getAsJsonObject();
-			
+
 			JsonArray characters = data.get("characters").getAsJsonArray();
 			JsonArray routes = data.get("routes").getAsJsonArray();
 
@@ -842,7 +843,7 @@ public class RouteAnalyzer {
 			for(Route currentRoute : loadedRoutes.values()) {
 				currentRoute.clearCharacters();
 			}
-			
+
 			for(int i = 1; i < characters.size(); i++) {
 				JsonObject currentJson = characters.get(i).getAsJsonObject();
 				NPC character = new NPC();
@@ -850,24 +851,24 @@ public class RouteAnalyzer {
 					loadedRoutes.get(character.getCurrentRoute().getId()).addCharacter(character);
 				}
 			}
-			
+
 			for(JsonElement current : routes) {
 				JsonObject currentJson = current.getAsJsonObject();
 				Route route = this.getRouteById(currentJson.get("id").getAsString());
 				route.importSaveData(currentJson, originalRoutes.get(route.getId()));
 			}
-			
+
 			for(String s : loadedRoutes.keySet()) {
 				if(!loadedRoutes.get(s).equals(originalRoutes.get(s))) {
 					loadedRoutes.get(s).createMap();
 				}
 			}
-			
+
 			gController.setCurrentRoute(gController.getMainCharacter().getCurrentRoute());
 
-			
+
 			gController.getCurrentBackground().getCamera().importSaveData(data.get("cam").getAsJsonObject());
-			
+
 			return true;
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -882,7 +883,7 @@ public class RouteAnalyzer {
 	public Image getLogoByName(String logo) {
 		return this.logos.get(logo);
 	}
-	
+
 	public HashMap<Integer, HashSet<String>> getAllPokemonLocations() {
 		HashMap<Integer, HashSet<String>> allLocations = new HashMap<>();
 		for(int i = 1; i < 650; i++) {
@@ -906,7 +907,7 @@ public class RouteAnalyzer {
 			}
 		}
 		return allLocations;
-		
+
 	}
 
 }

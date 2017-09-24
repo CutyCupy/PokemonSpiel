@@ -13,6 +13,7 @@ import de.alexanderciupka.pokemon.gui.GameFrame;
 import de.alexanderciupka.pokemon.gui.TextLabel;
 import de.alexanderciupka.pokemon.gui.panels.ReportPanel;
 import de.alexanderciupka.pokemon.menu.MenuController;
+import de.alexanderciupka.pokemon.menu.SoundController;
 import de.alexanderciupka.pokemon.pokemon.Ailment;
 import de.alexanderciupka.pokemon.pokemon.Item;
 import de.alexanderciupka.pokemon.pokemon.Move;
@@ -75,6 +76,7 @@ public class GameController {
 					break;
 				}
 			} else {
+				result = true;
 				mainCharacter.setCurrentDirection(moveDirection);
 				try {
 					Thread.sleep(50);
@@ -179,7 +181,7 @@ public class GameController {
 
 	public void setCurrentRoute(Route newRoute) {
 		mainCharacter.setCurrentRoute(newRoute);
-		if(currentBackground == null) {
+		if (currentBackground == null) {
 			this.currentBackground = new Background(newRoute);
 		} else {
 			currentBackground.setCurrentRoute(newRoute);
@@ -197,9 +199,10 @@ public class GameController {
 	public void startFight(NPC enemy) {
 		gameFrame.addDialogue(enemy.getName() + ": " + enemy.getBeforeFightDialogue());
 		waitDialogue();
+		this.fighting = true;
+		SoundController.getInstance().playBattleSong(enemy.getName());
 		this.gameFrame.getBackgroundLabel().startFight(enemy.getLogo());
 		this.fight = new Fighting(enemy);
-		this.fighting = true;
 		gameFrame.startFight(fight.getPlayer(), fight.getEnemy());
 		gameFrame.getFightPanel().showMenu();
 	}
@@ -207,6 +210,8 @@ public class GameController {
 	public void startFight(Pokemon enemy) {
 		this.fight = new Fighting(enemy);
 		this.fighting = true;
+		SoundController.getInstance().playBattleSong(null);
+		getGameFrame().getBackgroundLabel().startEncounter();
 		gameFrame.startFight(fight.getPlayer(), fight.getEnemy());
 		gameFrame.getFightPanel().showMenu();
 	}
@@ -240,6 +245,7 @@ public class GameController {
 
 	public void escape() {
 		if (fight.canEscape()) {
+			SoundController.getInstance().playSound(SoundController.ESCAPE);
 			this.fight.won = false;
 			endFight();
 		}
@@ -254,17 +260,20 @@ public class GameController {
 				break;
 			default:
 				break;
-
 			}
 		}
-		if(this.fight.won) {
-			if(!gameFrame.getEvolutionPanel().getPokemon().isEmpty()) {
+		if (this.fight.won) {
+			if (!gameFrame.getEvolutionPanel().getPokemon().isEmpty()) {
 				gameFrame.setCurrentPanel(gameFrame.getEvolutionPanel());
-//				gameFrame.repaint();
 				gameFrame.getEvolutionPanel().start();
 			}
 		}
 		gameFrame.stopFight();
+		if (fight.getEnemyCharacter() != null && fight.getEnemyCharacter().getReward() != Item.NONE) {
+			this.getGameFrame()
+					.addDialogue(fight.getEnemyCharacter().getName() + ": " + "Nehme das als ein Geschenk von mir!");
+			this.getGameFrame().addDialogue("Du hast " + fight.getEnemyCharacter().getReward() + " erhalten!");
+		}
 	}
 
 	public boolean winFight() {
@@ -279,13 +288,9 @@ public class GameController {
 		if (fight.enemyDead()) {
 			this.fight.won = true;
 			if (fight.getEnemyCharacter() != null) {
-				this.getMainCharacter().addItem(fight.getEnemyCharacter().getReward());
 				gameFrame.getFightPanel().addText(fight.getEnemyCharacter().getOnDefeatDialogue());
-				String message = "Du erhälst " + fight.getEnemyCharacter().getMoney() + " Cupydollar";
-				if (fight.getEnemyCharacter().getReward() != Item.NONE) {
-					message += " und " + fight.getEnemyCharacter().getReward().getName();
-				}
-				this.getGameFrame().getFightPanel().addText(message + "!");
+				this.getGameFrame().getFightPanel()
+						.addText("Du erhälst " + fight.getEnemyCharacter().getMoney() + " Cupydollar!");
 				this.getMainCharacter().increaseMoney(fight.getEnemyCharacter().getMoney());
 				gameFrame.getFightPanel().pause();
 			}
@@ -331,14 +336,15 @@ public class GameController {
 	}
 
 	public void updateFight() {
+		System.out.println("update");
 		gameFrame.getFightPanel().setPlayer();
 	}
 
 	public void checkInteraction() {
 		Point interactionPoint = mainCharacter.getInteractionPoint();
-		if (!interactionPause && 
-				interactionPoint.y >= 0 && interactionPoint.y < mainCharacter.getCurrentRoute().getHeight() &&
-				interactionPoint.x >= 0 && interactionPoint.x < mainCharacter.getCurrentRoute().getWidth()) {
+		if (!interactionPause && interactionPoint.y >= 0
+				&& interactionPoint.y < mainCharacter.getCurrentRoute().getHeight() && interactionPoint.x >= 0
+				&& interactionPoint.x < mainCharacter.getCurrentRoute().getWidth()) {
 			setInteractionPause(true);
 			currentBackground.getCurrentRoute().getEntities()[interactionPoint.y][interactionPoint.x]
 					.onInteraction(mainCharacter);
@@ -365,7 +371,7 @@ public class GameController {
 	}
 
 	public void repaint() {
-//		gameFrame.paint(gameFrame.getGraphics());
+		// gameFrame.paint(gameFrame.getGraphics());
 	}
 
 	public void resetCharacterPositions() {
@@ -386,34 +392,41 @@ public class GameController {
 		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("winterhude"));
 		mainCharacter.setCurrentPosition(10, 4);
 
-		for (int i = 0; i < 5; i++) {
-			mainCharacter.addItem(Item.POKEBALL);
+		// for (int i = 0; i < 5; i++) {
+		mainCharacter.getItems().put(Item.POKEBALL, 5);
+		mainCharacter.getItems().put(Item.RARECANDY, 1);
+		// mainCharacter.addItem(Item.POKEBALL);
+		// }
+
+		for (Item i : Item.values()) {
+			// if(i.name().contains("BALL")) {
+			// mainCharacter.addItem(i);
+			mainCharacter.getItems().put(i, 5);
+			// mainCharacter.addItem(i);
+			// mainCharacter.addItem(i);
+			// }
 		}
 
-//		 for(Item i : Item.values()) {
-//			 if(i.name().contains("BALL")) {
-//				 mainCharacter.addItem(i);
-//				 mainCharacter.addItem(i);
-//				 mainCharacter.addItem(i);
-//				 mainCharacter.addItem(i);
-//			 }
-//		 }
-
-//		 mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("eigenes_zimmer"));
-//		 mainCharacter.setCurrentPosition(START.x, START.y);
+		// mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("eigenes_zimmer"));
+		// mainCharacter.setCurrentPosition(START.x, START.y);
 		currentBackground = new Background(mainCharacter.getCurrentRoute());
 		Pokemon player = new Pokemon(152);
 		player.setName("Mandarine");
-		player.getStats().generateStats((short) 5);
+		player.getStats().generateStats((short) 15);
 		mainCharacter.getTeam().addPokemon(player);
-		
-		
-//		for(int i = 0; i < 3; i++) {
-//			Pokemon foo = new Pokemon(new Random().nextInt(649) + 1);
-//			foo.getStats().generateStats((short) 100);
-//			mainCharacter.getPC().getBoxes()[0].addPokemon(foo, i * 10);
-//		}
-		
+
+		for (int i = 0; i < 5; i++) {
+			Pokemon p = new Pokemon(i + 1);
+			p.getStats().generateStats((short) 10);
+			mainCharacter.getTeam().addPokemon(p);
+		}
+
+		// for(int i = 0; i < 3; i++) {
+		// Pokemon foo = new Pokemon(new Random().nextInt(649) + 1);
+		// foo.getStats().generateStats((short) 100);
+		// mainCharacter.getPC().getBoxes()[0].addPokemon(foo, i * 10);
+		// }
+
 		// Random rng = new Random();
 		// for(int i = 0; i < 5; i++) {
 		// Pokemon current = new Pokemon(rng.nextInt(649) + 1);
@@ -423,15 +436,16 @@ public class GameController {
 		gameFrame = new GameFrame();
 
 		gameFrame.getBackgroundLabel().changeRoute(getCurrentBackground().getCurrentRoute());
-		
+
 		currentBackground.getCamera().setCharacter(getMainCharacter(), false);
-		
-//		SnowOverlay s = new SnowOverlay(gameFrame.getBackgroundLabel(), new Dimension(630, 630), SnowType.BLIZZARD);
-//		s.createOverlay();
-//		gameFrame.getBackgroundLabel().addOverlay(s);
-//		s.startAnimation();
-		
-//		information.getGender(300);
+
+		// SnowOverlay s = new SnowOverlay(gameFrame.getBackgroundLabel(), new
+		// Dimension(630, 630), SnowType.BLIZZARD);
+		// s.createOverlay();
+		// gameFrame.getBackgroundLabel().addOverlay(s);
+		// s.startAnimation();
+
+		// information.getGender(300);
 	}
 
 	public boolean loadGame(String path) {
@@ -476,6 +490,7 @@ public class GameController {
 			break;
 		case 1:
 			this.saveGame();
+		case 3:
 			gameFrame.setVisible(false);
 			this.mController.showMenu();
 			break;
@@ -492,8 +507,8 @@ public class GameController {
 		if (isFighting()) {
 			this.fight.setCurrentFightOption(FightOption.REPORT);
 		}
-		((ReportPanel) this.gameFrame.getReportPanel()).setPokemon(pokemon, others, this.gameFrame.getPokemonPanel());
 		this.gameFrame.setCurrentPanel(this.gameFrame.getReportPanel());
+		((ReportPanel) this.gameFrame.getReportPanel()).setPokemon(pokemon, others, this.gameFrame.getPokemonPanel());
 		this.repaint();
 	}
 

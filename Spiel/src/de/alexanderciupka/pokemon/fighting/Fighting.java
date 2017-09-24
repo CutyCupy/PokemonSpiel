@@ -7,6 +7,7 @@ import de.alexanderciupka.pokemon.characters.Character;
 import de.alexanderciupka.pokemon.characters.NPC;
 import de.alexanderciupka.pokemon.characters.Team;
 import de.alexanderciupka.pokemon.map.GameController;
+import de.alexanderciupka.pokemon.menu.SoundController;
 import de.alexanderciupka.pokemon.pokemon.Ailment;
 import de.alexanderciupka.pokemon.pokemon.DamageClass;
 import de.alexanderciupka.pokemon.pokemon.Move;
@@ -37,13 +38,13 @@ public class Fighting {
 		enemyTeam = new Team(null);
 		enemyTeam.addPokemon(pokemonTwo);
 		this.enemy = pokemonTwo;
-		player.startFight();
-		enemy.startFight();
 		rng = new Random();
 		currentFightOption = FightOption.FIGHT;
 		participants = new ArrayList<Pokemon>();
 		escape = true;
 		getStartPokemon();
+		player.startFight();
+		enemy.startFight();
 	}
 
 	public Fighting(Character enemyCharacter) {
@@ -53,13 +54,13 @@ public class Fighting {
 		this.player = playerTeam.getFirstFightPokemon();
 		enemyTeam = new Team(enemyCharacter.getTeam().getTeam(), enemyCharacter);
 		this.enemy = enemyTeam.getFirstFightPokemon();
-		player.startFight();
-		enemy.startFight();
 		rng = new Random();
 		currentFightOption = FightOption.FIGHT;
 		participants = new ArrayList<Pokemon>();
 		escape = false;
 		getStartPokemon();
+		player.startFight();
+		enemy.startFight();
 	}
 
 	private void getStartPokemon() {
@@ -180,8 +181,8 @@ public class Fighting {
 	public boolean playerHit(Move playerMove) {
 		double hitChance = playerMove.getAccuracy() * (player.getStats().getFightStats().get(Stat.ACCURACY)
 				/ enemy.getStats().getFightStats().get(Stat.EVASION));
+		playerMove.reducePP();
 		if (rng.nextFloat() * 100 < hitChance && playerMove.getCurrentPP() > 0) {
-			playerMove.reducePP();
 			damageCalculation(player, enemy, playerMove,
 					rng.nextInt(playerMove.getMaxHits() - playerMove.getMinHits() + 1) + playerMove.getMinHits());
 			gController.sleep(150);
@@ -193,8 +194,8 @@ public class Fighting {
 	public boolean enemyHit(Move enemyMove) {
 		double hitChance = enemyMove.getAccuracy() * (enemy.getStats().getFightStats().get(Stat.ACCURACY)
 				/ player.getStats().getFightStats().get(Stat.EVASION));
+		enemyMove.reducePP();
 		if (enemyMove.getAccuracy() > 100 || rng.nextFloat() * 100 < hitChance && enemyMove.getCurrentPP() > 0) {
-			enemyMove.reducePP();
 			damageCalculation(enemy, player, enemyMove,
 					rng.nextInt(enemyMove.getMaxHits() - enemyMove.getMinHits() + 1) + enemyMove.getMinHits());
 			return true;
@@ -226,6 +227,10 @@ public class Fighting {
 		Stats attackerStats = attacker.getStats();
 		Stats defenderStats = defense.getStats();
 		double weakness = Type.getEffectiveness(usedMove.getMoveType(), defense.getTypes());
+		if(weakness == Type.USELESS) {
+			gController.getGameFrame().getFightPanel().addText("Die Attacke zeigte keine Wirkung!", true);
+			return;
+		}
 		double damage = usedMove.getPower() * Type.calcSTAB(attacker, usedMove);
 		if (damage > 0 || usedMove.getDamageClass() != DamageClass.NO_DAMAGE) {
 			double def = 0;
@@ -242,7 +247,6 @@ public class Fighting {
 			default:
 				break;
 			}
-			System.out.println(ammount);
 			for (int i = 0; i < ammount; i++) {
 				int crit = 1;
 				float pCrit = rng.nextFloat();
@@ -265,7 +269,6 @@ public class Fighting {
 				}
 				damage = (weakness * ((attackerStats.getLevel() * (2 / 5.0) + 2) * damage * (atk / (50.0 * def)) + 2)
 						* crit * ((rng.nextFloat() * 0.15f + 0.85) / 1));
-				System.out.println(damage);
 				damage = Math.max(damage, 1);
 				defenderStats.loseHP((int) damage);
 				if (usedMove.getDrain() > 0) {
@@ -278,15 +281,20 @@ public class Fighting {
 							.addText(attacker.getName() + " hat sich durch den Rückstoß verletzt!", true);
 				}
 				damage = usedMove.getPower() * Type.calcSTAB(attacker, usedMove);
+				if (weakness >= Type.STRONG) {
+					SoundController.getInstance().playSound(SoundController.SUPER_EFFECTIVE);
+				} else if (weakness <= Type.WEAK && weakness != Type.USELESS) {
+					SoundController.getInstance().playSound(SoundController.NOT_EFFECTIVE);
+				} else if (weakness == 1.0) {
+					SoundController.getInstance().playSound(SoundController.NORMAL_EFFECTIVE);
+				}
 				gController.getGameFrame().getFightPanel().updatePanels();
 				gController.sleep(150);
 			}
-			if (weakness == Type.STRONG) {
+			if (weakness >= Type.STRONG) {
 				gController.getGameFrame().getFightPanel().addText("Die Attacke war sehr effektiv!", true);
-			} else if (weakness == Type.WEAK) {
+			} else if (weakness <= Type.WEAK) {
 				gController.getGameFrame().getFightPanel().addText("Die Attacke war nicht sehr effektiv!", true);
-			} else if (weakness == Type.USELESS) {
-				gController.getGameFrame().getFightPanel().addText("Die Attacke zeigte keine Wirkung!", true);
 			}
 		}
 
@@ -305,13 +313,16 @@ public class Fighting {
 
 	}
 
-	public boolean newPlayerPokemon(int index) {
+	public boolean canBeSendOut(int index) {
 		if (playerTeam.getTeam()[index].getStats().getCurrentHP() > 0 && index != 0) {
-			playerTeam.swapPokemon(0, index);
-			setPlayer();
 			return true;
 		}
 		return false;
+	}
+
+	public void sendOut(int index) {
+		playerTeam.swapPokemon(0, index);
+		setPlayer();
 	}
 
 	public Pokemon getPlayer() {

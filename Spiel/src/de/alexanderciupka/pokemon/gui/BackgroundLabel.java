@@ -9,6 +9,7 @@ import javax.swing.JLabel;
 import de.alexanderciupka.pokemon.characters.NPC;
 import de.alexanderciupka.pokemon.gui.overlay.CollapseOverlay;
 import de.alexanderciupka.pokemon.gui.overlay.DarkOverlay;
+import de.alexanderciupka.pokemon.gui.overlay.FogOverlay;
 import de.alexanderciupka.pokemon.gui.overlay.Form;
 import de.alexanderciupka.pokemon.gui.overlay.LogoOverlay;
 import de.alexanderciupka.pokemon.gui.overlay.Overlay;
@@ -32,6 +33,8 @@ public class BackgroundLabel extends JLabel {
 	private double oldX;
 	private double oldY;
 
+	private int waitFrames;
+
 	public BackgroundLabel(int x, int y) {
 		super();
 		gController = GameController.getInstance();
@@ -40,7 +43,10 @@ public class BackgroundLabel extends JLabel {
 
 	@Override
 	public void paint(Graphics g) {
+		long currentTime = System.currentTimeMillis();
 		g.clearRect(0, 0, this.getWidth(), this.getHeight());
+//		System.out.print("clear: " + (System.currentTimeMillis() - currentTime) + " - ");
+		currentTime = System.currentTimeMillis();
 
 		Camera c = gController.getCurrentBackground().getCamera();
 
@@ -86,12 +92,19 @@ public class BackgroundLabel extends JLabel {
 				(int) ((gController.getMainCharacter().getExactX() - x + xOffset) * GameFrame.GRID_SIZE),
 				(int) ((gController.getMainCharacter().getExactY() - y + yOffset) * GameFrame.GRID_SIZE), null);
 
+//		System.out.print("drawing: " + (System.currentTimeMillis() - currentTime) + " - ");
+		currentTime = System.currentTimeMillis();
+
 		for (int i = 0; i < overlays.size(); i++) {
 			if (overlays.get(i).isFinshed()) {
+				overlays.get(i).onRemove();
 				overlays.remove(i);
 				i--;
 			}
 		}
+
+//		System.out.print("overlaycheck: " + (System.currentTimeMillis() - currentTime));
+		currentTime = System.currentTimeMillis();
 
 		waitAccess();
 		for (Overlay o : overlays) {
@@ -101,32 +114,44 @@ public class BackgroundLabel extends JLabel {
 		}
 		this.overlayAccess = true;
 
+//		System.out.print("overlays: " + (System.currentTimeMillis() - currentTime) + " - ");
+		currentTime = System.currentTimeMillis();
+
 //		if (oldX != x + xOffset || oldY != y + yOffset) {
+		if(waitFrames <= 0) {
 			RainOverlay r = (RainOverlay) getOverlay(RainOverlay.class);
 			SnowOverlay s = (SnowOverlay) getOverlay(SnowOverlay.class);
+			double xo = (oldX - (x - xOffset)) * GameFrame.GRID_SIZE;
+			double yo = (oldY - (y - yOffset)) * GameFrame.GRID_SIZE;
 			if (r != null) {
 				for (Raindrop rd : r.getRaindrops()) {
-					rd.offset((oldX - (x + xOffset)) * GameFrame.GRID_SIZE,
-							(oldY - (y + yOffset)) * GameFrame.GRID_SIZE);
+					rd.offset(xo, yo);
 				}
 			}
 			if (s != null) {
 				for (Snowflake sf : s.getSnowflakes()) {
-					sf.offset((oldX - (x - xOffset)) * GameFrame.GRID_SIZE,
-							(oldY - (y - yOffset)) * GameFrame.GRID_SIZE);
+					sf.offset(xo, yo);
 				}
 			}
-//		}
+		} else {
+			waitFrames--;
+		}
+
+//		System.out.print("offset: " + (System.currentTimeMillis() - currentTime));
 
 		oldX = x - xOffset;
 		oldY = y - yOffset;
+
+//		System.out.println();
 	}
 
 	private void waitAccess() {
 		while (!this.overlayAccess) {
+			System.out.println("waiting");
 			try {
 				Thread.sleep(1);
 			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -166,11 +191,7 @@ public class BackgroundLabel extends JLabel {
 
 	public void wait(Overlay o) {
 		while (!o.isFinshed()) {
-			try {
-				Thread.sleep(5);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			Thread.yield();
 		}
 	}
 
@@ -189,6 +210,7 @@ public class BackgroundLabel extends JLabel {
 			for (int i = 0; i < this.overlays.size(); i++) {
 				if (this.overlays.get(i) instanceof RouteOverlay || this.overlays.get(i) instanceof DarkOverlay
 						|| this.overlays.get(i) instanceof RainOverlay || this.overlays.get(i) instanceof SnowOverlay) {
+					overlays.get(i).onRemove();
 					this.overlays.remove(i);
 					i--;
 				}
@@ -209,10 +231,18 @@ public class BackgroundLabel extends JLabel {
 				snow.startAnimation();
 				this.addOverlay(snow);
 			}
+			if(newRoute.getFog() != null) {
+				FogOverlay fog = new FogOverlay(this, this.getSize(), newRoute.getFog());
+				fog.createOverlay();
+				this.addOverlay(fog);
+			}
 			RouteOverlay r = new RouteOverlay(newRoute, this, this.getSize());
 			r.createOverlay();
 			this.addOverlay(r);
-			repaint();
+			waitFrames = 5;
+//			oldX = gController.getCurrentBackground().getCamera().getX();
+//			oldY = gController.getCurrentBackground().getCamera().getY();
+//			repaint();
 		}
 	}
 

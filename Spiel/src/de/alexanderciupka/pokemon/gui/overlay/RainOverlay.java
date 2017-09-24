@@ -18,6 +18,9 @@ public class RainOverlay extends Overlay {
 
 	private Random rng;
 	private int thunderFrames;
+	private FogOverlay fog;
+
+	private Thread animation;
 
 	public RainOverlay(BackgroundLabel parent, Dimension size, RainType type) {
 		super(parent, size);
@@ -27,12 +30,25 @@ public class RainOverlay extends Overlay {
 		for (int i = 0; i < type.getRaindrops(); i++) {
 			raindrops.add(new Raindrop());
 		}
+		switch(type) {
+		case HEAVY:
+		case STORM:
+			this.fog = new FogOverlay(parent, size, FogType.MIST);
+			this.fog.createOverlay();
+			break;
+		}
 	}
 
 	@Override
 	public void createOverlay() {
-		this.overlay = new BufferedImage(size.width, size.height, BufferedImage.TYPE_4BYTE_ABGR);
-		Graphics g = overlay.getGraphics();
+		BufferedImage temp = null;
+		if(this.fog != null) {
+			this.fog.createOverlay();
+			temp = this.fog.getOverlay();
+		} else {
+			temp = new BufferedImage(size.width, size.height, BufferedImage.TYPE_4BYTE_ABGR);
+		}
+		Graphics g = temp.getGraphics();
 		g.setColor(Raindrop.COLOR);
 		for (Raindrop r : raindrops) {
 			g.fillRect((int) r.getX(), (int) r.getY(), r.getSize().width, r.getSize().height);
@@ -50,45 +66,53 @@ public class RainOverlay extends Overlay {
 			} else {
 				alpha = Math.min((60 - thunderFrames) * 13, 200);
 			}
-			
+
 			alpha = Math.min(alpha, 200);
-			
+
 			g.setColor(new Color(255, 255, 255, alpha));
 			g.fillRect(0, 0, this.size.width, this.size.height);
 			thunderFrames--;
 		}
+		this.overlay = temp;
 		created = true;
 		while (GameController.getInstance().getGameFrame().getDialogue().isVisible()) {
 			try {
-				Thread.sleep(5);
-			} catch (InterruptedException e) {
+				Thread.yield();
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
-		parent.repaint();
 	}
 
 	public void startAnimation() {
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				while (true) {
-					for (Raindrop r : raindrops) {
-						r.fall();
-					}
-					createOverlay();
-					try {
-						Thread.sleep(5);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
+		if(animation == null) {
+			animation = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					while (true) {
+						for (Raindrop r : raindrops) {
+							r.fall();
+						}
+						createOverlay();
+						try {
+							Thread.sleep(5);
+						} catch (InterruptedException e) {
+							return;
+						}
 					}
 				}
-			}
-		}).start();
+			});
+			animation.start();
+		}
 	}
-	
+
 	public ArrayList<Raindrop> getRaindrops() {
 		return raindrops;
+	}
+
+	@Override
+	public void onRemove() {
+		animation.interrupt();
 	}
 
 }

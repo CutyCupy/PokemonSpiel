@@ -1,5 +1,6 @@
 package de.alexanderciupka.pokemon.map;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
@@ -14,6 +15,8 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 
 import de.alexanderciupka.pokemon.characters.NPC;
+import de.alexanderciupka.pokemon.gui.GameFrame;
+import de.alexanderciupka.pokemon.gui.overlay.FogType;
 import de.alexanderciupka.pokemon.gui.overlay.RainType;
 import de.alexanderciupka.pokemon.gui.overlay.SnowType;
 import de.alexanderciupka.pokemon.map.entities.Entity;
@@ -32,6 +35,7 @@ public class Route {
 	private BufferedImage map;
 	private RainType rain;
 	private SnowType snow;
+	private FogType fog;
 
 	private String terrainName;
 	private RouteType type;
@@ -169,7 +173,7 @@ public class Route {
 				}
 			}
 		}
-		// saveMap();
+		 saveMap();
 	}
 
 	public void updateMap(Point... updatePoint) {
@@ -254,29 +258,29 @@ public class Route {
 		try {
 			Graphics g = map.getGraphics();
 			g.setFont(g.getFont().deriveFont(20.0f));
-			// for (int y = 0; y < height; y++) {
-			// for (int x = 0; x < width; x++) {
-			// try {
-			// if(entities[y][x].hasCharacter()) {
-			// for (NPC npc : entities[y][x].getCharacters()) {
-			// g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() *
-			// 70),
-			// (int) (npc.getExactY() * 70), null);
-			// }
-			// }
-			// g.setColor(Color.black);
-			// g.drawRect(GameFrame.GRID_SIZE * x, GameFrame.GRID_SIZE * y,
-			// GameFrame.GRID_SIZE,
-			// GameFrame.GRID_SIZE);
-			// g.setColor(Color.red);
-			// g.drawString(x + "|" + y, x * GameFrame.GRID_SIZE + 10, (int) ((y
-			// + .5) * GameFrame.GRID_SIZE));
-			//
-			// } catch (Exception e) {
-			// e.printStackTrace();
-			// }
-			// }
-			// }
+			 for (int y = 0; y < height; y++) {
+			 for (int x = 0; x < width; x++) {
+			 try {
+			 if(entities[y][x].hasCharacter()) {
+			 for (NPC npc : entities[y][x].getCharacters()) {
+			 g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() *
+			 70),
+			 (int) (npc.getExactY() * 70), null);
+			 }
+			 }
+			 g.setColor(Color.black);
+			 g.drawRect(GameFrame.GRID_SIZE * x, GameFrame.GRID_SIZE * y,
+			 GameFrame.GRID_SIZE,
+			 GameFrame.GRID_SIZE);
+			 g.setColor(Color.red);
+			 g.drawString(x + "|" + y, x * GameFrame.GRID_SIZE + 10, (int) ((y
+			 + .5) * GameFrame.GRID_SIZE));
+
+			 } catch (Exception e) {
+			 e.printStackTrace();
+			 }
+			 }
+			 }
 			ImageIO.write(map, "png", new File("./res/routes/" + this.id + ".png"));
 			System.out.println(this.getName() + " wurde gespeichert!");
 		} catch (Exception e) {
@@ -399,7 +403,7 @@ public class Route {
 			} else {
 				this.setRain(route.getRain());
 			}
-			
+
 			JsonElement snow = saveData.get("snow");
 			if (snow != null && snow instanceof JsonNull) {
 				this.snow = null;
@@ -412,7 +416,20 @@ public class Route {
 			} else {
 				this.setSnow(route.getSnow());
 			}
-			
+
+
+			JsonElement fog = saveData.get("fog");
+			if (fog != null && fog instanceof JsonNull) {
+				this.fog = null;
+			} else if (fog != null) {
+				try {
+					this.setFog(FogType.valueOf(fog.getAsString().toUpperCase()));
+				} catch(Exception e) {
+					this.setFog(route.getFog());
+				}
+			} else {
+				this.setFog(route.getFog());
+			}
 
 			createEntities();
 			if (saveData.get("entities") != null) {
@@ -467,7 +484,18 @@ public class Route {
 		if (this.snow == null ? oldRoute.snow != null : !this.snow.equals(oldRoute.snow)) {
 			saveData.addProperty("snow", this.snow != null ? snow.name() : null);
 		}
+		if (this.fog == null ? oldRoute.fog != null : !this.fog.equals(oldRoute.fog)) {
+			saveData.addProperty("fog", this.fog != null ? fog.name() : null);
+		}
 		System.out.println(saveData);
 		return saveData;
+	}
+
+	public void setFog(FogType fog) {
+		this.fog = fog;
+	}
+
+	public FogType getFog() {
+		return this.fog;
 	}
 }

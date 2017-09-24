@@ -25,6 +25,7 @@ import javax.swing.KeyStroke;
 import de.alexanderciupka.pokemon.characters.Box;
 import de.alexanderciupka.pokemon.characters.Team;
 import de.alexanderciupka.pokemon.map.GameController;
+import de.alexanderciupka.pokemon.menu.SoundController;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
 
 public class BoxPanel extends JPanel {
@@ -46,7 +47,7 @@ public class BoxPanel extends JPanel {
 
 	private static final Color teamColor = new Color(153, 255, 255);
 	private static final Color boxColor = new Color(153, 255, 153);
-	
+
 	private GameController gController;
 
 	private Box next;
@@ -94,7 +95,7 @@ public class BoxPanel extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				if (parent.getPC().getOwner().getTeam().getAmmount() > 0) {
 					GameController.getInstance().getGameFrame().setCurrentPanel(GameController.getInstance().getGameFrame().getLastPanel());
-//					GameController.getInstance().getGameFrame().repaint();
+					SoundController.getInstance().playSound(SoundController.PC_SHUTDOWN);
 				} else {
 					JOptionPane.showMessageDialog(GameController.getInstance().getGameFrame(),
 							"Du brauchst mindestens ein Pokemon im Team!", "Team", JOptionPane.ERROR_MESSAGE, null);

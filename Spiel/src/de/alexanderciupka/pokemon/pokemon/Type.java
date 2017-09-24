@@ -11,15 +11,15 @@ public enum Type {
 	FAIRY("Fee"), PSYCHO("Psycho"), FLYING("Flug"),
 	BUG("Käfer"), POISON("Gift"), ELECTRIC("Elektro"),
 	ICE("Eis"), FIGHTING("Kampf"), DRAGON("Drache");
-	
+
 	private String name;
-	
+
 	public static final double STRONG = 2.0;
 	public static final double WEAK = 0.5;
 	public static final double USELESS = 0.0;
 	public static final double DEFAULT = 1.0;
 	public static final double STAB = 1.5;
-	
+
 	private static EnumMap<Type, Color> colorMapping = new EnumMap<Type, Color>(Type.class) {
 		private static final long serialVersionUID = 1L;
 		{
@@ -41,10 +41,10 @@ public enum Type {
 			put(Type.ICE, new Color(153, 255, 255));
 			put(Type.FIGHTING, new Color(255, 128, 0));
 			put(Type.DRAGON, new Color(0, 0, 102));
-			
+
 		}
 	};
-	
+
 	//TODO
 	private static EnumMap<Type, Type[]> strongMapping = new EnumMap<Type, Type[]>(Type.class) {
 		private static final long serialVersionUID = 1L;
@@ -69,7 +69,7 @@ public enum Type {
 			put(Type.DRAGON, new Type[]{DRAGON});
 		}
 	};
-	
+
 	private static EnumMap<Type, Type[]> weakMapping = new EnumMap<Type, Type[]>(Type.class) {
 		private static final long serialVersionUID = 1L;
 
@@ -94,7 +94,7 @@ public enum Type {
 			put(Type.DRAGON, new Type[]{STEEL});
 		}
 	};
-	
+
 
 	private static EnumMap<Type, Type[]> uselessMapping = new EnumMap<Type, Type[]>(Type.class) {
 		private static final long serialVersionUID = 1L;
@@ -120,11 +120,11 @@ public enum Type {
 			put(Type.DRAGON, new Type[]{FAIRY});
 		}
 	};
-	
+
 	private Type(String name) {
 		this.name = name;
 	}
-	
+
 	public static double getEffectiveness(Type attackType, Type[] targetTypes) {
 		double factor = DEFAULT;
 		for(Type curType : strongMapping.get(attackType)) {
@@ -144,13 +144,13 @@ public enum Type {
 		for(Type curType : uselessMapping.get(attackType)) {
 			for(Type curTarget : targetTypes) {
 				if(curType.equals(curTarget)) {
-					factor *= USELESS;
+					factor = USELESS;
 				}
 			}
 		}
 		return factor;
 	}
-	
+
 	@Override
 	public String toString() {
 		return name;
@@ -164,7 +164,7 @@ public enum Type {
 		}
 		return DEFAULT;
 	}
-	
+
 	public static Color getColor(Type type) {
 		if(colorMapping.get(type) != null) {
 			return colorMapping.get(type);
@@ -179,37 +179,37 @@ public enum Type {
 		case "grass":
 			return Type.GRASS;
 		case "fire":
-			return Type.FIRE;						
+			return Type.FIRE;
 		case "rock":
-			return Type.ROCK;	
+			return Type.ROCK;
 		case "ground":
-			return Type.GROUND;	
+			return Type.GROUND;
 		case "steel":
-			return Type.STEEL;	
+			return Type.STEEL;
 		case "ghost":
-			return Type.GHOST;	
+			return Type.GHOST;
 		case "dark":
-			return Type.DARK;	
+			return Type.DARK;
 		case "normal":
-			return Type.NORMAL;	
+			return Type.NORMAL;
 		case "fairy":
-			return Type.FAIRY;	
+			return Type.FAIRY;
 		case "psycho":
-			return Type.PSYCHO;	
+			return Type.PSYCHO;
 		case "flying":
-			return Type.FLYING;	
+			return Type.FLYING;
 		case "bug":
-			return Type.BUG;	
+			return Type.BUG;
 		case "poison":
-			return Type.POISON;	
+			return Type.POISON;
 		case "electric":
-			return Type.ELECTRIC;	
+			return Type.ELECTRIC;
 		case "ice":
-			return Type.ICE;	
+			return Type.ICE;
 		case "fighting":
-			return Type.FIGHTING;	
+			return Type.FIGHTING;
 		case "dragon":
-			return Type.DRAGON;	
+			return Type.DRAGON;
 		case "":
 			return null;
 		default:

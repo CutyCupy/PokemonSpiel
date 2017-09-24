@@ -8,15 +8,16 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import de.alexanderciupka.pokemon.map.Route;
+import de.alexanderciupka.pokemon.menu.SoundController;
 import de.alexanderciupka.pokemon.pokemon.Item;
 
 public class Player extends Character {
 
 	private ArrayList<String> routeHistory;
 	private PC pc;
-	
+
 	private int stepCounter;
-	
+
 	private int protectedSteps;
 
 	HashMap<Item, Integer> items;
@@ -37,16 +38,16 @@ public class Player extends Character {
 		routeHistory = new ArrayList<String>();
 
 		pc = new PC(this);
-		
+
 		init();
 	}
-	
+
 	private void init() {
 		for(Item i : Item.values()) {
 			this.items.put(i, 0);
 		}
 	}
-	
+
 	@Override
 	public void changePosition(Direction direction, boolean waiting) {
 		super.changePosition(direction, waiting);
@@ -55,9 +56,6 @@ public class Player extends Character {
 
 	@Override
 	public void setCurrentRoute(Route currentRoute) {
-		if(gController.getGameFrame() != null) {
-			gController.getGameFrame().getBackgroundLabel().changeRoute(currentRoute);
-		}
 		for(int i = 0; i < routeHistory.size(); i++) {
 			if(routeHistory.get(i).equals(currentRoute.getId())) {
 				routeHistory.remove(i);
@@ -66,6 +64,9 @@ public class Player extends Character {
 		}
 		routeHistory.add(currentRoute.getId());
 		super.setCurrentRoute(currentRoute);
+		if(gController.getGameFrame() != null) {
+			gController.getGameFrame().getBackgroundLabel().changeRoute(currentRoute);
+		}
 	}
 
 	public void warpToPokemonCenter() {
@@ -73,7 +74,7 @@ public class Player extends Character {
 		int x = 5;
 		int y = 4;
 		Direction d = Direction.DOWN;
-		
+
 		for(int centerIndex = this.routeHistory.size() - 1; centerIndex >= 0; centerIndex--) {
 			if(this.routeHistory.get(centerIndex).equals("pokemon_center")) {
 				routeID = this.routeHistory.get(centerIndex);
@@ -97,13 +98,14 @@ public class Player extends Character {
 	}
 
 	public void addItem(Item reward) {
+		SoundController.getInstance().playSound(SoundController.GET_ITEM);
 		this.items.put(reward, this.items.get(reward) + 1);
 	}
 
 	public boolean hasItem(Item i) {
 		return items.get(i) > 0 || true;
 	}
-	
+
 	public boolean removeItem(Item i) {
 		int value = this.items.get(i);
 		if(value > 0) {
@@ -114,7 +116,7 @@ public class Player extends Character {
 		}
 		return false;
 	}
-	
+
 	public HashMap<Item, Integer> getItems() {
 		return this.items;
 	}
@@ -122,7 +124,7 @@ public class Player extends Character {
 	public PC getPC() {
 		return this.pc;
 	}
-	
+
 	@Override
 	public JsonObject getSaveData() {
 		JsonObject saveData = super.getSaveData();
@@ -149,7 +151,7 @@ public class Player extends Character {
 		saveData.addProperty("step_counter", this.stepCounter);
 		return saveData;
 	}
-	
+
 	@Override
 	public boolean importSaveData(JsonObject saveData) {
 		if(super.importSaveData(saveData)) {
@@ -160,7 +162,7 @@ public class Player extends Character {
 			init();
 			for(JsonElement j : saveData.get("items").getAsJsonArray()) {
 				if(j.getAsJsonObject().get("amount") != null) {
-					this.items.put(Item.valueOf(j.getAsJsonObject().get("id").getAsString()), 
+					this.items.put(Item.valueOf(j.getAsJsonObject().get("id").getAsString()),
 							j.getAsJsonObject().get("amount").getAsInt());
 				}
 			}
@@ -216,7 +218,7 @@ public class Player extends Character {
 		gController.setInteractionPause(false);
 		return result;
 	}
-	
+
 	public void onMovement() {
 		this.stepCounter++;
 		if(this.stepCounter % 8 == 0) {
@@ -237,7 +239,7 @@ public class Player extends Character {
 			}
 		}
 	}
-	
+
 	public boolean isProtected() {
 		return this.protectedSteps > 0;
 	}

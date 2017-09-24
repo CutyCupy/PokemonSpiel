@@ -13,6 +13,7 @@ import com.google.gson.JsonObject;
 
 import de.alexanderciupka.pokemon.characters.Player;
 import de.alexanderciupka.pokemon.map.GameController;
+import de.alexanderciupka.pokemon.menu.SoundController;
 
 public class Pokemon {
 
@@ -42,10 +43,10 @@ public class Pokemon {
 	private int evolves;
 	private int happiness;
 	private String growthRate;
-	
+
 	private Gender gender;
 	private boolean shiny;
-	
+
 	private String uniqueID = UUID.randomUUID().toString();
 
 	public Pokemon(int id) {
@@ -393,7 +394,6 @@ public class Pokemon {
 	}
 
 	public boolean isCatched(Item usedBall) {
-		System.out.println(this.getCatchRate());
 		if (usedBall.equals(Item.MASTERBALL)) {
 			return true;
 		}
@@ -416,11 +416,8 @@ public class Pokemon {
 		if (getStats().getCurrentHP() / 4 > 0) {
 			F = Math.min(255, F / (getStats().getCurrentHP() / 4));
 		}
-		System.out.println("Z: " + Z);
-		System.out.println("F: " + F);
 		if(Z - ailmentValue <= getCatchRate()) {
 			int M = getStats().getRNG().nextInt(256);
-			System.out.println("M: " + M);
 			if (M <= F) {
 				return true;
 			}
@@ -492,6 +489,7 @@ public class Pokemon {
 					this.getStats().restoreHP((int) (this.getStats().getStats().get(Stat.HP) * (i.getValue() / 100.0)));
 					this.setAilment(Ailment.NONE);
 					gController.getGameFrame().addDialogue(this.getName() + " wurde wiederbelebt!");
+					SoundController.getInstance().playSound(SoundController.ITEM_HEAL);
 				}
 				break;
 			case FULLRESTORE:
@@ -500,6 +498,7 @@ public class Pokemon {
 					gController.getGameFrame().addDialogue(
 							this.getName() + " ist nicht mehr " + Ailment.getText(this.getAilment()) + "!");
 					this.setAilment(Ailment.NONE);
+					SoundController.getInstance().playSound(SoundController.ITEM_HEAL);
 				}
 			case POTION:
 			case SUPERPOTION:
@@ -507,6 +506,9 @@ public class Pokemon {
 			case FULLHEAL:
 				int restore = this.stats.restoreHP(i.getValue());
 				if (restore > 0) {
+					if(!effective) {
+						SoundController.getInstance().playSound(SoundController.ITEM_HEAL);
+					}
 					effective = true;
 					gController.getGameFrame().addDialogue(this.getName() + " wurde um " + restore + " KP geheilt!");
 				}
@@ -521,6 +523,7 @@ public class Pokemon {
 					gController.getGameFrame().addDialogue(
 							this.getName() + " ist nicht mehr " + Ailment.getText(this.getAilment()) + "!");
 					this.setAilment(Ailment.NONE);
+					SoundController.getInstance().playSound(SoundController.ITEM_HEAL);
 				}
 				break;
 			case HYPERHEAL:
@@ -529,6 +532,7 @@ public class Pokemon {
 					gController.getGameFrame().addDialogue(
 							this.getName() + " ist nicht mehr " + Ailment.getText(this.getAilment()) + "!");
 					this.setAilment(Ailment.NONE);
+					SoundController.getInstance().playSound(SoundController.ITEM_HEAL);
 				}
 			case RARECANDY:
 				if (this.getStats().levelUP()) {
@@ -560,7 +564,7 @@ public class Pokemon {
 				Stat s = i.getIncrease();
 				if(this.getStats().getEv(s) < 100) {
 					effective = true;
-					gController.getGameFrame().addDialogue(i.getName() + " hat " + s.getArticle() + " " + s.getText() + 
+					gController.getGameFrame().addDialogue(i.getName() + " hat " + s.getArticle() + " " + s.getText() +
 							" von " + this.getName() + " erhöht!");
 					this.stats.increaseEV(s, (short) 10);
 					if(getHappiness() < 100) {
@@ -570,6 +574,7 @@ public class Pokemon {
 					} else {
 						changeHappiness(2);
 					}
+					SoundController.getInstance().playSound(SoundController.ITEM_HEAL);
 				}
 				break;
 			default:
@@ -586,19 +591,19 @@ public class Pokemon {
 			throw new IllegalArgumentException("Given Item must be usable on Pokemon!");
 		}
 	}
-	
+
 	public int getEvolves() {
 		return this.evolves;
 	}
-	
+
 	public boolean isShiny() {
 		return this.shiny;
 	}
-	
+
 	public Gender getGender() {
 		return this.gender;
 	}
-	
+
 	public void setGender(Gender g) {
 		this.gender = g;
 	}
@@ -609,7 +614,6 @@ public class Pokemon {
 
 	public void changeHappiness(int value) {
 		this.happiness = Math.min(255, Math.max(0, this.happiness + value));
-		System.out.println(this.happiness);
 	}
 
 	public void startEvolution() {
@@ -630,7 +634,7 @@ public class Pokemon {
 		}
 		return false;
 	}
-	
+
 	public String getUniqueID() {
 		return uniqueID;
 	}

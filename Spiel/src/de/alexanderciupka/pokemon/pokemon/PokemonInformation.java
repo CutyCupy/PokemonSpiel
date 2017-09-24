@@ -178,7 +178,6 @@ public class PokemonInformation {
 				}
 				allMoves.add(currentMove);
 			}
-			System.out.println(foo);
 			for (JsonElement element : allPokemonData) {
 				int key = element.getAsJsonObject().get("id").getAsInt();
 				names.put(key,
@@ -268,7 +267,7 @@ public class PokemonInformation {
 
 	/**
 	 * Checks the evolution of a Pokemon - if used is Item.NONE -> LEVELUP
-	 * 
+	 *
 	 * @param p
 	 * @param used
 	 * @return
@@ -361,8 +360,6 @@ public class PokemonInformation {
 						String move = curJson.get("known_move").getAsString().toLowerCase();
 						boolean has = false;
 						for (Move m : p.getMoves()) {
-							System.out.println(m.getName());
-							System.out.println(move);
 							if (m != null && m.getName().toLowerCase().equals(move)) {
 								has = true;
 								break;
@@ -591,5 +588,5 @@ public class PokemonInformation {
 			return null;
 		}
 	}
-	
+
 }

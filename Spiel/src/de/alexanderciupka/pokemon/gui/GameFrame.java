@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
 import java.util.Stack;
 
 import javax.swing.AbstractAction;
@@ -26,6 +27,7 @@ import de.alexanderciupka.pokemon.gui.panels.PokemonPanel;
 import de.alexanderciupka.pokemon.gui.panels.ReportPanel;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.menu.MenuController;
+import de.alexanderciupka.pokemon.menu.SoundController;
 import de.alexanderciupka.pokemon.pokemon.Item;
 import de.alexanderciupka.pokemon.pokemon.Move;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
@@ -48,7 +50,7 @@ public class GameFrame extends JFrame {
 	private GameController gController;
 	private boolean active;
 	private JPanel currentPanel;
-	private static final long COOLDOWN = 0;
+	private static final long COOLDOWN = 250;
 
 	public static final int GRID_SIZE = 70;
 	public static final int FRAME_SIZE = GRID_SIZE * 9;
@@ -57,13 +59,17 @@ public class GameFrame extends JFrame {
 	private Stack<JPanel> panelHistory;
 	private boolean back;
 
+	private boolean fighting;
+
+	private ArrayList<Direction> directions;
+
 	@Override
 	public void repaint() {
-		// TODO Auto-generated method stub
 		super.repaint();
 	}
-	
+
 	public GameFrame() {
+		directions = new ArrayList<>();
 		currentDirection = Direction.NONE;
 		map = new JPanel(null);
 		setContentPane(map);
@@ -90,19 +96,23 @@ public class GameFrame extends JFrame {
 		evolution = new EvolutionPanel();
 		map.add(imageHolder);
 		map.add(dialogue);
-		
+
 		panelHistory = new Stack<JPanel>();
 
 
 		addActions();
 		this.paint(getGraphics());
-		
+
 
 	}
 
 	@Override
 	public void paint(Graphics g) {
 		if (!gController.isFighting()) {
+			if(this.fighting) {
+				System.err.println("foo");
+				this.fighting = false;
+			}
 			if (currentPanel != null) {
 				if (!currentPanel.equals(getContentPane())) {
 					setContentPane(currentPanel);
@@ -113,8 +123,9 @@ public class GameFrame extends JFrame {
 				}
 				map.repaint();
 			}
-		} else {
-			if (gController.getCurrentFightPanel() != null && 
+		} else if(this.fighting) {
+			System.out.println("fighting");
+			if (gController.getCurrentFightPanel() != null &&
 					!gController.getCurrentFightPanel().equals(getContentPane())) {
 				setContentPane(gController.getCurrentFightPanel());
 			}
@@ -129,7 +140,7 @@ public class GameFrame extends JFrame {
 		}
 		super.setContentPane(contentPane);
 	}
-	
+
 	public JPanel getCurrentPanel() {
 		return this.currentPanel;
 	}
@@ -138,6 +149,7 @@ public class GameFrame extends JFrame {
 		fight = new FightPanel(player, enemy);
 		fight.setBorder(new EmptyBorder(5, 5, 5, 5));
 		fight.setLayout(null);
+		this.fighting = true;
 		pokemon.update();
 //		repaint();
 		if (!gController.getFight().canEscape()) {
@@ -207,9 +219,9 @@ public class GameFrame extends JFrame {
 
 	public void setCurrentPanel(JPanel currentPanel) {
 		if(!this.back && (currentPanel != null || this.currentPanel != null) &&
-				((currentPanel != null && !currentPanel.getClass().isInstance(this.currentPanel)) || 
+				((currentPanel != null && !currentPanel.getClass().isInstance(this.currentPanel)) ||
 						(this.currentPanel != null && !this.currentPanel.getClass().isInstance(currentPanel)))) {
-			
+
 			this.panelHistory.push(this.currentPanel);
 		}
 		this.currentPanel = currentPanel;
@@ -226,7 +238,6 @@ public class GameFrame extends JFrame {
 	private void addActions() {
 
 		new Thread(new Runnable() {
-
 			@Override
 			public void run() {
 				while (true) {
@@ -234,13 +245,14 @@ public class GameFrame extends JFrame {
 						if (!active) {
 							active = true;
 							if (currentDirection != Direction.NONE) {
-								gController.move(currentDirection);
-								try {
-									Thread.sleep(COOLDOWN);
-								} catch (InterruptedException e) {
-									e.printStackTrace();
+								if(!gController.move(currentDirection)) {
+									SoundController.getInstance().playSound(SoundController.BUMP);
+									try {
+										Thread.sleep(COOLDOWN);
+									} catch (InterruptedException e) {
+										e.printStackTrace();
+									}
 								}
-//								repaint();
 							}
 							active = false;
 						}
@@ -256,6 +268,8 @@ public class GameFrame extends JFrame {
 			}
 
 		}).start();
+
+		//TODO: Code new movement with unique stopup, stopdown, stopleft and stopright action
 
 		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("W"), "up");
 		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("UP"), "up");
@@ -384,15 +398,15 @@ public class GameFrame extends JFrame {
 				}
 			}
 		});
-		
+
 		pokemon.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ENTER"), "enter");
 		pokemon.getActionMap().put("enter", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				dialogue.setActive();
 			}
-		}); 	
-		
+		});
+
 		evolution.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("SPACE"), "space");
 		evolution.getActionMap().put("space", new AbstractAction() {
 			@Override
@@ -422,7 +436,7 @@ public class GameFrame extends JFrame {
 				}
 			}
 		});
-		
+
 		inventory.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("SPACE"), "space");
 		inventory.getActionMap().put("space", new AbstractAction() {
 			@Override
@@ -504,7 +518,7 @@ public class GameFrame extends JFrame {
 				gController.getMainCharacter().ignoreCollisions = !gController.getMainCharacter().ignoreCollisions;
 			}
 		});
-		
+
 	}
 
 	public void displayPC(Player owner) {
@@ -512,6 +526,7 @@ public class GameFrame extends JFrame {
 			this.pc = new PCPanel();
 		}
 		this.pc.setPC(owner.getPC());
+		SoundController.getInstance().playSound(SoundController.PC_BOOT, true);
 		this.setCurrentPanel(this.pc.getContentPane());
 //		this.repaint();
 	}
@@ -527,15 +542,15 @@ public class GameFrame extends JFrame {
 	public InventoryPanel getInventoryPanel() {
 		return this.inventory;
 	}
-	
+
 	public EvolutionPanel getEvolutionPanel() {
 		return this.evolution;
 	}
-	
+
 	public JPanel getLastPanel() {
 		return getLastPanel(false);
 	}
-	
+
 	public JPanel getLastPanel(boolean withEvolution) {
 		this.back = true;
 		if(panelHistory.isEmpty()) {

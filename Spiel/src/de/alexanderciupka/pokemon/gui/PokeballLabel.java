@@ -11,25 +11,26 @@ import javax.swing.JLabel;
 
 import de.alexanderciupka.pokemon.gui.panels.FightPanel;
 import de.alexanderciupka.pokemon.map.GameController;
+import de.alexanderciupka.pokemon.menu.SoundController;
 import de.alexanderciupka.pokemon.pokemon.Item;
 
 public class PokeballLabel extends JLabel {
-	
+
 	private Item ball;
 	private BufferedImage image;
 	private GameController gController;
-	
+
 	private static HashMap<Integer, Integer> coordinates;
-	
+
 	private int x;
 	private int y;
-	
+
 	private double degree;
-	
+
 	public PokeballLabel() {
 		gController = GameController.getInstance();
 		setBounds(0, 0, GameFrame.FRAME_SIZE, GameFrame.FRAME_SIZE);
-		
+
 		if(coordinates == null) {
 			coordinates = new HashMap<Integer, Integer>();
 			for (int x = 150; x <= 475; x++) {
@@ -37,16 +38,16 @@ public class PokeballLabel extends JLabel {
 			}
 		}
 	}
-	
+
 	public void setBall(Item ball) {
 		this.ball = ball;
 		this.image = FightPanel.pokeballImages.get(this.ball);
 	}
-	
+
 	@Override
 	protected void paintComponent(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g;
-		
+
 		double rotationRequired = Math.toRadians(degree);
 		double locationX = image.getWidth() / 2;
 		double locationY = image.getHeight() / 2;
@@ -55,14 +56,14 @@ public class PokeballLabel extends JLabel {
 
 		g2d.drawImage(op.filter(image, null), x - image.getWidth() / 2, y - image.getHeight() / 2, null);
 	}
-	
+
 	public void throwBall() {
 		this.degree = 0;
 		for (int x = 150; x <= 475; x++) {
 			this.x = x;
 			this.y = coordinates.get(x);
 			try {
-				Thread.sleep(4);
+				Thread.sleep(2);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -79,23 +80,24 @@ public class PokeballLabel extends JLabel {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void drop() {
 		this.image = FightPanel.pokeballImages.get(this.ball);
 		for(int bounce = 50; bounce > 0; bounce /= 2) {
 			for(int y = 0; y < bounce; y++) {
 				this.y += 1;
 				try {
-					Thread.sleep(4);
+					Thread.sleep(7);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 				repaint();
 			}
+			SoundController.getInstance().playSound(SoundController.POKEBALL_DROP, false);
 			for(int y = 0; y < bounce / 2; y++) {
 				this.y -= 1;
 				try {
-					Thread.sleep(4);
+					Thread.sleep(7);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -103,7 +105,7 @@ public class PokeballLabel extends JLabel {
 			}
 		}
 	}
-	
+
 	public void shake(int times)  {
 		for(int shakes = 0; shakes < Math.min(3, times); shakes++) {
 			try {
@@ -141,11 +143,12 @@ public class PokeballLabel extends JLabel {
 		} else {
 			this.image = FightPanel.openPokeballImages.get(this.ball);
 			repaint();
+			SoundController.getInstance().playSound(SoundController.POKEBALL_OUT, false);
 		}
 	}
-	
+
 	private int nextPokeballCoordinate(int x) {
 		return (int) (0.0038825965 * Math.pow(x, 2) - 2.5518694434 * x + 516.1271465108);
 	}
-	
+
 }
