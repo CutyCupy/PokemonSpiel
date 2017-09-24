@@ -62,15 +62,15 @@ public class NPC extends Character {
 //		gController.sleep(50);
 //		gController.repaint();
 	}
-	
+
 	public void setBeforeFightDialogue(String dialog) {
 		this.beforeFight = dialog;
 	}
-	
+
 	public void setNoFightDialogue(String dialog) {
 		this.noFight = dialog;
 	}
-	
+
 	public void setAfterFightDialog(String dialog) {
 		this.onDefeat = dialog;
 	}
@@ -211,7 +211,7 @@ public class NPC extends Character {
 	public Item getReward() {
 		return reward;
 	}
-	
+
 	public String getLogo() {
 		return logo;
 	}
@@ -219,7 +219,7 @@ public class NPC extends Character {
 	public void setLogo(String logo) {
 		this.logo = logo;
 	}
-	
+
 	@Override
 	public JsonObject getSaveData() {
 		JsonObject saveData = super.getSaveData();
@@ -229,7 +229,7 @@ public class NPC extends Character {
 		saveData.addProperty("reward", this.reward != null ? this.reward.name() : null);
 		return saveData;
 	}
-	
+
 	@Override
 	public boolean importSaveData(JsonObject saveData) {
 		if(super.importSaveData(saveData)) {
@@ -239,7 +239,7 @@ public class NPC extends Character {
 			this.reward = saveData.get("reward") instanceof JsonNull ? null : Item.valueOf(saveData.get("reward").getAsString());
 			return true;
 		}
-		
+
 		return false;
 	}
 }

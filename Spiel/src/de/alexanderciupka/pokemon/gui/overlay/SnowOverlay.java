@@ -63,7 +63,6 @@ public class SnowOverlay extends Overlay {
 						for (Snowflake s : snowflakes) {
 							s.fall();
 						}
-						System.out.println(Thread.currentThread().getName());
 						createOverlay();
 						try {
 							Thread.sleep(5);

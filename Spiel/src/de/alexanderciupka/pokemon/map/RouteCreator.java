@@ -54,29 +54,29 @@ public class RouteCreator extends JFrame {
 
 	private RouteAnalyzer routeAnalyzer;
 
-	private static final String[][] TYPES = {{"Out of Bounds", "OOB"}, {"Bett", "bed"}, {"Leiter hoch", "WLU"}, {"Leiter runter", "WLD"}, 
-			{"Treppe hoch links", "WSUL"}, {"Treppe hoch rechts", "WSUR"}, {"Treppe runter links", "WSDL"}, {"Treppe runter rechts", "WSDR"}, 
-			{"St�rke", "ST"}, {"Zerschneider", "TC"}, {"Wand", "MW"}, {"Fenster", "MWW"}, {"Fenster+Gardine", "MWWC"}, {"Free", ""}, {"Tree", "T"}, {"Snow Tree", "TS"}, 
-			{"Bookshelf", "BS"}, {"TV", "TV"}, {"SP�LE", "spuele"}, {"Laptop", "LAPTOP"}, {"Table", "TA"},{"Kaffee", "KAFFEE"}, {"Chair UP", "STUHLU"}, 
-			{"Chair DOWN", "STUHLD"}, {"Chair LEFT", "STUHLL"}, {"Chair RIGHT", "STUHLR"}, {"Settle UP", "SETTLEU"}, {"Settle DOWN", "SETTLED"}, 
-			{"Settle LEFT", "SETTLEL"}, {"Settle RIGHT", "SETTLER"}, {"Grass", "G"}, {"Grassy", "GR"}, {"Snow", "SN"}, {"Mauer", "M"}, {"Pokemon Center", "P"}, 
-			{"House Small", "HS"}, {"Gym", "A"}, {"Warp", "W"}, {"Character", "C"}, {"See","S"}, {"Sand", "SA"}, {"Bridge", "B"}, {"PC", "BC"}, 
-			{"JoyHealing", "JH"}, {"MoveDown", "MD"}, {"MoveUp", "MU"}, {"MoveLeft", "ML"}, {"MoveRight", "MR"}, {"MoveStop", "MS"}, {"Höhle vorne", "HWF"}, 
-			{"Höhle hinten", "HWB"}, {"Höhle rechts", "HWR"}, {"Höhle links", "HWL"}, {"Höhle Eingang", "WHE"}, {"Höhle linksvorne außen", "HWLF"}, 
-			{"Höhle linkshinten außen", "HWLB"}, {"Höhle rechtshinten außen", "HWRB"}, {"Höhle rechtsvorne außen", "HWRF"}, {"Höhle Mitte", "HM"},  
-			{"Höhle linksvorne innen", "HWLFI"}, {"Höhle linkshinten innen", "HWLBI"}, {"Höhle rechtshinten innen", "HWRBI"}, 
+	private static final String[][] TYPES = {{"Out of Bounds", "OOB"}, {"Bett", "bed"}, {"Leiter hoch", "WLU"}, {"Leiter runter", "WLD"},
+			{"Treppe hoch links", "WSUL"}, {"Treppe hoch rechts", "WSUR"}, {"Treppe runter links", "WSDL"}, {"Treppe runter rechts", "WSDR"},
+			{"St�rke", "ST"}, {"Zerschneider", "TC"}, {"Wand", "MW"}, {"Fenster", "MWW"}, {"Fenster+Gardine", "MWWC"}, {"Free", ""}, {"Tree", "T"}, {"Snow Tree", "TS"},
+			{"Bookshelf", "BS"}, {"TV", "TV"}, {"SP�LE", "spuele"}, {"Laptop", "LAPTOP"}, {"Table", "TA"},{"Kaffee", "KAFFEE"}, {"Chair UP", "STUHLU"},
+			{"Chair DOWN", "STUHLD"}, {"Chair LEFT", "STUHLL"}, {"Chair RIGHT", "STUHLR"}, {"Settle UP", "SETTLEU"}, {"Settle DOWN", "SETTLED"},
+			{"Settle LEFT", "SETTLEL"}, {"Settle RIGHT", "SETTLER"}, {"Grass", "G"}, {"Grassy", "GR"}, {"Snow", "SN"}, {"Mauer", "M"}, {"Pokemon Center", "P"},
+			{"House Small", "HS"}, {"Gym", "A"}, {"Warp", "W"}, {"Character", "C"}, {"See","S"}, {"Sand", "SA"}, {"Bridge", "B"}, {"PC", "BC"},
+			{"JoyHealing", "JH"}, {"MoveDown", "MD"}, {"MoveUp", "MU"}, {"MoveLeft", "ML"}, {"MoveRight", "MR"}, {"MoveStop", "MS"}, {"Höhle vorne", "HWF"},
+			{"Höhle hinten", "HWB"}, {"Höhle rechts", "HWR"}, {"Höhle links", "HWL"}, {"Höhle Eingang", "WHE"}, {"Höhle linksvorne außen", "HWLF"},
+			{"Höhle linkshinten außen", "HWLB"}, {"Höhle rechtshinten außen", "HWRB"}, {"Höhle rechtsvorne außen", "HWRF"}, {"Höhle Mitte", "HM"},
+			{"Höhle linksvorne innen", "HWLFI"}, {"Höhle linkshinten innen", "HWLBI"}, {"Höhle rechtshinten innen", "HWRBI"},
 			{"Höhle rechtsvorne innen", "HWRFI"}, {"RockBig", "RB"}, {"RockGroup", "RG"}, {"Rock", "R"}};
-	
+
 	private static final int SIZE = 25;
 
 	public RouteCreator() {
 		int width = Integer.parseInt(JOptionPane.showInputDialog("Breite (max: 65): "));
 		int height = Integer.parseInt(JOptionPane.showInputDialog("Höhe (max: 40): "));
 		String name = JOptionPane.showInputDialog("Name der Route: ");
-		
+
 		this.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-		
-		
+
+
 		routeAnalyzer = GameController.getInstance().getRouteAnalyzer();
 		x = 0;
 		y = 0;
@@ -155,9 +155,9 @@ public class RouteCreator extends JFrame {
 		add(terrains);
 		add(save);
 		entities.setBounds(0, 0, 220, terrains.getY());
-		
+
 		buttons[0].setSelected(true);
-		
+
 		JScrollPane pane = new JScrollPane();
 		pane.setBounds(1700, 0, 200, terrains.getY());
 		pane.setViewportView(entities);
@@ -300,7 +300,11 @@ public class RouteCreator extends JFrame {
 						warpCounter++;
 					}
 					else if(x != 0 || y != 0) {
-						labels[yStart + y][xStart + x].setText("M");
+						if(y == 0) {
+							labels[yStart + y][xStart + x].setText("F");
+						} else {
+							labels[yStart + y][xStart + x].setText("M");
+						}
 					} else {
 						System.out.println("ELSE: " + x + ", " + y);
 					}
@@ -338,7 +342,7 @@ public class RouteCreator extends JFrame {
 			}
 			JsonArray characterDetails = new JsonArray();
 			for(String s : characters.keySet()) {
-				
+
 //			for(int i = 0; i < characters.size(); i++) {
 				JsonObject currentCharacter = new JsonObject();
 				currentCharacter.addProperty("id", s);
@@ -368,7 +372,7 @@ public class RouteCreator extends JFrame {
 		routeAnalyzer.readRoute(newRoute);
 //		routeAnalyzer.getRouteById(routeID).saveMap();
 	}
-	
+
 	private void floodFill(String text, boolean[][] visited, int x, int y, int startX, int startY) {
 		visited[x][y] = true;
 		if(x > 0 && !visited[x-1][y] && this.labels[y][x-1].getText().equals(this.labels[startY][startX].getText())) {

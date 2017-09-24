@@ -338,19 +338,19 @@ public class RouteAnalyzer {
 										currentRoute.getTerrainName());
 								break;
 							case "P": // Center
-								currentEntity = new Entity(currentRoute, false, "house_center", 0,
+								currentEntity = new Entity(currentRoute, true, "house_center", 0,
 										currentRoute.getTerrainName());
 								break;
 							case "HS":
-								currentEntity = new Entity(currentRoute, false, "house_small", 0,
+								currentEntity = new Entity(currentRoute, true, "house_small", 0,
 										currentRoute.getTerrainName());
 								break;
 							case "HL":
-								currentEntity = new Entity(currentRoute, false, "house_large", 0,
+								currentEntity = new Entity(currentRoute, true, "house_large", 0,
 										currentRoute.getTerrainName());
 								break;
 							case "A":
-								currentEntity = new Entity(currentRoute, false, "house_gym", 0,
+								currentEntity = new Entity(currentRoute, true, "house_gym", 0,
 										currentRoute.getTerrainName());
 								break;
 							case "SA": // Sand

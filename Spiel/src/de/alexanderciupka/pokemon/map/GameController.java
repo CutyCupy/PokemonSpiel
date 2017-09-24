@@ -180,7 +180,6 @@ public class GameController {
 	}
 
 	public void setCurrentRoute(Route newRoute) {
-		mainCharacter.setCurrentRoute(newRoute);
 		if (currentBackground == null) {
 			this.currentBackground = new Background(newRoute);
 		} else {
@@ -394,32 +393,32 @@ public class GameController {
 
 		// for (int i = 0; i < 5; i++) {
 		mainCharacter.getItems().put(Item.POKEBALL, 5);
-		mainCharacter.getItems().put(Item.RARECANDY, 1);
+//		mainCharacter.getItems().put(Item.RARECANDY, 1);
 		// mainCharacter.addItem(Item.POKEBALL);
 		// }
 
-		for (Item i : Item.values()) {
+//		for (Item i : Item.values()) {
 			// if(i.name().contains("BALL")) {
 			// mainCharacter.addItem(i);
-			mainCharacter.getItems().put(i, 5);
+//			mainCharacter.getItems().put(i, 5);
 			// mainCharacter.addItem(i);
-			// mainCharacter.addItem(i);
-			// }
-		}
+//			 mainCharacter.addItem(i);
+//			 }
+//		}
 
-		// mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("eigenes_zimmer"));
-		// mainCharacter.setCurrentPosition(START.x, START.y);
+//		 mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("eigenes_zimmer"));
+//		 mainCharacter.setCurrentPosition(START.x, START.y);
 		currentBackground = new Background(mainCharacter.getCurrentRoute());
 		Pokemon player = new Pokemon(152);
 		player.setName("Mandarine");
-		player.getStats().generateStats((short) 15);
+		player.getStats().generateStats((short) 5);
 		mainCharacter.getTeam().addPokemon(player);
 
-		for (int i = 0; i < 5; i++) {
-			Pokemon p = new Pokemon(i + 1);
-			p.getStats().generateStats((short) 10);
-			mainCharacter.getTeam().addPokemon(p);
-		}
+//		for (int i = 0; i < 5; i++) {
+//			Pokemon p = new Pokemon(i + 1);
+//			p.getStats().generateStats((short) 10);
+//			mainCharacter.getTeam().addPokemon(p);
+//		}
 
 		// for(int i = 0; i < 3; i++) {
 		// Pokemon foo = new Pokemon(new Random().nextInt(649) + 1);

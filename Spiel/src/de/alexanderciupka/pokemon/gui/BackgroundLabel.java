@@ -88,9 +88,9 @@ public class BackgroundLabel extends JLabel {
 				g.drawImage(npc.getCharacterImage(), npcX, npcY, null);
 			}
 		}
-		g.drawImage(gController.getMainCharacter().getCharacterImage(),
-				(int) ((gController.getMainCharacter().getExactX() - x + xOffset) * GameFrame.GRID_SIZE),
-				(int) ((gController.getMainCharacter().getExactY() - y + yOffset) * GameFrame.GRID_SIZE), null);
+//		g.drawImage(gController.getMainCharacter().getCharacterImage(),
+//				(int) ((gController.getMainCharacter().getExactX() - x + xOffset) * GameFrame.GRID_SIZE),
+//				(int) ((gController.getMainCharacter().getExactY() - y + yOffset) * GameFrame.GRID_SIZE), null);
 
 //		System.out.print("drawing: " + (System.currentTimeMillis() - currentTime) + " - ");
 		currentTime = System.currentTimeMillis();

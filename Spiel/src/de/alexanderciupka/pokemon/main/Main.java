@@ -91,7 +91,9 @@ public class Main {
 				File[] songs = new File(Main.class.getResource("/music/songs/").getFile()).listFiles();
 				while (true) {
 					if (!sc.isSongRunning()) {
-						sc.playSong(songs[rng.nextInt(songs.length)]);
+						File song = songs[rng.nextInt(songs.length)];
+						System.out.println(song.getName());
+						sc.playSong(song);
 					}
 					Thread.yield();
 				}

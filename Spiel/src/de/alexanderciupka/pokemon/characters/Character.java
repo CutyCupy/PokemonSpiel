@@ -55,7 +55,7 @@ public class Character implements Runnable {
 	private HashMap<String, Image[]> sprites;
 	private String spriteName;
 	private int currentWalking;
-	
+
 	public boolean ignoreCollisions;
 
 	// TODO: Add History to check where the last Pokemon center was.
@@ -89,7 +89,15 @@ public class Character implements Runnable {
 
 	public void setCurrentRoute(Route currentRoute) {
 		this.oldPosition = new Point(this.currentPosition);
+		String oldRoute = currentRoute.getName();
+		if(this.currentRoute != null) {
+			oldRoute =  this.currentRoute.getId();
+		}
 		this.currentRoute = currentRoute;
+		Route old = this.gController.getRouteAnalyzer().getRouteById(oldRoute);
+		if(old != null) {
+			old.updateMap(this.currentPosition);
+		}
 	}
 
 	public Route getCurrentRoute() {
@@ -97,11 +105,7 @@ public class Character implements Runnable {
 	}
 
 	public void setCurrentPosition(int x, int y) {
-		this.oldPosition.setLocation(currentPosition.x, currentPosition.y);
-		currentPosition.setLocation(x, y);
-		originalPosition.setLocation(x, y);
-		this.exactX = x;
-		this.exactY = y;
+		setCurrentPosition(new Point(x, y));
 	}
 
 	public void setCurrentPosition(Point newPosition) {
@@ -110,6 +114,9 @@ public class Character implements Runnable {
 		originalPosition.setLocation(newPosition);
 		this.exactX = newPosition.x;
 		this.exactY = newPosition.y;
+		if(this.currentRoute != null) {
+			this.currentRoute.updateMap(this.currentPosition);
+		}
 	}
 
 	public Point getCurrentPosition() {
@@ -155,6 +162,7 @@ public class Character implements Runnable {
 				this.moving = true;
 			}
 			setSurfing(this.getCurrentRoute().getEntities()[currentPosition.y][currentPosition.x].isWater());
+			this.currentRoute.updateMap(this.currentPosition);
 		}
 	}
 
@@ -195,7 +203,7 @@ public class Character implements Runnable {
 		}
 		return null;
 	}
-	
+
 	public void setCharacterImage(String characterImageName) {
 		switch(currentDirection) {
 		case DOWN:
@@ -288,6 +296,9 @@ public class Character implements Runnable {
 	public void setCurrentDirection(Direction direction) {
 		if (controllable) {
 			this.currentDirection = direction;
+			if(this.currentRoute != null) {
+				this.currentRoute.updateMap(this.currentPosition);
+			}
 		}
 	}
 
@@ -468,9 +479,9 @@ public class Character implements Runnable {
 			} else if (this.isControllable() && i % 2 == 0 && i != 0) {
 				currentWalking = (currentWalking + 1) % 4;
 			}
-			if (this instanceof NPC) {
+//			if (this instanceof NPC) {
 				currentRoute.updateMap(oldPosition, currentPosition);
-			}
+//			}
 //			gController.getGameFrame().repaint();
 			try {
 				if(i != 9) {
@@ -653,7 +664,7 @@ public class Character implements Runnable {
 	public boolean equals(Object obj) {
 		if(obj instanceof Character) {
 			Character c = (Character) obj;
-			return this.getID().equals(c.getID()) && this.getName().equals(c.getName()) && this.getCurrentPosition().equals(c.getCurrentPosition()) 
+			return this.getID().equals(c.getID()) && this.getName().equals(c.getName()) && this.getCurrentPosition().equals(c.getCurrentPosition())
 					&& this.getCurrentRoute().getId().equals(c.getCurrentRoute().getId());
 		}
 		return false;

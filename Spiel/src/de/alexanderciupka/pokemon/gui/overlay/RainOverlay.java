@@ -9,6 +9,7 @@ import java.util.Random;
 
 import de.alexanderciupka.pokemon.gui.BackgroundLabel;
 import de.alexanderciupka.pokemon.map.GameController;
+import de.alexanderciupka.pokemon.menu.SoundController;
 
 public class RainOverlay extends Overlay {
 
@@ -56,6 +57,7 @@ public class RainOverlay extends Overlay {
 
 		if (this.type == RainType.STORM && (thunderFrames > 0 || rng.nextFloat() < 0.001)) {
 			if (thunderFrames == 0) {
+				SoundController.getInstance().playSound(SoundController.THUNDER);
 				thunderFrames = rng.nextInt(10) + 50;
 			}
 			int alpha = 0;
@@ -89,6 +91,7 @@ public class RainOverlay extends Overlay {
 			animation = new Thread(new Runnable() {
 				@Override
 				public void run() {
+					SoundController.getInstance().startRain(type);
 					while (true) {
 						for (Raindrop r : raindrops) {
 							r.fall();
@@ -113,6 +116,7 @@ public class RainOverlay extends Overlay {
 	@Override
 	public void onRemove() {
 		animation.interrupt();
+		SoundController.getInstance().stopRain();
 	}
 
 }

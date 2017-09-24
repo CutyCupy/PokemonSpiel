@@ -8,11 +8,13 @@ import javax.sound.sampled.Clip;
 import javax.sound.sampled.FloatControl;
 
 import de.alexanderciupka.hoverbutton.Main;
+import de.alexanderciupka.pokemon.gui.overlay.RainType;
 import de.alexanderciupka.pokemon.map.GameController;
 
 public class SoundController {
 
 	private Clip currentSong;
+	private Clip rain;
 
 	private static SoundController instance;
 
@@ -37,6 +39,9 @@ public class SoundController {
 	public static final String ESCAPE = "escape_fight"; //DONE
 	public static final String SAVE = "save_game"; //DONE
 	public static final String BUMP = "bump"; //DONE
+	public static final String THUNDER = "thunder"; //DONE
+
+
 
 	private SoundController() {
 	}
@@ -180,6 +185,37 @@ public class SoundController {
 			}).start();
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+
+	public void startRain(RainType type) {
+		if(rain != null) {
+			rain.stop();
+		}
+		try {
+			rain = AudioSystem.getClip();
+			switch(type) {
+			case NIZZLE:
+				rain.open(AudioSystem.getAudioInputStream(
+						new File(Main.class.getResource("/music/sounds/nizzle.wav").getFile())));
+				break;
+			case HEAVY:
+			case STORM:
+				rain.open(AudioSystem.getAudioInputStream(
+						new File(Main.class.getResource("/music/sounds/heavy_rain.wav").getFile())));
+				break;
+			}
+			rain.loop(Clip.LOOP_CONTINUOUSLY);
+			rain.start();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void stopRain() {
+		if(rain != null) {
+			rain.stop();
+			rain = null;
 		}
 	}
 }

@@ -15,6 +15,7 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 
 import de.alexanderciupka.pokemon.characters.NPC;
+import de.alexanderciupka.pokemon.characters.Player;
 import de.alexanderciupka.pokemon.gui.GameFrame;
 import de.alexanderciupka.pokemon.gui.overlay.FogType;
 import de.alexanderciupka.pokemon.gui.overlay.RainType;
@@ -39,6 +40,8 @@ public class Route {
 
 	private String terrainName;
 	private RouteType type;
+
+	private boolean wait;
 
 	public Route() {
 		this.pokemonPool = new PokemonPool("DEFAULT");
@@ -147,37 +150,47 @@ public class Route {
 
 	public void createMap() {
 		map = new BufferedImage(width * 70, height * 70, BufferedImage.TYPE_4BYTE_ABGR);
-		Graphics g = map.getGraphics();
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++) {
-				try {
-					g.drawImage(entities[y][x].getTerrain(), x * 70, y * 70, null);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+		// Graphics g = map.getGraphics();
+		// for (int y = 0; y < height; y++) {
+		// for (int x = 0; x < width; x++) {
+		// try {
+		// g.drawImage(entities[y][x].getTerrain(), x * 70, y * 70, null);
+		// } catch (Exception e) {
+		// e.printStackTrace();
+		// }
+		// }
+		// }
+		// for (int y = 0; y < height; y++) {
+		// for (int x = 0; x < width; x++) {
+		// try {
+		// g.drawImage(entities[y][x].getSprite(), (int) (entities[y][x].getExactX() *
+		// 70),
+		// (int) (entities[y][x].getExactY() * 70), null);
+		// if (entities[y][x].hasCharacter()) {
+		// for (NPC npc : entities[y][x].getCharacters()) {
+		// g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70),
+		// (int) (npc.getExactY() * 70), null);
+		// }
+		// }
+		// } catch (Exception e) {
+		// e.printStackTrace();
+		// }
+		// }
+		// }
+		Point[] points = new Point[this.width * this.height];
+		for (int x = 0; x < this.width; x++) {
+			for (int y = 0; y < this.height; y++) {
+				points[x + y * this.width] = new Point(x, y);
 			}
 		}
-		for (int y = 0; y < height; y++) {
-			for (int x = 0; x < width; x++) {
-				try {
-					g.drawImage(entities[y][x].getSprite(), (int) (entities[y][x].getExactX() * 70),
-							(int) (entities[y][x].getExactY() * 70), null);
-					if (entities[y][x].hasCharacter()) {
-						for (NPC npc : entities[y][x].getCharacters()) {
-							g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70),
-									(int) (npc.getExactY() * 70), null);
-						}
-					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		 saveMap();
+		updateMap(points);
+		// saveMap();
 	}
 
 	public void updateMap(Point... updatePoint) {
+		wait = true;
 		if (map != null) {
+			Player mc = GameController.getInstance().getMainCharacter();
 			Graphics g = map.getGraphics();
 			boolean[][] repainted = new boolean[this.height][this.width];
 			for (Point p : updatePoint) {
@@ -192,36 +205,78 @@ public class Route {
 						// (int) (npc.getExactY() * 70), null);
 						// }
 					}
-					repainted[p.y][p.x] = true;
-					for (int x = Math.max(0, p.x - 4); x < Math.min(width, p.x + 4); x++) {
-						for (int y = Math.max(0, p.y - 4); y < Math.min(height, p.y + 4); y++) {
-							if (repainted[y][x]) {
-								continue;
-							}
-							if (this.entities[y][x].getSpriteName().startsWith("house")
-									|| this.entities[y][x].getSpriteName().startsWith("pokecenter")) {
-								g.drawImage(entities[y][x].getTerrain(), x * 70, y * 70, null);
-								g.drawImage(entities[y][x].getSprite(), (int) (entities[y][x].getExactX() * 70),
-										(int) (entities[y][x].getExactY() * 70), null);
-								if (entities[y][x].hasCharacter()) {
-									// for (NPC npc :
-									// entities[y][x].getCharacters()) {
-									// g.drawImage(npc.getCharacterImage(),
-									// (int) (npc.getExactX() * 70),
-									// (int) (npc.getExactY() * 70), null);
-									// }
-								}
-							}
-							// for (NPC npc : entities[y][x].getCharacters()) {
-							// g.drawImage(npc.getCharacterImage(), (int)
-							// (npc.getExactX() * 70),
-							// (int) (npc.getExactY() * 70), null);
-							// }
-							repainted[y][x] = true;
-						}
+
+					if (mc != null && this.equals(mc.getCurrentRoute()) && p.equals(mc.getCurrentPosition())) {
+						g.drawImage(mc.getCharacterImage(), (int) (mc.getExactX() * 70), (int) (mc.getExactY() * 70),
+								null);
 					}
+
+					// for (int x = 0; x < this.width; x++) {//Math.max(0, p.x - 7); x <
+					// Math.min(width, p.x + 7); x++) {
+					// for (int y = 0; y < this.height; y++) {//Math.max(0, p.y - 7); y <
+					// Math.min(height, p.y + 7); y++) {
+					// if (repainted[y][x]) {
+					// continue;
+					// }
+					// if (this.entities[y][x].getSpriteName().startsWith("house")
+					// || this.entities[y][x].getSpriteName().startsWith("pokecenter")) {
+					// g.drawImage(entities[y][x].getTerrain(), x * 70, y * 70, null);
+					// g.drawImage(entities[y][x].getSprite(), (int) (entities[y][x].getExactX() *
+					// 70),
+					// (int) (entities[y][x].getExactY() * 70), null);
+					// if (entities[y][x].hasCharacter()) {
+					// // for (NPC npc :
+					// // entities[y][x].getCharacters()) {
+					// // g.drawImage(npc.getCharacterImage(),
+					// // (int) (npc.getExactX() * 70),
+					// // (int) (npc.getExactY() * 70), null);
+					// // }
+					// }
+					// }
+					// // for (NPC npc : entities[y][x].getCharacters()) {
+					// // g.drawImage(npc.getCharacterImage(), (int)
+					// // (npc.getExactX() * 70),
+					// // (int) (npc.getExactY() * 70), null);
+					// // }
+					// repainted[y][x] = true;
+					// }
+					// }
 				} catch (Exception e) {
 					e.printStackTrace();
+				}
+			}
+			for (int x = 0; x < this.width; x++) {// Math.max(0, p.x - 7); x < Math.min(width, p.x + 7); x++) {
+				for (int y = 0; y < this.height; y++) {// Math.max(0, p.y - 7); y < Math.min(height, p.y + 7); y++) {
+					if (repainted[y][x]) {
+						continue;
+					}
+					if (this.entities[y][x].getSpriteName().startsWith("house")
+							|| this.entities[y][x].getSpriteName().startsWith("pokecenter")) {
+						// g.drawImage(entities[y][x].getTerrain(), x * 70, y * 70, null);
+						// Player mc = GameController.getInstance().getMainCharacter();
+						// if(mc != null && this.equals(mc.getCurrentRoute()) &&
+						// new Point(x, y).equals(mc.getCurrentPosition())) {
+						// g.drawImage(mc.getCharacterImage(), (int) (mc.getExactX() * 70), (int)
+						// (mc.getExactY() * 70), null);
+						// }
+
+						g.drawImage(entities[y][x].getSprite(), (int) (entities[y][x].getExactX() * 70),
+								(int) (entities[y][x].getExactY() * 70), null);
+						if (entities[y][x].hasCharacter()) {
+							// for (NPC npc :
+							// entities[y][x].getCharacters()) {
+							// g.drawImage(npc.getCharacterImage(),
+							// (int) (npc.getExactX() * 70),
+							// (int) (npc.getExactY() * 70), null);
+							// }
+						}
+					}
+					// for (NPC npc : entities[y][x].getCharacters()) {
+					// g.drawImage(npc.getCharacterImage(), (int)
+					// (npc.getExactX() * 70),
+					// (int) (npc.getExactY() * 70), null);
+					// }
+					repainted[y][x] = true;
 				}
 			}
 			// for (int x = 0; x < width; x++) {
@@ -250,37 +305,38 @@ public class Route {
 			// }
 			// }
 			// saveMap();
+			if(mc != null && this.entities[mc.getCurrentPosition().y][mc.getCurrentPosition().x].getWarp() != null) {
+				System.out.println("do");
+				g.drawImage(mc.getCharacterImage(), (int) (mc.getExactX() * 70), (int) (mc.getExactY() * 70), null);
+			}
 		}
-
+		wait = false;
 	}
 
 	void saveMap() {
 		try {
 			Graphics g = map.getGraphics();
 			g.setFont(g.getFont().deriveFont(20.0f));
-			 for (int y = 0; y < height; y++) {
-			 for (int x = 0; x < width; x++) {
-			 try {
-			 if(entities[y][x].hasCharacter()) {
-			 for (NPC npc : entities[y][x].getCharacters()) {
-			 g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() *
-			 70),
-			 (int) (npc.getExactY() * 70), null);
-			 }
-			 }
-			 g.setColor(Color.black);
-			 g.drawRect(GameFrame.GRID_SIZE * x, GameFrame.GRID_SIZE * y,
-			 GameFrame.GRID_SIZE,
-			 GameFrame.GRID_SIZE);
-			 g.setColor(Color.red);
-			 g.drawString(x + "|" + y, x * GameFrame.GRID_SIZE + 10, (int) ((y
-			 + .5) * GameFrame.GRID_SIZE));
+			for (int y = 0; y < height; y++) {
+				for (int x = 0; x < width; x++) {
+					try {
+						if (entities[y][x].hasCharacter()) {
+							for (NPC npc : entities[y][x].getCharacters()) {
+								g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70),
+										(int) (npc.getExactY() * 70), null);
+							}
+						}
+						g.setColor(Color.black);
+						g.drawRect(GameFrame.GRID_SIZE * x, GameFrame.GRID_SIZE * y, GameFrame.GRID_SIZE,
+								GameFrame.GRID_SIZE);
+						g.setColor(Color.red);
+						g.drawString(x + "|" + y, x * GameFrame.GRID_SIZE + 10, (int) ((y + .5) * GameFrame.GRID_SIZE));
 
-			 } catch (Exception e) {
-			 e.printStackTrace();
-			 }
-			 }
-			 }
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
 			ImageIO.write(map, "png", new File("./res/routes/" + this.id + ".png"));
 			System.out.println(this.getName() + " wurde gespeichert!");
 		} catch (Exception e) {
@@ -289,6 +345,14 @@ public class Route {
 	}
 
 	public BufferedImage getMap() {
+		while (wait) {
+			System.out.println("wait");
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 		return this.map;
 	}
 
@@ -397,7 +461,7 @@ public class Route {
 			} else if (rain != null) {
 				try {
 					this.setRain(RainType.valueOf(rain.getAsString().toUpperCase()));
-				} catch(Exception e) {
+				} catch (Exception e) {
 					this.setRain(route.getRain());
 				}
 			} else {
@@ -410,13 +474,12 @@ public class Route {
 			} else if (snow != null) {
 				try {
 					this.setSnow(SnowType.valueOf(snow.getAsString().toUpperCase()));
-				} catch(Exception e) {
+				} catch (Exception e) {
 					this.setSnow(route.getSnow());
 				}
 			} else {
 				this.setSnow(route.getSnow());
 			}
-
 
 			JsonElement fog = saveData.get("fog");
 			if (fog != null && fog instanceof JsonNull) {
@@ -424,7 +487,7 @@ public class Route {
 			} else if (fog != null) {
 				try {
 					this.setFog(FogType.valueOf(fog.getAsString().toUpperCase()));
-				} catch(Exception e) {
+				} catch (Exception e) {
 					this.setFog(route.getFog());
 				}
 			} else {
