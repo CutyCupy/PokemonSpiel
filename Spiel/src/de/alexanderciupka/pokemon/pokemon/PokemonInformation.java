@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
@@ -74,6 +75,7 @@ public class PokemonInformation {
 				this.allGrowthRates.put(element.getAsJsonObject().get("name").getAsString(), element.getAsJsonObject());
 			}
 			ArrayList<Move> foo = new ArrayList<Move>();
+			HashSet<String> ailments = new HashSet<>();
 			for (JsonElement element : allMoveData) {
 				JsonObject currentJson = element.getAsJsonObject();
 				Move currentMove = new Move(currentJson.get("id").getAsInt());
@@ -100,29 +102,36 @@ public class PokemonInformation {
 				currentMove.setTarget(currentJson.get("target") instanceof JsonNull ? Target.OPPONENT
 						: Target.valueOf(currentJson.get("target").getAsString()));
 				currentMove.setCrit(currentJson.get("crit_rate").getAsInt());
-				switch (currentJson.get("ailment").getAsString()) {
-				case "poison":
-					currentMove.setAilment(Ailment.POISON);
-					break;
-				case "burn":
-					currentMove.setAilment(Ailment.BURN);
-					break;
-				case "sleep":
-					currentMove.setAilment(Ailment.SLEEP);
-					break;
-				case "paralysis":
-					currentMove.setAilment(Ailment.PARALYSIS);
-					break;
-				case "freeze":
-					currentMove.setAilment(Ailment.FREEZE);
-					break;
-				case "confusion":
-					currentMove.setAilment(Ailment.CONFUSION);
-					break;
-				default:
-					currentMove.setAilment(Ailment.NONE);
-					break;
+				try {
+					currentMove.setAilment(Ailment.valueOf(currentJson.get("ailment").getAsString().toUpperCase()));
+				} catch(Exception e) {
+					System.out.println(currentJson.get("ailment").getAsString().toUpperCase());
+					currentMove.setAilment(SecondaryAilment.valueOf(currentJson.get("ailment").getAsString().toUpperCase()));
 				}
+//				switch (currentJson.get("ailment").getAsString()) {
+//				case "poison":
+//					currentMove.setAilment(Ailment.POISON);
+//					break;
+//				case "burn":
+//					currentMove.setAilment(Ailment.BURN);
+//					break;
+//				case "sleep":
+//					currentMove.setAilment(Ailment.SLEEP);
+//					break;
+//				case "paralysis":
+//					currentMove.setAilment(Ailment.PARALYSIS);
+//					break;
+//				case "freeze":
+//					currentMove.setAilment(Ailment.FREEZE);
+//					break;
+//				case "confusion":
+//					currentMove.setAilment(Ailment.CONFUSION);
+//					break;
+//				default:
+//					currentMove.setAilment(Ailment.NONE);
+//					break;
+//				}
+				ailments.add(currentJson.get("ailment").getAsString());
 				try {
 					currentMove.setPriority(currentJson.get("priority").getAsInt());
 				} catch (Exception e) {
@@ -178,6 +187,7 @@ public class PokemonInformation {
 				}
 				allMoves.add(currentMove);
 			}
+			System.out.println(ailments);
 			for (JsonElement element : allPokemonData) {
 				int key = element.getAsJsonObject().get("id").getAsInt();
 				names.put(key,

@@ -335,6 +335,7 @@ public class FightPanel extends JPanel {
 								}
 								mine.afterTurnDamage();
 								enemy.afterTurnDamage();
+								gController.getFight().increaseTurn();
 								updateMoves();
 								showMenu();
 								attacked = false;

@@ -14,7 +14,6 @@ import de.alexanderciupka.pokemon.gui.TextLabel;
 import de.alexanderciupka.pokemon.gui.panels.ReportPanel;
 import de.alexanderciupka.pokemon.menu.MenuController;
 import de.alexanderciupka.pokemon.menu.SoundController;
-import de.alexanderciupka.pokemon.pokemon.Ailment;
 import de.alexanderciupka.pokemon.pokemon.Item;
 import de.alexanderciupka.pokemon.pokemon.Move;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
@@ -252,15 +251,9 @@ public class GameController {
 
 	public void endFight() {
 		this.fighting = false;
-		for (int i = 0; i < this.mainCharacter.getTeam().getAmmount(); i++) {
-			switch (this.mainCharacter.getTeam().getTeam()[i].getAilment()) {
-			case CONFUSION:
-				this.mainCharacter.getTeam().getTeam()[i].setAilment(Ailment.NONE);
-				break;
-			default:
-				break;
-			}
-		}
+//		for (int i = 0; i < this.mainCharacter.getTeam().getAmmount(); i++) {
+//			this.mainCharacter.getTeam().getTeam()[i].
+//		}
 		if (this.fight.won) {
 			if (!gameFrame.getEvolutionPanel().getPokemon().isEmpty()) {
 				gameFrame.setCurrentPanel(gameFrame.getEvolutionPanel());
@@ -335,7 +328,6 @@ public class GameController {
 	}
 
 	public void updateFight() {
-		System.out.println("update");
 		gameFrame.getFightPanel().setPlayer();
 	}
 
@@ -412,6 +404,10 @@ public class GameController {
 		Pokemon player = new Pokemon(152);
 		player.setName("Mandarine");
 		player.getStats().generateStats((short) 5);
+		player.setMoves(new Move[4]);
+		player.addMove("Verwurzler");
+		player.addMove("Egelsamen");
+		player.addMove("Gähner");
 		mainCharacter.getTeam().addPokemon(player);
 
 //		for (int i = 0; i < 5; i++) {

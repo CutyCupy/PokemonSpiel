@@ -28,7 +28,7 @@ public class Background {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public Camera getCamera() {
 		return this.cam;
 	}

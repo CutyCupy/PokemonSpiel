@@ -15,7 +15,6 @@ import de.alexanderciupka.pokemon.gui.GameFrame;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.menu.MenuController;
 import de.alexanderciupka.pokemon.menu.SoundController;
-import de.alexanderciupka.pokemon.pokemon.Type;
 
 public class Main {
 
@@ -92,8 +91,7 @@ public class Main {
 				while (true) {
 					if (!sc.isSongRunning()) {
 						File song = songs[rng.nextInt(songs.length)];
-						System.out.println(song.getName());
-						sc.playSong(song);
+//						sc.playSong(song);
 					}
 					Thread.yield();
 				}
@@ -105,7 +103,6 @@ public class Main {
 		// readDescription();
 
 
-		System.out.println(Type.getEffectiveness(Type.GROUND, new Type[] {Type.ELECTRIC, Type.STEEL}));
 	}
 
 	public static void readDescription() {

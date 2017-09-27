@@ -2,6 +2,7 @@ package de.alexanderciupka.pokemon.gui;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
@@ -23,7 +24,7 @@ public class TextLabel extends JLabel implements Runnable {
 
 	private boolean waiting;
 	private JPanel parent;
-	
+
 	public TextLabel() {
 		super();
 		new Thread(this).start();
@@ -36,7 +37,7 @@ public class TextLabel extends JLabel implements Runnable {
 		this.setBorder(BorderFactory.createCompoundBorder(new LineBorder(Color.BLACK, 5), new EmptyBorder(2, 10, 2, 10)));
 		this.setHorizontalAlignment(SwingConstants.LEFT);
 		this.setVerticalAlignment(SwingConstants.TOP);
-		
+
 		delay = SLOW;
 	}
 
@@ -156,7 +157,7 @@ public class TextLabel extends JLabel implements Runnable {
 	public boolean isWaiting() {
 		return this.waiting;
 	}
-	
+
 	public void setParent(JPanel parent) {
 		if(this.parent != null) {
 			this.parent.remove(this);

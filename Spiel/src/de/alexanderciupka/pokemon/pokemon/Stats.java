@@ -327,14 +327,15 @@ public class Stats {
 		return this.currentHP - oldHP;
 	}
 
-	public boolean loseHP(int ammount) {
+	public int loseHP(int ammount) {
+		int lost = ammount;
 		if (this.currentHP - ammount <= 0) {
+			lost = currentHP;
 			this.currentHP = 0;
 			this.pokemon.setAilment(Ailment.FAINTED);
-			return true;
 		}
 		this.currentHP -= ammount;
-		return false;
+		return lost;
 	}
 
 	public void startFight() {

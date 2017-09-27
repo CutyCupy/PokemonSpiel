@@ -12,6 +12,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import de.alexanderciupka.pokemon.characters.Player;
+import de.alexanderciupka.pokemon.gui.panels.FightPanel;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.menu.SoundController;
 
@@ -29,7 +30,7 @@ public class Pokemon {
 
 	private Type[] types;
 	private Ailment ailment;
-	private int since;
+	private ArrayList<SecondaryAilment> secondaryAilments;
 
 	private int catchRate;
 	private int weight;
@@ -156,6 +157,7 @@ public class Pokemon {
 
 	public void startFight() {
 		stats.startFight();
+		secondaryAilments = new ArrayList<>();
 	}
 
 	public Move getRandomMove() {
@@ -270,8 +272,16 @@ public class Pokemon {
 
 	public boolean setAilment(Ailment ailment) {
 		if (Ailment.NONE.equals(this.ailment) || ailment.equals(Ailment.NONE) || ailment.equals(Ailment.FAINTED)) {
-			this.since = 1;
 			this.ailment = ailment;
+			return true;
+		}
+		return false;
+	}
+
+	public boolean addSecondaryAilment(SecondaryAilment ailment) {
+		if(!this.secondaryAilments.contains(ailment)) {
+			gController.getGameFrame().getFightPanel().addText(ailment.getOnHit().replace("@pokemon", this.getName()));
+			this.secondaryAilments.add(ailment);
 			return true;
 		}
 		return false;
@@ -298,41 +308,91 @@ public class Pokemon {
 				return this.name + " ist wieder aufgewacht!";
 			}
 			return this.name + " schl�ft tief und fest!";
-		case CONFUSION:
-			if (rng.nextFloat() < 0.2f * since) {
-				this.ailment = Ailment.NONE;
-				gController.getGameFrame().getFightPanel().updatePanels();
-				this.gController.getGameFrame().getFightPanel().addText(this.name + " ist nicht mehr verwirrt!", false);
-				return null;
-			}
-			this.gController.getGameFrame().getFightPanel().addText(this.name + " ist verwirrt!");
-			if (rng.nextFloat() < (1 / 3.0)) {
-				this.gController.getFight().selfAttack(this);
-				return "Es hat sich vor Verwirrung selbst verletzt!";
-			}
+//		case CONFUSION:
+//			if (rng.nextFloat() < 0.2f * since) {
+//				this.ailment = Ailment.NONE;
+//				gController.getGameFrame().getFightPanel().updatePanels();
+//				this.gController.getGameFrame().getFightPanel().addText(this.name + " ist nicht mehr verwirrt!", false);
+//				return null;
+//			}
+//			this.gController.getGameFrame().getFightPanel().addText(this.name + " ist verwirrt!");
+//			if (rng.nextFloat() < (1 / 3.0)) {
+//				this.gController.getFight().selfAttack(this);
+//				return "Es hat sich vor Verwirrung selbst verletzt!";
+//			}
+//			break;
 		default:
 			break;
 		}
-		since++;
 		return null;
 	}
 
 	public void afterTurnDamage() {
+		FightPanel fightPanel = this.gController.getGameFrame().getFightPanel();
 		switch (this.ailment) {
 		case BURN:
 			this.stats.loseHP((int) (this.stats.getStats().get(Stat.HP) * (1 / 16.0)));
-			this.gController.getGameFrame().getFightPanel()
-					.addText(this.name + " wurde durch die Verbrennung verletzt!", true);
+			fightPanel.addText(this.name + " wurde durch die Verbrennung verletzt!", true);
 			break;
 		case POISON:
 			this.stats.loseHP((int) (this.stats.getStats().get(Stat.HP) * (1 / 8.0)));
-			this.gController.getGameFrame().getFightPanel().addText(this.name + " wurde durch die Vergiftung verletzt!",
+			fightPanel.addText(this.name + " wurde durch die Vergiftung verletzt!",
 					true);
 			break;
 		default:
 			break;
 		}
-		gController.getGameFrame().getFightPanel().updatePanels();
+		int turn = gController.getFight().getTurn();
+		for(int i = 0; i < this.secondaryAilments.size(); i++) {
+			SecondaryAilment ailment = this.secondaryAilments.get(i);
+			if(ailment.isWearOff()) {
+				if(turn >= ailment.getInflictedTurn() + ailment.getMinTurns()) {
+					if(turn >= ailment.getInflictedTurn() + ailment.getMaxTurns() ||
+							rng.nextFloat() > (ailment.getMinTurns() / (ailment.getMaxTurns() * 1.0)) * ((turn - ailment.getInflictedTurn()) - ailment.getMinTurns())) {
+						fightPanel.addText(ailment.getHealed().replace("@pokemon", this.getName()), true);
+						this.secondaryAilments.remove(i);
+						i--;
+						continue;
+					}
+				}
+			}
+			switch(ailment) {
+			case INGRAIN:
+				if(this.stats.restoreHP((int) (this.stats.getStats().get(Stat.HP) / 8.0)) > 0) {
+					fightPanel.addText(ailment.getAffected().replace("@pokemon", this.getName()), true);
+				}
+				break;
+			case LEECHSEED:
+				int gain = this.stats.loseHP((int) (this.stats.getStats().get(Stat.HP) / 8.0));
+				this.gController.getFight().getEnemy().getStats().restoreHP(gain);
+				fightPanel.addText(ailment.getAffected().replace("@pokemon", this.getName()), true);
+				break;
+			case NIGHTMARE:
+				if(this.getAilment() == Ailment.SLEEP) {
+					this.stats.loseHP((int) (this.stats.getStats().get(Stat.HP) / 4.0));
+					fightPanel.addText(ailment.getAffected().replace("@pokemon", this.getName()), true);
+				} else {
+					this.gController.getGameFrame().getFightPanel().addText(
+							ailment.getHealed().replace("@pokemon", this.getName()), true);
+					this.secondaryAilments.remove(i);
+					i--;
+				}
+				break;
+			case PERISHSONG:
+				//TODO: implement
+				break;
+			case YAWN:
+				if(ailment.getInflictedTurn() + 1 <= turn) {
+					if(this.setAilment(Ailment.SLEEP)) {
+						fightPanel.addText(ailment.getAffected().replace("@pokemon", this.getName()), true);
+					}
+				}
+				break;
+			default:
+				break;
+			}
+		}
+		fightPanel.updatePanels();
 	}
 
 	public void afterWalkingDamage() {

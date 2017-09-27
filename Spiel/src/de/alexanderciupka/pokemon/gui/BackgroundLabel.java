@@ -6,7 +6,6 @@ import java.util.Random;
 
 import javax.swing.JLabel;
 
-import de.alexanderciupka.pokemon.characters.NPC;
 import de.alexanderciupka.pokemon.gui.overlay.CollapseOverlay;
 import de.alexanderciupka.pokemon.gui.overlay.DarkOverlay;
 import de.alexanderciupka.pokemon.gui.overlay.FogOverlay;
@@ -22,6 +21,7 @@ import de.alexanderciupka.pokemon.gui.overlay.SpottedOverlay;
 import de.alexanderciupka.pokemon.map.Camera;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.map.Route;
+import de.alexanderciupka.pokemon.menu.SoundController;
 
 public class BackgroundLabel extends JLabel {
 
@@ -80,14 +80,14 @@ public class BackgroundLabel extends JLabel {
 						(int) Math.round(x * GameFrame.GRID_SIZE), (int) Math.round(y * GameFrame.GRID_SIZE),
 						(int) Math.round(w * GameFrame.GRID_SIZE), (int) Math.round(h * GameFrame.GRID_SIZE)),
 				(int) Math.round(xOffset * GameFrame.GRID_SIZE), (int) Math.round(yOffset * GameFrame.GRID_SIZE), null);
-		for (NPC npc : gController.getCurrentBackground().getCurrentRoute().getCharacters()) {
-			int npcX = (int) Math.round((npc.getExactX() - x + xOffset) * GameFrame.GRID_SIZE);
-			int npcY = (int) Math.round((npc.getExactY() - y + yOffset) * GameFrame.GRID_SIZE);
-			if (npcX > -GameFrame.GRID_SIZE && npcX < GameFrame.GRID_SIZE * w
-					|| npcX > -GameFrame.GRID_SIZE && npcY < GameFrame.GRID_SIZE * h) {
-				g.drawImage(npc.getCharacterImage(), npcX, npcY, null);
-			}
-		}
+//		for (NPC npc : gController.getCurrentBackground().getCurrentRoute().getCharacters()) {
+//			int npcX = (int) Math.round((npc.getExactX() - x + xOffset) * GameFrame.GRID_SIZE);
+//			int npcY = (int) Math.round((npc.getExactY() - y + yOffset) * GameFrame.GRID_SIZE);
+//			if (npcX > -GameFrame.GRID_SIZE && npcX < GameFrame.GRID_SIZE * w
+//					|| npcX > -GameFrame.GRID_SIZE && npcY < GameFrame.GRID_SIZE * h) {
+//				g.drawImage(npc.getCharacterImage(), npcX, npcY, null);
+//			}
+//		}
 //		g.drawImage(gController.getMainCharacter().getCharacterImage(),
 //				(int) ((gController.getMainCharacter().getExactX() - x + xOffset) * GameFrame.GRID_SIZE),
 //				(int) ((gController.getMainCharacter().getExactY() - y + yOffset) * GameFrame.GRID_SIZE), null);
@@ -165,6 +165,7 @@ public class BackgroundLabel extends JLabel {
 	}
 
 	public void spotted(de.alexanderciupka.pokemon.characters.Character spotter) {
+		SoundController.getInstance().playSound(SoundController.ALERT);
 		SpottedOverlay s = new SpottedOverlay(this, spotter);
 		this.addOverlay(s);
 		s.createOverlay();

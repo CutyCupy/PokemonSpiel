@@ -40,6 +40,7 @@ public class SoundController {
 	public static final String SAVE = "save_game"; //DONE
 	public static final String BUMP = "bump"; //DONE
 	public static final String THUNDER = "thunder"; //DONE
+	public static final String ALERT = "alert";
 
 
 

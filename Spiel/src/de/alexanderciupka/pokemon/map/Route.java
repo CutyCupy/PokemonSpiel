@@ -6,6 +6,8 @@ import java.awt.Point;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 
 import javax.imageio.ImageIO;
 
@@ -31,6 +33,7 @@ public class Route {
 	private int height;
 	private boolean dark;
 	private Entity[][] entities;
+	private HashMap<String, ArrayList<Point>> buildings;
 	private PokemonPool pokemonPool;
 	private ArrayList<NPC> characters;
 	private BufferedImage map;
@@ -45,6 +48,7 @@ public class Route {
 
 	public Route() {
 		this.pokemonPool = new PokemonPool("DEFAULT");
+		this.buildings = new HashMap<>();
 		this.characters = new ArrayList<NPC>();
 	}
 
@@ -148,6 +152,19 @@ public class Route {
 		this.characters.clear();
 	}
 
+	public HashMap<String, ArrayList<Point>> getBuildings() {
+		return this.buildings;
+	}
+
+	public void addBuilding(String building, Point location) {
+		ArrayList<Point> locations = this.buildings.get(building);
+		if (locations == null) {
+			locations = new ArrayList<Point>();
+		}
+		locations.add(location);
+		this.buildings.put(building,locations);
+	}
+
 	public void createMap() {
 		map = new BufferedImage(width * 70, height * 70, BufferedImage.TYPE_4BYTE_ABGR);
 		// Graphics g = map.getGraphics();
@@ -163,7 +180,8 @@ public class Route {
 		// for (int y = 0; y < height; y++) {
 		// for (int x = 0; x < width; x++) {
 		// try {
-		// g.drawImage(entities[y][x].getSprite(), (int) (entities[y][x].getExactX() *
+		// g.drawImage(entities[y][x].getSprite(), (int)
+		// (entities[y][x].getExactX() *
 		// 70),
 		// (int) (entities[y][x].getExactY() * 70), null);
 		// if (entities[y][x].hasCharacter()) {
@@ -184,7 +202,7 @@ public class Route {
 			}
 		}
 		updateMap(points);
-		// saveMap();
+		 saveMap();
 	}
 
 	public void updateMap(Point... updatePoint) {
@@ -192,36 +210,42 @@ public class Route {
 		if (map != null) {
 			Player mc = GameController.getInstance().getMainCharacter();
 			Graphics g = map.getGraphics();
-			boolean[][] repainted = new boolean[this.height][this.width];
 			for (Point p : updatePoint) {
 				try {
 					g.drawImage(entities[p.y][p.x].getTerrain(), p.x * 70, p.y * 70, null);
 					g.drawImage(entities[p.y][p.x].getSprite(), (int) (entities[p.y][p.x].getExactX() * 70),
 							(int) (entities[p.y][p.x].getExactY() * 70), null);
-					if (entities[p.y][p.x].hasCharacter()) {
+//					if (entities[p.y][p.x].hasCharacter()) {
 						// for (NPC npc : entities[p.y][p.x].getCharacters()) {
 						// g.drawImage(npc.getCharacterImage(), (int)
 						// (npc.getExactX() * 70),
 						// (int) (npc.getExactY() * 70), null);
 						// }
-					}
+//					}
 
-					if (mc != null && this.equals(mc.getCurrentRoute()) && p.equals(mc.getCurrentPosition())) {
+					if (mc != null && this.equals(mc.getCurrentRoute(), false) && p.equals(mc.getCurrentPosition())) {
 						g.drawImage(mc.getCharacterImage(), (int) (mc.getExactX() * 70), (int) (mc.getExactY() * 70),
 								null);
 					}
 
-					// for (int x = 0; x < this.width; x++) {//Math.max(0, p.x - 7); x <
+					// for (int x = 0; x < this.width; x++) {//Math.max(0, p.x -
+					// 7); x <
 					// Math.min(width, p.x + 7); x++) {
-					// for (int y = 0; y < this.height; y++) {//Math.max(0, p.y - 7); y <
+					// for (int y = 0; y < this.height; y++) {//Math.max(0, p.y
+					// - 7); y <
 					// Math.min(height, p.y + 7); y++) {
 					// if (repainted[y][x]) {
 					// continue;
 					// }
-					// if (this.entities[y][x].getSpriteName().startsWith("house")
-					// || this.entities[y][x].getSpriteName().startsWith("pokecenter")) {
-					// g.drawImage(entities[y][x].getTerrain(), x * 70, y * 70, null);
-					// g.drawImage(entities[y][x].getSprite(), (int) (entities[y][x].getExactX() *
+					// if
+					// (this.entities[y][x].getSpriteName().startsWith("house")
+					// ||
+					// this.entities[y][x].getSpriteName().startsWith("pokecenter"))
+					// {
+					// g.drawImage(entities[y][x].getTerrain(), x * 70, y * 70,
+					// null);
+					// g.drawImage(entities[y][x].getSprite(), (int)
+					// (entities[y][x].getExactX() *
 					// 70),
 					// (int) (entities[y][x].getExactY() * 70), null);
 					// if (entities[y][x].hasCharacter()) {
@@ -245,40 +269,48 @@ public class Route {
 					e.printStackTrace();
 				}
 			}
-			for (int x = 0; x < this.width; x++) {// Math.max(0, p.x - 7); x < Math.min(width, p.x + 7); x++) {
-				for (int y = 0; y < this.height; y++) {// Math.max(0, p.y - 7); y < Math.min(height, p.y + 7); y++) {
-					if (repainted[y][x]) {
-						continue;
-					}
-					if (this.entities[y][x].getSpriteName().startsWith("house")
-							|| this.entities[y][x].getSpriteName().startsWith("pokecenter")) {
-						// g.drawImage(entities[y][x].getTerrain(), x * 70, y * 70, null);
-						// Player mc = GameController.getInstance().getMainCharacter();
-						// if(mc != null && this.equals(mc.getCurrentRoute()) &&
-						// new Point(x, y).equals(mc.getCurrentPosition())) {
-						// g.drawImage(mc.getCharacterImage(), (int) (mc.getExactX() * 70), (int)
-						// (mc.getExactY() * 70), null);
-						// }
-
-						g.drawImage(entities[y][x].getSprite(), (int) (entities[y][x].getExactX() * 70),
-								(int) (entities[y][x].getExactY() * 70), null);
-						if (entities[y][x].hasCharacter()) {
-							// for (NPC npc :
-							// entities[y][x].getCharacters()) {
-							// g.drawImage(npc.getCharacterImage(),
-							// (int) (npc.getExactX() * 70),
-							// (int) (npc.getExactY() * 70), null);
-							// }
-						}
-					}
-					// for (NPC npc : entities[y][x].getCharacters()) {
-					// g.drawImage(npc.getCharacterImage(), (int)
-					// (npc.getExactX() * 70),
-					// (int) (npc.getExactY() * 70), null);
-					// }
-					repainted[y][x] = true;
-				}
+			for(NPC npc : this.characters) {
+				g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70), (int) (npc.getExactY() * 70), null);
 			}
+			// for (int x = 0; x < this.width; x++) {// Math.max(0, p.x - 7); x
+			// < Math.min(width, p.x + 7); x++) {
+			// for (int y = 0; y < this.height; y++) {// Math.max(0, p.y - 7); y
+			// < Math.min(height, p.y + 7); y++) {
+			// if (repainted[y][x]) {
+			// continue;
+			// }
+			// if (this.entities[y][x].getSpriteName().startsWith("house")
+			// || this.entities[y][x].getSpriteName().startsWith("pokecenter"))
+			// {
+			// g.drawImage(entities[y][x].getTerrain(), x * 70, y * 70, null);
+			// Player mc = GameController.getInstance().getMainCharacter();
+			// if(mc != null && this.equals(mc.getCurrentRoute()) &&
+			// new Point(x, y).equals(mc.getCurrentPosition())) {
+			// g.drawImage(mc.getCharacterImage(), (int) (mc.getExactX() * 70),
+			// (int)
+			// (mc.getExactY() * 70), null);
+			// }
+
+			// g.drawImage(entities[y][x].getSprite(), (int)
+			// (entities[y][x].getExactX() * 70),
+			// (int) (entities[y][x].getExactY() * 70), null);
+			// if (entities[y][x].hasCharacter()) {
+			// for (NPC npc :
+			// entities[y][x].getCharacters()) {
+			// g.drawImage(npc.getCharacterImage(),
+			// (int) (npc.getExactX() * 70),
+			// (int) (npc.getExactY() * 70), null);
+			// }
+			// }
+			// }
+			// for (NPC npc : entities[y][x].getCharacters()) {
+			// g.drawImage(npc.getCharacterImage(), (int)
+			// (npc.getExactX() * 70),
+			// (int) (npc.getExactY() * 70), null);
+			// }
+			// repainted[y][x] = true;
+			// }
+			// }
 			// for (int x = 0; x < width; x++) {
 			// for (int y = 0; y < height; y++) {
 			// if (this.entities[y][x].getSpriteName().startsWith("house")
@@ -305,8 +337,23 @@ public class Route {
 			// }
 			// }
 			// saveMap();
-			if(mc != null && this.entities[mc.getCurrentPosition().y][mc.getCurrentPosition().x].getWarp() != null) {
-				System.out.println("do");
+			HashSet<NPC> needsRepaint = new HashSet<>();
+			for (String building : this.buildings.keySet()) {
+				BufferedImage currentBuilding = GameController.getInstance().getRouteAnalyzer().getSpriteByName(building);
+				for (Point p : this.buildings.get(building)) {
+					g.drawImage(currentBuilding, p.x * 70, p.y * 70, null);
+					for(NPC npc : this.characters) {
+						if((npc.getExactX() * 70 + npc.getCharacterImage().getWidth(null) < p.x * 70 || npc.getExactX() * 70 > p.x * 70 + currentBuilding.getWidth()) ||
+								(npc.getExactY() * 70 + npc.getCharacterImage().getHeight(null) < p.y * 70 || npc.getExactY() * 70 > p.y * 70 + currentBuilding.getHeight())) {
+							needsRepaint.add(npc);
+						}
+					}
+				}
+			}
+			for(NPC npc : needsRepaint) {
+				g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70), (int) (npc.getExactY() * 70), null);
+			}
+			if (mc != null && this.equals(mc.getCurrentRoute(), false) && this.entities[mc.getCurrentPosition().y][mc.getCurrentPosition().x].getWarp() != null) {
 				g.drawImage(mc.getCharacterImage(), (int) (mc.getExactX() * 70), (int) (mc.getExactY() * 70), null);
 			}
 		}
@@ -346,7 +393,6 @@ public class Route {
 
 	public BufferedImage getMap() {
 		while (wait) {
-			System.out.println("wait");
 			try {
 				Thread.sleep(1);
 			} catch (InterruptedException e) {
@@ -422,7 +468,7 @@ public class Route {
 				for (int i = 0; i < this.characters.size(); i++) {
 					boolean contains = false;
 					for (int j = 0; j < other.characters.size(); j++) {
-						if (!other.characters.get(j).equals(this.characters.get(i))) {
+						if (other.characters.get(j).equals(this.characters.get(i))) {
 							contains = true;
 							break;
 						}
@@ -433,7 +479,6 @@ public class Route {
 					}
 				}
 			}
-			System.out.println("finished");
 			return (this.id.equals(other.id) && this.name.equals(other.name)
 					&& this.terrainName.equals(other.terrainName) && ((this.rain == null && other.rain == null)
 							|| (this.rain != null && this.rain.equals(other.rain))));
@@ -550,7 +595,6 @@ public class Route {
 		if (this.fog == null ? oldRoute.fog != null : !this.fog.equals(oldRoute.fog)) {
 			saveData.addProperty("fog", this.fog != null ? fog.name() : null);
 		}
-		System.out.println(saveData);
 		return saveData;
 	}
 

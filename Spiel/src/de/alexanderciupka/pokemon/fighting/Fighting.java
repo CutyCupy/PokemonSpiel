@@ -28,6 +28,7 @@ public class Fighting {
 	private Random rng;
 	private GameController gController;
 	private boolean escape;
+	private int turn;
 
 	public boolean won;
 
@@ -183,8 +184,22 @@ public class Fighting {
 				/ enemy.getStats().getFightStats().get(Stat.EVASION));
 		playerMove.reducePP();
 		if (rng.nextFloat() * 100 < hitChance && playerMove.getCurrentPP() > 0) {
-			damageCalculation(player, enemy, playerMove,
-					rng.nextInt(playerMove.getMaxHits() - playerMove.getMinHits() + 1) + playerMove.getMinHits());
+			int hits = rng.nextInt(playerMove.getMaxHits() - playerMove.getMinHits() + 1) + playerMove.getMinHits();
+			switch(playerMove.getTarget()) {
+			case ALL:
+				damageCalculation(player, enemy, playerMove, hits);
+				damageCalculation(player, player, playerMove, hits);
+				break;
+			case OPPONENT:
+				damageCalculation(player, enemy, playerMove, hits);
+				break;
+			case USER:
+				damageCalculation(player, player, playerMove, hits);
+				break;
+			default:
+				break;
+
+			}
 			gController.sleep(150);
 			return true;
 		}
@@ -196,8 +211,22 @@ public class Fighting {
 				/ player.getStats().getFightStats().get(Stat.EVASION));
 		enemyMove.reducePP();
 		if (enemyMove.getAccuracy() > 100 || rng.nextFloat() * 100 < hitChance && enemyMove.getCurrentPP() > 0) {
-			damageCalculation(enemy, player, enemyMove,
-					rng.nextInt(enemyMove.getMaxHits() - enemyMove.getMinHits() + 1) + enemyMove.getMinHits());
+			int hits = rng.nextInt(enemyMove.getMaxHits() - enemyMove.getMinHits() + 1) + enemyMove.getMinHits();
+			switch(enemyMove.getTarget()) {
+			case ALL:
+				damageCalculation(enemy, player, enemyMove, hits);
+				damageCalculation(enemy, enemy, enemyMove, hits);
+				break;
+			case OPPONENT:
+				damageCalculation(enemy, player, enemyMove, hits);
+				break;
+			case USER:
+				damageCalculation(enemy, enemy, enemyMove, hits);
+				break;
+			default:
+				break;
+
+			}
 			return true;
 		}
 		return false;
@@ -305,9 +334,11 @@ public class Fighting {
 		}
 
 		if (rng.nextFloat() * 100 < usedMove.getAilmentChance()) {
-			if (usedMove.getAilment() != Ailment.NONE && defense.setAilment(usedMove.getAilment())) {
+			if (((usedMove.getAilment() != Ailment.NONE && usedMove.getAilment() != null) && defense.setAilment(usedMove.getAilment()))) {
 				gController.getGameFrame().getFightPanel()
 						.addText(defense.getName() + " wurde " + Ailment.getText(usedMove.getAilment()) + "!", true);
+			} else if ((usedMove.getSecondaryAilment() != null)) {
+				defense.addSecondaryAilment(usedMove.getSecondaryAilment());
 			}
 		}
 
@@ -416,6 +447,18 @@ public class Fighting {
 
 	public NPC getEnemyCharacter() {
 		return (NPC) this.enemyCharacter;
+	}
+
+	public int getTurn() {
+		return this.turn;
+	}
+
+	public void increaseTurn() {
+		this.turn++;
+	}
+
+	public void setTurn(int newTurn) {
+		this.turn = newTurn;
 	}
 
 }

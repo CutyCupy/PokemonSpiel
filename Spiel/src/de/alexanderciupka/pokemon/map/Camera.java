@@ -29,14 +29,14 @@ public class Camera {
 	}
 
 	public double getX() {
-		if (centered != null) {
+		if (centered != null && !moving) {
 			this.x = centered.getExactX() + 0.5;
 		}
 		return this.x;
 	}
 
 	public double getY() {
-		if (centered != null) {
+		if (centered != null && !moving) {
 			this.y = centered.getExactY() + 0.5;
 		}
 		return this.y;
@@ -47,6 +47,7 @@ public class Camera {
 	}
 
 	public void moveTowards(double x, double y, boolean animated) {
+		moving = true;
 		x += .5;
 		y += .5;
 		if (getX() != x || getY() != y) {
@@ -54,7 +55,6 @@ public class Camera {
 		}
 		getX();
 		getY();
-		moving = true;
 		if (animated) {
 			double xDelta = x - this.x;
 			double yDelta = y - this.y;
@@ -66,7 +66,7 @@ public class Camera {
 			for (double i = 0; i < pathLength; i += .1) {
 				this.x += xChange;
 				this.y += yChange;
-//				gController.getGameFrame().repaint();
+				// gController.getGameFrame().repaint();
 				try {
 					Thread.sleep(20);
 				} catch (InterruptedException e) {
@@ -77,7 +77,7 @@ public class Camera {
 		this.x = x;
 		this.y = y;
 		moving = false;
-//		gController.getGameFrame().repaint();
+		// gController.getGameFrame().repaint();
 	}
 
 	public JsonObject getSaveData() {

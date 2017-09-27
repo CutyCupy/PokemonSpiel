@@ -2,21 +2,24 @@ package de.alexanderciupka.pokemon.pokemon;
 
 import java.awt.Color;
 
+import de.alexanderciupka.pokemon.map.GameController;
+
 public enum Ailment {
 
 	NONE, BURN, FREEZE,
-	PARALYSIS, SLEEP, CONFUSION,
+	PARALYSIS, SLEEP,
 	POISON, FAINTED;
 
+	private int inflictedTurn;
 
-
+	Ailment() {
+		inflictedTurn = GameController.getInstance().getFight() != null ? GameController.getInstance().getFight().getTurn() : -1;
+	}
 
 	public static String getText(Ailment ailment) {
 		switch(ailment) {
 		case BURN:
 			return "verbrannt";
-		case CONFUSION:
-			return "verwirrt";
 		case FREEZE:
 			return "eingefroren";
 		case PARALYSIS:
@@ -34,8 +37,6 @@ public enum Ailment {
 		switch(ailment) {
 		case BURN:
 			return "BRT";
-		case CONFUSION:
-			return "VWR";
 		case FREEZE:
 			return "GFR";
 		case PARALYSIS:
@@ -55,8 +56,6 @@ public enum Ailment {
 		switch(ailment) {
 		case BURN:
 			return Type.getColor(Type.FIRE);
-		case CONFUSION:
-			return Type.getColor(Type.PSYCHO);
 		case FREEZE:
 			return Type.getColor(Type.ICE);
 		case PARALYSIS:
@@ -70,5 +69,9 @@ public enum Ailment {
 		default:
 			return new Color(0, 0, 0);
 		}
+	}
+
+	public int getInflictedTurn() {
+		return this.inflictedTurn;
 	}
 }

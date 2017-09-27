@@ -25,11 +25,12 @@ public class Move {
 	private int crit;
 	private String description;
 	private Ailment ailment;
+	private SecondaryAilment secondaryAilment;
 	private DamageClass damageClass;
 	private float accuracy;
 	private String category;
 	private HashMap<Stat, Integer> statChanges;
-	
+
 	private Target target;
 
 	private Type moveType;
@@ -142,7 +143,7 @@ public class Move {
 		}
 		return false;
 	}
-	
+
 	@Override
 	public String toString() {
 		return this.getName();
@@ -171,6 +172,7 @@ public class Move {
 		newMove.setCategory(this.category);
 		newMove.setTarget(this.target);
 		newMove.setCrit(this.crit);
+		newMove.setAilment(this.secondaryAilment);
 		return newMove;
 	}
 
@@ -276,6 +278,14 @@ public class Move {
 
 	public void setAilment(Ailment ailment) {
 		this.ailment = ailment;
+	}
+
+	public SecondaryAilment getSecondaryAilment() {
+		return secondaryAilment;
+	}
+
+	public void setAilment(SecondaryAilment secondaryAilment) {
+		this.secondaryAilment = secondaryAilment;
 	}
 
 	public DamageClass getDamageClass() {
