@@ -339,6 +339,7 @@ public class Route {
 			// saveMap();
 			HashSet<NPC> needsRepaint = new HashSet<>();
 			for (String building : this.buildings.keySet()) {
+				System.out.println(building);
 				BufferedImage currentBuilding = GameController.getInstance().getRouteAnalyzer().getSpriteByName(building);
 				for (Point p : this.buildings.get(building)) {
 					g.drawImage(currentBuilding, p.x * 70, p.y * 70, null);
@@ -358,6 +359,13 @@ public class Route {
 			}
 		}
 		wait = false;
+	}
+
+	public Entity getEntity(int x, int y) {
+		if(x >= 0 && x < width && y >= 0 && y < height) {
+			return entities[y][x];
+		}
+		return null;
 	}
 
 	void saveMap() {
@@ -455,13 +463,12 @@ public class Route {
 			for (int x = 0; x < this.width; x++) {
 				for (int y = 0; y < this.height; y++) {
 					if (!this.entities[y][x].equals(other.entities[y][x])) {
-						System.err.println("wrong entities");
+						System.err.println("wrong entity: " + x + "|" + y);
 						return false;
 					}
 				}
 			}
 			if (this.characters.size() != other.characters.size()) {
-				System.err.println("wrong character size");
 				return false;
 			}
 			if (withCharacters) {
@@ -474,14 +481,14 @@ public class Route {
 						}
 					}
 					if (!contains) {
-						System.err.println("wrong character " + this.characters.get(i).getName());
+						System.err.println("wrong character");
 						return false;
 					}
 				}
 			}
-			return (this.id.equals(other.id) && this.name.equals(other.name)
-					&& this.terrainName.equals(other.terrainName) && ((this.rain == null && other.rain == null)
-							|| (this.rain != null && this.rain.equals(other.rain))));
+			return this.id.equals(other.id) && this.name.equals(other.name)
+					&& this.terrainName.equals(other.terrainName) && this.rain == other.rain && this.snow == other.snow &&
+					this.fog == other.fog;
 		}
 		return false;
 	}

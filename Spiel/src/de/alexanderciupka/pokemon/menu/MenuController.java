@@ -122,7 +122,7 @@ public class MenuController {
 
 	public int returnToMenu() {
 		return JOptionPane.showOptionDialog(null, "Was möchtest du tun?", "Menü", JOptionPane.YES_NO_CANCEL_OPTION,  JOptionPane.QUESTION_MESSAGE, null,
-				new Object[]{"Speichern", "Speichern und zum Hauptmenü", "Laden", "Zur�ck zum Hauptmen�"}, "Speichern");
+				new Object[]{"Speichern", "Speichern und zum Hauptmenü", "Laden", "Zurück zum Hauptmenü"}, "Speichern");
 	}
 
 	public void showMenu() {

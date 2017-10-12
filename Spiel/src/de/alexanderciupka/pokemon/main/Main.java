@@ -24,6 +24,7 @@ public class Main {
 
 		MenuController.getInstance();
 
+
 		Thread repainter = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -43,7 +44,7 @@ public class Main {
 					startTime = System.currentTimeMillis();
 					wait = false;
 					if (!frame.getDialogue().isVisible()
-							|| (gController.isFighting() && !frame.getFightPanel().getTextLabel().isVisible())) {
+							|| (gController.isFighting() && !frame.getFightPanel().getTextLabel().isVisible()) && !frame.getDialogue().isVisible()) {
 						wait = true;
 						firstDialogue = true;
 						waitFrames = 0;

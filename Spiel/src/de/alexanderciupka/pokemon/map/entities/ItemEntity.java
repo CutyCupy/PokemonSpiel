@@ -133,10 +133,10 @@ public class ItemEntity extends Entity {
 				this.id = other.id;
 			}
 			if(saveData.get("item") != null) {
-				this.item = saveData.get("item") instanceof JsonNull ? null :
-					Item.valueOf(saveData.get("item").getAsString().toUpperCase());
+				setItem(saveData.get("item") instanceof JsonNull ? null :
+					Item.valueOf(saveData.get("item").getAsString().toUpperCase()));
 			} else {
-				this.item = other.item;
+				setItem(other.item);
 			}
 			if(saveData.get("hidden") != null) {
 				this.hidden = saveData.get("hidden").getAsBoolean();

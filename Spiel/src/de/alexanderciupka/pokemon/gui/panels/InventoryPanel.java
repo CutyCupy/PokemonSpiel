@@ -36,17 +36,17 @@ public class InventoryPanel extends JPanel {
 	private JPanel panel;
 
 	private Player currentPlayer;
-	
+
 	private GameController gController;
 
 	private static final Font FONT = new Font("Monospace", Font.PLAIN, 35);
 	private static final Color LABEL_BACKGROUND = new Color(-1118482);
 	private static final Color HOVER_BACKGROUND = LABEL_BACKGROUND.darker();
-	
-	private HashMap<Item, ImageIcon> itemSprites;   
+
+	private HashMap<Item, ImageIcon> itemSprites;
 
 	public InventoryPanel() {
-		
+
 		gController = GameController.getInstance();
 
 		itemNameLabels = new HashMap<>();
@@ -70,7 +70,7 @@ public class InventoryPanel extends JPanel {
 		pokemonB.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		pokemonB.setBackground(Color.WHITE);
 		pokemonB.setFocusable(false);
-		
+
 		pokemonB.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -79,7 +79,7 @@ public class InventoryPanel extends JPanel {
 //				gController.getGameFrame().repaint();
 				e.getComponent().setBackground(Color.WHITE);
 			}
-			
+
 			@Override
 			public void mouseExited(MouseEvent e) {
 				JButton source = (JButton) e.getComponent();
@@ -91,9 +91,9 @@ public class InventoryPanel extends JPanel {
 				JButton source = (JButton) e.getComponent();
 				source.setBackground(Color.WHITE.darker());
 			}
-			
+
 		});
-		
+
 		add(pokemonB);
 
 		backB = new JButton("Zurück");
@@ -102,7 +102,7 @@ public class InventoryPanel extends JPanel {
 		backB.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		backB.setBackground(Color.WHITE);
 		backB.setFocusable(false);
-		
+
 		backB.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -114,7 +114,7 @@ public class InventoryPanel extends JPanel {
 				e.getComponent().setBackground(Color.WHITE);
 //				gController.getGameFrame().repaint();
 			}
-			
+
 			@Override
 			public void mouseExited(MouseEvent e) {
 				JButton source = (JButton) e.getComponent();
@@ -126,10 +126,10 @@ public class InventoryPanel extends JPanel {
 				JButton source = (JButton) e.getComponent();
 				source.setBackground(Color.WHITE.darker());
 			}
-			
+
 		});
-			
-		
+
+
 		add(backB);
 
 		itemSP = new JScrollPane();
@@ -143,17 +143,17 @@ public class InventoryPanel extends JPanel {
 		panel.setLayout(layout);
 
 		itemSP.getVerticalScrollBar().setUnitIncrement(10);
-		
+
 		readSprites();
 	}
-	
+
 	private void readSprites() {
 		this.itemSprites = new HashMap<>(Item.values().length);
 		for(Item i : Item.values()) {
 			try {
 				this.itemSprites.put(i, new ImageIcon(gController.getRouteAnalyzer().getItemImage(i)));
 			} catch(Exception e) {}
-		}	
+		}
  	}
 
 	public void update(Player p) {
@@ -182,16 +182,16 @@ public class InventoryPanel extends JPanel {
 						JLabel itemL = new JLabel(i.getName());
 						itemL.setOpaque(true);
 						itemL.setFont(FONT);
-						
+
 						itemL.setName(String.valueOf(row));
-						
+
 						gbc.gridx = 0;
 						gbc.gridy = row;
-						
+
 						gbc.fill = GridBagConstraints.BOTH;
 						gbc.weightx = 0.5;
 						gbc.weighty = 0;
-						
+
 						itemL.addMouseListener(new MouseAdapter() {
 							@Override
 							public void mouseExited(MouseEvent e) {
@@ -200,7 +200,7 @@ public class InventoryPanel extends JPanel {
 								descriptionL.setText("");
 								spriteL.setIcon(null);
 							}
-							
+
 							@Override
 							public void mouseEntered(MouseEvent e) {
 								JLabel source = (JLabel) e.getComponent();
@@ -211,7 +211,7 @@ public class InventoryPanel extends JPanel {
 										getFontMetrics(descriptionL.getFont()), 5));
 								spriteL.setIcon(itemSprites.get(item));
 							}
-							
+
 							@Override
 							public void mouseClicked(MouseEvent e) {
 								new Thread(new Runnable() {
@@ -237,33 +237,33 @@ public class InventoryPanel extends JPanel {
 								}).start();
 							}
 						});
-						
+
 						panel.add(itemL, gbc);
 						JLabel amountL = new JLabel("x" + (amount > 99 ? 99 : amount));
 						amount -= 99;
 						amountL.setFont(FONT);
-						
+
 						amountL.setName(String.valueOf(row));
-						
+
 						gbc.gridx = 1;
 						gbc.gridy = row;
-						
+
 						gbc.fill = GridBagConstraints.BOTH;
 						gbc.weightx = 0.5;
 						gbc.weighty = 0;
-						
+
 						panel.add(amountL, gbc);
-						
+
 						itemNameLabels.put(row, itemL);
 						itemAmountLabels.put(row, amountL);
-						
+
 						row++;
 					}
 				}
 			}
-			
+
 			itemSP.setBorder(null);
-			
+
 			itemSP.setSize(itemSP.getWidth(), Math.min(row * 50 + 5, 569));
 			itemSP.repaint();
 			this.repaint();

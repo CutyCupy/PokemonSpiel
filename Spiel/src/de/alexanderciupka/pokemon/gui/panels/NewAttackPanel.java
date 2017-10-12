@@ -219,6 +219,7 @@ public class NewAttackPanel extends JPanel {
 								pokemon.addMove(pokemon.getMoves()[Integer.parseInt(e.getComponent().getName())].getName(), newMove);
 								if(gController.isFighting()) {
 									gController.getGameFrame().getFightPanel().setPlayer();
+									gController.getGameFrame().getFightPanel().updatePanels();
 									gController.getFight().setCurrentFightOption(FightOption.FIGHT);
 									gController.getGameFrame().getFightPanel().addText(pokemon.getName() + " hat " + ((MoveButton) e.getComponent()).getMove().getName() + " vergessen und " + newMove.getName() + " erlernt!");
 								} else {
@@ -290,10 +291,10 @@ public class NewAttackPanel extends JPanel {
 
 	private void updateMoves() {
 		for(int i = 0; i < Math.min(this.pokemon.getMoves().length, this.moves.length); i++) {
-			moves[i].setMove(this.pokemon.getMoves()[i]);
+			moves[i].setMove(this.pokemon, this.pokemon.getMoves()[i]);
 			moves[i].setName(String.valueOf(i));
 		}
-		newMoveButton.setMove(newMove);
+		newMoveButton.setMove(this.pokemon, newMove);
 	}
 
 	private void update() {
@@ -319,7 +320,7 @@ public class NewAttackPanel extends JPanel {
 		this.hpBar.setForeground(stats.getHPColor());
 		this.ailmentLabel.setAilment(this.pokemon.getAilment());
 		//Stats
-		for(int i = 0; i < Stat.values().length - 1; i++) {
+		for(int i = 0; i < Stat.values().length - 3; i++) {
 			this.stats[i].setText(Stat.values()[i].getText() + ": " + stats.getStats().get(Stat.values()[i]));
 		}
 		setVisible(true);

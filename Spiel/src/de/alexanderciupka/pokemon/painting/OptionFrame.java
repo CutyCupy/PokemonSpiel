@@ -36,10 +36,10 @@ public class OptionFrame extends JFrame {
 	private JComboBox<Integer> circleSizeBox;
 	private boolean rubberEnabled;
 	private boolean fillEnabled;
-	
+
 	private PaintingController pController;
-	
-	
+
+
 	public OptionFrame() {
 		pController = PaintingController.getInstance();
 		setResizable(false);
@@ -52,7 +52,7 @@ public class OptionFrame extends JFrame {
 		createComponents();
 		repaint();
 	}
-	
+
 	public void createComponents() {
 		createColorComponents();
 		createModeComponents();
@@ -104,9 +104,9 @@ public class OptionFrame extends JFrame {
 		contentPane.add(saveButton);
 		contentPane.add(rubberButton);
 	}
-	
+
 	private void createModeComponents() {
-		JLabel circleSizeBoxLabel = new JLabel("Gr��e");
+		JLabel circleSizeBoxLabel = new JLabel("Größe");
 		circleSizeBoxLabel.setBounds(35, 235, 40, 10);
 		circleSizeBox = new JComboBox<Integer>();
 		for(int i = 2; i <= 100; i += 2) {
@@ -132,7 +132,7 @@ public class OptionFrame extends JFrame {
 		colorPanel = new JPanel();
 		colorPanel.setBackground(new Color(254, 254, 254));
 		colorPanel.setBounds(80, 30, 40, 40);
-		
+
 		JLabel redPanel = new JLabel("Rot");
 		redPanel.setBounds(30, 80, 30, 20);
 		redValue = new JTextField("254");
@@ -140,17 +140,17 @@ public class OptionFrame extends JFrame {
 		redBar = new JSlider(SwingConstants.HORIZONTAL, 0, 254, 254);
 		redBar.setBounds(30, 100, 140, 25);
 		rgbValues[0] = redValue;
-		rgbSlider[0] = redBar;		
-		
-		JLabel greenPanel = new JLabel("Gr�n");
+		rgbSlider[0] = redBar;
+
+		JLabel greenPanel = new JLabel("Grün");
 		greenPanel.setBounds(30, 130, 30, 20);
 		greenValue = new JTextField("254");
 		greenValue.setBounds(140, 130, 30, 20);
 		greenBar = new JSlider(SwingConstants.HORIZONTAL, 0, 254, 254);
 		greenBar.setBounds(30, 150, 140, 25);
 		rgbValues[1] = greenValue;
-		rgbSlider[1] = greenBar;	
-		
+		rgbSlider[1] = greenBar;
+
 		JLabel bluePanel = new JLabel("Blau");
 		bluePanel.setBounds(30, 180, 30, 20);
 		blueValue = new JTextField("254");
@@ -158,8 +158,8 @@ public class OptionFrame extends JFrame {
 		blueBar = new JSlider(SwingConstants.HORIZONTAL, 0, 254, 254);
 		blueBar.setBounds(30, 200, 140, 25);
 		rgbValues[2] = blueValue;
-		rgbSlider[2] = blueBar;	
-		
+		rgbSlider[2] = blueBar;
+
 		contentPane.add(colorPanel);
 		contentPane.add(redPanel);
 		contentPane.add(redValue);
@@ -172,7 +172,7 @@ public class OptionFrame extends JFrame {
 		contentPane.add(blueBar);
 		addActionListeners();
 	}
-	
+
 	private void addActionListeners() {
 		redValue.addActionListener(new ActionListener() {
 			@Override
@@ -214,7 +214,7 @@ public class OptionFrame extends JFrame {
 			}
 		});
 	}
-	
+
 	public void valueActionListener(JTextField textField, int value, int index) {
 		if(value > 0 && value < 256) {
 			rgbSlider[index].setValue(value);
@@ -222,18 +222,18 @@ public class OptionFrame extends JFrame {
 			textField.setText(String.valueOf(rgbSlider[index].getValue()));
 		}
 	}
-	
+
 	public void sliderActionListener(JTextField textField, int value) {
 		colorPanel.setBackground(new Color(redBar.getValue(), greenBar.getValue(), blueBar.getValue()));
 		textField.setText(String.valueOf(value));
 		pController.setPaintingColor(colorPanel.getBackground());
 	}
-	
+
 	public void start() {
 		setVisible(true);
 		repaint();
 	}
-	
+
 	public void updateColorLabel(Color c) {
 		colorPanel.setBackground(c);
 		redBar.setValue(c.getRed());
@@ -244,7 +244,7 @@ public class OptionFrame extends JFrame {
 		blueValue.setText(String.valueOf(c.getBlue()));
 		repaint();
 	}
-	
+
 	public int getCircleWidth() {
 		return (int) circleSizeBox.getSelectedItem();
 	}

@@ -28,10 +28,10 @@ public class PaintingNameFrame extends JFrame {
 	private JTextField width;
 	private JTextField height;
 	private Font font;
-	
+
 	private MenuController mController;
 	private PaintingController pController;
-	
+
 	public PaintingNameFrame() {
 		setTitle("Name des Bildes!");
 		setResizable(false);
@@ -44,7 +44,7 @@ public class PaintingNameFrame extends JFrame {
 		font = mController.getMenuFont().deriveFont(16F);
 		addComponents();
 	}
-	
+
 	private void addComponents() {
 		nameField = new JTextField();
 		nameField.setBounds(0, 0, 280, 35);
@@ -76,18 +76,18 @@ public class PaintingNameFrame extends JFrame {
 		loadButton.setBounds(100, 85, 81, 35);
 		loadButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 5));
 		loadButton.setFont(font);
-		cancelButton = new JButton("Zurück");
+		cancelButton = new JButton("ZurÃ¼ck");
 		cancelButton.setForeground(MainMenuFrame.FOREGROUND);
 		cancelButton.setBackground(MainMenuFrame.BACKGROUND);
 		cancelButton.setBounds(200, 85, 81, 35);
 		cancelButton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 5));
 		cancelButton.setFont(font);
-		
+
 		nameField.setHorizontalAlignment(SwingConstants.CENTER);
 		width.setHorizontalAlignment(SwingConstants.CENTER);
 		height.setHorizontalAlignment(SwingConstants.CENTER);
 		xLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		
+
 		contentPane.add(nameField);
 		contentPane.add(width);
 		contentPane.add(xLabel);
@@ -97,32 +97,32 @@ public class PaintingNameFrame extends JFrame {
 		contentPane.add(cancelButton);
 		addActionListeners();
 	}
-	
+
 	private void addActionListeners() {
 		nameField.addKeyListener(new KeyListener() {
 			@Override
 			public void keyTyped(KeyEvent e) {
 				checkInput(((JTextField) e.getSource()).getText(), e.getKeyChar());
 			}
-			
+
 			@Override
 			public void keyReleased(KeyEvent e) {
 				checkInput(((JTextField) e.getSource()).getText(), e.getKeyChar());
 			}
-			
+
 			@Override
 			public void keyPressed(KeyEvent e) {
 				checkInput(((JTextField) e.getSource()).getText(), e.getKeyChar());
 			}
 		});
-		width.addKeyListener(new KeyListener() {	
+		width.addKeyListener(new KeyListener() {
 			@Override
 			public void keyTyped(KeyEvent e) {
 //				if(width.getText().length() > 0) {
 //					widthCheck(e.getKeyChar());
 //				}
 			}
-			
+
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if(e.getKeyCode() != KeyEvent.VK_BACK_SPACE) {
@@ -131,7 +131,7 @@ public class PaintingNameFrame extends JFrame {
 					}
 				}
 			}
-			
+
 			@Override
 			public void keyPressed(KeyEvent e) {
 //				if(width.getText().length() > 0) {
@@ -140,14 +140,14 @@ public class PaintingNameFrame extends JFrame {
 			}
 		});
 		height.addKeyListener(new KeyListener() {
-			
+
 			@Override
 			public void keyTyped(KeyEvent e) {
 //				if(height.getText().length() > 0) {
 //					heightCheck(e.getKeyChar());
 //				}
 			}
-			
+
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if(e.getKeyCode() != KeyEvent.VK_BACK_SPACE) {
@@ -156,7 +156,7 @@ public class PaintingNameFrame extends JFrame {
 					}
 				}
 			}
-			
+
 			@Override
 			public void keyPressed(KeyEvent e) {
 //				if(height.getText().length() > 0) {
@@ -184,7 +184,7 @@ public class PaintingNameFrame extends JFrame {
 			}
 		});
 	}
-	
+
 	private void widthCheck(char c) {
 		if(isANumber(c)) {
 			int value = Integer.parseInt(width.getText());
@@ -196,7 +196,7 @@ public class PaintingNameFrame extends JFrame {
 		}
 		width.setText(cutLastChar(width.getText()));
 	}
-	
+
 	private void heightCheck(char c) {
 		if(isANumber(c)) {
 			int value = Integer.parseInt(height.getText());
@@ -208,24 +208,24 @@ public class PaintingNameFrame extends JFrame {
 		}
 		height.setText(cutLastChar(height.getText()));
 	}
-	
+
 	private boolean checkName(String text) {
 		if(text.length() > 0 && text.length() <= 16) {
 			return true;
 		}
 		return false;
 	}
-	
+
 	private void checkInput(String text, char inputChar) {
 		if(!mController.checkName(text, inputChar)) {
 			nameField.setText(cutLastChar(nameField.getText()));
 		}
 	}
-	
+
 	private String cutLastChar(String text) {
 		return text.substring(0, text.length() - 1);
 	}
-	
+
 	private boolean isANumber(char c) {
 		try {
 			Integer.parseInt(String.valueOf(c));
@@ -234,5 +234,5 @@ public class PaintingNameFrame extends JFrame {
 			return false;
 		}
 	}
-	
+
 }

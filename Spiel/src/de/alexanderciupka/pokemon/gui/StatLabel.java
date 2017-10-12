@@ -30,6 +30,9 @@ public class StatLabel extends JLabel {
 
 	@Override
 	protected void paintComponent(Graphics g) {
+		if(pokemon == null) {
+			return;
+		}
 		g.setFont(NAME_FONT);
 		FontMetrics fm = getFontMetrics(NAME_FONT);
 		int h = 15;

@@ -20,6 +20,7 @@ import de.alexanderciupka.pokemon.fighting.FightOption;
 import de.alexanderciupka.pokemon.gui.overlay.DarkOverlay;
 import de.alexanderciupka.pokemon.gui.panels.EvolutionPanel;
 import de.alexanderciupka.pokemon.gui.panels.FightPanel;
+import de.alexanderciupka.pokemon.gui.panels.GeneratorPanel;
 import de.alexanderciupka.pokemon.gui.panels.InventoryPanel;
 import de.alexanderciupka.pokemon.gui.panels.NewAttackPanel;
 import de.alexanderciupka.pokemon.gui.panels.PCPanel;
@@ -109,7 +110,6 @@ public class GameFrame extends JFrame {
 	public void paint(Graphics g) {
 		if (!gController.isFighting()) {
 			if (this.fighting) {
-				System.err.println("foo");
 				this.fighting = false;
 			}
 			if (currentPanel != null) {
@@ -158,6 +158,7 @@ public class GameFrame extends JFrame {
 		}
 		fight.setEnemy();
 		fight.setPlayer();
+		fight.updatePanels();
 	}
 
 	public void stopFight() {
@@ -216,20 +217,26 @@ public class GameFrame extends JFrame {
 	}
 
 	public void setCurrentPanel(JPanel currentPanel) {
+		System.out.println(currentPanel);
 		if (!this.back && (currentPanel != null || this.currentPanel != null)
 				&& ((currentPanel != null && !currentPanel.getClass().isInstance(this.currentPanel))
 						|| (this.currentPanel != null && !this.currentPanel.getClass().isInstance(currentPanel)))) {
-
 			this.panelHistory.push(this.currentPanel);
 		}
-		this.currentPanel = currentPanel;
+		if(this.currentPanel instanceof GeneratorPanel) {
+			map.add(imageHolder);
+		}
 		if (this.gController.isFighting() && currentPanel instanceof PokemonPanel) {
 			this.gController.getFight().setCurrentFightOption(FightOption.POKEMON);
 		} else if (this.gController.isFighting() && currentPanel instanceof ReportPanel) {
 			this.gController.getFight().setCurrentFightOption(FightOption.REPORT);
 		} else if (this.gController.isFighting() && currentPanel instanceof InventoryPanel) {
 			this.gController.getFight().setCurrentFightOption(FightOption.BAG);
+		} else if(currentPanel instanceof GeneratorPanel) {
+			currentPanel.add(imageHolder);
 		}
+		this.currentPanel = currentPanel;
+		System.out.println(this.currentPanel);
 		this.back = false;
 	}
 

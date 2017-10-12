@@ -147,8 +147,8 @@ public class PokemonEntity extends Entity {
 		if (super.equals(obj) && obj instanceof PokemonEntity) {
 			PokemonEntity other = (PokemonEntity) obj;
 			return this.id.equals(other.id) && this.interactionMessage.equals(other.interactionMessage)
-					&& this.interactionMessage.equals(other.noInteractionMessage)
-					&& this.requiredItems.equals(other.requiredItems) && 
+					&& this.noInteractionMessage.equals(other.noInteractionMessage)
+					&& this.requiredItems.equals(other.requiredItems) &&
 					(this.pokemon == null ? other.pokemon == null : this.pokemon.equals(other.pokemon));
 		}
 		return false;

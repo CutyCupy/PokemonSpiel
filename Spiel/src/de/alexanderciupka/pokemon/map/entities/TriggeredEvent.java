@@ -1,5 +1,6 @@
 package de.alexanderciupka.pokemon.map.entities;
 
+import java.awt.Color;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import de.alexanderciupka.pokemon.characters.Player;
 import de.alexanderciupka.pokemon.map.Camera;
 import de.alexanderciupka.pokemon.map.Change;
 import de.alexanderciupka.pokemon.map.GameController;
+import de.alexanderciupka.pokemon.menu.SoundController;
 import de.alexanderciupka.pokemon.pokemon.Item;
 
 public class TriggeredEvent {
@@ -30,7 +32,7 @@ public class TriggeredEvent {
 
 		this.gController = GameController.getInstance();
 	}
-	
+
 	public ArrayList<Change[]> getChanges() {
 		return this.changes;
 	}
@@ -38,17 +40,18 @@ public class TriggeredEvent {
 	public void addChanges(Change[] changes) {
 		this.changes.add(changes);
 	}
-	
+
 	public String getId() {
 		return id;
 	}
 
 	public void startEvent(Player source) {
+		triggered = true;
 		if(!triggered) {
 			triggered = true;
 			while(gController.getInteractionPause()) {
 				try {
-					Thread.sleep(5);
+					Thread.sleep(1);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
@@ -89,7 +92,7 @@ public class TriggeredEvent {
 				for(int j = 0; j < currentChanges.length; j++) {
 					Camera cam = gController.getCurrentBackground().getCamera();
 					if(currentChanges[j].isCenterCharacter()) {
-						cam.setCharacter(currentChanges[j].getCharacter(), 
+						cam.setCharacter(currentChanges[j].getCharacter(),
 								currentChanges[j].isCamAnimation());
 					} else {
 						Point camPosition = currentChanges[j].getCamPosition();
@@ -112,7 +115,7 @@ public class TriggeredEvent {
 							currentChar.setCurrentDirection(currentChanges[c].getDirection());
 						}
 					}
-//					GameController.getInstance().getGameFrame().repaint();
+//					gController.getGameFrame().repaint();
 				}
 				if(max == 0) {
 					for(int c = 0; c < currentChanges.length; c++) {
@@ -122,7 +125,7 @@ public class TriggeredEvent {
 							currentChar.setCurrentDirection(currentChanges[c].getDirection());
 						}
 					}
-//					GameController.getInstance().getGameFrame().repaint();
+//					gController.getGameFrame().repaint();
 				}
 				for(int j = 0; j < currentChanges.length; j++) {
 					currentChar = currentChanges[j].getCharacter();
@@ -167,8 +170,14 @@ public class TriggeredEvent {
 				for(int j = 0; j < currentChanges.length; j++) {
 					if(currentChanges[j].getDialog() != null) {
 						currentChar = currentChanges[j].getCharacter();
-						GameController.getInstance().getGameFrame().addDialogue((currentChar instanceof NPC ? (currentChar.getName() + ": ") : "") + currentChanges[j].getDialog());
-						GameController.getInstance().waitDialogue();
+						if(currentChar instanceof NPC) {
+							gController.getGameFrame().addDialogue(currentChar.getName() + ": " + currentChanges[j].getDialog());
+						} else {
+							gController.getGameFrame().getDialogue().setForeground(new Color(255, 102, 204));
+							gController.getGameFrame().addDialogue(currentChanges[j].getDialog());
+						}
+						gController.waitDialogue();
+						gController.getGameFrame().getDialogue().setForeground(Color.BLACK);
 					}
 				}
 				for(int j = 0; j < currentChanges.length; j++) {
@@ -243,27 +252,29 @@ public class TriggeredEvent {
 						}
 					}
 				}
+				for(int j = 0; j < currentChanges.length; j++) {
+					if(currentChanges[j].getSound() != null) {
+						SoundController.getInstance().playSound(currentChanges[j].getSound(), currentChanges[j].isWaiting());
+					}
+				}
 			}
 			gController.setInteractionPause(false);
 		}
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof TriggeredEvent) {
 			TriggeredEvent other = (TriggeredEvent) obj;
 			if(other.changes.size() != this.changes.size() || !this.id.equals(other.id) || this.triggered != other.triggered) {
-				System.err.println("wrong triggeredevent");
 				return false;
 			}
 			for(int i = 0; i < this.changes.size(); i++) {
 				if(this.changes.get(i).length != other.changes.get(i).length) {
-					System.err.println("wrong changesize");
 					return false;
 				} else {
 					for(int j = 0; j < this.changes.get(i).length; j++) {
 						if(!this.changes.get(i)[j].equals(other.changes.get(i)[j])) {
-							System.err.println("unequal changes");
 							return false;
 						}
 					}
@@ -282,7 +293,7 @@ public class TriggeredEvent {
 		}
 		return saveData;
 	}
-	
+
 	public boolean importSaveData(JsonObject saveData, TriggeredEvent event) {
 		if(saveData.get("id").getAsString().equals(this.id)) {
 			if(saveData.get("triggered") != null) {

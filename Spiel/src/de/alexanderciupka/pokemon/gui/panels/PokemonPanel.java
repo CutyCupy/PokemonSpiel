@@ -8,9 +8,11 @@ import java.awt.event.ActionListener;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import de.alexanderciupka.hoverbutton.Main;
 import de.alexanderciupka.pokemon.fighting.FightOption;
 import de.alexanderciupka.pokemon.gui.PokemonButton;
 import de.alexanderciupka.pokemon.map.GameController;
@@ -37,6 +39,7 @@ public class PokemonPanel extends JPanel {
 		gController = GameController.getInstance();
 		for (int i = 0; i < 6; i++) {
 			PokemonButton pokemonButton = new PokemonButton(gController.getMainCharacter().getTeam().getTeam()[i], i);
+//			pokemonButton.setOpaque(false);
 			pokemonButton.setSize(300, 96);
 			if (i % 2 == 0) {
 				pokemonButton.setLocation(10, 100 + i * 62);
@@ -61,7 +64,11 @@ public class PokemonPanel extends JPanel {
 						}
 						switch (result) {
 						case 0:
-							gController.displayReport(source.getPokemon(), gController.getMainCharacter().getTeam().getTeam());
+							if(gController.isFighting()) {
+								gController.displayReport(source.getPokemon(), gController.getFight().getPlayerTeam().getTeam());
+							} else {
+								gController.displayReport(source.getPokemon(), gController.getMainCharacter().getTeam().getTeam());
+							}
 							break;
 						case 1:
 							if (gController.isFighting()) {
@@ -75,12 +82,12 @@ public class PokemonPanel extends JPanel {
 												gController.getGameFrame().getFightPanel().checkEnemyAttack();
 												gController.getGameFrame().getFightPanel().showMenu();
 											}
-										}).start();;
+										}).start();
 									}
 								}
 							} else {
 								if (source.getIndex() != firstOne) {
-									source.setBackground(Color.LIGHT_GRAY);
+//									source.setBackground(Color.LIGHT_GRAY);
 									if (firstOne != -1) {
 										gController.getMainCharacter().getTeam().swapPokemon(firstOne, source.getIndex());
 										firstOne = -1;
@@ -89,7 +96,7 @@ public class PokemonPanel extends JPanel {
 										firstOne = source.getIndex();
 									}
 								} else {
-									source.setBackground(Color.WHITE);
+//									source.setBackground(Color.WHITE);
 									firstOne = -1;
 								}
 							}
@@ -152,9 +159,16 @@ public class PokemonPanel extends JPanel {
 		backButton.setFont(new Font(backButton.getFont().getFontName(), Font.PLAIN, 30));
 		backButton.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		backButton.setBackground(Color.WHITE);
+		backButton.setOpaque(false);
 		add(backButton);
 
 		addActionListeners();
+
+		JLabel background = new JLabel(new ImageIcon(Main.class.getResource("/backgrounds/team_pink.png")));
+		background.setBounds(getBounds());
+		this.add(background);
+
+		this.setComponentZOrder(background, getComponentCount() - 1);
 	}
 
 	private void addActionListeners() {
@@ -173,7 +187,13 @@ public class PokemonPanel extends JPanel {
 	}
 
 	public void update() {
-		if(this.currentItem != null && this.gController.getGameFrame().getInventoryPanel().getCurrentPlayer().getItems().get(currentItem) == 0) {
+		if(this.currentItem != null &&
+				this.gController.getGameFrame().getInventoryPanel().getCurrentPlayer().getItems().get(currentItem) == 0 &&
+				!gController.isFighting()) {
+			while(!this.getClass().isInstance(gController.getGameFrame().getCurrentPanel())) {
+//				System.out.println(gController.getGameFrame().getCurrentPanel().getClass());
+				Thread.yield();
+			}
 			gController.getGameFrame().addDialogue("Du hast deinen letzten " + this.currentItem.getName() + " benutzt!");
 			this.currentItem = null;
 			gController.waitDialogue();

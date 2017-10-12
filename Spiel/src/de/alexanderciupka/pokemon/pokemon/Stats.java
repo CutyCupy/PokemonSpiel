@@ -58,7 +58,6 @@ public class Stats {
 
 		this.currentHP = stats.get(Stat.HP);
 		this.nature = Nature.getRandomNature();
-		this.nature = Nature.BASHFUL;
 		updateStats();
 	}
 
@@ -91,6 +90,10 @@ public class Stats {
 			level++;
 			if(gController.isFighting()) {
 				gController.getGameFrame().getFightPanel().updatePanels();
+				SoundController.getInstance().playSound(SoundController.LEVEL_UP);
+				if(this.pokemon.equals(gController.getFight().getPlayer())) {
+					gController.getGameFrame().getFightPanel().getPlayerAnimation().playAnimation("levelup");
+				}
 				gController.getGameFrame().getFightPanel().addText(pokemon.getName() + " erreicht Level " + this.level + "!");
 			} else {
 				if(!generated) {
@@ -104,6 +107,8 @@ public class Stats {
 			this.level = 100;
 			if(gController.isFighting()) {
 				gController.getGameFrame().getFightPanel().updatePanels();
+				SoundController.getInstance().playSound(SoundController.LEVEL_UP);
+				gController.getGameFrame().getFightPanel().getPlayerAnimation().playAnimation("levelup");
 				gController.getGameFrame().getFightPanel().addText(pokemon.getName() + " erreicht Level " + this.level + "!");
 			} else {
 				if(!generated) {
@@ -201,7 +206,7 @@ public class Stats {
 					if(gController.isFighting()) {
 						gController.getGameFrame().getFightPanel().addText(this.pokemon.getName() + " versucht "
 								+ newMove.getName()
-								+ " zu erlernen! M�chtest du eine andere Attacke vergessen oder deine momentanen Attacken behalten?");
+								+ " zu erlernen! Möchtest du eine andere Attacke vergessen oder deine momentanen Attacken behalten?");
 						gController.getGameFrame().getFightPanel().getTextLabel().setAfter(After.NEW_ATTACK);
 						gController.getGameFrame().displayNewMove(this.pokemon, newMove);
 						while (this.gController.getFight().getCurrentFightOption() == FightOption.NEW_ATTACK) {
@@ -210,7 +215,7 @@ public class Stats {
 					} else {
 						gController.getGameFrame().addDialogue(this.pokemon.getName() + " versucht "
 								+ newMove.getName()
-								+ " zu erlernen! M�chtest du eine andere Attacke vergessen oder deine momentanen Attacken behalten?");
+								+ " zu erlernen! Möchtest du eine andere Attacke vergessen oder deine momentanen Attacken behalten?");
 						gController.waitDialogue();
 						gController.getGameFrame().getDialogue().setAfter(After.NEW_ATTACK);
 						gController.getGameFrame().displayNewMove(this.pokemon, newMove);
@@ -318,6 +323,18 @@ public class Stats {
 	}
 
 	public int restoreHP(int ammount) {
+		if(this.pokemon.getSecondaryAilments().contains(SecondaryAilment.HEALBLOCK)) {
+			gController.getGameFrame().getFightPanel().addText(
+					SecondaryAilment.HEALBLOCK.getAffected().replace("@pokemon", this.pokemon.getName()));
+			return 0;
+		}
+		if(gController.isFighting()) {
+			if(this.pokemon.equals(gController.getFight().getPlayer())) {
+				gController.getGameFrame().getFightPanel().getPlayerAnimation().playAnimation("heilung");
+			} else {
+				gController.getGameFrame().getFightPanel().getEnemyAnimation().playAnimation("heilung");
+			}
+		}
 		short oldHP = this.currentHP;
 		if (this.currentHP + ammount <= stats.get(Stat.HP)) {
 			this.currentHP += ammount;
@@ -333,8 +350,9 @@ public class Stats {
 			lost = currentHP;
 			this.currentHP = 0;
 			this.pokemon.setAilment(Ailment.FAINTED);
+		} else {
+			this.currentHP -= ammount;
 		}
-		this.currentHP -= ammount;
 		return lost;
 	}
 

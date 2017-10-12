@@ -2,7 +2,6 @@ package de.alexanderciupka.pokemon.gui;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
@@ -164,5 +163,13 @@ public class TextLabel extends JLabel implements Runnable {
 		}
 		this.parent = parent;
 		this.parent.add(this);
+	}
+
+	public void waitText() {
+		setWaiting(false);
+		while (!isEmpty()) {
+			Thread.yield();
+			repaint();
+		}
 	}
 }

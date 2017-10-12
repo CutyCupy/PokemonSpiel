@@ -9,9 +9,9 @@ import de.alexanderciupka.pokemon.characters.Player;
 import de.alexanderciupka.pokemon.pokemon.Item;
 
 public class Change {
-	
+
 	private GameController gController;
-	
+
 	private String participant;
 	private String routeID;
 	private Direction direction;
@@ -23,33 +23,36 @@ public class Change {
 	private String noFightUpdate;
 	private String afterFightUpdate;
 	private String spriteUpdate;
+	private String sound;
+	private boolean waitSound;
 	private boolean heal;
 	private HashMap<Item, Integer> item;
 	private Point camPosition;
 	private boolean camAnimation;
 	private boolean centerCharacter;
-	
+
 	private Character character;
 	private Route route;
 	private Direction[] path;
-	
-	
-	
+
+
+
 	public Change() {
 		this.gController = GameController.getInstance();
 	}
-	
+
 	public void initiate(Player source) {
 		this.route = this.gController.getRouteAnalyzer().getRouteById(routeID);
 		this.route = this.route == null ? source.getCurrentRoute() : this.route;
 		this.character = this.route.getNPCByName(participant);
 		this.character = this.character == null ? source : this.character;
-		this.path = this.character.moveTowards(this.move.x == -1 ? this.character.getCurrentPosition().x : this.move.x, 
+		System.err.println(this.move.x + " - " + this.move.y);
+		this.path = this.character.moveTowards(this.move.x == -1 ? this.character.getCurrentPosition().x : this.move.x,
 				this.move.y == -1 ? this.character.getCurrentPosition().y : this.move.y);
 		this.item = new HashMap<Item, Integer>();
 	}
-	
-	
+
+
 	public Character getCharacter() {
 		return this.character;
 	}
@@ -134,7 +137,7 @@ public class Change {
 	public void setHeal(boolean heal) {
 		this.heal = heal;
 	}
-	
+
 	public HashMap<Item, Integer> getItem() {
 		return item;
 	}
@@ -167,6 +170,22 @@ public class Change {
 		this.centerCharacter = centerCharacter;
 	}
 
+	public String getSound() {
+		return sound;
+	}
+
+	public void setSound(String sound) {
+		this.sound = sound;
+	}
+
+	public boolean isWaiting() {
+		return waitSound;
+	}
+
+	public void setWait(boolean wait) {
+		this.waitSound = wait;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof Change) {
@@ -179,14 +198,15 @@ public class Change {
 					((this.noFightUpdate == null && other.noFightUpdate == null) || (this.noFightUpdate != null && this.noFightUpdate.equals(other.noFightUpdate))) &&
 					((this.afterFightUpdate == null && other.afterFightUpdate == null) || (this.afterFightUpdate != null && this.afterFightUpdate.equals(other.afterFightUpdate))) &&
 					((this.spriteUpdate == null && other.spriteUpdate == null) || (this.spriteUpdate != null && this.spriteUpdate.equals(other.spriteUpdate))) &&
-					(this.item == null && other.item == null) || (this.item != null && this.item.equals(other.item)) && 
+					(this.item == null && other.item == null) || (this.item != null && this.item.equals(other.item)) &&
 					this.camAnimation == other.camAnimation && this.centerCharacter == other.centerCharacter &&
-					(this.camPosition == null && other.camPosition == null) || (this.camPosition != null && this.camPosition.equals(other.camPosition)));
+					(this.camPosition == null && other.camPosition == null) || (this.camPosition != null && this.camPosition.equals(other.camPosition)) &&
+					(this.sound == null ? other.sound == null : this.sound.equals(other.sound)));
 		}
 		return false;
 	}
 
-	
+
 	@Override
 	public Change clone() {
 		Change clone = new Change();
@@ -205,6 +225,8 @@ public class Change {
 		clone.setCamAnimation(this.camAnimation);
 		clone.setCamPosition(this.camPosition);
 		clone.setCenterCharacter(this.centerCharacter);
+		clone.setSound(this.sound);
+		clone.setWait(this.waitSound);
 		return clone;
 	}
 }

@@ -30,6 +30,8 @@ import de.alexanderciupka.pokemon.characters.NPC;
 import de.alexanderciupka.pokemon.gui.overlay.RainType;
 import de.alexanderciupka.pokemon.gui.overlay.SnowType;
 import de.alexanderciupka.pokemon.map.entities.Entity;
+import de.alexanderciupka.pokemon.map.entities.GeneratorEntity;
+import de.alexanderciupka.pokemon.map.entities.HatchEntity;
 import de.alexanderciupka.pokemon.map.entities.ItemEntity;
 import de.alexanderciupka.pokemon.map.entities.PokemonEntity;
 import de.alexanderciupka.pokemon.map.entities.SignEntity;
@@ -48,7 +50,7 @@ public class RouteAnalyzer {
 	public static final File SPRITE_FOLDER = new File(Main.class.getResource("/routes/Entities/").getFile());
 	public static final File TERRAIN_FOLDER = new File(Main.class.getResource("/routes/terrain/").getFile());
 	public static final File POKEBALL_FOLDER = new File(Main.class.getResource("/pokeballs/").getFile());
-
+	public static final File ANIMATION_FOLDER = new File(Main.class.getResource("/animations/").getFile());
 
 	private File[] folderFiles;
 	private BufferedReader currentReader;
@@ -60,6 +62,9 @@ public class RouteAnalyzer {
 	private HashMap<String, BufferedImage> sprites;
 	private HashMap<String, BufferedImage> terrains;
 	private HashMap<Item, BufferedImage> pokeballs;
+	private HashMap<String, BufferedImage> animations;
+
+	ArrayList<HatchEntity> hatches;
 
 	private JsonParser parser;
 
@@ -73,6 +78,7 @@ public class RouteAnalyzer {
 		sprites = new HashMap<String, BufferedImage>();
 		terrains = new HashMap<String, BufferedImage>();
 		pokeballs = new HashMap<Item, BufferedImage>();
+		animations = new HashMap<String, BufferedImage>();
 		parser = new JsonParser();
 	}
 
@@ -83,14 +89,15 @@ public class RouteAnalyzer {
 		readAllLogos();
 		readAllItems();
 		readAllRoutes();
+		readAllAnimations();
 
-		for(String s : loadedRoutes.keySet()) {
+		for (String s : loadedRoutes.keySet()) {
 			System.out.println("Loaded: " + loadedRoutes.get(s).getName());
 		}
 
 		HashMap<Integer, HashSet<String>> locations = getAllPokemonLocations();
-		for(int i = 1; i < 650; i++) {
-			if(!locations.get(i).isEmpty())
+		for (int i = 1; i < 650; i++) {
+			if (!locations.get(i).isEmpty())
 				System.out.println(gController.getInformation().getName(i) + " - " + locations.get(i));
 		}
 
@@ -98,8 +105,8 @@ public class RouteAnalyzer {
 
 	private void readAllSprites() {
 		File[] sprites = SPRITE_FOLDER.listFiles();
-		for(File currentFile : sprites) {
-			if(currentFile.isFile() && currentFile.getName().endsWith(".png")) {
+		for (File currentFile : sprites) {
+			if (currentFile.isFile() && currentFile.getName().endsWith(".png")) {
 				try {
 					this.sprites.put(currentFile.getName().split("\\.")[0].toLowerCase(), ImageIO.read(currentFile));
 				} catch (IOException e) {
@@ -115,8 +122,8 @@ public class RouteAnalyzer {
 
 	private void readAllTerrains() {
 		File[] terrains = TERRAIN_FOLDER.listFiles();
-		for(File currentFile : terrains) {
-			if(currentFile.isFile() && currentFile.getName().endsWith(".png")) {
+		for (File currentFile : terrains) {
+			if (currentFile.isFile() && currentFile.getName().endsWith(".png")) {
 				try {
 					this.terrains.put(currentFile.getName().split("\\.")[0].toLowerCase(), ImageIO.read(currentFile));
 				} catch (IOException e) {
@@ -132,10 +139,11 @@ public class RouteAnalyzer {
 
 	private void readAllPokeballs() {
 		File[] pokeballs = POKEBALL_FOLDER.listFiles();
-		for(File currentFile : pokeballs) {
-			if(currentFile.isFile() && currentFile.getName().endsWith(".png")) {
+		for (File currentFile : pokeballs) {
+			if (currentFile.isFile() && currentFile.getName().endsWith(".png")) {
 				try {
-					this.pokeballs.put(Item.valueOf(currentFile.getName().split("\\.")[0].toUpperCase()), ImageIO.read(currentFile));
+					this.pokeballs.put(Item.valueOf(currentFile.getName().split("\\.")[0].toUpperCase()),
+							ImageIO.read(currentFile));
 				} catch (Exception e) {
 					System.err.println(currentFile);
 					continue;
@@ -150,10 +158,11 @@ public class RouteAnalyzer {
 
 	private void readAllItems() {
 		File[] items = ITEM_FOLDER.listFiles();
-		for(File currentFile : items) {
-			if(currentFile.isFile() && currentFile.getName().endsWith(".png")) {
+		for (File currentFile : items) {
+			if (currentFile.isFile() && currentFile.getName().endsWith(".png")) {
 				try {
-					this.items.put(Item.valueOf(currentFile.getName().split("\\.")[0].toUpperCase()), ImageIO.read(currentFile));
+					this.items.put(Item.valueOf(currentFile.getName().split("\\.")[0].toUpperCase()),
+							ImageIO.read(currentFile));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -165,10 +174,27 @@ public class RouteAnalyzer {
 		return this.items.get(i);
 	}
 
+	private void readAllAnimations() {
+		File[] animations = ANIMATION_FOLDER.listFiles();
+		for (File currentFile : animations) {
+			if (currentFile.isFile() && currentFile.getName().endsWith(".png")) {
+				try {
+					this.animations.put(currentFile.getName().split("\\.")[0].toUpperCase(), ImageIO.read(currentFile));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	public BufferedImage getAnimationImage(String animation) {
+		return this.animations.get(animation.toUpperCase());
+	}
+
 	private void readAllLogos() {
 		File[] logos = LOGO_FOLDER.listFiles();
-		for(File currentFile : logos) {
-			if(currentFile.isFile() && currentFile.getName().endsWith(".png")) {
+		for (File currentFile : logos) {
+			if (currentFile.isFile() && currentFile.getName().endsWith(".png")) {
 				try {
 					this.logos.put(currentFile.getName().split("\\.")[0], ImageIO.read(currentFile));
 				} catch (IOException e) {
@@ -179,6 +205,7 @@ public class RouteAnalyzer {
 	}
 
 	public void readAllRoutes() {
+		hatches = new ArrayList<>();
 		for (File currentFile : folderFiles) {
 			if (currentFile.isFile() && currentFile.getName().endsWith(".route")) {
 				readRoute(currentFile);
@@ -356,6 +383,9 @@ public class RouteAnalyzer {
 							case "SA": // Sand
 								currentEntity = new Entity(currentRoute, true, "free", 0, "sandy");
 								break;
+							case "STO":
+								currentEntity = new Entity(currentRoute, true, "free", 0, "stone");
+								break;
 							case "B": // Bridge
 								currentEntity = new Entity(currentRoute, true, "bridge", nonGrassEncounterRate, currentRoute.getTerrainName());
 								break;
@@ -428,6 +458,27 @@ public class RouteAnalyzer {
 							case "HM":
 								currentEntity = new Entity(currentRoute, true, "cave_middle", nonGrassEncounterRate, currentRoute.getTerrainName());
 								break;
+							case "ZLU":
+								currentEntity = new Entity(currentRoute, false, "zaun_links_unten", nonGrassEncounterRate, currentRoute.getTerrainName());
+								break;
+							case "ZLO":
+								currentEntity = new Entity(currentRoute, false, "zaun_links_oben", nonGrassEncounterRate, currentRoute.getTerrainName());
+								break;
+							case "ZRU":
+								currentEntity = new Entity(currentRoute, false, "zaun_rechts_unten", nonGrassEncounterRate, currentRoute.getTerrainName());
+								break;
+							case "ZRO":
+								currentEntity = new Entity(currentRoute, false, "zaun_rechts_oben", nonGrassEncounterRate, currentRoute.getTerrainName());
+								break;
+							case "ZF":
+								currentEntity = new Entity(currentRoute, false, "zaun_front", nonGrassEncounterRate, currentRoute.getTerrainName());
+								break;
+							case "ZL":
+								currentEntity = new Entity(currentRoute, false, "zaun_links", nonGrassEncounterRate, currentRoute.getTerrainName());
+								break;
+							case "ZR":
+								currentEntity = new Entity(currentRoute, false, "zaun_rechts", nonGrassEncounterRate, currentRoute.getTerrainName());
+								break;
 							case "RB":
 								currentEntity = new Entity(currentRoute, false, "rockbig", 0,
 										currentRoute.getTerrainName());
@@ -454,6 +505,9 @@ public class RouteAnalyzer {
 								currentStone.setID("strength");
 								currentStone.setCharacterImage("strength", "back");
 								stones.add(currentStone);
+								break;
+							case "GENERATOR":
+								currentEntity = new GeneratorEntity(currentRoute, currentRoute.getTerrainName());
 								break;
 							default:
 								currentEntity = new Entity(currentRoute, true, "free", nonGrassEncounterRate, currentRoute.getTerrainName());
@@ -483,8 +537,34 @@ public class RouteAnalyzer {
 									break;
 								}
 							} else if(currentString.startsWith("WHE")) {
-								currentEntity = new Entity(currentRoute, false, false, false, true, "cave_entrance_front", 0,
-										currentRoute.getTerrainName());
+								String str = "";
+								for(char c : currentString.toCharArray()) {
+									try {
+										Integer.parseInt(String.valueOf(c));
+										break;
+									} catch(Exception e) {
+										str += c;
+									}
+								}
+								switch(str) {
+								case "WHER":
+									currentEntity = new Entity(currentRoute, false, true, false, false, "cave_entrance_right", 0,
+											currentRoute.getTerrainName());
+									break;
+								case "WHEL":
+									currentEntity = new Entity(currentRoute, true, false, false, false, "cave_entrance_left", 0,
+											currentRoute.getTerrainName());
+									break;
+								case "WHEB":
+									currentEntity = new Entity(currentRoute, false, false, true, false, "cave_entrance_back", 0,
+											currentRoute.getTerrainName());
+									break;
+								case "WHEF":
+								default:
+									currentEntity = new Entity(currentRoute, false, false, false, true, "cave_entrance_front", 0,
+											currentRoute.getTerrainName());
+									break;
+								}
 							} else if(currentString.startsWith("WL")) {
 								if(currentString.startsWith("WLU")) {
 									currentEntity = new Entity(currentRoute, false, false, false, true, "ladder_up", 0,
@@ -493,6 +573,9 @@ public class RouteAnalyzer {
 									currentEntity = new Entity(currentRoute, false, false, true, true, "ladder_down", 0,
 											currentRoute.getTerrainName());
 								}
+							} else if(currentString.startsWith("WH")) {
+								currentEntity = new HatchEntity(currentRoute, currentString, currentRoute.getTerrainName());
+								hatches.add((HatchEntity) currentEntity);
 							} else {
 								currentEntity = new Entity(currentRoute, true, "warp", 0, currentRoute.getTerrainName());
 							}
@@ -648,6 +731,34 @@ public class RouteAnalyzer {
 					}
 				}
 
+				if(route.get("hatches") != null) {
+					JsonArray hatchesDetails = route.get("hatches").getAsJsonArray();
+					for (int i = 0; i < Math.min(hatches.size(), hatchesDetails.size()); i++) {
+						JsonObject currentHatch = hatchesDetails.get(i).getAsJsonObject();
+						int hatchIndex = i;
+						String hatchID = currentHatch.get("entity_id").getAsString();
+						if (!hatchID.equals(hatches.get(hatchIndex).getId())) {
+							for (int j = 0; j < hatches.size(); j++) {
+								hatchIndex = j;
+								if (hatchID.equals(hatches.get(hatchIndex).getId())) {
+									break;
+								}
+							}
+						}
+						HatchEntity entity = hatches.get(hatchIndex);
+
+						entity.setMinimum(currentHatch.get("minimum") != null ?
+								currentHatch.get("minimum").getAsInt() : 0);
+
+						for(JsonElement g : currentHatch.get("generators").getAsJsonArray()) {
+							JsonObject generator = g.getAsJsonObject();
+							entity.addGenerator(generator.get("route") != null ?
+									generator.get("route").getAsString() : currentRoute.getId(),
+									new Point(generator.get("x").getAsInt(), generator.get("y").getAsInt()));
+						}
+					}
+				}
+
 				if (route.get("events") != null) {
 					JsonObject eventDetails = route.get("events").getAsJsonObject();
 					for (String event : events.keySet()) {
@@ -657,6 +768,7 @@ public class RouteAnalyzer {
 							JsonArray currentStep = step.getAsJsonArray();
 							ArrayList<Change> changes = new ArrayList<Change>();
 							for (JsonElement current : currentStep) {
+								System.out.println(current);
 								JsonObject j = current.getAsJsonObject();
 								Change currentChange = new Change();
 								currentChange.setParticipant(j.get("character").getAsString());
@@ -702,6 +814,10 @@ public class RouteAnalyzer {
 										? j.get("cam_animation").getAsBoolean() : false);
 								currentChange.setCenterCharacter(j.get("cam_center") != null
 										? j.get("cam_center").getAsBoolean() : false);
+								currentChange.setSound(j.get("sound") != null
+										? j.get("sound").getAsString() : null);
+								currentChange.setWait(j.get("wait") != null
+										? j.get("wait").getAsBoolean() : true);
 								changes.add(currentChange);
 							}
 							te.addChanges(changes.toArray(new Change[changes.size()]));
@@ -814,8 +930,8 @@ public class RouteAnalyzer {
 
 			JsonArray routeData = new JsonArray();
 
-			for(String s : loadedRoutes.keySet()) {
-				if(!loadedRoutes.get(s).equals(originalRoutes.get(s), false)) {
+			for (String s : loadedRoutes.keySet()) {
+				if (!loadedRoutes.get(s).equals(originalRoutes.get(s), false)) {
 					routeData.add(loadedRoutes.get(s).getSaveData(originalRoutes.get(s)));
 				}
 			}
@@ -830,7 +946,8 @@ public class RouteAnalyzer {
 			}
 			writer.close();
 			SoundController.getInstance().playSound(SoundController.SAVE);
-			JOptionPane.showMessageDialog(null, "Das Spiel wurde erfolgreich gespeichert!", "Speichern ...", JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(null, "Das Spiel wurde erfolgreich gespeichert!", "Speichern ...",
+					JOptionPane.INFORMATION_MESSAGE);
 			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -849,37 +966,36 @@ public class RouteAnalyzer {
 			JsonArray routes = data.get("routes").getAsJsonArray();
 
 			gController.getMainCharacter().importSaveData(characters.get(0).getAsJsonObject());
-			for(Route currentRoute : loadedRoutes.values()) {
+			for (Route currentRoute : loadedRoutes.values()) {
 				currentRoute.clearCharacters();
 			}
 
-			for(int i = 1; i < characters.size(); i++) {
+			for (int i = 1; i < characters.size(); i++) {
 				JsonObject currentJson = characters.get(i).getAsJsonObject();
 				NPC character = new NPC();
-				if(character.importSaveData(currentJson)) {
+				if (character.importSaveData(currentJson)) {
 					loadedRoutes.get(character.getCurrentRoute().getId()).addCharacter(character);
 				}
 			}
 
-			for(JsonElement current : routes) {
+			for (JsonElement current : routes) {
 				JsonObject currentJson = current.getAsJsonObject();
 				Route route = this.getRouteById(currentJson.get("id").getAsString());
 				route.importSaveData(currentJson, originalRoutes.get(route.getId()));
 			}
 
-			for(String s : loadedRoutes.keySet()) {
-				if(!loadedRoutes.get(s).equals(originalRoutes.get(s))) {
-					loadedRoutes.get(s).createMap();
-				}
+			for (String s : loadedRoutes.keySet()) {
+				// if(!loadedRoutes.get(s).equals(originalRoutes.get(s))) {
+				loadedRoutes.get(s).createMap();
+				// }
 			}
 
 			gController.setCurrentRoute(gController.getMainCharacter().getCurrentRoute());
 
-
 			gController.getCurrentBackground().getCamera().importSaveData(data.get("cam").getAsJsonObject());
 
 			return true;
-		} catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			return false;
 		}
@@ -895,18 +1011,18 @@ public class RouteAnalyzer {
 
 	public HashMap<Integer, HashSet<String>> getAllPokemonLocations() {
 		HashMap<Integer, HashSet<String>> allLocations = new HashMap<>();
-		for(int i = 1; i < 650; i++) {
+		for (int i = 1; i < 650; i++) {
 			allLocations.put(i, new HashSet<String>());
 		}
-		for(String s : loadedRoutes.keySet()) {
+		for (String s : loadedRoutes.keySet()) {
 			Route r = loadedRoutes.get(s);
 			ArrayList<String> checkedPools = new ArrayList<String>();
-			for(int x = 0; x < r.getWidth(); x++) {
-				for(int y = 0; y < r.getHeight(); y++) {
+			for (int x = 0; x < r.getWidth(); x++) {
+				for (int y = 0; y < r.getHeight(); y++) {
 					Entity e = r.getEntities()[y][x];
-					if(e.getPokemonPool() != null && !checkedPools.contains(e.getPokemonPool().getId())) {
+					if (e.getPokemonPool() != null && !checkedPools.contains(e.getPokemonPool().getId())) {
 						checkedPools.add(e.getPokemonPool().getId());
-						for(SimpleEntry<Integer, Short> id : e.getPokemonPool().getPokemonPool()) {
+						for (SimpleEntry<Integer, Short> id : e.getPokemonPool().getPokemonPool()) {
 							HashSet<String> temp = allLocations.get(id.getKey());
 							temp.add(s);
 							allLocations.put(id.getKey(), temp);
@@ -916,7 +1032,14 @@ public class RouteAnalyzer {
 			}
 		}
 		return allLocations;
+	}
 
+	public void updateHatches(GeneratorEntity source) {
+		for (HatchEntity hatch : hatches) {
+			if (hatch.containsGenerator(source)) {
+				hatch.getRoute().updateMap(new Point(hatch.getX(), hatch.getY()));
+			}
+		}
 	}
 
 }

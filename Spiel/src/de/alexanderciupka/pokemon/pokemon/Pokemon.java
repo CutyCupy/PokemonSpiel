@@ -12,6 +12,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import de.alexanderciupka.pokemon.characters.Player;
+import de.alexanderciupka.pokemon.gui.AnimationLabel;
 import de.alexanderciupka.pokemon.gui.panels.FightPanel;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.menu.SoundController;
@@ -57,8 +58,6 @@ public class Pokemon {
 		this.types = gController.getInformation().getTypes(id);
 		this.shiny = new Random().nextFloat() < 0.01;
 		this.gender = gController.getInformation().getGender(this.id);
-		this.spriteFront = gController.getInformation().getFrontSprite(this.id, this.gender, this.shiny);
-		this.spriteBack = gController.getInformation().getBackSprite(this.id, this.gender, this.shiny);
 		this.moves = new Move[4];
 		this.ailment = Ailment.NONE;
 		this.happiness = gController.getInformation().getBaseHappiness(this.id);
@@ -70,6 +69,8 @@ public class Pokemon {
 		this.catchRate = gController.getInformation().getCaptureRate(id);
 		this.setBaseExperience(gController.getInformation().getBaseExperience(id));
 		this.stats = new Stats(this);
+
+		updateSprites();
 	}
 
 	public Pokemon(String name) {
@@ -80,8 +81,6 @@ public class Pokemon {
 		this.types = gController.getInformation().getTypes(id);
 		this.shiny = new Random().nextFloat() < 0.01;
 		this.gender = gController.getInformation().getGender(this.id);
-		this.spriteFront = gController.getInformation().getFrontSprite(this.id, this.gender, this.shiny);
-		this.spriteBack = gController.getInformation().getBackSprite(this.id, this.gender, this.shiny);
 		this.moves = new Move[4];
 		this.ailment = Ailment.NONE;
 		this.rng = new Random();
@@ -92,6 +91,8 @@ public class Pokemon {
 		this.catchRate = gController.getInformation().getCaptureRate(id);
 		this.setBaseExperience(gController.getInformation().getBaseExperience(id));
 		this.stats = new Stats(this);
+
+		updateSprites();
 	}
 
 	public Stats getStats() {
@@ -211,7 +212,7 @@ public class Pokemon {
 	}
 
 	public boolean evolve(int newID) {
-		if(newID != 0 && this.evolves == 0) {
+		if (newID != 0 && this.evolves == 0) {
 			this.evolves = newID;
 			gController.getGameFrame().getEvolutionPanel().addPokemon(this);
 			return true;
@@ -238,19 +239,28 @@ public class Pokemon {
 	}
 
 	public Move getMove(Pokemon player) {
+		ArrayList<Move> possibleMoves = new ArrayList<>();
+		for(Move m : this.moves) {
+			if(m != null && m.equals(gController.getFight().canUse(this, m))) {
+				possibleMoves.add(m);
+			}
+		}
+		if(possibleMoves.size() == 0) {
+			return null;
+		}
 		if (gController.getFight().canEscape()) {
-			return this.getMoves()[rng.nextInt(this.getAmmountOfMoves())];
+			return possibleMoves.get(rng.nextInt(possibleMoves.size()));
 		} else {
 			double highscore = -1;
 			ArrayList<Integer> index = new ArrayList<Integer>();
-			for (int i = 0; i < this.getAmmountOfMoves(); i++) {
-				if (this.getMoves()[i].getPower() <= 0) {
+			for (int i = 0; i < possibleMoves.size(); i++) {
+				if (possibleMoves.get(i).getPower() <= 0) {
 					if (highscore <= 0) {
 						index.add(i);
 					}
 					continue;
 				}
-				double current = Type.getEffectiveness(this.getMoves()[i].getMoveType(), player.getTypes());
+				double current = Type.getEffectiveness(possibleMoves.get(i).getMoveType(), player.getTypes());
 				if (current > highscore) {
 					index.clear();
 					index.add(i);
@@ -260,9 +270,9 @@ public class Pokemon {
 				}
 			}
 			if (index.isEmpty()) {
-				return this.getMoves()[rng.nextInt(this.getAmmountOfMoves())];
+				return possibleMoves.get(rng.nextInt(possibleMoves.size()));
 			}
-			return this.getMoves()[index.get(rng.nextInt(index.size()))];
+			return possibleMoves.get(index.get(rng.nextInt(index.size())));
 		}
 	}
 
@@ -279,25 +289,86 @@ public class Pokemon {
 	}
 
 	public boolean addSecondaryAilment(SecondaryAilment ailment) {
-		if(!this.secondaryAilments.contains(ailment)) {
-			gController.getGameFrame().getFightPanel().addText(ailment.getOnHit().replace("@pokemon", this.getName()));
-			this.secondaryAilments.add(ailment);
-			return true;
+		if (!this.secondaryAilments.contains(ailment)) {
+			FightPanel fp = gController.getGameFrame().getFightPanel();
+			boolean success = true;
+			String message = ailment.getOnHit().replace("@pokemon", this.getName());
+			switch (ailment) {
+			case DISABLE:
+				Move disabled = gController.getFight().getLastMove(this);
+				if (disabled != null) {
+					disabled.setDisabled(true);
+					message = message.replace("@move", disabled.getName());
+				}
+				break;
+			case INFATUATION:
+				Pokemon source = this.equals(gController.getFight().getEnemy()) ? gController.getFight().getPlayer()
+						: gController.getFight().getEnemy();
+				message = message.replace("@enemy", source.getName());
+				switch (source.getGender()) {
+				case FEMALE:
+					switch (this.gender) {
+					case MALE:
+						success = true;
+						break;
+					default:
+						success = false;
+						break;
+					}
+					break;
+				case GENDERLESS:
+					success = false;
+					break;
+				case MALE:
+					switch (this.gender) {
+					case FEMALE:
+						success = true;
+						break;
+					default:
+						success = false;
+						break;
+					}
+					break;
+				default:
+					success = false;
+					break;
+				}
+				break;
+			case NIGHTMARE:
+				success = this.ailment == Ailment.SLEEP;
+				break;
+			default:
+				break;
+			}
+			if (success) {
+				fp.addText(message);
+				ailment.inflict();
+				this.secondaryAilments.add(ailment);
+				return true;
+			} else {
+				fp.addText("Es wird keine Wirkung haben!");
+			}
 		}
 		return false;
 	}
 
 	public String canAttack() {
+		AnimationLabel animation = this.equals(gController.getFight().getPlayer()) ?
+				gController.getGameFrame().getFightPanel().getPlayerAnimation() :
+					gController.getGameFrame().getFightPanel().getEnemyAnimation();
 		switch (this.ailment) {
 		case FREEZE:
 			if (rng.nextFloat() < 0.2f) {
 				this.ailment = Ailment.NONE;
 				this.gController.getGameFrame().getFightPanel().updatePanels();
 				return this.name + " ist wieder aufgetaut!";
+			} else {
+				animation.playAnimation("eingefroren");
 			}
 			return this.name + " kann sich nicht bewegen!";
 		case PARALYSIS:
 			if (rng.nextFloat() < (1 / 3.0)) {
+				animation.playAnimation("paralyse");
 				return this.name + " ist paralysiert und kann sich nicht bewegen!";
 			}
 			break;
@@ -306,84 +377,115 @@ public class Pokemon {
 				this.ailment = Ailment.NONE;
 				gController.getGameFrame().getFightPanel().updatePanels();
 				return this.name + " ist wieder aufgewacht!";
+			} else {
+				animation.playAnimation("schlafen");
 			}
-			return this.name + " schl�ft tief und fest!";
-//		case CONFUSION:
-//			if (rng.nextFloat() < 0.2f * since) {
-//				this.ailment = Ailment.NONE;
-//				gController.getGameFrame().getFightPanel().updatePanels();
-//				this.gController.getGameFrame().getFightPanel().addText(this.name + " ist nicht mehr verwirrt!", false);
-//				return null;
-//			}
-//			this.gController.getGameFrame().getFightPanel().addText(this.name + " ist verwirrt!");
-//			if (rng.nextFloat() < (1 / 3.0)) {
-//				this.gController.getFight().selfAttack(this);
-//				return "Es hat sich vor Verwirrung selbst verletzt!";
-//			}
-//			break;
+			return this.name + " schläft tief und fest!";
 		default:
 			break;
+		}
+		for (SecondaryAilment ailment : this.secondaryAilments) {
+			switch (ailment) {
+			case CONFUSION:
+				if (rng.nextFloat() < 0.2f * (gController.getFight().getTurn() - ailment.getInflictedTurn())) {
+					this.ailment = Ailment.NONE;
+					gController.getGameFrame().getFightPanel().updatePanels();
+					this.gController.getGameFrame().getFightPanel().addText(ailment.getHealed(), false);
+					return null;
+				}
+				animation.playAnimation("verwirrt");
+				this.gController.getGameFrame().getFightPanel().addText(this.name + " ist verwirrt!");
+				if (rng.nextFloat() < (1 / 3.0)) {
+					this.gController.getFight().selfAttack(this);
+					return "Es hat sich vor Verwirrung selbst verletzt!";
+				}
+				break;
+			case INFATUATION:
+				if(rng.nextFloat() < 0.5) {
+					animation.playAnimation("verliebt");
+					return ailment.getAffected().replace("@pokemon", this.getName());
+				}
+				break;
+			case FLINCH:
+				return ailment.getAffected().replace("@pokemon", this.getName());
+			default:
+				break;
+			}
 		}
 		return null;
 	}
 
 	public void afterTurnDamage() {
 		FightPanel fightPanel = this.gController.getGameFrame().getFightPanel();
+		AnimationLabel animation = this.equals(gController.getFight().getPlayer()) ?
+				fightPanel.getPlayerAnimation() : fightPanel.getEnemyAnimation();
 		switch (this.ailment) {
 		case BURN:
+			animation.playAnimation("verbrennung");
 			this.stats.loseHP((int) (this.stats.getStats().get(Stat.HP) * (1 / 16.0)));
 			fightPanel.addText(this.name + " wurde durch die Verbrennung verletzt!", true);
 			break;
 		case POISON:
+			animation.playAnimation("gift");
 			this.stats.loseHP((int) (this.stats.getStats().get(Stat.HP) * (1 / 8.0)));
-			fightPanel.addText(this.name + " wurde durch die Vergiftung verletzt!",
-					true);
+			fightPanel.addText(this.name + " wurde durch die Vergiftung verletzt!", true);
 			break;
 		default:
 			break;
 		}
 		int turn = gController.getFight().getTurn();
-		for(int i = 0; i < this.secondaryAilments.size(); i++) {
+		for (int i = 0; i < this.secondaryAilments.size(); i++) {
 			SecondaryAilment ailment = this.secondaryAilments.get(i);
-			if(ailment.isWearOff()) {
-				if(turn >= ailment.getInflictedTurn() + ailment.getMinTurns()) {
-					if(turn >= ailment.getInflictedTurn() + ailment.getMaxTurns() ||
-							rng.nextFloat() > (ailment.getMinTurns() / (ailment.getMaxTurns() * 1.0)) * ((turn - ailment.getInflictedTurn()) - ailment.getMinTurns())) {
-						fightPanel.addText(ailment.getHealed().replace("@pokemon", this.getName()), true);
+			if (ailment.isWearOff()) {
+				if (turn >= ailment.getInflictedTurn() + ailment.getMinTurns()) {
+					if (turn >= ailment.getInflictedTurn() + ailment.getMaxTurns()
+							|| rng.nextFloat() > (ailment.getMinTurns() / (Math.max(ailment.getMaxTurns() * 1.0, 1)))
+									* ((turn - ailment.getInflictedTurn()) - ailment.getMinTurns())) {
+						if(ailment.getHealed() != null) {
+							fightPanel.addText(ailment.getHealed().replace("@pokemon", this.getName()), true);
+						}
 						this.secondaryAilments.remove(i);
 						i--;
 						continue;
 					}
 				}
 			}
-			switch(ailment) {
+			switch (ailment) {
 			case INGRAIN:
-				if(this.stats.restoreHP((int) (this.stats.getStats().get(Stat.HP) / 8.0)) > 0) {
+				if (this.stats.restoreHP((int) (this.stats.getStats().get(Stat.HP) / 8.0)) > 0) {
 					fightPanel.addText(ailment.getAffected().replace("@pokemon", this.getName()), true);
 				}
 				break;
 			case LEECHSEED:
+				animation.playAnimation("absorber");
 				int gain = this.stats.loseHP((int) (this.stats.getStats().get(Stat.HP) / 8.0));
-				this.gController.getFight().getEnemy().getStats().restoreHP(gain);
+				if (this.gController.getFight().getEnemy().equals(this)) {
+					this.gController.getFight().getPlayer().getStats().restoreHP(gain);
+				} else {
+					this.gController.getFight().getEnemy().getStats().restoreHP(gain);
+				}
 				fightPanel.addText(ailment.getAffected().replace("@pokemon", this.getName()), true);
 				break;
 			case NIGHTMARE:
-				if(this.getAilment() == Ailment.SLEEP) {
+				if (this.getAilment() == Ailment.SLEEP) {
 					this.stats.loseHP((int) (this.stats.getStats().get(Stat.HP) / 4.0));
 					fightPanel.addText(ailment.getAffected().replace("@pokemon", this.getName()), true);
 				} else {
-					this.gController.getGameFrame().getFightPanel().addText(
-							ailment.getHealed().replace("@pokemon", this.getName()), true);
+					this.gController.getGameFrame().getFightPanel()
+							.addText(ailment.getHealed().replace("@pokemon", this.getName()), true);
 					this.secondaryAilments.remove(i);
 					i--;
 				}
 				break;
+			case TRAP:
+				this.stats.loseHP((int) (this.stats.getStats().get(Stat.HP) / 8.0));
+				fightPanel.addText(ailment.getAffected().replace("@pokemon", this.getName()));
 			case PERISHSONG:
-				//TODO: implement
+				// TODO: implement
 				break;
 			case YAWN:
-				if(ailment.getInflictedTurn() + 1 <= turn) {
-					if(this.setAilment(Ailment.SLEEP)) {
+				if (ailment.getInflictedTurn() + 1 <= turn) {
+					if (this.setAilment(Ailment.SLEEP)) {
 						fightPanel.addText(ailment.getAffected().replace("@pokemon", this.getName()), true);
 					}
 				}
@@ -441,7 +543,18 @@ public class Pokemon {
 		result.setAilment(Ailment.valueOf(saveData.get("ailment").getAsString()));
 		result.setGender(Gender.valueOf(saveData.get("gender").getAsString().toUpperCase()));
 		result.happiness = saveData.get("happiness").getAsInt();
+		result.updateSprites();
 		return result;
+	}
+
+	private void updateSprites() {
+		this.spriteFront = gController.getInformation().getFrontSprite(this.id, this.gender, this.shiny);
+		this.spriteBack = gController.getInformation().getBackSprite(this.id, this.gender, this.shiny);
+	}
+
+	@Override
+	public String toString() {
+		return this.getName();
 	}
 
 	public void setName(String string) {
@@ -476,7 +589,7 @@ public class Pokemon {
 		if (getStats().getCurrentHP() / 4 > 0) {
 			F = Math.min(255, F / (getStats().getCurrentHP() / 4));
 		}
-		if(Z - ailmentValue <= getCatchRate()) {
+		if (Z - ailmentValue <= getCatchRate()) {
 			int M = getStats().getRNG().nextInt(256);
 			if (M <= F) {
 				return true;
@@ -519,7 +632,7 @@ public class Pokemon {
 
 	public void increaseEV(Pokemon enemy) {
 		for (Stat s : Stat.values()) {
-			if(s.equals(Stat.ACCURACY) || s.equals(Stat.EVASION)) {
+			if (s.equals(Stat.ACCURACY) || s.equals(Stat.EVASION)) {
 				continue;
 			}
 			this.stats.increaseEV(s, enemy.getEVBonus().get(s));
@@ -539,6 +652,11 @@ public class Pokemon {
 	}
 
 	public boolean useItem(Player source, Item i) {
+		if (this.secondaryAilments != null && this.secondaryAilments.contains(SecondaryAilment.EMBARGO)) {
+			gController.getGameFrame()
+					.addDialogue(SecondaryAilment.EMBARGO.getAffected().replace("@pokemon", this.getName()));
+			return false;
+		}
 		if (i.isUsableOnPokemon()) {
 			boolean effective = false;
 			switch (i) {
@@ -566,7 +684,7 @@ public class Pokemon {
 			case FULLHEAL:
 				int restore = this.stats.restoreHP(i.getValue());
 				if (restore > 0) {
-					if(!effective) {
+					if (!effective) {
 						SoundController.getInstance().playSound(SoundController.ITEM_HEAL);
 					}
 					effective = true;
@@ -587,6 +705,7 @@ public class Pokemon {
 				}
 				break;
 			case HYPERHEAL:
+			case ZWIEBACKNUTELLA:
 				if (this.getAilment() != Ailment.NONE) {
 					effective = true;
 					gController.getGameFrame().addDialogue(
@@ -594,6 +713,7 @@ public class Pokemon {
 					this.setAilment(Ailment.NONE);
 					SoundController.getInstance().playSound(SoundController.ITEM_HEAL);
 				}
+				break;
 			case RARECANDY:
 				if (this.getStats().levelUP()) {
 					effective = true;
@@ -622,14 +742,14 @@ public class Pokemon {
 			case IRON:
 			case ZINC:
 				Stat s = i.getIncrease();
-				if(this.getStats().getEv(s) < 100) {
+				if (this.getStats().getEv(s) < 100) {
 					effective = true;
-					gController.getGameFrame().addDialogue(i.getName() + " hat " + s.getArticle() + " " + s.getText() +
-							" von " + this.getName() + " erhöht!");
+					gController.getGameFrame().addDialogue(i.getName() + " hat " + s.getArticle() + " " + s.getText()
+							+ " von " + this.getName() + " erhöht!");
 					this.stats.increaseEV(s, (short) 10);
-					if(getHappiness() < 100) {
+					if (getHappiness() < 100) {
 						changeHappiness(5);
-					} else if(getHappiness() > 200) {
+					} else if (getHappiness() > 200) {
 						changeHappiness(3);
 					} else {
 						changeHappiness(2);
@@ -682,13 +802,12 @@ public class Pokemon {
 			this.evolves = 0;
 			update();
 			this.stats.newMoves();
-			gController.getGameFrame().getPokemonPanel().update();
 		}
 	}
 
 	public boolean knowsMove(Move newMove) {
-		for(int i = 0; i < this.getAmmountOfMoves(); i++) {
-			if(newMove.equals(this.getMoves()[i])) {
+		for (int i = 0; i < this.getAmmountOfMoves(); i++) {
+			if (newMove.equals(this.getMoves()[i])) {
 				return true;
 			}
 		}
@@ -702,5 +821,9 @@ public class Pokemon {
 	@Override
 	public boolean equals(Object obj) {
 		return obj instanceof Pokemon ? ((Pokemon) obj).uniqueID.equals(this.uniqueID) : false;
+	}
+
+	public ArrayList<SecondaryAilment> getSecondaryAilments() {
+		return this.secondaryAilments;
 	}
 }

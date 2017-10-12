@@ -49,6 +49,7 @@ public class EvolutionPanel extends JPanel {
 
 	public void start() {
 		gController.setInteractionPause(true);
+		gController.getGameFrame().repaint();
 		while (!pokemon.isEmpty()) {
 			Pokemon currentPokemon = pokemon.poll();
 
@@ -91,7 +92,7 @@ public class EvolutionPanel extends JPanel {
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
-					repaint();
+//					repaint();
 				}
 				pokemonLabel.setLocation(235, 235);
 			}
@@ -100,11 +101,12 @@ public class EvolutionPanel extends JPanel {
 			gController.getGameFrame().addDialogue("Glückwunsch? Dein " + currentPokemon.getName() + " hat sich zu "
 					+ gController.getInformation().getName(currentPokemon.getEvolves()) + " entwickelt!");
 			gController.waitDialogue();
-
 			currentPokemon.startEvolution();
 			gController.waitDialogue();
 		}
 		gController.setInteractionPause(false);
+		gController.getGameFrame().setCurrentPanel(gController.getGameFrame().getLastPanel(false));
+		gController.getGameFrame().getPokemonPanel().update();
 	}
 
 	private BufferedImage makeWhite(BufferedImage original) {

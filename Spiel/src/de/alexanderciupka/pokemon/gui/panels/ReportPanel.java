@@ -24,6 +24,7 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
+import de.alexanderciupka.hoverbutton.Main;
 import de.alexanderciupka.pokemon.gui.AilmentLabel;
 import de.alexanderciupka.pokemon.gui.HPBar;
 import de.alexanderciupka.pokemon.gui.MoveButton;
@@ -324,6 +325,13 @@ public class ReportPanel extends JPanel {
 				}
 			}
 		}
+
+		JLabel background = new JLabel(new ImageIcon(Main.class.getResource("/backgrounds/stat.png")));
+		background.setBounds(getBounds());
+		this.add(background);
+
+		this.setComponentZOrder(background, getComponentCount() - 1);
+
 	}
 
 	public void setPokemon(Pokemon p, Pokemon[] others, JPanel parent) {
@@ -348,7 +356,7 @@ public class ReportPanel extends JPanel {
 
 	private void updateMoves() {
 		for (int i = 0; i < Math.min(this.pokemon.getMoves().length, this.moves.length); i++) {
-			moves[i].setMove(this.pokemon.getMoves()[i]);
+			moves[i].setMove(this.pokemon, this.pokemon.getMoves()[i]);
 			moves[i].setName(String.valueOf(i));
 		}
 	}
@@ -379,7 +387,7 @@ public class ReportPanel extends JPanel {
 		this.kpLabel.setText(stats.getCurrentHP() + " / " + stats.getStats().get(Stat.HP));
 		this.hpBar.setMaximum(stats.getStats().get(Stat.HP));
 		this.hpBar.setValue(stats.getCurrentHP());
-		this.hpBar.setForeground(stats.getHPColor());
+//		this.hpBar.setForeground(stats.getHPColor());
 		this.ailmentLabel.setAilment(this.pokemon.getAilment());
 		// Stats
 		for (int i = 0; i < this.stats.length; i++) {
@@ -388,6 +396,8 @@ public class ReportPanel extends JPanel {
 				this.stats[i].setForeground(Nature.INCREASE_COLOR);
 			} else if (Stat.values()[i].equals(stats.getNature().getDecrease())) {
 				this.stats[i].setForeground(Nature.DECREASE_COLOR);
+			} else {
+				this.stats[i].setForeground(Color.BLACK);
 			}
 		}
 		setVisible(true);

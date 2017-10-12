@@ -3,6 +3,7 @@ package de.alexanderciupka.pokemon.pokemon;
 import java.awt.Image;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -68,14 +69,19 @@ public class PokemonInformation {
 	private void readData() {
 		try {
 			allPokemonData = parser.parse(pokemonData.readLine()).getAsJsonArray();
-			allMoveData = parser.parse(moveData.readLine()).getAsJsonArray();
+			String data = "";
+			String readLine = "";
+			while ((readLine = moveData.readLine()) != null) {
+				data += readLine;
+			}
+			allMoveData = parser.parse(data).getAsJsonArray();
 			allPokemonMoveData = parser.parse(pokemonMoveData.readLine()).getAsJsonArray();
 			JsonArray allGrowthRates = parser.parse(growthRates.readLine()).getAsJsonArray();
 			for (JsonElement element : allGrowthRates) {
 				this.allGrowthRates.put(element.getAsJsonObject().get("name").getAsString(), element.getAsJsonObject());
 			}
 			ArrayList<Move> foo = new ArrayList<Move>();
-			HashSet<String> ailments = new HashSet<>();
+			HashSet<String> uniqueMoves = new HashSet<>();
 			for (JsonElement element : allMoveData) {
 				JsonObject currentJson = element.getAsJsonObject();
 				Move currentMove = new Move(currentJson.get("id").getAsInt());
@@ -103,35 +109,47 @@ public class PokemonInformation {
 						: Target.valueOf(currentJson.get("target").getAsString()));
 				currentMove.setCrit(currentJson.get("crit_rate").getAsInt());
 				try {
-					currentMove.setAilment(Ailment.valueOf(currentJson.get("ailment").getAsString().toUpperCase()));
-				} catch(Exception e) {
-					System.out.println(currentJson.get("ailment").getAsString().toUpperCase());
-					currentMove.setAilment(SecondaryAilment.valueOf(currentJson.get("ailment").getAsString().toUpperCase()));
+					currentMove.setTargetAnimation(currentJson.get("target_animation").getAsString());
+				} catch (Exception e) {
+					currentMove.setTargetAnimation("none");
 				}
-//				switch (currentJson.get("ailment").getAsString()) {
-//				case "poison":
-//					currentMove.setAilment(Ailment.POISON);
-//					break;
-//				case "burn":
-//					currentMove.setAilment(Ailment.BURN);
-//					break;
-//				case "sleep":
-//					currentMove.setAilment(Ailment.SLEEP);
-//					break;
-//				case "paralysis":
-//					currentMove.setAilment(Ailment.PARALYSIS);
-//					break;
-//				case "freeze":
-//					currentMove.setAilment(Ailment.FREEZE);
-//					break;
-//				case "confusion":
-//					currentMove.setAilment(Ailment.CONFUSION);
-//					break;
-//				default:
-//					currentMove.setAilment(Ailment.NONE);
-//					break;
-//				}
-				ailments.add(currentJson.get("ailment").getAsString());
+
+				try {
+					currentMove.setUserAnimation(currentJson.get("user_animation").getAsString());
+				} catch (Exception e) {
+					currentMove.setUserAnimation("none");
+				}
+
+				try {
+					currentMove.setAilment(Ailment.valueOf(currentJson.get("ailment").getAsString().toUpperCase()));
+				} catch (Exception e) {
+					currentMove.setAilment(
+							SecondaryAilment.valueOf(currentJson.get("ailment").getAsString().toUpperCase()));
+				}
+				// switch (currentJson.get("ailment").getAsString()) {
+				// case "poison":
+				// currentMove.setAilment(Ailment.POISON);
+				// break;
+				// case "burn":
+				// currentMove.setAilment(Ailment.BURN);
+				// break;
+				// case "sleep":
+				// currentMove.setAilment(Ailment.SLEEP);
+				// break;
+				// case "paralysis":
+				// currentMove.setAilment(Ailment.PARALYSIS);
+				// break;
+				// case "freeze":
+				// currentMove.setAilment(Ailment.FREEZE);
+				// break;
+				// case "confusion":
+				// currentMove.setAilment(Ailment.CONFUSION);
+				// break;
+				// default:
+				// currentMove.setAilment(Ailment.NONE);
+				// break;
+				// }
+
 				try {
 					currentMove.setPriority(currentJson.get("priority").getAsInt());
 				} catch (Exception e) {
@@ -150,11 +168,7 @@ public class PokemonInformation {
 					break;
 				}
 				try {
-					if (currentJson.get("category").getAsString().equals("ohko")) {
-						currentMove.setPower(100);
-					} else {
-						currentMove.setPower(currentJson.get("power").getAsInt());
-					}
+					currentMove.setPower(currentJson.get("power").getAsInt());
 				} catch (Exception e) {
 					currentMove.setPower(0);
 				}
@@ -162,7 +176,10 @@ public class PokemonInformation {
 				if (currentJson.get("category").getAsString().equals("ailment")) {
 					currentMove.setAilmentChance(100);
 				}
-				if (!currentJson.get("category").getAsString().equals("net-good-stats")) {
+				if(currentJson.get("category").getAsString().contains("unique")) {
+					uniqueMoves.add(currentJson.get("name").getAsString() + " - " + currentJson.get("ailment").getAsString());
+				}
+				if (!currentJson.get("category").getAsString().contains("net-good-stats")) {
 					currentMove.setStatChance(currentJson.get("stat_chance").getAsFloat());
 				} else {
 					currentMove.setStatChance(1.0f);
@@ -172,26 +189,31 @@ public class PokemonInformation {
 				for (JsonElement currentStatChange : currentJson.get("stat_changes").getAsJsonArray()) {
 					int change = currentStatChange.getAsJsonObject().get("change").getAsInt();
 					try {
-						currentMove.addStatChange(
-								Stat.valueOf(
-										currentStatChange.getAsJsonObject().get("stat").getAsJsonObject()
-										.get("name").getAsString().toUpperCase()),
-								change);
+						currentMove.addStatChange(Stat.valueOf(currentStatChange.getAsJsonObject().get("stat")
+								.getAsJsonObject().get("name").getAsString().toUpperCase()), change);
 					} catch (Exception e) {
 						e.printStackTrace();
 						continue;
 					}
 				}
-				if(!foo.contains(currentMove) && currentMove.getCategory().equals("unique")) {
+				if (!foo.contains(currentMove) && currentMove.getCategory().equals("unique")) {
 					foo.add(currentMove);
 				}
 				allMoves.add(currentMove);
 			}
-			System.out.println(ailments);
+			for(String s : uniqueMoves) {
+				System.out.println(s);
+			}
+			String newMovesData = allMoveData.toString().replaceAll("\\},\\{\\\"id\\\"", "\\},\n\\{\\\"id\\\"");
+			FileWriter fw = new FileWriter(new File("C:/Users/Alexander/Desktop/foo.json"));
+			for (char c : newMovesData.toCharArray()) {
+				fw.write(c);
+				fw.flush();
+			}
+			fw.close();
 			for (JsonElement element : allPokemonData) {
 				int key = element.getAsJsonObject().get("id").getAsInt();
-				names.put(key,
-						element.getAsJsonObject().get("name").getAsString());
+				names.put(key, element.getAsJsonObject().get("name").getAsString());
 				HashMap<Integer, ArrayList<Move>> moves = new HashMap<Integer, ArrayList<Move>>();
 				JsonArray moveArray = null;
 				try {
@@ -208,7 +230,7 @@ public class PokemonInformation {
 							currentMoves = new ArrayList<Move>();
 						}
 						currentMoves.add(getMoveById(moveElement.getAsJsonObject().get("id").getAsInt()));
-						if(foo.contains(getMoveById(moveElement.getAsJsonObject().get("id").getAsInt()))) {
+						if (foo.contains(getMoveById(moveElement.getAsJsonObject().get("id").getAsInt()))) {
 							foo.remove(getMoveById(moveElement.getAsJsonObject().get("id").getAsInt()));
 						}
 						moves.put(level, currentMoves);
@@ -592,7 +614,8 @@ public class PokemonInformation {
 
 	public Image getGenderImage(Gender g) {
 		try {
-			return ImageIO.read(new File(Main.class.getResource("/icons/" + g.name().toLowerCase() + ".png").getFile()));
+			return ImageIO
+					.read(new File(Main.class.getResource("/icons/" + g.name().toLowerCase() + ".png").getFile()));
 		} catch (IOException e) {
 			e.printStackTrace();
 			return null;

@@ -112,6 +112,7 @@ public class PokemonButton extends JButton {
 		} else {
 			setEnabled(false);
 		}
+		this.setOpaque(this.pokemon == null);
 		this.setBackground(Color.WHITE);
 		this.setFocusable(false);
 	}

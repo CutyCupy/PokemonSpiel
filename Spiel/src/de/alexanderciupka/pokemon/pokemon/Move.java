@@ -31,6 +31,11 @@ public class Move {
 	private String category;
 	private HashMap<Stat, Integer> statChanges;
 
+	private String userAnimation;
+	private String targetAnimation;
+
+	private boolean disabled;
+
 	private Target target;
 
 	private Type moveType;
@@ -173,6 +178,8 @@ public class Move {
 		newMove.setTarget(this.target);
 		newMove.setCrit(this.crit);
 		newMove.setAilment(this.secondaryAilment);
+		newMove.setUserAnimation(this.userAnimation);
+		newMove.setTargetAnimation(this.targetAnimation);
 		return newMove;
 	}
 
@@ -339,6 +346,30 @@ public class Move {
 		Move result = GameController.getInstance().getInformation().getMoveById(saveData.get("id").getAsInt());
 		result.setCurrentPP(saveData.get("currentPP").getAsInt());
 		return result;
+	}
+
+	public boolean isDisabled() {
+		return this.disabled;
+	}
+
+	public void setDisabled(boolean disabled) {
+		this.disabled = disabled;
+	}
+
+	public String getUserAnimation() {
+		return userAnimation;
+	}
+
+	public void setUserAnimation(String animation) {
+		this.userAnimation = animation;
+	}
+
+	public String getTargetAnimation() {
+		return targetAnimation;
+	}
+
+	public void setTargetAnimation(String animation) {
+		this.targetAnimation = animation;
 	}
 
 }

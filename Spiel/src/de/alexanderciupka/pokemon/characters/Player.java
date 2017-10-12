@@ -100,10 +100,11 @@ public class Player extends Character {
 	public void addItem(Item reward) {
 		SoundController.getInstance().playSound(SoundController.GET_ITEM);
 		this.items.put(reward, this.items.get(reward) + 1);
+		this.gController.getGameFrame().getInventoryPanel().update(this);
 	}
 
 	public boolean hasItem(Item i) {
-		return items.get(i) > 0 || true;
+		return items.get(i) > 0;
 	}
 
 	public boolean removeItem(Item i) {

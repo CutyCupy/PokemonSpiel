@@ -52,20 +52,26 @@ public class RouteCreator extends JFrame {
 	private JComboBox<String> terrains;
 	private boolean active;
 
+	HashMap<String, ArrayList<Point>> buildings = new HashMap<>();
+
 	private RouteAnalyzer routeAnalyzer;
 
 	private static final String[][] TYPES = {{"Out of Bounds", "OOB"}, {"Bett", "bed"}, {"Leiter hoch", "WLU"}, {"Leiter runter", "WLD"},
 			{"Treppe hoch links", "WSUL"}, {"Treppe hoch rechts", "WSUR"}, {"Treppe runter links", "WSDL"}, {"Treppe runter rechts", "WSDR"},
-			{"St�rke", "ST"}, {"Zerschneider", "TC"}, {"Wand", "MW"}, {"Fenster", "MWW"}, {"Fenster+Gardine", "MWWC"}, {"Free", ""}, {"Tree", "T"}, {"Snow Tree", "TS"},
-			{"Bookshelf", "BS"}, {"TV", "TV"}, {"SP�LE", "spuele"}, {"Laptop", "LAPTOP"}, {"Table", "TA"},{"Kaffee", "KAFFEE"}, {"Chair UP", "STUHLU"},
+			{"Stärke", "ST"}, {"Zerschneider", "TC"}, {"Wand", "MW"}, {"Fenster", "MWW"}, {"Fenster+Gardine", "MWWC"}, {"Free", ""}, {"Tree", "T"}, {"Snow Tree", "TS"},
+			{"Bookshelf", "BS"}, {"TV", "TV"}, {"SPÜLE", "spuele"}, {"Laptop", "LAPTOP"}, {"Table", "TA"},{"Kaffee", "KAFFEE"}, {"Chair UP", "STUHLU"},
 			{"Chair DOWN", "STUHLD"}, {"Chair LEFT", "STUHLL"}, {"Chair RIGHT", "STUHLR"}, {"Settle UP", "SETTLEU"}, {"Settle DOWN", "SETTLED"},
-			{"Settle LEFT", "SETTLEL"}, {"Settle RIGHT", "SETTLER"}, {"Grass", "G"}, {"Grassy", "GR"}, {"Snow", "SN"}, {"Mauer", "M"}, {"Pokemon Center", "P"},
-			{"House Small", "HS"}, {"Gym", "A"}, {"Warp", "W"}, {"Character", "C"}, {"See","S"}, {"Sand", "SA"}, {"Bridge", "B"}, {"PC", "BC"},
+			{"Settle LEFT", "SETTLEL"}, {"Settle RIGHT", "SETTLER"}, {"Grass", "GRASS"}, {"Grassy", "GR"}, {"Snow", "SN"}, {"Mauer", "M"}, {"Pokemon Center", "P"},
+			{"House Small", "HS"}, {"Gym", "A"}, {"Warp", "W"}, {"Character", "C"}, {"See","S"}, {"Sand", "SA"}, {"Stone", "STO"}, {"Bridge", "B"}, {"PC", "BC"},
 			{"JoyHealing", "JH"}, {"MoveDown", "MD"}, {"MoveUp", "MU"}, {"MoveLeft", "ML"}, {"MoveRight", "MR"}, {"MoveStop", "MS"}, {"Höhle vorne", "HWF"},
-			{"Höhle hinten", "HWB"}, {"Höhle rechts", "HWR"}, {"Höhle links", "HWL"}, {"Höhle Eingang", "WHE"}, {"Höhle linksvorne außen", "HWLF"},
-			{"Höhle linkshinten außen", "HWLB"}, {"Höhle rechtshinten außen", "HWRB"}, {"Höhle rechtsvorne außen", "HWRF"}, {"Höhle Mitte", "HM"},
+			{"Höhle hinten", "HWB"}, {"Höhle rechts", "HWR"}, {"Höhle links", "HWL"},
+			{"Höhle Eingang Front", "WHEF"}, {"Höhle Eingang Back", "WHEB"}, {"Höhle Eingang Left", "WHEL"}, {"Höhle Eingang Right", "WHER"},
+			{"Höhle linksvorne außen", "HWLF"}, {"Höhle linkshinten außen", "HWLB"}, {"Höhle rechtshinten außen", "HWRB"}, {"Höhle rechtsvorne außen", "HWRF"}, {"Höhle Mitte", "HM"},
 			{"Höhle linksvorne innen", "HWLFI"}, {"Höhle linkshinten innen", "HWLBI"}, {"Höhle rechtshinten innen", "HWRBI"},
-			{"Höhle rechtsvorne innen", "HWRFI"}, {"RockBig", "RB"}, {"RockGroup", "RG"}, {"Rock", "R"}};
+			{"Höhle rechtsvorne innen", "HWRFI"}, {"RockBig", "RB"}, {"RockGroup", "RG"}, {"Rock", "R"},
+			{"Luke", "WH"}, {"Generator", "GENERATOR"},
+			{"Zaun linksunten", "ZLU"},  {"Zaun linksoben", "ZLO"},  {"Zaun rechtsunten", "ZRU"},  {"Zaun rechtsoben", "ZRO"},
+			{"Zaun links", "ZL"},  {"Zaun rechts", "ZR"},  {"Zaun front", "ZF"}};
 
 	private static final int SIZE = 25;
 
@@ -288,6 +294,29 @@ public class RouteCreator extends JFrame {
 
 	public boolean createBuilding(int xStart, int yStart, int width, int height, String buildingID) {
 		if(xStart + width < horizontal.length && yStart + height < vertical.length) {
+			String key = "";
+			switch(buildingID) {
+			case "H":
+				key = "house_small";
+				break;
+			case "P":
+				key = "house_center";
+				break;
+			case "A":
+				key = "house_gym";
+				break;
+			default:
+				key = null;
+				break;
+			}
+			if(key != null) {
+				ArrayList<Point> locations = this.buildings.get(key);
+				if (locations == null) {
+					locations = new ArrayList<Point>();
+				}
+				locations.add(new Point(xStart, yStart));
+				this.buildings.put(key, locations);
+			}
 			for(int y = 0; y < height; y++) {
 				for(int x = 0; x < width; x++) {
 					if(y == height - 1 && x == (width - 1) / 2) {
@@ -361,6 +390,19 @@ public class RouteCreator extends JFrame {
 			route.add("warps", warpDetails);
 			route.add("characters", characterDetails);
 			route.add("encounters", new JsonObject());
+			route.add("events", new JsonObject());
+
+			JsonArray buildings = new JsonArray();
+			for(String key : this.buildings.keySet()) {
+				for(Point p : this.buildings.get(key)) {
+					JsonObject j = new JsonObject();
+					j.addProperty("building", key);
+					j.addProperty("x", p.x);
+					j.addProperty("y", p.y);
+					buildings.add(j);
+				}
+			}
+			route.add("buildings", buildings);
 			BufferedWriter bWriter = new BufferedWriter(new FileWriter(newRoute));
 			for(char c : route.toString().toCharArray()) {
 				bWriter.write(c);
@@ -370,7 +412,7 @@ public class RouteCreator extends JFrame {
 			e.printStackTrace();
 		}
 		routeAnalyzer.readRoute(newRoute);
-//		routeAnalyzer.getRouteById(routeID).saveMap();
+		routeAnalyzer.getRouteById(routeID).saveMap();
 	}
 
 	private void floodFill(String text, boolean[][] visited, int x, int y, int startX, int startY) {

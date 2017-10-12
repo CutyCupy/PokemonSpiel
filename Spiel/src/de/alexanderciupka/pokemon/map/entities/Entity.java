@@ -437,7 +437,7 @@ public class Entity {
 						gController.waitDialogue();
 					}
 					if (character.getName().equals("Maria")
-							&& gController.getCurrentBackground().getCurrentRoute().getName().equals("zuhause")) {
+							&& character.getCurrentRoute().getId().equals("zuhause")) {
 						c.getTeam().restoreTeam();
 					}
 				}
@@ -490,7 +490,7 @@ public class Entity {
 						}
 					}).start();
 				} else {
-					gController.getGameFrame().addDialogue("Dieser Baum k�nnte zerschnitten werden!");
+					gController.getGameFrame().addDialogue("Dieser Baum könnte zerschnitten werden!");
 				}
 			}
 			break;
@@ -516,7 +516,7 @@ public class Entity {
 					source.getCurrentRoute().updateMap(source.getInteractionPoint());
 					gController.waitDialogue();
 				} else {
-					gController.getGameFrame().addDialogue("Dieser Felsen könnte zertr�mmert werden!");
+					gController.getGameFrame().addDialogue("Dieser Felsen könnte zertrümmert werden!");
 				}
 //				gController.getGameFrame().repaint();
 			} else {
@@ -547,12 +547,12 @@ public class Entity {
 			if (isWater() && !source.isSurfing()) {
 				if (hasItem) {
 					result = true;
-					gController.getGameFrame().addDialogue("Du f�ngst an zu surfen!");
+					gController.getGameFrame().addDialogue("Du fängst an zu surfen!");
 					source.setSurfing(true);
 					gController.waitDialogue();
 					source.changePosition(source.getCurrentDirection(), true);
 				} else {
-					gController.getGameFrame().addDialogue("Hier k�nnte man surfen!");
+					gController.getGameFrame().addDialogue("Hier könnte man surfen!");
 				}
 			} else {
 				return false;
@@ -711,6 +711,10 @@ public class Entity {
 			return true;
 		}
 		return false;
+	}
+
+	public Route getRoute() {
+		return this.parent;
 	}
 
 }

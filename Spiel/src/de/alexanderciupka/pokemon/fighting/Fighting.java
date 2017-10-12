@@ -1,6 +1,8 @@
 package de.alexanderciupka.pokemon.fighting;
 
-import java.util.ArrayList;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Random;
 
 import de.alexanderciupka.pokemon.characters.Character;
@@ -12,6 +14,7 @@ import de.alexanderciupka.pokemon.pokemon.Ailment;
 import de.alexanderciupka.pokemon.pokemon.DamageClass;
 import de.alexanderciupka.pokemon.pokemon.Move;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
+import de.alexanderciupka.pokemon.pokemon.SecondaryAilment;
 import de.alexanderciupka.pokemon.pokemon.Stat;
 import de.alexanderciupka.pokemon.pokemon.Stats;
 import de.alexanderciupka.pokemon.pokemon.Type;
@@ -24,24 +27,27 @@ public class Fighting {
 	private Pokemon enemy;
 	private FightOption currentFightOption;
 	private Character enemyCharacter;
-	private ArrayList<Pokemon> participants;
+	private HashSet<Pokemon> participants;
 	private Random rng;
 	private GameController gController;
 	private boolean escape;
 	private int turn;
 
+	private HashMap<Pokemon, Move> lastMoves;
+	private HashMap<Pokemon, Move> chargeMoves;
+	private HashMap<Pokemon, Boolean> needsRecharge;
+
+	private SimpleEntry<Boolean, Boolean> visible;
+
 	public boolean won;
 
 	public Fighting(Pokemon pokemonTwo) {
-		gController = GameController.getInstance();
+		init();
 		playerTeam = new Team(gController.getMainCharacter().getTeam().getTeam(), gController.getMainCharacter());
 		this.player = playerTeam.getFirstFightPokemon();
 		enemyTeam = new Team(null);
 		enemyTeam.addPokemon(pokemonTwo);
 		this.enemy = pokemonTwo;
-		rng = new Random();
-		currentFightOption = FightOption.FIGHT;
-		participants = new ArrayList<Pokemon>();
 		escape = true;
 		getStartPokemon();
 		player.startFight();
@@ -49,28 +55,34 @@ public class Fighting {
 	}
 
 	public Fighting(Character enemyCharacter) {
+		init();
 		this.enemyCharacter = enemyCharacter;
-		gController = GameController.getInstance();
 		playerTeam = new Team(gController.getMainCharacter().getTeam().getTeam(), gController.getMainCharacter());
 		this.player = playerTeam.getFirstFightPokemon();
 		enemyTeam = new Team(enemyCharacter.getTeam().getTeam(), enemyCharacter);
 		this.enemy = enemyTeam.getFirstFightPokemon();
-		rng = new Random();
-		currentFightOption = FightOption.FIGHT;
-		participants = new ArrayList<Pokemon>();
 		escape = false;
 		getStartPokemon();
 		player.startFight();
 		enemy.startFight();
 	}
 
+	private void init() {
+		lastMoves = new HashMap<>();
+		chargeMoves = new HashMap<>();
+		needsRecharge = new HashMap<>();
+		turn = 0;
+		gController = GameController.getInstance();
+		rng = new Random();
+		currentFightOption = FightOption.FIGHT;
+		participants = new HashSet<Pokemon>();
+		this.visible = new SimpleEntry<Boolean, Boolean>(true, true);
+
+	}
+
 	private void getStartPokemon() {
 		player = playerTeam.getFirstFightPokemon();
-		int index = playerTeam.getIndex(player);
-		if (index > 0) {
-			playerTeam.swapPokemon(0, index);
-		}
-		participants.add(player);
+		sendOut(playerTeam.getIndex(player));
 	}
 
 	public boolean isPlayerStart(Move playerMove, Move enemyMove) {
@@ -90,111 +102,252 @@ public class Fighting {
 		}
 	}
 
-	public boolean playerAttack(Move move) {
-		String message = player.canAttack();
-		if (message != null) {
-			gController.getGameFrame().getFightPanel().addText(message);
-			gController.getGameFrame().getFightPanel().updatePanels();
-			return true;
+	public void startRound(Move playerMove, Move enemyMove) {
+		if (playerMove == null) {
+			playerMove = gController.getInformation().getMoveByName("Verzweifler");
 		}
-		gController.getGameFrame().getFightPanel().addText(player.getName() + " setzt " + move.getName() + " ein!");
-		if (!playerHit(move)) {
-			gController.getGameFrame().getFightPanel().addText("Die Attacke ging daneben");
-			return true;
+		if (enemyMove == null) {
+			enemyMove = gController.getInformation().getMoveByName("Verzweifler");
 		}
-		gController.getGameFrame().getFightPanel().updatePanels();
-		if (gController.checkEnemyDead()) {
-			gController.getGameFrame().getFightPanel().addText(enemy.getName() + " wurde besiegt!");
-			if (!gController.winFight()) {
-				gController.getGameFrame().getFightPanel().setEnemy();
+		boolean playerStarts = gController.getFight().isPlayerStart(playerMove, enemyMove);
+		if (playerStarts) {
+			if (gController.getFight().attack(player, enemy, playerMove)) {
+				gController.getFight().attack(enemy, player, enemyMove);
 			}
-			return false;
-		} else if (gController.checkPlayerDead()) {
-			gController.getGameFrame().getFightPanel().addText(player.getName() + " wurde besiegt!");
-			gController.getGameFrame().getFightPanel().updatePanels();
-			if (!gController.loseFight()) {
-				gController.repaint();
-				setPlayer();
-			}
-			return false;
 		} else {
-			if (move.checkStatChange()) {
-				if (move.checkUserBuff()) {
-					buff(player, move);
-				}
-				if (move.checkEnemyBuff()) {
-					buff(enemy, move);
+			if (gController.getFight().attack(enemy, player, enemyMove)) {
+				gController.getFight().attack(player, enemy, playerMove);
+			} else {
+//				gController.getFight().setCurrentFightOption(FightOption.POKEMON);
+				gController.repaint();
+			}
+		}
+		endTurn();
+	}
+
+	public void endTurn() {
+		if (gController.isFighting()) {
+			player.afterTurnDamage();
+			enemy.afterTurnDamage();
+			if (gController.checkDead(player)) {
+				gController.getGameFrame().getFightPanel().addText(player.getName() + " wurde besiegt!");
+				gController.getGameFrame().getFightPanel().updatePanels();
+				if (!gController.loseFight()) {
+					gController.repaint();
+//					setPlayer();
 				}
 			}
-			return true;
+			if (gController.checkDead(enemy)) {
+				gController.getGameFrame().getFightPanel().addText(enemy.getName() + " wurde besiegt!");
+				if (!gController.winFight()) {
+//					gController.getGameFrame().getFightPanel().setEnemy();
+				}
+			}
+			increaseTurn();
 		}
 	}
 
-	public boolean enemyAttack() {
-		return enemyAttack(enemy.getMove(this.player));
+	public boolean attack(Pokemon attacker, Pokemon defender) {
+		return attack(attacker, defender, attacker.getMove(defender));
 	}
 
-	public boolean enemyAttack(Move move) {
-		String message = enemy.canAttack();
+	public boolean attack(Pokemon attacker, Pokemon defender, Move move) {
+		if(!this.gController.isFighting()) {
+			return true;
+		}
+		if (this.needsRecharge(attacker)) {
+			gController.getGameFrame().getFightPanel().addText(attacker.getName() + " muss sich erholen.");
+			this.setRecharge(attacker, false);
+			return true;
+		}
+		String message = attacker.canAttack();
 		if (message != null) {
 			gController.getGameFrame().getFightPanel().addText(message);
-			gController.getGameFrame().getFightPanel().updatePanels();
-			return true;
-		}
-		gController.getGameFrame().getFightPanel().addText(enemy.getName() + " setzt " + move.getName() + " ein!");
-		if (!enemyHit(move)) {
-			gController.getGameFrame().getFightPanel().addText("Die Attacke ging daneben");
-			return true;
-		}
-		gController.getGameFrame().getFightPanel().updatePanels();
-		if (gController.checkPlayerDead()) {
-			gController.getGameFrame().getFightPanel().addText(player.getName() + " wurde besiegt!");
-			gController.getGameFrame().getFightPanel().updatePanels();
-			if (!gController.loseFight()) {
-				gController.repaint();
-				setPlayer();
-			}
-			return false;
-		} else if (gController.checkEnemyDead()) {
-			gController.getGameFrame().getFightPanel().addText(enemy.getName() + " wurde besiegt!");
+			this.setVisible(attacker, true);
+			this.chargeMoves.put(attacker, null);
+		} else {
+			this.lastMoves.put(attacker, move);
 			gController.getGameFrame().getFightPanel()
-					.addText(player.getName() + " erh�lt " + (int) ((enemy.getStats().getLevel() * 1.25 * 100) / 7));
-			gController.getGameFrame().getFightPanel().updatePanels();
-			if (!gController.winFight()) {
-				enemy = gController.getFight().getEnemy();
-				gController.getGameFrame().getFightPanel().setEnemy();
+					.addText(attacker.getName() + " setzt " + move.getName() + " ein!");
+			if (!hit(attacker, defender, move)) {
+				gController.getGameFrame().getFightPanel().addText("Die Attacke ging daneben");
+				setRecharge(attacker, false);
+				setVisible(attacker, true);
+				// gController.getGameFrame().getFightPanel().updatePanels();
 			}
-			return false;
-		} else {
-			if (move.checkStatChange()) {
-				if (move.checkUserBuff()) {
-					buff(enemy, move);
-				}
-				if (move.checkEnemyBuff()) {
-					buff(player, move);
-				}
-			}
-
-			return true;
 		}
+		gController.getGameFrame().getFightPanel().updatePanels();
+		boolean dead = false;
+		if (gController.checkDead(player)) {
+			gController.getGameFrame().getFightPanel().addText(player.getName() + " wurde besiegt!");
+			gController.getGameFrame().getFightPanel().updatePanels();
+			if (!gController.loseFight()) {
+				gController.repaint();
+//				setPlayer();
+			}
+			dead = true;
+		}
+		if (gController.checkDead(enemy)) {
+			gController.getGameFrame().getFightPanel().addText(enemy.getName() + " wurde besiegt!");
+			if (!gController.winFight()) {
+				gController.getGameFrame().getFightPanel().setEnemy();
+				gController.getGameFrame().getFightPanel().updatePanels();
+			}
+			dead = true;
+		}
+		return !dead;
 	}
 
-	public boolean playerHit(Move playerMove) {
-		double hitChance = playerMove.getAccuracy() * (player.getStats().getFightStats().get(Stat.ACCURACY)
-				/ enemy.getStats().getFightStats().get(Stat.EVASION));
-		playerMove.reducePP();
-		if (rng.nextFloat() * 100 < hitChance && playerMove.getCurrentPP() > 0) {
-			int hits = rng.nextInt(playerMove.getMaxHits() - playerMove.getMinHits() + 1) + playerMove.getMinHits();
-			switch(playerMove.getTarget()) {
+	// public boolean playerAttack(Move move) {
+	// String message = player.canAttack();
+	// if (message != null) {
+	// gController.getGameFrame().getFightPanel().addText(message);
+	// gController.getGameFrame().getFightPanel().updatePanels();
+	// return true;
+	// }
+	// gController.getGameFrame().getFightPanel().addText(player.getName() + " setzt
+	// " + move.getName() + " ein!");
+	// if (!playerHit(move)) {
+	// gController.getGameFrame().getFightPanel().addText("Die Attacke ging
+	// daneben");
+	// return true;
+	// }
+	// gController.getGameFrame().getFightPanel().updatePanels();
+	// if (gController.checkEnemyDead()) {
+	// gController.getGameFrame().getFightPanel().addText(enemy.getName() + " wurde
+	// besiegt!");
+	// if (!gController.winFight()) {
+	// gController.getGameFrame().getFightPanel().setEnemy();
+	// }
+	// return false;
+	// } else if (gController.checkPlayerDead()) {
+	// gController.getGameFrame().getFightPanel().addText(player.getName() + " wurde
+	// besiegt!");
+	// gController.getGameFrame().getFightPanel().updatePanels();
+	// if (!gController.loseFight()) {
+	// gController.repaint();
+	// setPlayer();
+	// }
+	// return false;
+	// } else {
+	// if (move.checkStatChange()) {
+	// if (move.checkUserBuff()) {
+	// buff(player, move);
+	// }
+	// if (move.checkEnemyBuff()) {
+	// buff(enemy, move);
+	// }
+	// }
+	// return true;
+	// }
+	// }
+	//
+	// public boolean enemyAttack() {
+	// return enemyAttack(enemy.getMove(this.player));
+	// }
+	//
+	// public boolean enemyAttack(Move move) {
+	// String message = enemy.canAttack();
+	// if (message != null) {
+	// gController.getGameFrame().getFightPanel().addText(message);
+	// gController.getGameFrame().getFightPanel().updatePanels();
+	// return true;
+	// }
+	// gController.getGameFrame().getFightPanel().addText(enemy.getName() + " setzt
+	// " + move.getName() + " ein!");
+	// if (!enemyHit(move)) {
+	// gController.getGameFrame().getFightPanel().addText("Die Attacke ging
+	// daneben");
+	// return true;
+	// }
+	// gController.getGameFrame().getFightPanel().updatePanels();
+	// if (gController.checkPlayerDead()) {
+	// gController.getGameFrame().getFightPanel().addText(player.getName() + " wurde
+	// besiegt!");
+	// gController.getGameFrame().getFightPanel().updatePanels();
+	// if (!gController.loseFight()) {
+	// gController.repaint();
+	// setPlayer();
+	// }
+	// return false;
+	// } else if (gController.checkEnemyDead()) {
+	// gController.getGameFrame().getFightPanel().addText(enemy.getName() + " wurde
+	// besiegt!");
+	// gController.getGameFrame().getFightPanel()
+	// .addText(player.getName() + " erhält " + (int) ((enemy.getStats().getLevel()
+	// * 1.25 * 100) / 7));
+	// gController.getGameFrame().getFightPanel().updatePanels();
+	// if (!gController.winFight()) {
+	// enemy = gController.getFight().getEnemy();
+	// gController.getGameFrame().getFightPanel().setEnemy();
+	// }
+	// return false;
+	// } else {
+	// if (move.checkStatChange()) {
+	// if (move.checkUserBuff()) {
+	// buff(enemy, move);
+	// }
+	// if (move.checkEnemyBuff()) {
+	// buff(player, move);
+	// }
+	// }
+	//
+	// return true;
+	// }
+	// }
+
+	public boolean hit(Pokemon attacker, Pokemon defender, Move move) {
+		boolean stop = false;
+		for (String category : move.getCategory().split("\\+")) {
+			if (category.equals("charge")) {
+				if (this.chargeMoves.get(attacker) == null) {
+					this.chargeMoves.put(attacker, move);
+					this.setVisible(attacker, !move.getCategory().contains("disappear"));
+					stop = true;
+				} else {
+					this.chargeMoves.put(attacker, null);
+					this.setVisible(attacker, true);
+				}
+			}
+		}
+
+		if (stop) {
+			return true;
+		}
+
+		double hitChance = move.getAccuracy() * (attacker.getStats().getFightStats().get(Stat.ACCURACY)
+				/ defender.getStats().getFightStats().get(Stat.EVASION));
+		move.reducePP();
+		float p = rng.nextFloat() * 100;
+		if (p < hitChance) {
+			for (String category : move.getCategory().split("\\+")) {
+				if (category.equals("recharge")) {
+					this.setRecharge(attacker, true);
+				} else if (category.equals("explosion")) {
+					if (attacker.equals(this.player)) {
+						this.gController.getGameFrame().getFightPanel().getPlayerAnimation().playAnimation("explosion");
+					} else {
+						this.gController.getGameFrame().getFightPanel().getEnemyAnimation().playAnimation("explosion");
+					}
+					attacker.getStats().loseHP(attacker.getStats().getCurrentHP());
+				}
+			}
+			if(defender.getSecondaryAilments().contains(SecondaryAilment.PROTECTED)) {
+				gController.getGameFrame().getFightPanel().addText(SecondaryAilment.PROTECTED.getAffected()
+						.replace("@pokemon", defender.getName()));
+				return true;
+			}
+			int hits = rng.nextInt(move.getMaxHits() - move.getMinHits() + 1) + move.getMinHits();
+			switch (move.getTarget()) {
 			case ALL:
-				damageCalculation(player, enemy, playerMove, hits);
-				damageCalculation(player, player, playerMove, hits);
+				damageCalculation(attacker, defender, move, hits);
+				damageCalculation(attacker, attacker, move, hits);
 				break;
 			case OPPONENT:
-				damageCalculation(player, enemy, playerMove, hits);
+				damageCalculation(attacker, defender, move, hits);
 				break;
 			case USER:
-				damageCalculation(player, player, playerMove, hits);
+				damageCalculation(attacker, attacker, move, hits);
 				break;
 			default:
 				break;
@@ -206,35 +359,79 @@ public class Fighting {
 		return false;
 	}
 
-	public boolean enemyHit(Move enemyMove) {
-		double hitChance = enemyMove.getAccuracy() * (enemy.getStats().getFightStats().get(Stat.ACCURACY)
-				/ player.getStats().getFightStats().get(Stat.EVASION));
-		enemyMove.reducePP();
-		if (enemyMove.getAccuracy() > 100 || rng.nextFloat() * 100 < hitChance && enemyMove.getCurrentPP() > 0) {
-			int hits = rng.nextInt(enemyMove.getMaxHits() - enemyMove.getMinHits() + 1) + enemyMove.getMinHits();
-			switch(enemyMove.getTarget()) {
-			case ALL:
-				damageCalculation(enemy, player, enemyMove, hits);
-				damageCalculation(enemy, enemy, enemyMove, hits);
-				break;
-			case OPPONENT:
-				damageCalculation(enemy, player, enemyMove, hits);
-				break;
-			case USER:
-				damageCalculation(enemy, enemy, enemyMove, hits);
-				break;
-			default:
-				break;
-
-			}
-			return true;
-		}
-		return false;
-	}
+	// public boolean playerHit(Move playerMove) {
+	// double hitChance = playerMove.getAccuracy() *
+	// (player.getStats().getFightStats().get(Stat.ACCURACY)
+	// / enemy.getStats().getFightStats().get(Stat.EVASION));
+	// playerMove.reducePP();
+	// if (rng.nextFloat() * 100 < hitChance && playerMove.getCurrentPP() > 0) {
+	// int hits = rng.nextInt(playerMove.getMaxHits() - playerMove.getMinHits() + 1)
+	// + playerMove.getMinHits();
+	// switch(playerMove.getTarget()) {
+	// case ALL:
+	// damageCalculation(player, enemy, playerMove, hits);
+	// damageCalculation(player, player, playerMove, hits);
+	// break;
+	// case OPPONENT:
+	// damageCalculation(player, enemy, playerMove, hits);
+	// break;
+	// case USER:
+	// damageCalculation(player, player, playerMove, hits);
+	// break;
+	// default:
+	// break;
+	//
+	// }
+	// gController.sleep(150);
+	// return true;
+	// }
+	// return false;
+	// }
+	//
+	// public boolean enemyHit(Move enemyMove) {
+	// double hitChance = enemyMove.getAccuracy() *
+	// (enemy.getStats().getFightStats().get(Stat.ACCURACY)
+	// / player.getStats().getFightStats().get(Stat.EVASION));
+	// enemyMove.reducePP();
+	// if (enemyMove.getAccuracy() > 100 || rng.nextFloat() * 100 < hitChance &&
+	// enemyMove.getCurrentPP() > 0) {
+	// int hits = rng.nextInt(enemyMove.getMaxHits() - enemyMove.getMinHits() + 1) +
+	// enemyMove.getMinHits();
+	// switch(enemyMove.getTarget()) {
+	// case ALL:
+	// damageCalculation(enemy, player, enemyMove, hits);
+	// damageCalculation(enemy, enemy, enemyMove, hits);
+	// break;
+	// case OPPONENT:
+	// damageCalculation(enemy, player, enemyMove, hits);
+	// break;
+	// case USER:
+	// damageCalculation(enemy, enemy, enemyMove, hits);
+	// break;
+	// default:
+	// break;
+	//
+	// }
+	// return true;
+	// }
+	// return false;
+	// }
 
 	public void buff(Pokemon pokemon, Move move) {
 		for (Stat s : Stat.values()) {
 			int change = move.changeStat(s);
+			if (change == 0) {
+				continue;
+			}
+			if (gController.isFighting()) {
+				if (pokemon.equals(gController.getFight().getPlayer())) {
+					gController.getGameFrame().getFightPanel().getPlayerAnimation()
+							.playAnimation(change < 0 ? "debuff" : "buff");
+				} else {
+					gController.getGameFrame().getFightPanel().getEnemyAnimation()
+							.playAnimation(change < 0 ? "debuff" : "buff");
+				}
+			}
 			if (change < 0) {
 				pokemon.getStats().decreaseStat(s, Math.abs(change));
 			} else if (change > 0) {
@@ -248,15 +445,38 @@ public class Fighting {
 		double damage = 40;
 		double def = stats.getFightStats().get(Stat.DEFENSE);
 		double atk = stats.getFightStats().get(Stat.ATTACK);
+		if (pokemon.equals(player)) {
+			gController.getGameFrame().getFightPanel().getPlayerAnimation().playAnimation("punch");
+		} else {
+			gController.getGameFrame().getFightPanel().getEnemyAnimation().playAnimation("punch");
+		}
+		SoundController.getInstance().playSound(SoundController.NORMAL_EFFECTIVE);
 		stats.loseHP((int) (((stats.getLevel() * (2 / 5.0) + 2) * damage * (atk / (50.0 * def)) + 2)
 				* ((rng.nextFloat() * 0.15f + 0.85) / 1)));
+	}
+
+	private void playAnimation(Pokemon attacker, Pokemon defense, Move usedMove) {
+		if (attacker.equals(gController.getFight().getPlayer())) {
+			gController.getGameFrame().getFightPanel().getPlayerAnimation().playAnimation(usedMove.getUserAnimation());
+		} else {
+			gController.getGameFrame().getFightPanel().getEnemyAnimation().playAnimation(usedMove.getUserAnimation());
+		}
+		if (defense.equals(gController.getFight().getPlayer())) {
+			gController.getGameFrame().getFightPanel().getPlayerAnimation().playAnimation(usedMove.getTargetAnimation());
+		} else {
+			gController.getGameFrame().getFightPanel().getEnemyAnimation().playAnimation(usedMove.getTargetAnimation());
+		}
 	}
 
 	private void damageCalculation(Pokemon attacker, Pokemon defense, Move usedMove, int ammount) {
 		Stats attackerStats = attacker.getStats();
 		Stats defenderStats = defense.getStats();
 		double weakness = Type.getEffectiveness(usedMove.getMoveType(), defense.getTypes());
-		if(weakness == Type.USELESS) {
+		if (!isVisible(defense)) {
+			gController.getGameFrame().getFightPanel().addText("Es ist kein Gegner zu sehen!", true);
+			return;
+		}
+		if (weakness == Type.USELESS) {
 			gController.getGameFrame().getFightPanel().addText("Die Attacke zeigte keine Wirkung!", true);
 			return;
 		}
@@ -277,6 +497,9 @@ public class Fighting {
 				break;
 			}
 			for (int i = 0; i < ammount; i++) {
+				if (gController.isFighting()) {
+					playAnimation(attacker, defense, usedMove);
+				}
 				int crit = 1;
 				float pCrit = rng.nextFloat();
 				switch (usedMove.getCrit() + 1) {
@@ -299,17 +522,10 @@ public class Fighting {
 				damage = (weakness * ((attackerStats.getLevel() * (2 / 5.0) + 2) * damage * (atk / (50.0 * def)) + 2)
 						* crit * ((rng.nextFloat() * 0.15f + 0.85) / 1));
 				damage = Math.max(damage, 1);
-				defenderStats.loseHP((int) damage);
-				if (usedMove.getDrain() > 0) {
-					attackerStats.restoreHP((int) (damage * (usedMove.getDrain() / 100)));
-					gController.getGameFrame().getFightPanel().addText(defense.getName() + " wurde Energie abgesaugt!",
-							true);
-				} else if (usedMove.getDrain() < 0) {
-					attackerStats.loseHP((int) (damage * (usedMove.getDrain() / 100)));
-					gController.getGameFrame().getFightPanel()
-							.addText(attacker.getName() + " hat sich durch den Rückstoß verletzt!", true);
+				if(usedMove.getCategory().contains("ohko")) {
+					damage = defense.getStats().getCurrentHP();
 				}
-				damage = usedMove.getPower() * Type.calcSTAB(attacker, usedMove);
+				defenderStats.loseHP((int) damage);
 				if (weakness >= Type.STRONG) {
 					SoundController.getInstance().playSound(SoundController.SUPER_EFFECTIVE);
 				} else if (weakness <= Type.WEAK && weakness != Type.USELESS) {
@@ -319,55 +535,131 @@ public class Fighting {
 				}
 				gController.getGameFrame().getFightPanel().updatePanels();
 				gController.sleep(150);
+
+				if (usedMove.getDrain() > 0) {
+					attackerStats.restoreHP((int) (damage * (usedMove.getDrain() / 100.0)));
+					gController.getGameFrame().getFightPanel().addText(defense.getName() + " wurde Energie abgesaugt!",
+							true);
+				} else if (usedMove.getDrain() < 0) {
+					attackerStats.loseHP((int) Math.abs(damage * (usedMove.getDrain() / 100.0)));
+					gController.getGameFrame().getFightPanel()
+							.addText(attacker.getName() + " hat sich durch den Rückstoß verletzt!", true);
+				}
+				gController.getGameFrame().getFightPanel().updatePanels();
+				damage = usedMove.getPower() * Type.calcSTAB(attacker, usedMove);
 			}
 			if (weakness >= Type.STRONG) {
 				gController.getGameFrame().getFightPanel().addText("Die Attacke war sehr effektiv!", true);
 			} else if (weakness <= Type.WEAK) {
 				gController.getGameFrame().getFightPanel().addText("Die Attacke war nicht sehr effektiv!", true);
 			}
+		} else {
+			playAnimation(attacker, defense, usedMove);
+			if(!attacker.equals(defense) && (usedMove.getAilment() != null || usedMove.getAilment() != Ailment.NONE ||
+					usedMove.getSecondaryAilment() != null) &&
+					defense.getSecondaryAilments().contains(SecondaryAilment.MAGICCOAT)) {
+				gController.getGameFrame().getFightPanel().addText(
+						SecondaryAilment.MAGICCOAT.getAffected().replace("@pokemon", defense.getName()));
+				defense = attacker;
+			} else if(usedMove.getCategory().contains("teleport")) {
+				if(this.canEscape()) {
+					gController.getGameFrame().getFightPanel().addText(
+							attacker.getName() + " flieht aus dem Kampf!");
+					gController.endFight();
+				} else {
+					gController.getGameFrame().getFightPanel().addText("Es schlägt fehl!");
+				}
+			}
 		}
+
+		gController.getGameFrame().getFightPanel().getTextLabel().waitText();
 
 		if (usedMove.getHealing() > 0) {
 			attackerStats.restoreHP((int) (attackerStats.getStats().get(Stat.HP) * (usedMove.getHealing() / 100)));
 			gController.getGameFrame().getFightPanel()
 					.addText("Die KP von " + attacker.getName() + " wurden aufgefrischt!", true);
+			gController.getGameFrame().getFightPanel().updatePanels();
 		}
 
-		if (rng.nextFloat() * 100 < usedMove.getAilmentChance()) {
-			if (((usedMove.getAilment() != Ailment.NONE && usedMove.getAilment() != null) && defense.setAilment(usedMove.getAilment()))) {
+		gController.getGameFrame().getFightPanel().getTextLabel().waitText();
+
+		if (usedMove.checkStatChange()) {
+			if (usedMove.checkUserBuff()) {
+				buff(attacker, usedMove);
+			}
+			if (usedMove.checkEnemyBuff()) {
+				buff(defense, usedMove);
+			}
+		}
+
+		gController.getGameFrame().getFightPanel().getTextLabel().waitText();
+
+		if (rng.nextFloat() * 100 < usedMove.getAilmentChance() || usedMove.getAilmentChance() == 0) {
+			if (((usedMove.getAilment() != Ailment.NONE && usedMove.getAilment() != null)
+					&& defense.setAilment(usedMove.getAilment()))) {
 				gController.getGameFrame().getFightPanel()
 						.addText(defense.getName() + " wurde " + Ailment.getText(usedMove.getAilment()) + "!", true);
 			} else if ((usedMove.getSecondaryAilment() != null)) {
 				defense.addSecondaryAilment(usedMove.getSecondaryAilment());
 			}
+			gController.getGameFrame().getFightPanel().updatePanels();
 		}
 
+		gController.getGameFrame().getFightPanel().getTextLabel().waitText();
 	}
 
 	public boolean canBeSendOut(int index) {
+		System.out.println("sendOut? " + index);
 		if (playerTeam.getTeam()[index].getStats().getCurrentHP() > 0 && index != 0) {
+			System.out.println("can be send out: " + index);
 			return true;
 		}
+		System.out.println("cant be send out: " + index);
 		return false;
 	}
 
 	public void sendOut(int index) {
+		System.out.println("send out: " + index);
 		playerTeam.swapPokemon(0, index);
 		setPlayer();
+		participants.add(player);
 	}
 
 	public Pokemon getPlayer() {
 		return player;
 	}
 
+	public Move canUse(Pokemon user, Move move) {
+		if (chargeMoves.get(user) != null) {
+			return chargeMoves.get(user);
+		}
+		if (user.getSecondaryAilments().contains(SecondaryAilment.TORMENT)) {
+			if (move.equals(lastMoves.get(user))) {
+				return null;
+			}
+		}
+		return move.isDisabled() ? null : move;
+	}
+
 	private void setPlayer() {
 		this.player = playerTeam.getTeam()[0];
 		this.player.startFight();
-		if (!participants.contains(player)) {
-			participants.add(player);
-		}
+//		participants.add(player);
 		// gController.getGameFrame().getFightPanel().addText("Du schaffst das "
 		// + this.player.getName() + "!");
+		this.visible = new SimpleEntry<Boolean, Boolean>(true, this.visible.getValue());
+		gController.updateFight();
+	}
+
+	private void setEnemy() {
+		this.enemy = enemyTeam.getFirstFightPokemon();
+		enemy.startFight();
+		if(participants == null) {
+			participants = new HashSet<>();
+		}
+		participants.clear();
+		participants.add(player);
+		this.visible = new SimpleEntry<Boolean, Boolean>(this.visible.getKey(), true);
 		gController.updateFight();
 	}
 
@@ -379,15 +671,19 @@ public class Fighting {
 	 * @return false if player has another Pokemon
 	 */
 	public boolean playerDead() {
+		System.out.println("Player Dead! " + player);
+		participants.remove(player);
 		if (playerTeam.getFirstFightPokemon() == null) {
 			if (enemyCharacter != null) {
 				enemyCharacter.getTeam().restoreTeam();
 			}
 			return true;
 		}
-		participants.remove(player);
-		gController.getFight().setCurrentFightOption(FightOption.POKEMON);
+		setCurrentFightOption(FightOption.POKEMON);
 		gController.getGameFrame().getPokemonPanel().update();
+		while(getCurrentFightOption().equals(FightOption.POKEMON)) {
+			Thread.yield();
+		}
 		return false;
 	}
 
@@ -396,25 +692,24 @@ public class Fighting {
 	 */
 	public boolean enemyDead() {
 		gController.getGameFrame().getFightPanel().removeEnemy();
-		enemy = enemyTeam.getFirstFightPokemon();
-		if (enemy == null) {
+		if (enemyTeam.getFirstFightPokemon() == null) {
 			if (enemyCharacter != null) {
 				gController.getGameFrame().getFightPanel().addText(enemyCharacter.getName() + " wurde besiegt!");
 				enemyCharacter.defeated(true);
 			}
 			return true;
 		}
-		participants.clear();
-		participants.add(player);
-		enemy.startFight();
+		setEnemy();
 		return false;
 	}
+
 
 	public FightOption getCurrentFightOption() {
 		return currentFightOption;
 	}
 
 	public void setCurrentFightOption(FightOption currentFightOption) {
+		System.out.println("FightOption: " + currentFightOption);
 		this.currentFightOption = currentFightOption;
 	}
 
@@ -422,7 +717,7 @@ public class Fighting {
 		return this.playerTeam.getTeam()[index];
 	}
 
-	public ArrayList<Pokemon> getParticipants() {
+	public HashSet<Pokemon> getParticipants() {
 		return this.participants;
 	}
 
@@ -459,6 +754,52 @@ public class Fighting {
 
 	public void setTurn(int newTurn) {
 		this.turn = newTurn;
+	}
+
+	public Move getLastMove(Pokemon pokemon) {
+		return this.lastMoves.get(pokemon);
+	}
+
+	public Team getPlayerTeam() {
+		return playerTeam;
+	}
+
+	public void setVisible(boolean player, boolean enemy) {
+		this.visible = new SimpleEntry<Boolean, Boolean>(player, enemy);
+	}
+
+	public void setVisible(Pokemon p, boolean v) {
+		if (p.equals(player)) {
+			this.visible = new SimpleEntry<Boolean, Boolean>(v, this.visible.getValue());
+		} else {
+			this.visible = new SimpleEntry<Boolean, Boolean>(this.visible.getKey(), v);
+		}
+	}
+
+	public boolean isVisible(Pokemon pokemon) {
+		if (pokemon.equals(player)) {
+			return this.visible.getKey();
+		} else {
+			return this.visible.getValue();
+		}
+	}
+
+	public void setRecharge(Pokemon p, boolean v) {
+		this.needsRecharge.put(p, v);
+	}
+
+	public boolean needsRecharge(Pokemon pokemon) {
+		if (this.needsRecharge.get(pokemon) == null) {
+			this.needsRecharge.put(pokemon, false);
+		}
+		return this.needsRecharge.get(pokemon);
+	}
+
+	public boolean canChooseAction() {
+		if (chargeMoves.get(player) != null || needsRecharge(player)) {
+			return false;
+		}
+		return true;
 	}
 
 }

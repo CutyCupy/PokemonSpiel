@@ -178,6 +178,7 @@ public class NPC extends Character {
 		try {
 			dialogueFile = new File(
 					this.getClass().getResource("/characters/dialoge/" + this.currentRoute.getId() + "/" +  getFileName() + ".char").getFile());
+			System.out.println(dialogueFile);
 			JsonObject dialogue = new JsonParser().parse(new BufferedReader(new FileReader(dialogueFile))).getAsJsonObject();
 			this.beforeFight = dialogue.get("before") == null ? null : dialogue.get("before").getAsString();
 			this.noFight = dialogue.get("no") == null ? null : dialogue.get("no").getAsString();
@@ -196,12 +197,15 @@ public class NPC extends Character {
 		} catch (Exception e) {
 			System.err.println("/characters/dialoge/" + this.currentRoute.getId() + "/" +  getFileName() + ".char");
 			e.printStackTrace();
+			System.exit(0);
 		}
 	}
 
 
 	private String getFileName() {
-		return this.name.toLowerCase().replace(" ", "_");
+		System.out.println(name);
+		System.out.println(name.toLowerCase());
+		return this.name.toLowerCase().replace(" ", "_").replace("ä", "ae").replace("ö", "oe").replace("ü", "ue");
 	}
 
 	public String getOnDefeatDialogue() {
