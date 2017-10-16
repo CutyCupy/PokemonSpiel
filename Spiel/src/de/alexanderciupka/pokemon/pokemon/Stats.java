@@ -149,7 +149,6 @@ public class Stats {
 			}
 			fightStats.put(s, this.stats.get(s).doubleValue() * calcStatFactor(s, this.fightStatsChanges.get(s)));
 		}
-//		System.err.println(this.fightStatsChanges);
 //		HashMap<Stat, Short> fightStatsChanges = new HashMap<>(this.fightStatsChanges);
 //		this.fightStatsChanges = new HashMap<>();
 //		for (Stat s : fightStatsChanges.keySet()) {

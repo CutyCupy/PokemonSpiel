@@ -377,8 +377,8 @@ public class GameController {
 		mainCharacter.setCharacterImage("talih", "front");
 		mainCharacter.setName("Talih");
 		mainCharacter.setID("999");
-		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("haddonfield"));
-		mainCharacter.setCurrentPosition(32, 9);
+		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("haus_basement_haddonfield_5"));
+		mainCharacter.setCurrentPosition(2, 3);
 
 		// for (int i = 0; i < 5; i++) {
 		mainCharacter.getItems().put(Item.POKEBALL, 5);
@@ -437,6 +437,8 @@ public class GameController {
 		if(gameFrame == null) {
 			gameFrame = new GameFrame();
 		}
+
+		routeAnalyzer.updateHatches(mainCharacter.getCurrentRoute());
 
 		gameFrame.getBackgroundLabel().changeRoute(getCurrentBackground().getCurrentRoute());
 

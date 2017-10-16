@@ -609,17 +609,13 @@ public class Fighting {
 	}
 
 	public boolean canBeSendOut(int index) {
-		System.out.println("sendOut? " + index);
 		if (playerTeam.getTeam()[index].getStats().getCurrentHP() > 0 && index != 0) {
-			System.out.println("can be send out: " + index);
 			return true;
 		}
-		System.out.println("cant be send out: " + index);
 		return false;
 	}
 
 	public void sendOut(int index) {
-		System.out.println("send out: " + index);
 		playerTeam.swapPokemon(0, index);
 		setPlayer();
 		participants.add(player);
@@ -671,7 +667,6 @@ public class Fighting {
 	 * @return false if player has another Pokemon
 	 */
 	public boolean playerDead() {
-		System.out.println("Player Dead! " + player);
 		participants.remove(player);
 		if (playerTeam.getFirstFightPokemon() == null) {
 			if (enemyCharacter != null) {
@@ -709,7 +704,6 @@ public class Fighting {
 	}
 
 	public void setCurrentFightOption(FightOption currentFightOption) {
-		System.out.println("FightOption: " + currentFightOption);
 		this.currentFightOption = currentFightOption;
 	}
 

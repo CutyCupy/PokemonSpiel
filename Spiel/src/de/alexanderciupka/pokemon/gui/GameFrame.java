@@ -217,7 +217,6 @@ public class GameFrame extends JFrame {
 	}
 
 	public void setCurrentPanel(JPanel currentPanel) {
-		System.out.println(currentPanel);
 		if (!this.back && (currentPanel != null || this.currentPanel != null)
 				&& ((currentPanel != null && !currentPanel.getClass().isInstance(this.currentPanel))
 						|| (this.currentPanel != null && !this.currentPanel.getClass().isInstance(currentPanel)))) {
@@ -236,7 +235,6 @@ public class GameFrame extends JFrame {
 			currentPanel.add(imageHolder);
 		}
 		this.currentPanel = currentPanel;
-		System.out.println(this.currentPanel);
 		this.back = false;
 	}
 

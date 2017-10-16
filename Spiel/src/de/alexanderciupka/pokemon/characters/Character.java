@@ -233,7 +233,6 @@ public class Character implements Runnable {
 							.getResource("/characters/" + this.spriteName + "_" + s + "_" + i + ".png").getFile())
 							.getImage();
 				} catch(Exception e) {
-					System.err.println(this.spriteName);
 					currentImages[i] = new ImageIcon(this.getClass()
 							.getResource("/characters/team_marco" + "_" + s + "_" + i + ".png").getFile())
 							.getImage();
@@ -559,8 +558,6 @@ public class Character implements Runnable {
 	}
 
 	public Direction[] moveTowards(int x, int y) {
-		System.out.println("x: " + x);
-		System.out.println("y: " + y);
 		this.speed = SLOW;
 		int start = this.currentPosition.y * this.currentRoute.getWidth() + this.currentPosition.x;
 		int[] distance = new int[this.currentRoute.getHeight() * this.currentRoute.getWidth()];
@@ -631,7 +628,6 @@ public class Character implements Runnable {
 				value = distance[i];
 			}
 		}
-		System.out.println(index % 7 + " | " + index / 7 + ": " + nodes.get(index));
 		return nodes.remove(index);
 	}
 

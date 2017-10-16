@@ -201,9 +201,9 @@ public class PokemonInformation {
 				}
 				allMoves.add(currentMove);
 			}
-			for(String s : uniqueMoves) {
-				System.out.println(s);
-			}
+//			for(String s : uniqueMoves) {
+//				System.out.println(s);
+//			}
 			String newMovesData = allMoveData.toString().replaceAll("\\},\\{\\\"id\\\"", "\\},\n\\{\\\"id\\\"");
 			FileWriter fw = new FileWriter(new File("C:/Users/Alexander/Desktop/foo.json"));
 			for (char c : newMovesData.toCharArray()) {

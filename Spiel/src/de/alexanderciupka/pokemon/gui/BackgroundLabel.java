@@ -43,10 +43,7 @@ public class BackgroundLabel extends JLabel {
 
 	@Override
 	public void paint(Graphics g) {
-		long currentTime = System.currentTimeMillis();
 		g.clearRect(0, 0, this.getWidth(), this.getHeight());
-//		System.out.print("clear: " + (System.currentTimeMillis() - currentTime) + " - ");
-		currentTime = System.currentTimeMillis();
 
 		Camera c = gController.getCurrentBackground().getCamera();
 
@@ -80,20 +77,6 @@ public class BackgroundLabel extends JLabel {
 						(int) Math.round(x * GameFrame.GRID_SIZE), (int) Math.round(y * GameFrame.GRID_SIZE),
 						(int) Math.round(w * GameFrame.GRID_SIZE), (int) Math.round(h * GameFrame.GRID_SIZE)),
 				(int) Math.round(xOffset * GameFrame.GRID_SIZE), (int) Math.round(yOffset * GameFrame.GRID_SIZE), null);
-//		for (NPC npc : gController.getCurrentBackground().getCurrentRoute().getCharacters()) {
-//			int npcX = (int) Math.round((npc.getExactX() - x + xOffset) * GameFrame.GRID_SIZE);
-//			int npcY = (int) Math.round((npc.getExactY() - y + yOffset) * GameFrame.GRID_SIZE);
-//			if (npcX > -GameFrame.GRID_SIZE && npcX < GameFrame.GRID_SIZE * w
-//					|| npcX > -GameFrame.GRID_SIZE && npcY < GameFrame.GRID_SIZE * h) {
-//				g.drawImage(npc.getCharacterImage(), npcX, npcY, null);
-//			}
-//		}
-//		g.drawImage(gController.getMainCharacter().getCharacterImage(),
-//				(int) ((gController.getMainCharacter().getExactX() - x + xOffset) * GameFrame.GRID_SIZE),
-//				(int) ((gController.getMainCharacter().getExactY() - y + yOffset) * GameFrame.GRID_SIZE), null);
-
-//		System.out.print("drawing: " + (System.currentTimeMillis() - currentTime) + " - ");
-		currentTime = System.currentTimeMillis();
 
 		for (int i = 0; i < overlays.size(); i++) {
 			if (overlays.get(i).isFinshed()) {
@@ -103,9 +86,6 @@ public class BackgroundLabel extends JLabel {
 			}
 		}
 
-//		System.out.print("overlaycheck: " + (System.currentTimeMillis() - currentTime));
-		currentTime = System.currentTimeMillis();
-
 		waitAccess();
 		for (Overlay o : overlays) {
 			if (o.created) {
@@ -114,10 +94,6 @@ public class BackgroundLabel extends JLabel {
 		}
 		this.overlayAccess = true;
 
-//		System.out.print("overlays: " + (System.currentTimeMillis() - currentTime) + " - ");
-		currentTime = System.currentTimeMillis();
-
-//		if (oldX != x + xOffset || oldY != y + yOffset) {
 		if(waitFrames <= 0) {
 			RainOverlay r = (RainOverlay) getOverlay(RainOverlay.class);
 			SnowOverlay s = (SnowOverlay) getOverlay(SnowOverlay.class);
@@ -137,23 +113,14 @@ public class BackgroundLabel extends JLabel {
 			waitFrames--;
 		}
 
-//		System.out.print("offset: " + (System.currentTimeMillis() - currentTime));
-
 		oldX = x - xOffset;
 		oldY = y - yOffset;
 
-//		System.out.println();
 	}
 
 	private void waitAccess() {
 		while (!this.overlayAccess) {
-			System.out.println("waiting");
-			try {
-				Thread.sleep(1);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			Thread.yield();
 		}
 		this.overlayAccess = false;
 	}

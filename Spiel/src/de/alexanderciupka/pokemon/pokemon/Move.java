@@ -251,7 +251,6 @@ public class Move {
 		if(statChanges.containsKey(s)) {
 			return statChanges.get(s);
 		}
-		System.out.println("doesnt exist!");
 		return 0;
 	}
 

@@ -46,7 +46,6 @@ public class Change {
 		this.route = this.route == null ? source.getCurrentRoute() : this.route;
 		this.character = this.route.getNPCByName(participant);
 		this.character = this.character == null ? source : this.character;
-		System.err.println(this.move.x + " - " + this.move.y);
 		this.path = this.character.moveTowards(this.move.x == -1 ? this.character.getCurrentPosition().x : this.move.x,
 				this.move.y == -1 ? this.character.getCurrentPosition().y : this.move.y);
 		this.item = new HashMap<Item, Integer>();

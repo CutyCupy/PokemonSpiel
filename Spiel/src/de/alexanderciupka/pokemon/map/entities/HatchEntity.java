@@ -26,6 +26,7 @@ public class HatchEntity extends Entity {
 	}
 
 	public void setMinimum(int minimum) {
+		System.out.println("setMinimum: " + getRoute().getId() + " - " + minimum);
 		this.minimum = minimum;
 	}
 
@@ -59,27 +60,27 @@ public class HatchEntity extends Entity {
 	}
 
 	public boolean isDone() {
+		System.err.println(this.getRoute().getId() + " - " + this.minimum);
 		if (minimum == 0 || minimum > generators.size()) {
+			System.err.println("Set minimum");
 			minimum = generators.size();
 		}
 		int done = 0;
 		for (SimpleEntry<String, Point> g : generators) {
 			Route r = gController.getRouteAnalyzer().getRouteById(g.getKey());
-			System.out.println(r);
 			if (r != null) {
 				Entity e = r.getEntity(g.getValue().x, g.getValue().y);
-				System.out.println(e);
 				if (e instanceof GeneratorEntity && ((GeneratorEntity) e).isDone()) {
 					done++;
 				}
 			}
 		}
+		System.out.println(done + " - " + minimum);
 		return done >= this.minimum;
 	}
 
 	@Override
 	public boolean startWarp(Character c) {
-		System.out.println(isDone());
 		if (isDone()) {
 			return super.startWarp(c);
 		}

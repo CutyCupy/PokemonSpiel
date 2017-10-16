@@ -25,6 +25,10 @@ public class RouteOverlay extends Overlay {
 
 	@Override
 	public void createOverlay() {
+		if(this.route.getName().equals("")) {
+			finished = true;
+			return;
+		}
 		this.overlay = new BufferedImage(size.width, size.height, BufferedImage.TYPE_4BYTE_ABGR);
 		Graphics2D g = (Graphics2D) overlay.getGraphics();
 		g.setFont(ROUTE_FONT);

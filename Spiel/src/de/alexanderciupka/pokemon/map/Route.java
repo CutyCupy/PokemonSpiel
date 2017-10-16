@@ -167,6 +167,9 @@ public class Route {
 
 	public void createMap() {
 		map = new BufferedImage(width * 70, height * 70, BufferedImage.TYPE_4BYTE_ABGR);
+		Graphics g = map.getGraphics();
+		g.setColor(Color.BLACK);
+		g.fillRect(0, 0, map.getWidth(), map.getHeight());
 		// Graphics g = map.getGraphics();
 		// for (int y = 0; y < height; y++) {
 		// for (int x = 0; x < width; x++) {
@@ -202,7 +205,7 @@ public class Route {
 			}
 		}
 		updateMap(points);
-		 saveMap();
+		saveMap();
 	}
 
 	public void updateMap(Point... updatePoint) {
@@ -339,7 +342,6 @@ public class Route {
 			// saveMap();
 			HashSet<NPC> needsRepaint = new HashSet<>();
 			for (String building : this.buildings.keySet()) {
-				System.out.println(building);
 				BufferedImage currentBuilding = GameController.getInstance().getRouteAnalyzer().getSpriteByName(building);
 				for (Point p : this.buildings.get(building)) {
 					g.drawImage(currentBuilding, p.x * 70, p.y * 70, null);
@@ -393,7 +395,6 @@ public class Route {
 				}
 			}
 			ImageIO.write(map, "png", new File("./res/routes/" + this.id + ".png"));
-			System.out.println(this.getName() + " wurde gespeichert!");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -457,13 +458,11 @@ public class Route {
 		if (obj instanceof Route) {
 			Route other = (Route) obj;
 			if (this.height != other.height || this.width != other.width) {
-				System.err.println("wrong size");
 				return false;
 			}
 			for (int x = 0; x < this.width; x++) {
 				for (int y = 0; y < this.height; y++) {
 					if (!this.entities[y][x].equals(other.entities[y][x])) {
-						System.err.println("wrong entity: " + x + "|" + y);
 						return false;
 					}
 				}
@@ -481,7 +480,6 @@ public class Route {
 						}
 					}
 					if (!contains) {
-						System.err.println("wrong character");
 						return false;
 					}
 				}

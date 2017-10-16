@@ -92,7 +92,7 @@ public class Main {
 				while (true) {
 					if (!sc.isSongRunning()) {
 						File song = songs[rng.nextInt(songs.length)];
-//						sc.playSong(song);
+						sc.playSong(song);
 					}
 					Thread.yield();
 				}
@@ -113,7 +113,6 @@ public class Main {
 		HashMap<String, Point> charLocations = null;
 		for (File f : new File(Main.class.getResource("/routes/").getFile()).listFiles()) {
 			if (f.getName().endsWith(".route")) {
-				// System.out.println(f);
 				try {
 					currentRoute = new BufferedReader(new FileReader(f));
 					String data = "";
@@ -128,20 +127,10 @@ public class Main {
 					for (int x = 0; x < routeDetails.get("width").getAsInt(); x++) {
 						for (int y = 0; y < routeDetails.get("height").getAsInt(); y++) {
 							if (routeDetails.get(x + "." + y).getAsString().startsWith("C")) {
-								// charLocations.put(routeDetails.get(x + "." + y).getAsString(),
-								// new Point(x, y));
 								routeDetails.addProperty(x + "." + y, "");
 							}
 						}
 					}
-
-					// for(JsonElement j : currentObject.get("characters").getAsJsonArray()) {
-					// JsonObject currentChar = j.getAsJsonObject();
-					// Point p = charLocations.get(currentChar.get("id").getAsString());
-					// currentChar.addProperty("x", p.x);
-					// currentChar.addProperty("y", p.y);
-					// currentChar.remove("sprite");
-					// }
 
 					FileWriter fw = new FileWriter(f);
 					for (char c : currentObject.toString().toCharArray()) {

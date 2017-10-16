@@ -200,6 +200,7 @@ public class Entity {
 
 	public boolean startWarp(Character c) {
 		if (warp != null) {
+			gController.getRouteAnalyzer().updateHatches(gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()));
 			if (gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()) == null) {
 				return false;
 			}

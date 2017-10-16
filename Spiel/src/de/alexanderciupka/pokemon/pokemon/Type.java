@@ -213,7 +213,6 @@ public enum Type {
 		case "":
 			return null;
 		default:
-			System.err.println(type);
 		}
 		return null;
 	}

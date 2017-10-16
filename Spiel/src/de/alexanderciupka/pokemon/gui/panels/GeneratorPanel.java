@@ -67,10 +67,9 @@ public class GeneratorPanel extends JPanel {
 					stop = true;
 					int zeigerX = zeiger.getX() + zeiger.getWidth() / 2;// (int) Math.round(zeiger.getX() +
 																		// (zeiger.getWidth() * 1.0) / 2);
-					System.out.println(zeigerX);
 					waitProgressAccess();
 					if (hits(zeigerX, great)) {
-						progress.setValue(Math.min(progress.getValue() + 100, progress.getMaximum()));
+						progress.setValue(Math.min(progress.getValue() + 250, progress.getMaximum()));
 						SoundController.getInstance().playSound("great_success");
 					} else if (hits(zeigerX, good)) {
 						SoundController.getInstance().playSound("success");

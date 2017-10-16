@@ -191,7 +191,6 @@ public class PokemonPanel extends JPanel {
 				this.gController.getGameFrame().getInventoryPanel().getCurrentPlayer().getItems().get(currentItem) == 0 &&
 				!gController.isFighting()) {
 			while(!this.getClass().isInstance(gController.getGameFrame().getCurrentPanel())) {
-//				System.out.println(gController.getGameFrame().getCurrentPanel().getClass());
 				Thread.yield();
 			}
 			gController.getGameFrame().addDialogue("Du hast deinen letzten " + this.currentItem.getName() + " benutzt!");
