@@ -37,7 +37,7 @@ public class Entity {
 
 	private boolean water;
 
-	public static final float POKEMON_GRASS_RATE = 0.1f;
+	public static final float POKEMON_GRASS_RATE = 1.0f;
 
 	private int x;
 	private int y;
@@ -188,9 +188,9 @@ public class Entity {
 	}
 
 	public boolean checkPokemon() {
-		if (pokemonRate > 0 && ((this.pokemonPool != null && this.pokemonPool.getPokemonPool().size() > 0) ||
-				(gController.getMainCharacter().getCurrentRoute().getPokemonPool() != null &&
-						gController.getMainCharacter().getCurrentRoute().getPokemonPool().getPokemonPool().size() > 0))) {
+		if (pokemonRate > 0 && ((this.pokemonPool != null && this.pokemonPool.getPokemonPool().size() > 0)
+				|| (gController.getMainCharacter().getCurrentRoute().getPokemonPool() != null && gController
+						.getMainCharacter().getCurrentRoute().getPokemonPool().getPokemonPool().size() > 0))) {
 			if (rng.nextFloat() <= pokemonRate) {
 				return true;
 			}
@@ -200,7 +200,8 @@ public class Entity {
 
 	public boolean startWarp(Character c) {
 		if (warp != null) {
-			gController.getRouteAnalyzer().updateHatches(gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()));
+			gController.getRouteAnalyzer()
+					.updateHatches(gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()));
 			if (gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()) == null) {
 				return false;
 			}
@@ -213,24 +214,13 @@ public class Entity {
 			if (c instanceof Player) {
 				gController.resetCharacterPositions();
 				gController.setCurrentRoute(gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()));
-//				SoundController.getInstance().playSound(SoundController.WARP);
-//				gController.getGameFrame().getBackgroundLabel()
-//						.changeRoute(gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()));
 			}
+			System.out.println(c.getOldPosition());
 			c.setCurrentRoute(gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()));
+			System.out.println(c.getOldPosition());
 			c.setCurrentPosition(warp.getNewPosition());
-			if (this.spriteName.contains("stair")) {
-				switch (c.getCurrentDirection()) {
-				case LEFT:
-					c.setCurrentDirection(Direction.RIGHT);
-					break;
-				case RIGHT:
-					c.setCurrentDirection(Direction.LEFT);
-					break;
-				default:
-					break;
-				}
-			}
+			System.out.println(c.getOldPosition());
+			c.setCurrentDirection(warp.getNewDirection());
 			if (c instanceof NPC) {
 				gController.getRouteAnalyzer().getRouteById(warp.getOldRoute()).removeCharacter(c);
 				gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()).addCharacter((NPC) c);
@@ -252,7 +242,6 @@ public class Entity {
 				}
 				gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()).updateMap(c.getCurrentPosition());
 			}
-//			gController.getGameFrame().repaint();
 			c.getCurrentRoute().getEntities()[c.getCurrentPosition().y][c.getCurrentPosition().x].onStepNoWarp(c);
 			return true;
 		}
@@ -338,7 +327,7 @@ public class Entity {
 	}
 
 	public void onStepNoWarp(Character c) {
-		if (this.event != null && c instanceof Player) {
+		if (this.event != null && c instanceof Player && !c.isEvent()) {
 			new Thread(new Runnable() {
 				@Override
 				public void run() {
@@ -347,33 +336,28 @@ public class Entity {
 			}).start();
 			return;
 		}
-		if(this.terrainName.equals("ice")) {
+		if (this.terrainName.equals("ice")) {
 			c.startUncontrollableMove(c.getCurrentDirection(), false, Character.FAST);
-//			if(gController.slide(c.getCurrentDirection())) {
-//				gController.setInteractionPause(true);
-//				return;
-//			}
-//			gController.setInteractionPause(true);
 		} else {
-			if(!c.isControllable() && !c.isSpinning()) {
+			if (!c.isControllable() && !c.isSpinning()) {
 				c.setControllable(true);
 			}
 		}
 		int characterIndex = gController.checkStartFight();
-		if (c instanceof Player && characterIndex >= 0) {
+		if (!c.isEvent() && c instanceof Player && characterIndex >= 0) {
 			NPC enemy = gController.getCurrentBackground().getCurrentRoute().getCharacters().get(characterIndex);
 			if (enemy.moveTowardsMainCharacter()) {
 				if (!this.gController.isFighting()) {
 					gController.startFight(enemy);
 				}
 			}
-		} else if (c instanceof Player && !((Player) c).isProtected() && checkPokemon()) {
+		} else if (!c.isEvent() && c instanceof Player && !((Player) c).isProtected() && checkPokemon()) {
 			if (!this.gController.isFighting()) {
 				Pokemon encounter = null;
-				if(this.pokemonPool != null) {
+				if (this.pokemonPool != null) {
 					encounter = this.pokemonPool.getEncounter();
 				}
-				if(encounter == null) {
+				if (encounter == null) {
 					encounter = gController.getCurrentBackground().chooseEncounter();
 				}
 				gController.startFight(encounter);
@@ -425,8 +409,8 @@ public class Entity {
 								gController.getCurrentBackground().getCurrentRoute().getEntities()[0][1]
 										.setSprite("joyhealing" + (i % (c.getTeam().getAmmount() + 1)));
 								gController.getCurrentBackground().getCurrentRoute().updateMap(new Point(1, 0));
-//								gController.getGameFrame().repaint();
-								if(i == c.getTeam().getAmmount()) {
+								// gController.getGameFrame().repaint();
+								if (i == c.getTeam().getAmmount()) {
 									SoundController.getInstance().playSound(SoundController.POKECENTER_HEAL);
 									gController.sleep(1500);
 								} else {
@@ -437,8 +421,7 @@ public class Entity {
 						gController.getGameFrame().addDialogue("Deine Pokemon sind nun wieder topfit!");
 						gController.waitDialogue();
 					}
-					if (character.getName().equals("Maria")
-							&& character.getCurrentRoute().getId().equals("zuhause")) {
+					if (character.getName().equals("Maria") && character.getCurrentRoute().getId().equals("zuhause")) {
 						c.getTeam().restoreTeam();
 					}
 				}
@@ -481,7 +464,7 @@ public class Entity {
 							for (int i = 1; i <= 3; i++) {
 								setSprite("treecut" + i);
 								source.getCurrentRoute().updateMap(source.getInteractionPoint());
-//								gController.getGameFrame().repaint();
+								// gController.getGameFrame().repaint();
 								try {
 									Thread.sleep(100);
 								} catch (InterruptedException e) {
@@ -519,7 +502,7 @@ public class Entity {
 				} else {
 					gController.getGameFrame().addDialogue("Dieser Felsen könnte zertrümmert werden!");
 				}
-//				gController.getGameFrame().repaint();
+				// gController.getGameFrame().repaint();
 			} else {
 				return false;
 			}

@@ -402,11 +402,7 @@ public class Route {
 
 	public BufferedImage getMap() {
 		while (wait) {
-			try {
-				Thread.sleep(1);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			Thread.yield();
 		}
 		return this.map;
 	}

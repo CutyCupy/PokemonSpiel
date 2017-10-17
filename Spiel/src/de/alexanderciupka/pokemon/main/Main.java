@@ -92,7 +92,7 @@ public class Main {
 				while (true) {
 					if (!sc.isSongRunning()) {
 						File song = songs[rng.nextInt(songs.length)];
-						sc.playSong(song);
+//						sc.playSong(song);
 					}
 					Thread.yield();
 				}

@@ -29,6 +29,7 @@ import de.alexanderciupka.pokemon.characters.Direction;
 import de.alexanderciupka.pokemon.characters.NPC;
 import de.alexanderciupka.pokemon.gui.overlay.RainType;
 import de.alexanderciupka.pokemon.gui.overlay.SnowType;
+import de.alexanderciupka.pokemon.map.entities.Change;
 import de.alexanderciupka.pokemon.map.entities.Entity;
 import de.alexanderciupka.pokemon.map.entities.GeneratorEntity;
 import de.alexanderciupka.pokemon.map.entities.HatchEntity;
@@ -91,9 +92,9 @@ public class RouteAnalyzer {
 		readAllRoutes();
 		readAllAnimations();
 
-//		for (String s : loadedRoutes.keySet()) {
-//			System.out.println("Loaded: " + loadedRoutes.get(s).getName());
-//		}
+		// for (String s : loadedRoutes.keySet()) {
+		// System.out.println("Loaded: " + loadedRoutes.get(s).getName());
+		// }
 
 		HashMap<Integer, HashSet<String>> locations = getAllPokemonLocations();
 		for (int i = 1; i < 650; i++) {
@@ -217,7 +218,7 @@ public class RouteAnalyzer {
 	}
 
 	public void readRoute(File file) {
-		for(int counter = 0; counter < 2; counter++) {
+		for (int counter = 0; counter < 2; counter++) {
 			try {
 				currentReader = new BufferedReader(new FileReader(file));
 			} catch (FileNotFoundException e) {
@@ -233,21 +234,22 @@ public class RouteAnalyzer {
 				currentRoute.setTerrain(routeDetails.get("terrain").getAsString());
 				currentRoute.setHeight(routeDetails.get("height").getAsInt());
 				currentRoute.setWidth(routeDetails.get("width").getAsInt());
-				currentRoute.setDark(routeDetails.get("dark") != null ? routeDetails.get("dark").getAsBoolean() : false);
-				currentRoute.setType(RouteType.valueOf(routeDetails.get("type") != null ?
-						routeDetails.get("type").getAsString().toUpperCase() : "CITY"));
+				currentRoute
+						.setDark(routeDetails.get("dark") != null ? routeDetails.get("dark").getAsBoolean() : false);
+				currentRoute.setType(RouteType.valueOf(routeDetails.get("type") != null
+						? routeDetails.get("type").getAsString().toUpperCase() : "CITY"));
 				try {
 					currentRoute.setRain(RainType.valueOf(routeDetails.get("rain").getAsString().toUpperCase()));
-				} catch(Exception e) {
+				} catch (Exception e) {
 					currentRoute.setRain(null);
 				}
 				try {
 					currentRoute.setSnow(SnowType.valueOf(routeDetails.get("snow").getAsString().toUpperCase()));
-				} catch(Exception e) {
+				} catch (Exception e) {
 					currentRoute.setSnow(null);
 				}
 				ArrayList<Warp> warps = new ArrayList<Warp>();
-//				ArrayList<NPC> characters = new ArrayList<NPC>();
+				// ArrayList<NPC> characters = new ArrayList<NPC>();
 				ArrayList<NPC> stones = new ArrayList<NPC>();
 				HashMap<String, ArrayList<Point>> events = new HashMap<String, ArrayList<Point>>();
 				HashMap<String, ArrayList<Entity>> pokemonPools = new HashMap<>();
@@ -255,7 +257,7 @@ public class RouteAnalyzer {
 				ArrayList<ItemEntity> items = new ArrayList<ItemEntity>();
 				ArrayList<SignEntity> signs = new ArrayList<SignEntity>();
 				float nonGrassEncounterRate = 0;
-				switch(currentRoute.getTerrainName().toLowerCase()) {
+				switch (currentRoute.getTerrainName().toLowerCase()) {
 				case "cave":
 					nonGrassEncounterRate = Entity.POKEMON_GRASS_RATE;
 					break;
@@ -270,10 +272,10 @@ public class RouteAnalyzer {
 							break;
 						}
 						String currentString = routeDetails.get(x + "." + y).getAsString().toUpperCase();
-						if (!currentString.startsWith("W")
-								&& !currentString.startsWith("PKM") && !currentString.startsWith("TRIGGERED")
-								&& !currentString.startsWith("ITEM") && !currentString.startsWith("GRASS")
-								&& !currentString.startsWith("SEE") && !currentString.startsWith("CAVE")) {
+						if (!currentString.startsWith("W") && !currentString.startsWith("PKM")
+								&& !currentString.startsWith("TRIGGERED") && !currentString.startsWith("ITEM")
+								&& !currentString.startsWith("GRASS") && !currentString.startsWith("SEE")
+								&& !currentString.startsWith("CAVE")) {
 							switch (currentString) {
 							case "OOB":
 								currentEntity = new Entity(currentRoute, false, "free", 0, "free");
@@ -286,39 +288,47 @@ public class RouteAnalyzer {
 								signs.add((SignEntity) currentEntity);
 								break;
 							case "TA": // Table
-								currentEntity = new Entity(currentRoute, false, "table", 0, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, false, "table", 0,
+										currentRoute.getTerrainName());
 								break;
 							case "KAFFEE":
 								currentEntity = new Entity(currentRoute, false, "coffee_table", 0,
 										currentRoute.getTerrainName());
 								break;
 							case "BED":
-								currentEntity = new Entity(currentRoute, false, "bed", 0, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, false, "bed", 0,
+										currentRoute.getTerrainName());
 								break;
 							case "TV":
 								currentEntity = new Entity(currentRoute, false, "tv", 0, currentRoute.getTerrainName());
 								break;
 							case "LAPTOP":
-								currentEntity = new Entity(currentRoute, false, "laptop", 0, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, false, "laptop", 0,
+										currentRoute.getTerrainName());
 								break;
 							case "SPUELE":
-								currentEntity = new Entity(currentRoute, false, "spuele", 0, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, false, "spuele", 0,
+										currentRoute.getTerrainName());
 								break;
 							case "BS":
 								currentEntity = new Entity(currentRoute, false, "bookshelf", 0,
 										currentRoute.getTerrainName());
 								break;
 							case "STUHLR":
-								currentEntity = new Entity(currentRoute, true, "chair_r", nonGrassEncounterRate, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, true, "chair_r", nonGrassEncounterRate,
+										currentRoute.getTerrainName());
 								break;
 							case "STUHLL":
-								currentEntity = new Entity(currentRoute, true, "chair_l", nonGrassEncounterRate, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, true, "chair_l", nonGrassEncounterRate,
+										currentRoute.getTerrainName());
 								break;
 							case "STUHLD":
-								currentEntity = new Entity(currentRoute, true, "chair_d", nonGrassEncounterRate, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, true, "chair_d", nonGrassEncounterRate,
+										currentRoute.getTerrainName());
 								break;
 							case "STUHLU":
-								currentEntity = new Entity(currentRoute, true, "chair_u", nonGrassEncounterRate, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, true, "chair_u", nonGrassEncounterRate,
+										currentRoute.getTerrainName());
 								break;
 							case "SETTLER":
 								currentEntity = new Entity(currentRoute, true, "settle_r", nonGrassEncounterRate,
@@ -337,8 +347,10 @@ public class RouteAnalyzer {
 										currentRoute.getTerrainName());
 								break;
 							case "F": // Free
-							case "": // Alternative way to create a "Free" Entity
-								currentEntity = new Entity(currentRoute, true, "free", nonGrassEncounterRate, currentRoute.getTerrainName());
+							case "": // Alternative way to create a "Free"
+										// Entity
+								currentEntity = new Entity(currentRoute, true, "free", nonGrassEncounterRate,
+										currentRoute.getTerrainName());
 								break;
 							case "GR":
 								currentEntity = new Entity(currentRoute, true, "free", 0, "grassy");
@@ -350,10 +362,12 @@ public class RouteAnalyzer {
 								currentEntity = new Entity(currentRoute, true, "free", 0, "ice");
 								break;
 							case "M": // Mauer - House/Center/Market
-								currentEntity = new Entity(currentRoute, false, "free", 0, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, false, "free", 0,
+										currentRoute.getTerrainName());
 								break;
 							case "MW":
-								currentEntity = new Entity(currentRoute, false, "wand", 0, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, false, "wand", 0,
+										currentRoute.getTerrainName());
 								break;
 							case "MWW":
 								currentEntity = new Entity(currentRoute, false, "wand_window", 0,
@@ -386,7 +400,8 @@ public class RouteAnalyzer {
 								currentEntity = new Entity(currentRoute, true, "free", 0, "stone");
 								break;
 							case "B": // Bridge
-								currentEntity = new Entity(currentRoute, true, "bridge", nonGrassEncounterRate, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, true, "bridge", nonGrassEncounterRate,
+										currentRoute.getTerrainName());
 								break;
 							case "PC":
 								currentEntity = new Entity(currentRoute, false, "pc", 0, currentRoute.getTerrainName());
@@ -404,7 +419,8 @@ public class RouteAnalyzer {
 										currentRoute.getTerrainName());
 								break;
 							case "MU":
-								currentEntity = new Entity(currentRoute, true, "moveup", 0, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, true, "moveup", 0,
+										currentRoute.getTerrainName());
 								break;
 							case "ML":
 								currentEntity = new Entity(currentRoute, true, "moveleft", 0,
@@ -419,64 +435,84 @@ public class RouteAnalyzer {
 										currentRoute.getTerrainName());
 								break;
 							case "HWF":
-								currentEntity = new Entity(currentRoute, false, "cave_front", 0, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, false, "cave_front", 0,
+										currentRoute.getTerrainName());
 								break;
 							case "HWL":
-								currentEntity = new Entity(currentRoute, false, "cave_left", 0, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, false, "cave_left", 0,
+										currentRoute.getTerrainName());
 								break;
 							case "HWR":
-								currentEntity = new Entity(currentRoute, false, "cave_right", 0, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, false, "cave_right", 0,
+										currentRoute.getTerrainName());
 								break;
 							case "HWB":
-								currentEntity = new Entity(currentRoute, false, "cave_back", 0, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, false, "cave_back", 0,
+										currentRoute.getTerrainName());
 								break;
 							case "HWLF":
-								currentEntity = new Entity(currentRoute, false, "cave_left_front_corner_outside", 0, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, false, "cave_left_front_corner_outside", 0,
+										currentRoute.getTerrainName());
 								break;
 							case "HWLB":
-								currentEntity = new Entity(currentRoute, false, "cave_left_back_corner_outside", 0, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, false, "cave_left_back_corner_outside", 0,
+										currentRoute.getTerrainName());
 								break;
 							case "HWRB":
-								currentEntity = new Entity(currentRoute, false, "cave_right_back_corner_outside", 0, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, false, "cave_right_back_corner_outside", 0,
+										currentRoute.getTerrainName());
 								break;
 							case "HWRF":
-								currentEntity = new Entity(currentRoute, false, "cave_right_front_corner_outside", 0, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, false, "cave_right_front_corner_outside", 0,
+										currentRoute.getTerrainName());
 								break;
 							case "HWRBI":
-								currentEntity = new Entity(currentRoute, false, "cave_right_back_corner_inside", 0, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, false, "cave_right_back_corner_inside", 0,
+										currentRoute.getTerrainName());
 								break;
 							case "HWRFI":
-								currentEntity = new Entity(currentRoute, false, "cave_right_front_corner_inside", 0, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, false, "cave_right_front_corner_inside", 0,
+										currentRoute.getTerrainName());
 								break;
 							case "HWLBI":
-								currentEntity = new Entity(currentRoute, false, "cave_left_back_corner_inside", 0, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, false, "cave_left_back_corner_inside", 0,
+										currentRoute.getTerrainName());
 								break;
 							case "HWLFI":
-								currentEntity = new Entity(currentRoute, false, "cave_left_front_corner_inside", 0, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, false, "cave_left_front_corner_inside", 0,
+										currentRoute.getTerrainName());
 								break;
 							case "HM":
-								currentEntity = new Entity(currentRoute, true, "cave_middle", nonGrassEncounterRate, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, true, "cave_middle", nonGrassEncounterRate,
+										currentRoute.getTerrainName());
 								break;
 							case "ZLU":
-								currentEntity = new Entity(currentRoute, false, "zaun_links_unten", nonGrassEncounterRate, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, false, "zaun_links_unten",
+										nonGrassEncounterRate, currentRoute.getTerrainName());
 								break;
 							case "ZLO":
-								currentEntity = new Entity(currentRoute, false, "zaun_links_oben", nonGrassEncounterRate, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, false, "zaun_links_oben",
+										nonGrassEncounterRate, currentRoute.getTerrainName());
 								break;
 							case "ZRU":
-								currentEntity = new Entity(currentRoute, false, "zaun_rechts_unten", nonGrassEncounterRate, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, false, "zaun_rechts_unten",
+										nonGrassEncounterRate, currentRoute.getTerrainName());
 								break;
 							case "ZRO":
-								currentEntity = new Entity(currentRoute, false, "zaun_rechts_oben", nonGrassEncounterRate, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, false, "zaun_rechts_oben",
+										nonGrassEncounterRate, currentRoute.getTerrainName());
 								break;
 							case "ZF":
-								currentEntity = new Entity(currentRoute, false, "zaun_front", nonGrassEncounterRate, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, false, "zaun_front", nonGrassEncounterRate,
+										currentRoute.getTerrainName());
 								break;
 							case "ZL":
-								currentEntity = new Entity(currentRoute, false, "zaun_links", nonGrassEncounterRate, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, false, "zaun_links", nonGrassEncounterRate,
+										currentRoute.getTerrainName());
 								break;
 							case "ZR":
-								currentEntity = new Entity(currentRoute, false, "zaun_rechts", nonGrassEncounterRate, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, false, "zaun_rechts", nonGrassEncounterRate,
+										currentRoute.getTerrainName());
 								break;
 							case "RB":
 								currentEntity = new Entity(currentRoute, false, "rockbig", 0,
@@ -487,17 +523,20 @@ public class RouteAnalyzer {
 										currentRoute.getTerrainName());
 								break;
 							case "R":
-								currentEntity = new Entity(currentRoute, false, "rock", nonGrassEncounterRate, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, false, "rock", nonGrassEncounterRate,
+										currentRoute.getTerrainName());
 								break;
 							case "IR":
-								currentEntity = new Entity(currentRoute, false, "icerock", nonGrassEncounterRate, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, false, "icerock", nonGrassEncounterRate,
+										currentRoute.getTerrainName());
 								break;
 							case "TC":
 								currentEntity = new Entity(currentRoute, false, "treecut", nonGrassEncounterRate,
 										currentRoute.getTerrainName());
 								break;
 							case "ST":
-								currentEntity = new Entity(currentRoute, true, "free", nonGrassEncounterRate, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, true, "free", nonGrassEncounterRate,
+										currentRoute.getTerrainName());
 								NPC currentStone = new NPC(currentString);
 								currentStone.setCurrentPosition(x, y);
 								currentStone.setCurrentRoute(currentRoute);
@@ -513,7 +552,8 @@ public class RouteAnalyzer {
 										currentRoute.getTerrainName());
 								break;
 							default:
-								currentEntity = new Entity(currentRoute, true, "free", nonGrassEncounterRate, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, true, "free", nonGrassEncounterRate,
+										currentRoute.getTerrainName());
 								break;
 							}
 						} else if (currentString.startsWith("W")) {
@@ -523,69 +563,72 @@ public class RouteAnalyzer {
 							} else if (currentString.startsWith("WS")) {
 								switch (currentString.substring(0, 4)) {
 								case "WSUL":
-									currentEntity = new Entity(currentRoute, false, true, false, false, "stair_up_left", 0,
-											currentRoute.getTerrainName());
+									currentEntity = new Entity(currentRoute, false, true, false, false, "stair_up_left",
+											0, currentRoute.getTerrainName());
 									break;
 								case "WSUR":
-									currentEntity = new Entity(currentRoute, true, false, false, false, "stair_up_right", 0,
-											currentRoute.getTerrainName());
+									currentEntity = new Entity(currentRoute, true, false, false, false,
+											"stair_up_right", 0, currentRoute.getTerrainName());
 									break;
 								case "WSDL":
-									currentEntity = new Entity(currentRoute, false, true, false, false, "stair_down_left",
-											0, currentRoute.getTerrainName());
+									currentEntity = new Entity(currentRoute, false, true, false, false,
+											"stair_down_left", 0, currentRoute.getTerrainName());
 									break;
 								case "WSDR":
-									currentEntity = new Entity(currentRoute, true, true, false, false, "stair_down_right",
-											0, currentRoute.getTerrainName());
+									currentEntity = new Entity(currentRoute, true, true, false, false,
+											"stair_down_right", 0, currentRoute.getTerrainName());
 									break;
 								}
-							} else if(currentString.startsWith("WHE")) {
+							} else if (currentString.startsWith("WHE")) {
 								String str = "";
-								for(char c : currentString.toCharArray()) {
+								for (char c : currentString.toCharArray()) {
 									try {
 										Integer.parseInt(String.valueOf(c));
 										break;
-									} catch(Exception e) {
+									} catch (Exception e) {
 										str += c;
 									}
 								}
-								switch(str) {
+								switch (str) {
 								case "WHER":
-									currentEntity = new Entity(currentRoute, false, true, false, false, "cave_entrance_right", 0,
-											currentRoute.getTerrainName());
+									currentEntity = new Entity(currentRoute, false, true, false, false,
+											"cave_entrance_right", 0, currentRoute.getTerrainName());
 									break;
 								case "WHEL":
-									currentEntity = new Entity(currentRoute, true, false, false, false, "cave_entrance_left", 0,
-											currentRoute.getTerrainName());
+									currentEntity = new Entity(currentRoute, true, false, false, false,
+											"cave_entrance_left", 0, currentRoute.getTerrainName());
 									break;
 								case "WHEB":
-									currentEntity = new Entity(currentRoute, false, false, true, false, "cave_entrance_back", 0,
-											currentRoute.getTerrainName());
+									currentEntity = new Entity(currentRoute, false, false, true, false,
+											"cave_entrance_back", 0, currentRoute.getTerrainName());
 									break;
 								case "WHEF":
 								default:
-									currentEntity = new Entity(currentRoute, false, false, false, true, "cave_entrance_front", 0,
-											currentRoute.getTerrainName());
+									currentEntity = new Entity(currentRoute, false, false, false, true,
+											"cave_entrance_front", 0, currentRoute.getTerrainName());
 									break;
 								}
-							} else if(currentString.startsWith("WL")) {
-								if(currentString.startsWith("WLU")) {
+							} else if (currentString.startsWith("WL")) {
+								if (currentString.startsWith("WLU")) {
 									currentEntity = new Entity(currentRoute, false, false, false, true, "ladder_up", 0,
 											currentRoute.getTerrainName());
 								} else {
 									currentEntity = new Entity(currentRoute, false, false, true, true, "ladder_down", 0,
 											currentRoute.getTerrainName());
 								}
-							} else if(currentString.startsWith("WH")) {
-								currentEntity = new HatchEntity(currentRoute, currentString, currentRoute.getTerrainName());
+							} else if (currentString.startsWith("WH")) {
+								currentEntity = new HatchEntity(currentRoute, currentString,
+										currentRoute.getTerrainName());
 								hatches.add((HatchEntity) currentEntity);
 							} else {
-								currentEntity = new Entity(currentRoute, true, "warp", 0, currentRoute.getTerrainName());
+								currentEntity = new Entity(currentRoute, true, "warp", 0,
+										currentRoute.getTerrainName());
 							}
 							currentEntity.addWarp(currentWarp);
 							warps.add(currentWarp);
 						} else if (currentString.startsWith("PKM")) {
-							currentEntity = new PokemonEntity(currentRoute, currentRoute.getTerrainName(), currentString);
+							currentEntity = new PokemonEntity(currentRoute, currentRoute.getTerrainName(),
+									currentString);
 							pokemons.add((PokemonEntity) currentEntity);
 						} else if (currentString.startsWith("TRIGGERED")) {
 							currentEntity = new Entity(currentRoute, true, "warp", 0, currentRoute.getTerrainName());
@@ -595,30 +638,29 @@ public class RouteAnalyzer {
 							}
 							temp.add(new Point(x, y));
 							events.put(currentString, temp);
-						} else if(currentString.startsWith("ITEM")) {
-							currentEntity = new ItemEntity(currentRoute, currentRoute.getTerrainName(), currentString, false);
+						} else if (currentString.startsWith("ITEM")) {
+							currentEntity = new ItemEntity(currentRoute, currentRoute.getTerrainName(), currentString,
+									false);
 							items.add((ItemEntity) currentEntity);
-						} else if(currentString.startsWith("GRASS")) {
-							currentEntity = new Entity(currentRoute, true, "grass",
-											Entity.POKEMON_GRASS_RATE, "grassy");
+						} else if (currentString.startsWith("GRASS")) {
+							currentEntity = new Entity(currentRoute, true, "grass", Entity.POKEMON_GRASS_RATE,
+									"grassy");
 							ArrayList<Entity> temp = pokemonPools.get(currentString);
 							if (temp == null) {
 								temp = new ArrayList<Entity>();
 							}
 							temp.add(currentEntity);
 							pokemonPools.put(currentString, temp);
-						} else if(currentString.startsWith("SEE")) {
-							currentEntity = new Entity(currentRoute, true, "free",
-											Entity.POKEMON_GRASS_RATE, "see");
+						} else if (currentString.startsWith("SEE")) {
+							currentEntity = new Entity(currentRoute, true, "free", Entity.POKEMON_GRASS_RATE, "see");
 							ArrayList<Entity> temp = pokemonPools.get(currentString);
 							if (temp == null) {
 								temp = new ArrayList<Entity>();
 							}
 							temp.add(currentEntity);
 							pokemonPools.put(currentString, temp);
-						} else if(currentString.startsWith("CAVE")) {
-							currentEntity = new Entity(currentRoute, true, "free",
-									Entity.POKEMON_GRASS_RATE, "cave");
+						} else if (currentString.startsWith("CAVE")) {
+							currentEntity = new Entity(currentRoute, true, "free", Entity.POKEMON_GRASS_RATE, "cave");
 							ArrayList<Entity> temp = pokemonPools.get(currentString);
 							if (temp == null) {
 								temp = new ArrayList<Entity>();
@@ -647,6 +689,8 @@ public class RouteAnalyzer {
 					warps.get(warpIndex).setNewRoute(currentWarp.get("new_route").getAsString());
 					warps.get(warpIndex).setNewPosition(
 							new Point(currentWarp.get("new_x").getAsInt(), currentWarp.get("new_y").getAsInt()));
+					warps.get(warpIndex).setNewDirection(currentWarp.get("direction") != null
+							? currentWarp.get("direction").getAsString() : Direction.NONE.name());
 
 				}
 				JsonArray characterDetails = route.get("characters").getAsJsonArray();
@@ -660,7 +704,8 @@ public class RouteAnalyzer {
 							currentChar.get("direction").getAsString().toLowerCase());
 					currentCharacter.setName(currentChar.get("name").getAsString());
 					currentCharacter.setTrainer(currentChar.get("is_trainer").getAsString());
-					currentCharacter.setLogo(currentChar.get("logo") != null ? currentChar.get("logo").getAsString() : null);
+					currentCharacter
+							.setLogo(currentChar.get("logo") != null ? currentChar.get("logo").getAsString() : null);
 					if (currentChar.get("surfing") != null) {
 						currentCharacter.setSurfing(currentChar.get("surfing").getAsBoolean());
 						if (currentCharacter.isSurfing()) {
@@ -668,8 +713,8 @@ public class RouteAnalyzer {
 									.getCurrentPosition().x].setTerrain("see");
 						}
 					}
-					currentCharacter
-							.setAggro(currentChar.get("aggro") != null ? currentChar.get("aggro").getAsBoolean() : true);
+					currentCharacter.setAggro(
+							currentChar.get("aggro") != null ? currentChar.get("aggro").getAsBoolean() : true);
 					if (currentCharacter.isTrainer()) {
 						currentCharacter.importTeam();
 					}
@@ -704,7 +749,7 @@ public class RouteAnalyzer {
 					}
 				}
 
-				if(route.get("items") != null) {
+				if (route.get("items") != null) {
 					JsonArray itemDetails = route.get("items").getAsJsonArray();
 					for (int i = 0; i < Math.min(items.size(), itemDetails.size()); i++) {
 						JsonObject currentItem = itemDetails.get(i).getAsJsonObject();
@@ -721,24 +766,24 @@ public class RouteAnalyzer {
 						ItemEntity entity = items.get(itemIndex);
 
 						entity.setItem(Item.valueOf(currentItem.get("name").getAsString().toUpperCase()));
-						if(currentItem.get("sprite") != null) {
+						if (currentItem.get("sprite") != null) {
 							entity.setSprite(currentItem.get("sprite").getAsString().toLowerCase());
 						}
-						if(currentItem.get("terrain") != null) {
+						if (currentItem.get("terrain") != null) {
 							entity.setTerrain(currentItem.get("terrain").getAsString().toLowerCase());
 						}
-						if(currentItem.get("hidden") != null) {
+						if (currentItem.get("hidden") != null) {
 							entity.setHidden(currentItem.get("hidden").getAsBoolean());
 						}
 						currentRoute.addEntity(entity.getX(), entity.getY(), entity);
 					}
 				}
 
-				if(route.get("hatches") != null) {
+				if (route.get("hatches") != null) {
 					JsonArray hatchesDetails = route.get("hatches").getAsJsonArray();
 					ArrayList<HatchEntity> currentHatches = new ArrayList<>();
-					for(HatchEntity h : hatches) {
-						if(h.getRoute().equals(currentRoute)) {
+					for (HatchEntity h : hatches) {
+						if (h.getRoute().equals(currentRoute)) {
 							currentHatches.add(h);
 						}
 					}
@@ -758,15 +803,15 @@ public class RouteAnalyzer {
 
 						System.out.println(routeID + " - " + currentHatch.get("minimum"));
 
-						for(JsonElement g : currentHatch.get("generators").getAsJsonArray()) {
+						for (JsonElement g : currentHatch.get("generators").getAsJsonArray()) {
 							JsonObject generator = g.getAsJsonObject();
-							entity.addGenerator(generator.get("route") != null ?
-									generator.get("route").getAsString() : routeID,
+							entity.addGenerator(
+									generator.get("route") != null ? generator.get("route").getAsString() : routeID,
 									new Point(generator.get("x").getAsInt(), generator.get("y").getAsInt()));
 						}
 
-						entity.setMinimum(currentHatch.get("minimum") != null ?
-								currentHatch.get("minimum").getAsInt() : 0);
+						entity.setMinimum(
+								currentHatch.get("minimum") != null ? currentHatch.get("minimum").getAsInt() : 0);
 
 					}
 				}
@@ -780,55 +825,51 @@ public class RouteAnalyzer {
 							JsonArray currentStep = step.getAsJsonArray();
 							ArrayList<Change> changes = new ArrayList<Change>();
 							for (JsonElement current : currentStep) {
+//								System.out.println(current);
 								JsonObject j = current.getAsJsonObject();
 								Change currentChange = new Change();
 								currentChange.setParticipant(j.get("character").getAsString());
-								currentChange.setRouteID(j.get("route") != null
-										? j.get("route").getAsString() : currentRoute.getId());
-								currentChange.setMove(new Point(
-										j.get("target_x") != null
-												? j.get("target_x").getAsInt() : -1,
-										j.get("target_y") != null
-												? j.get("target_y").getAsInt() : -1));
-								currentChange.setDialog(j.get("dialog") != null
-										? j.get("dialog").getAsString() : null);
+								currentChange.setRouteID(
+										j.get("route") != null ? j.get("route").getAsString() : currentRoute.getId());
+								currentChange.setMove(
+										new Point(j.get("target_x") != null ? j.get("target_x").getAsInt() : -1,
+												j.get("target_y") != null ? j.get("target_y").getAsInt() : -1));
+								currentChange.setDialog(j.get("dialog") != null ? j.get("dialog").getAsString() : null);
 								currentChange.setDirection(j.get("direction") != null
-										? Direction.valueOf(
-												j.get("direction").getAsString().toUpperCase())
-										: null);
-								currentChange.setPositionUpdate(j.get("update") != null
-										? j.get("update").getAsBoolean() : false);
-								currentChange.setFight(j.get("fight") != null
-										? j.get("fight").getAsBoolean() : false);
-								currentChange.setAfterFightUpdate(j.get("after_fight") != null
-										? j.get("after_fight").getAsString() : null);
-								currentChange.setBeforeFightUpdate(j.get("before_fight") != null
-										? j.get("before_fight").getAsString() : null);
-								currentChange.setNoFightUpdate(j.get("no_fight") != null
-										? j.get("no_fight").getAsString() : null);
-								currentChange.setSpriteUpdate(j.get("sprite_update") != null
-										? j.get("sprite_update").getAsString() : null);
-								currentChange.setHeal(j.get("heal") != null
-										? j.get("heal").getAsBoolean() : false);
-								if(j.get("item") != null) {
-									for(JsonElement x : j.get("item").getAsJsonArray()) {
+										? Direction.valueOf(j.get("direction").getAsString().toUpperCase()) : null);
+								currentChange.setPositionUpdate(
+										j.get("update") != null ? j.get("update").getAsBoolean() : false);
+								currentChange.setFight(j.get("fight") != null ? j.get("fight").getAsBoolean() : false);
+								currentChange.setAfterFightUpdate(
+										j.get("after_fight") != null ? j.get("after_fight").getAsString() : null);
+								currentChange.setBeforeFightUpdate(
+										j.get("before_fight") != null ? j.get("before_fight").getAsString() : null);
+								currentChange.setNoFightUpdate(
+										j.get("no_fight") != null ? j.get("no_fight").getAsString() : null);
+								currentChange.setSpriteUpdate(
+										j.get("sprite_update") != null ? j.get("sprite_update").getAsString() : null);
+								currentChange.setHeal(j.get("heal") != null ? j.get("heal").getAsBoolean() : false);
+								if (j.get("item") != null && j.get("item").isJsonArray()) {
+									for (JsonElement x : j.get("item").getAsJsonArray()) {
 										JsonObject currentItem = x.getAsJsonObject();
-										currentChange.addItem(Item.valueOf(currentItem.get("name").getAsString().toUpperCase()),
-												currentItem.get("amount") != null ? currentItem.get("amount").getAsInt() : 1);
+										currentChange.addItem(
+												Item.valueOf(currentItem.get("name").getAsString().toUpperCase()),
+												currentItem.get("amount") != null ? currentItem.get("amount").getAsInt()
+														: 1);
 
 									}
 								}
-								currentChange.setCamPosition(new Point(j.get("cam_x") != null
-										? j.get("cam_x").getAsInt() : -1, j.get("cam_y") != null
-										? j.get("cam_y").getAsInt() : -1));
-								currentChange.setCamAnimation(j.get("cam_animation") != null
-										? j.get("cam_animation").getAsBoolean() : false);
-								currentChange.setCenterCharacter(j.get("cam_center") != null
-										? j.get("cam_center").getAsBoolean() : false);
-								currentChange.setSound(j.get("sound") != null
-										? j.get("sound").getAsString() : null);
-								currentChange.setWait(j.get("wait") != null
-										? j.get("wait").getAsBoolean() : true);
+								currentChange.setCamPosition(
+										new Point(j.get("cam_x") != null ? j.get("cam_x").getAsInt() : -1,
+												j.get("cam_y") != null ? j.get("cam_y").getAsInt() : -1));
+								currentChange.setCamAnimation(
+										j.get("cam_animation") != null ? j.get("cam_animation").getAsBoolean() : false);
+								currentChange.setCenterCharacter(
+										j.get("cam_center") != null ? j.get("cam_center").getAsBoolean() : false);
+								currentChange.setSound(j.get("sound") != null ? j.get("sound").getAsString() : null);
+								currentChange.setWait(j.get("wait") != null ? j.get("wait").getAsBoolean() : true);
+								currentChange.setDelay(j.get("delay") != null ? j.get("delay").getAsLong() : 0);
+								currentChange.setUnknown(j.get("unknown") != null ? j.get("unknown").getAsBoolean() : false);
 								changes.add(currentChange);
 							}
 							te.addChanges(changes.toArray(new Change[changes.size()]));
@@ -839,18 +880,18 @@ public class RouteAnalyzer {
 					}
 				}
 
-				for(int i = 0; i < signs.size(); i++) {
+				for (int i = 0; i < signs.size(); i++) {
 					signs.get(i).setInformation("Wer stellt ein leeres Schild auf?");
 				}
 
-				if(route.get("signs") != null) {
+				if (route.get("signs") != null) {
 					JsonArray signsData = route.get("signs").getAsJsonArray();
-					for(int i = 0; i < Math.min(signsData.size(), signs.size()); i++) {
+					for (int i = 0; i < Math.min(signsData.size(), signs.size()); i++) {
 						JsonObject current = signsData.get(i).getAsJsonObject();
-						if(current.get("terrain") != null) {
+						if (current.get("terrain") != null) {
 							signs.get(i).setTerrain(current.get("terrain").getAsString());
 						}
-						if(current.get("information") != null) {
+						if (current.get("information") != null) {
 							signs.get(i).setInformation(current.get("information").getAsString());
 						}
 					}
@@ -860,55 +901,55 @@ public class RouteAnalyzer {
 					currentRoute.addCharacter(stones.get(i));
 				}
 
-				if(route.get("encounters") != null) {
+				if (route.get("encounters") != null) {
 					JsonObject encounterDetails = route.get("encounters").getAsJsonObject();
-					if(encounterDetails.get("DEFAULT") != null) {
+					if (encounterDetails.get("DEFAULT") != null) {
 						PokemonPool pool = new PokemonPool("DEFAULT");
 						for (JsonElement j : encounterDetails.get("DEFAULT").getAsJsonArray()) {
 							JsonObject currentEncounter = j.getAsJsonObject();
-							int ammount = currentEncounter.get("ammount") != null ?
-									currentEncounter.get("ammount").getAsInt() : 1;
-									for(int i = 0; i < ammount; i++) {
-										pool.addPokemon(currentEncounter.get("id").getAsInt(),
-												currentEncounter.get("level").getAsShort());
-									}
+							int ammount = currentEncounter.get("ammount") != null
+									? currentEncounter.get("ammount").getAsInt() : 1;
+							for (int i = 0; i < ammount; i++) {
+								pool.addPokemon(currentEncounter.get("id").getAsInt(),
+										currentEncounter.get("level").getAsShort());
+							}
 						}
 					}
-					for(String s : pokemonPools.keySet()) {
+					for (String s : pokemonPools.keySet()) {
 						PokemonPool pool = new PokemonPool(s);
-						if(encounterDetails.get(s) != null) {
+						if (encounterDetails.get(s) != null) {
 							for (JsonElement j : encounterDetails.get(s).getAsJsonArray()) {
 								JsonObject currentEncounter = j.getAsJsonObject();
-								int ammount = currentEncounter.get("ammount") != null ?
-										currentEncounter.get("ammount").getAsInt() : 1;
-										for(int i = 0; i < ammount; i++) {
-											pool.addPokemon(currentEncounter.get("id").getAsInt(),
-													currentEncounter.get("level").getAsShort());
-										}
+								int ammount = currentEncounter.get("ammount") != null
+										? currentEncounter.get("ammount").getAsInt() : 1;
+								for (int i = 0; i < ammount; i++) {
+									pool.addPokemon(currentEncounter.get("id").getAsInt(),
+											currentEncounter.get("level").getAsShort());
+								}
 							}
 						} else {
 							pool.addPokemon(25, (short) 1);
 						}
-						for(int i = 0; i < pokemonPools.get(s).size(); i++) {
+						for (int i = 0; i < pokemonPools.get(s).size(); i++) {
 							pokemonPools.get(s).get(i).setPokemonPool(pool);
 						}
 					}
 				}
 
-				if(route.get("buildings") != null) {
+				if (route.get("buildings") != null) {
 					JsonArray buildings = route.get("buildings").getAsJsonArray();
-					for(JsonElement je : buildings) {
+					for (JsonElement je : buildings) {
 						JsonObject building = je.getAsJsonObject();
 						currentRoute.addBuilding(building.get("building").getAsString(),
 								new Point(building.get("x").getAsInt(), building.get("y").getAsInt()));
 					}
 				}
-//				warps.clear();
+				// warps.clear();
 			} catch (Exception e) {
 				e.printStackTrace();
 				continue;
 			}
-			if(counter == 0) {
+			if (counter == 0) {
 				currentRoute.createMap();
 				loadedRoutes.put(routeID, currentRoute);
 			} else {
@@ -1053,9 +1094,9 @@ public class RouteAnalyzer {
 	}
 
 	public void updateHatches(Route route) {
-		for(Entity[] rows : route.getEntities()) {
-			for(Entity e : rows) {
-				if(e instanceof HatchEntity) {
+		for (Entity[] rows : route.getEntities()) {
+			for (Entity e : rows) {
+				if (e instanceof HatchEntity) {
 					route.updateMap(new Point(e.getX(), e.getY()));
 				}
 			}

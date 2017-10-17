@@ -48,7 +48,7 @@ public class Character implements Runnable {
 	private boolean surfing;
 	private boolean controllable = true;
 	private boolean spinning;
-
+	private boolean event;
 
 	private Thread uncontrollable;
 
@@ -293,7 +293,7 @@ public class Character implements Runnable {
 	}
 
 	public void setCurrentDirection(Direction direction) {
-		if (controllable) {
+		if (controllable && direction != Direction.NONE) {
 			this.currentDirection = direction;
 			if(this.currentRoute != null) {
 				this.currentRoute.updateMap(this.currentPosition);
@@ -367,11 +367,7 @@ public class Character implements Runnable {
 
 	public void waiting(boolean waiting) {
 		while (moving && waiting) {
-			try {
-				Thread.sleep(5);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+			Thread.yield();
 		}
 	}
 
@@ -528,8 +524,8 @@ public class Character implements Runnable {
 
 	public void setControllable(boolean controllable) {
 		this.controllable = controllable;
-	}
-
+	}	
+	
 	public void startUncontrollableMove(Direction dir, boolean spinning, int newSpeed) {
 		this.setControllable(false);
 		this.spinning = spinning;
@@ -675,5 +671,13 @@ public class Character implements Runnable {
 
 	public boolean isSpinning() {
 		return this.spinning;
+	}
+
+	public boolean isEvent() {
+		return event;
+	}
+
+	public void setEvent(boolean event) {
+		this.event = event;
 	}
 }

@@ -3,7 +3,6 @@ package de.alexanderciupka.pokemon.pokemon;
 import java.awt.Image;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -204,13 +203,6 @@ public class PokemonInformation {
 //			for(String s : uniqueMoves) {
 //				System.out.println(s);
 //			}
-			String newMovesData = allMoveData.toString().replaceAll("\\},\\{\\\"id\\\"", "\\},\n\\{\\\"id\\\"");
-			FileWriter fw = new FileWriter(new File("C:/Users/Alexander/Desktop/foo.json"));
-			for (char c : newMovesData.toCharArray()) {
-				fw.write(c);
-				fw.flush();
-			}
-			fw.close();
 			for (JsonElement element : allPokemonData) {
 				int key = element.getAsJsonObject().get("id").getAsInt();
 				names.put(key, element.getAsJsonObject().get("name").getAsString());

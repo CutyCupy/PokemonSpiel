@@ -12,7 +12,6 @@ import de.alexanderciupka.pokemon.characters.Direction;
 import de.alexanderciupka.pokemon.characters.NPC;
 import de.alexanderciupka.pokemon.characters.Player;
 import de.alexanderciupka.pokemon.map.Camera;
-import de.alexanderciupka.pokemon.map.Change;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.menu.SoundController;
 import de.alexanderciupka.pokemon.pokemon.Item;
@@ -46,15 +45,11 @@ public class TriggeredEvent {
 	}
 
 	public void startEvent(Player source) {
-		triggered = true;
+//		triggered = true;
 		if(!triggered) {
 			triggered = true;
 			while(gController.getInteractionPause()) {
-				try {
-					Thread.sleep(1);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
+				Thread.yield();
 			}
 			gController.setInteractionPause(true);
 			ArrayList<NPC> defeats = new ArrayList<NPC>();
@@ -73,6 +68,7 @@ public class TriggeredEvent {
 					Character c = currentChanges[j].getCharacter();
 					if(c != null) {
 						if(!allParticipants.contains(c)) {
+							c.setEvent(true);
 							allParticipants.add(c);
 							allOriginalPoints.add(new Point(c.getCurrentPosition()));
 							allOriginalDirections.add(c.getCurrentDirection());
@@ -171,7 +167,7 @@ public class TriggeredEvent {
 					if(currentChanges[j].getDialog() != null) {
 						currentChar = currentChanges[j].getCharacter();
 						if(currentChar instanceof NPC) {
-							gController.getGameFrame().addDialogue(currentChar.getName() + ": " + currentChanges[j].getDialog());
+							gController.getGameFrame().addDialogue((currentChanges[j].isUnknown() ? "???: " : currentChar.getName() + ": ") + currentChanges[j].getDialog());
 						} else {
 							gController.getGameFrame().getDialogue().setForeground(new Color(255, 102, 204));
 							gController.getGameFrame().addDialogue(currentChanges[j].getDialog());
@@ -187,11 +183,7 @@ public class TriggeredEvent {
 						gController.startFight(enemy);
 //						gController.getGameFrame().repaint();
 						do {
-							try {
-								Thread.sleep(5);
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							}
+							Thread.yield();
 						} while(gController.isFighting());
 						if(enemy.isDefeated()) {
 							defeats.add(enemy);
@@ -234,6 +226,9 @@ public class TriggeredEvent {
 									nonNPCs++;
 								}
 							}
+							for(Character c : allParticipants) {
+								c.setEvent(false);
+							}
 							triggered = false;
 							gController.setInteractionPause(false);
 //							gController.getGameFrame().repaint();
@@ -257,6 +252,16 @@ public class TriggeredEvent {
 						SoundController.getInstance().playSound(currentChanges[j].getSound(), currentChanges[j].isWaiting());
 					}
 				}
+				for(int j = 0; j < currentChanges.length; j++) {
+					try {
+						Thread.sleep(currentChanges[j].getDelay());
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			for(Character c : allParticipants) {
+				c.setEvent(false);
 			}
 			gController.setInteractionPause(false);
 		}

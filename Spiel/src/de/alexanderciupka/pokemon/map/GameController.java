@@ -377,25 +377,12 @@ public class GameController {
 		mainCharacter.setCharacterImage("talih", "front");
 		mainCharacter.setName("Talih");
 		mainCharacter.setID("999");
-		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("haus_basement_haddonfield_5"));
-		mainCharacter.setCurrentPosition(2, 3);
+		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("haddonfield"));
+		mainCharacter.setCurrentPosition(62, 18);
 
-		// for (int i = 0; i < 5; i++) {
 		mainCharacter.getItems().put(Item.POKEBALL, 5);
 		mainCharacter.getItems().put(Item.RARECANDY, 1);
 		mainCharacter.getItems().put(Item.THUNDERSTONE, 1);
-//		mainCharacter.getItems().put(Item.RARECANDY, 1);
-		// mainCharacter.addItem(Item.POKEBALL);
-		// }
-
-//		for (Item i : Item.values()) {
-			// if(i.name().contains("BALL")) {
-			// mainCharacter.addItem(i);
-//			mainCharacter.getItems().put(i, 5);
-			// mainCharacter.addItem(i);
-//			 mainCharacter.addItem(i);
-//			 }
-//		}
 
 //		 mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("eigenes_zimmer"));
 //		 mainCharacter.setCurrentPosition(START.x, START.y);
@@ -406,34 +393,8 @@ public class GameController {
 
 		player.setName("Mandarine");
 
-//		player.addMove(player.getMoves()[0].getName(), information.getMoveByName("Teleport"));
-
-//		player.setMoves(new Move[4]);
-//		player.addMove("Heuler");
-//		player.addMove("Jauler");
-//		player.addMove("Fliegen");
-//		player.addMove("Taucher");
-//		player.addMove("Schemenkraft");
-
 		mainCharacter.getTeam().addPokemon(player);
-//		for (int i = 0; i < 5; i++) {
-//			Pokemon p = new Pokemon(i + 1);
-//			p.getStats().generateStats((short) 10);
-//			mainCharacter.getTeam().addPokemon(p);
-//		}
 
-		// for(int i = 0; i < 3; i++) {
-		// Pokemon foo = new Pokemon(new Random().nextInt(649) + 1);
-		// foo.getStats().generateStats((short) 100);
-		// mainCharacter.getPC().getBoxes()[0].addPokemon(foo, i * 10);
-		// }
-
-		// Random rng = new Random();
-		// for(int i = 0; i < 5; i++) {
-		// Pokemon current = new Pokemon(rng.nextInt(649) + 1);
-		// current.getStats().generateStats((short) (rng.nextInt(100) + 1));
-		// mainCharacter.getTeam().addPokemon(current);
-		// }
 		if(gameFrame == null) {
 			gameFrame = new GameFrame();
 		}
@@ -446,14 +407,6 @@ public class GameController {
 
 
 		mainCharacter.getCurrentRoute().getEntities()[mainCharacter.getCurrentPosition().y][mainCharacter.getCurrentPosition().x].onStep(mainCharacter);
-
-		// SnowOverlay s = new SnowOverlay(gameFrame.getBackgroundLabel(), new
-		// Dimension(630, 630), SnowType.BLIZZARD);
-		// s.createOverlay();
-		// gameFrame.getBackgroundLabel().addOverlay(s);
-		// s.startAnimation();
-
-		// information.getGender(300);
 	}
 
 	public boolean loadGame(String path) {
