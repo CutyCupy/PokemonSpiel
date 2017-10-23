@@ -252,11 +252,9 @@ public class GameController {
 				gameFrame.setCurrentPanel(gameFrame.getEvolutionPanel());
 				gameFrame.getEvolutionPanel().start();
 			}
-			if (fight.getEnemyCharacter() != null && fight.getEnemyCharacter().getReward() != Item.NONE) {
-				this.getGameFrame().addDialogue(fight.getEnemyCharacter().getName() + ": " + "Nehme das als ein Geschenk von mir!");
-				this.getGameFrame().getDialogue().waitText();
-				this.getGameFrame().addDialogue("Du hast " + fight.getEnemyCharacter().getReward().getName() + " erhalten!");
-				this.mainCharacter.addItem(fight.getEnemyCharacter().getReward());
+			if (fight.getEnemyCharacter() != null && fight.getEnemyCharacter().hasRewards()) {
+				this.mainCharacter.earnRewards(fight.getEnemyCharacter().getRewards(), true);
+				fight.getEnemyCharacter().getRewards().clear();
 			}
 		}
 	}
@@ -377,12 +375,10 @@ public class GameController {
 		mainCharacter.setCharacterImage("talih", "front");
 		mainCharacter.setName("Talih");
 		mainCharacter.setID("999");
-		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("haddonfield"));
-		mainCharacter.setCurrentPosition(62, 18);
+		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("bremen"));
+		mainCharacter.setCurrentPosition(9, 13);
 
 		mainCharacter.getItems().put(Item.POKEBALL, 5);
-		mainCharacter.getItems().put(Item.RARECANDY, 1);
-		mainCharacter.getItems().put(Item.THUNDERSTONE, 1);
 
 //		 mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("eigenes_zimmer"));
 //		 mainCharacter.setCurrentPosition(START.x, START.y);

@@ -4,6 +4,7 @@ import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.HashMap;
 
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
@@ -21,7 +22,7 @@ public class NPC extends Character {
 	private String noFight;
 	private String onDefeat;
 	private String logo;
-	private Item reward;
+	private HashMap<Item, Integer> rewards;
 
 	public NPC() {
 		super();
@@ -182,19 +183,25 @@ public class NPC extends Character {
 			this.beforeFight = dialogue.get("before") == null ? null : dialogue.get("before").getAsString();
 			this.noFight = dialogue.get("no") == null ? null : dialogue.get("no").getAsString();
 			this.onDefeat = dialogue.get("on_defeat") == null ? null : dialogue.get("on_defeat").getAsString();
+			this.rewards = new HashMap<>();
 			if(!(dialogue.get("reward") == null)) {
-				for(Item i : Item.values()) {
-					if(i.name().toLowerCase().equals(dialogue.get("reward").getAsString().toLowerCase())) {
-						this.reward = i;
-						break;
-					}
-				}
-			}
-			if(this.reward == null) {
-				this.reward = Item.NONE;
+				importRewards(dialogue.get("reward").getAsString());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+
+	private void importRewards(String rewards) {
+		for(String s : rewards.split("\\+")) {
+			Item current = null;
+			try {
+				current = Item.valueOf(s.toUpperCase());
+			} catch(Exception e) {
+				continue;
+			}
+			this.rewards.put(current,
+					this.rewards.get(current) == null ? 1 : this.rewards.get(current) + 1);
 		}
 	}
 
@@ -207,8 +214,27 @@ public class NPC extends Character {
 		return onDefeat;
 	}
 
-	public Item getReward() {
-		return reward;
+	public HashMap<Item, Integer> getRewards() {
+		return rewards;
+	}
+
+	public boolean hasRewards() {
+		for(Item i : this.rewards.keySet()) {
+			if(this.rewards.get(i) != null && this.rewards.get(i) > 0) {
+				return true;
+			}
+		}
+		return false;
+	}
+	public void removeReward(Item reward, Integer amount) {
+		if(this.rewards.get(reward) != null) {
+			int delta = this.rewards.get(reward) - amount;
+			if(delta <= 0) {
+				this.rewards.remove(reward);
+			} else {
+				this.rewards.put(reward, delta);
+			}
+		}
 	}
 
 	public String getLogo() {
@@ -225,7 +251,18 @@ public class NPC extends Character {
 		saveData.addProperty("before", this.beforeFight);
 		saveData.addProperty("no", this.noFight);
 		saveData.addProperty("after", this.onDefeat);
-		saveData.addProperty("reward", this.reward != null ? this.reward.name() : null);
+		String reward = "";
+		for(Item i : this.rewards.keySet()) {
+			if(this.rewards.get(i) != null && this.rewards.get(i) > 0) {
+				for(int j = 0; j < this.rewards.get(j); j++) {
+					if(j != 0) {
+						reward += "+";
+					}
+					reward += i.name();
+				}
+			}
+		}
+		saveData.addProperty("reward", reward);
 		return saveData;
 	}
 
@@ -235,7 +272,10 @@ public class NPC extends Character {
 			this.beforeFight = saveData.get("before") instanceof JsonNull ? null : saveData.get("before").getAsString();
 			this.noFight = saveData.get("no") instanceof JsonNull ? null : saveData.get("no").getAsString();
 			this.onDefeat = saveData.get("after") instanceof JsonNull ? null : saveData.get("after").getAsString();
-			this.reward = saveData.get("reward") instanceof JsonNull ? null : Item.valueOf(saveData.get("reward").getAsString());
+			this.rewards = new HashMap<>();
+			if(!(saveData.get("reward") instanceof JsonNull)) {
+				importRewards(saveData.get("reward").getAsString());
+			}
 			return true;
 		}
 

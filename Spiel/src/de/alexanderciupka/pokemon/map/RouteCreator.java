@@ -31,6 +31,8 @@ import javax.swing.border.EmptyBorder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import de.alexanderciupka.pokemon.pokemon.Item;
+
 public class RouteCreator extends JFrame {
 
 	private JPanel contentPane;
@@ -44,8 +46,10 @@ public class RouteCreator extends JFrame {
 	private ButtonGroup group;
 	private int warpCounter;
 	private int characterCounter;
+	private int itemCounter;
 	private ArrayList<Warp> warps;
 	private HashMap<String, Point> characters;
+	private HashMap<String, String> items;
 	private String routeName;
 	private String routeID;
 	private JButton save;
@@ -75,10 +79,12 @@ public class RouteCreator extends JFrame {
 			{"Wand", "MW"},
 			{"Fenster", "MWW"},
 			{"Fenster+Gardine", "MWWC"},
+			{"Statue", "statue"},
 			{"Bett", "bed"},
 			{"Bookshelf", "BS"},
 			{"TV", "TV"},
 			{"SPÜLE", "spuele"},
+			{"Item", "ITEM"},
 			{"Laptop", "LAPTOP"},
 			{"PC", "PC"},
 			{"Table", "TA"},
@@ -95,6 +101,8 @@ public class RouteCreator extends JFrame {
 			{"Snow Tree", "TS"},
 			{"Grass", "GRASS"},
 			{"Mauer", "M"},
+			{"LKW Links", "LKWL"},
+			{"LKW Rechts", "LKWR"},
 			{"Pokemon Center", "P"},
 			{"House Small", "HS"},
 			{"Gym", "A"},
@@ -158,6 +166,7 @@ public class RouteCreator extends JFrame {
 		routeID = routeName.toLowerCase().replace(" ", "_");
 		warps = new ArrayList<Warp>();
 		characters = new HashMap<String, Point>();
+		items = new HashMap<>();
 		this.setTitle(routeName);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(0, 0, 1920, 1080);
@@ -333,8 +342,34 @@ public class RouteCreator extends JFrame {
 										JOptionPane.showMessageDialog(null, text + characterCounter + " added!");
 										text = "";
 										characterCounter++;
+									} else if(text.startsWith("LKW")) {
+										if(xCoord < labels[0].length - 1) {
+											labels[yCoord][xCoord+1].setText("M");
+										}
+									} else if(text.equals("ITEM")) {
+										text += itemCounter;
+										itemCounter++;
+										String result = "";
+										String[] possibleItems = new String[Item.values().length - 1];
+										boolean none = false;
+										for(int counter = 0; counter < Item.values().length; counter++) {
+											if(Item.values()[counter] == Item.NONE) {
+												none = true;
+												continue;
+											}
+											possibleItems[none ? counter - 1 : counter] = Item.values()[counter].getName();
+										}
+										result += Item.getItemByName(
+												JOptionPane.showInputDialog(
+														null, "Welches Item?", text, JOptionPane.QUESTION_MESSAGE,
+												null, possibleItems, possibleItems[0]).toString()).name();
+										result += "+";
+										result += JOptionPane.showOptionDialog(
+												null, "Versteckt?", text, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
+												null, new String[] {"Ja", "Nein"}, "Nein") == 0 ? "TRUE" : "FALSE";
+										items.put(text, result);
 									}
-								}
+								 }
 							}
 							if(e.getButton() == MouseEvent.BUTTON1) {
 								labels[yCoord][xCoord].setText(text);
@@ -452,9 +487,20 @@ public class RouteCreator extends JFrame {
 				characterDetails.add(currentCharacter);
 			}
 
+			JsonArray itemDetails = new JsonArray();
+			for(String s : items.keySet()) {
+				JsonObject currentItem = new JsonObject();
+				currentItem.addProperty("entity_id", s);
+				currentItem.addProperty("item", items.get(s).split("\\+")[0]);
+				currentItem.addProperty("hidden", items.get(s).split("\\+")[1]);
+				itemDetails.add(currentItem);
+			}
+
+
 			route.add("route", routeDetails);
 			route.add("warps", warpDetails);
 			route.add("characters", characterDetails);
+			route.add("items", itemDetails);
 			route.add("encounters", new JsonObject());
 			route.add("events", new JsonObject());
 
@@ -470,7 +516,8 @@ public class RouteCreator extends JFrame {
 			}
 			route.add("buildings", buildings);
 			BufferedWriter bWriter = new BufferedWriter(new FileWriter(newRoute));
-			for(char c : route.toString().toCharArray()) {
+			String saveString = route.toString();
+			for(char c : saveString.toCharArray()) {
 				bWriter.write(c);
 				bWriter.flush();
 			}

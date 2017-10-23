@@ -206,9 +206,10 @@ public class Entity {
 				return false;
 			}
 			if (warp.getNewRoute().toLowerCase().equals("pokemon_center")) {
-				gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()).getEntities()[4][2].getWarp()
+				System.err.println();
+				gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()).getEntities()[5][2].getWarp()
 						.setNewPosition(c.getCurrentPosition().getLocation());
-				gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()).getEntities()[4][2].getWarp()
+				gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()).getEntities()[5][2].getWarp()
 						.setNewRoute(c.getCurrentRoute().getId());
 			}
 			if (c instanceof Player) {
@@ -424,6 +425,10 @@ public class Entity {
 					if (character.getName().equals("Maria") && character.getCurrentRoute().getId().equals("zuhause")) {
 						c.getTeam().restoreTeam();
 					}
+					if(character.hasRewards()) {
+						c.earnRewards(character.getRewards());
+						character.getRewards().clear();
+					}
 				}
 			}
 		} else if (getSpriteName().equals("free") && !isAccessible(c)) {
@@ -484,8 +489,6 @@ public class Entity {
 					result = true;
 					((DarkOverlay) (gController.getGameFrame().getBackgroundLabel().getOverlay(DarkOverlay.class)))
 							.flash();
-				} else {
-					gController.getGameFrame().addDialogue("Ein Hilfsmitte könnte die Höhle erleuchten!");
 				}
 			}
 			break;

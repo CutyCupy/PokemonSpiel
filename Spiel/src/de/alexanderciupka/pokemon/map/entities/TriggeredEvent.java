@@ -161,6 +161,7 @@ public class TriggeredEvent {
 					}
 					if(currentChanges[j].isHeal()) {
 						currentChar.getTeam().restoreTeam();
+						SoundController.getInstance().playSound(SoundController.ITEM_HEAL, true);
 					}
 				}
 				for(int j = 0; j < currentChanges.length; j++) {

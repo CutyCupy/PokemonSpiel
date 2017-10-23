@@ -76,7 +76,8 @@ public class HatchEntity extends Entity {
 			}
 		}
 		System.out.println(done + " - " + minimum);
-		return done >= this.minimum;
+//		return done >= this.minimum;
+		return true;
 	}
 
 	@Override

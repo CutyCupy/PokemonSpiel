@@ -12,7 +12,7 @@ public class Warp {
 
 	private Point newPosition;
 	private Direction newDirection;
-	
+
 	public Warp(String warpString, String oldRoute) {
 		this.warpString = warpString;
 		this.oldRoute = oldRoute;
@@ -53,11 +53,11 @@ public class Warp {
 	public String getWarpString() {
 		return this.warpString;
 	}
-	
+
 	public void setNewDirection(Direction d) {
 		this.newDirection = d;
 	}
-	
+
 	public void setNewDirection(String d) {
 		try {
 			this.newDirection = Direction.valueOf(d.toUpperCase());
@@ -65,22 +65,24 @@ public class Warp {
 			this.newDirection = Direction.NONE;
 		}
 	}
-	
+
 	public Direction getNewDirection() {
 		return this.newDirection;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof Warp) {
 			Warp other = (Warp) obj;
-			return (this.warpString.equals(other.warpString) && 
-					this.oldRoute.equals(other.oldRoute) && this.newRoute.equals(other.newRoute) && 
+			System.out.println(this.oldRoute);
+			System.out.println(this.newRoute);
+			return (this.warpString.equals(other.warpString) &&
+					this.oldRoute.equals(other.oldRoute) && this.newRoute.equals(other.newRoute) &&
 					this.newPosition.equals(other.newPosition) && this.newDirection.equals(other.newDirection));
 		}
 		return false;
 	}
-	
+
 	@Override
 	public Warp clone() {
 		return new Warp(this.warpString, this.oldRoute, this.newRoute, new Point(this.newPosition), this.newDirection);

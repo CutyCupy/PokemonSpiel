@@ -403,8 +403,21 @@ public class RouteAnalyzer {
 								currentEntity = new Entity(currentRoute, true, "bridge", nonGrassEncounterRate,
 										currentRoute.getTerrainName());
 								break;
+							case "LKWR":
+								currentEntity = new Entity(currentRoute, false, "lkw_right", nonGrassEncounterRate,
+										"stone");
+								currentRoute.addBuilding("lkw_right", new Point(x, y));
+								break;
+							case "LKWL":
+								currentEntity = new Entity(currentRoute, false, "lkw_left", nonGrassEncounterRate,
+										"stone");
+								currentRoute.addBuilding("lkw_left", new Point(x, y));
+								break;
 							case "PC":
 								currentEntity = new Entity(currentRoute, false, "pc", 0, currentRoute.getTerrainName());
+								break;
+							case "STATUE":
+								currentEntity = new Entity(currentRoute, false, "statue", 0, currentRoute.getTerrainName());
 								break;
 							case "JH":
 								currentEntity = new Entity(currentRoute, false, "joyhealing0", 0,

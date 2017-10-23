@@ -98,9 +98,28 @@ public class Player extends Character {
 	}
 
 	public void addItem(Item reward) {
-		SoundController.getInstance().playSound(SoundController.GET_ITEM);
-		this.items.put(reward, this.items.get(reward) + 1);
-		this.gController.getGameFrame().getInventoryPanel().update(this);
+		addItem(reward, 1);
+	}
+
+	public void addItem(Item reward, int amount) {
+		if(amount > 0) {
+			SoundController.getInstance().playSound(SoundController.GET_ITEM);
+			this.items.put(reward, this.items.get(reward) + amount);
+			this.gController.getGameFrame().getInventoryPanel().update(this);
+		}
+	}
+
+	public void earnRewards(HashMap<Item, Integer> rewards) {
+		earnRewards(rewards, false);
+	}
+
+	public void earnRewards(HashMap<Item, Integer> rewards, boolean withText) {
+		for(Item i : rewards.keySet()) {
+			if(withText) {
+				gController.getGameFrame().addDialogue("Du hast " + i.getName() + " (x" + rewards.get(i) + ") erhalten!");
+			}
+			addItem(i, rewards.get(i));
+		}
 	}
 
 	public boolean hasItem(Item i) {

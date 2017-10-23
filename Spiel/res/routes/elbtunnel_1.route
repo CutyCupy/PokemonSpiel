@@ -27,4 +27,18 @@
             {"id":41,"level":9,"ammount":1},
             {"id":41,"level":10,"ammount":2}
         ]
-    },"items":[{"entity_id":"ITEM1","name":"FULLRESTORE","hidden":true},{"entity_id":"ITEM2","name":"hyperball","hidden":true},{"entity_id":"ITEM3","name":"repel","hidden":false},{"entity_id":"ITEM4","name":"superpotion","hidden":true},{"entity_id":"ITEM5","name":"pokeball","hidden":false},{"entity_id":"ITEM6","name":"pokeball","hidden":false},{"entity_id":"ITEM7","name":"poisonheal","hidden":true},{"entity_id":"ITEM8","name":"freezeheal","hidden":true},{"entity_id":"ITEM9","name":"hyperball","hidden":false},{"entity_id":"ITEM10","name":"superball","hidden":false},{"entity_id":"ITEM11","name":"rarecandy","hidden":true},{"entity_id":"ITEM12","name":"potion","hidden":false},{"entity_id":"ITEM13","name":"revive","hidden":true}]}
+    },
+    "items":[
+        {"entity_id":"ITEM1","name":"FULLRESTORE","hidden":true},
+        {"entity_id":"ITEM2","name":"hyperball","hidden":true},
+        {"entity_id":"ITEM3","name":"repel","hidden":false},
+        {"entity_id":"ITEM4","name":"superpotion","hidden":true},
+        {"entity_id":"ITEM5","name":"pokeball","hidden":false},
+        {"entity_id":"ITEM6","name":"pokeball","hidden":false},
+        {"entity_id":"ITEM7","name":"poisonheal","hidden":true},
+        {"entity_id":"ITEM8","name":"freezeheal","hidden":true},
+        {"entity_id":"ITEM9","name":"hyperball","hidden":false},
+        {"entity_id":"ITEM10","name":"superball","hidden":false},
+        {"entity_id":"ITEM11","name":"rarecandy","hidden":true},
+        {"entity_id":"ITEM12","name":"potion","hidden":false},
+        {"entity_id":"ITEM13","name":"revive","hidden":true}]}

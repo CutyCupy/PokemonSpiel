@@ -200,8 +200,9 @@ public class Character implements Runnable {
 			return sprites.get("left")[currentWalking];
 		case RIGHT:
 			return sprites.get("right")[currentWalking];
+		default:
+			return sprites.get("front")[0];
 		}
-		return null;
 	}
 
 	public void setCharacterImage(String characterImageName) {
@@ -351,7 +352,7 @@ public class Character implements Runnable {
 						}
 						return -1;
 					}
-					for (int i = 1; i <= 7; i++) {
+					for (int i = 1; i <= 4; i++) {
 						if (this.getCurrentRoute().getEntities()[currentPosition.y + (i * y)][currentPosition.x
 								+ (i * x)].isAccessible(this)) {
 							if (mainX == currentPosition.x + (i * x) && mainY == currentPosition.y + (i * y)) {
@@ -524,8 +525,8 @@ public class Character implements Runnable {
 
 	public void setControllable(boolean controllable) {
 		this.controllable = controllable;
-	}	
-	
+	}
+
 	public void startUncontrollableMove(Direction dir, boolean spinning, int newSpeed) {
 		this.setControllable(false);
 		this.spinning = spinning;
