@@ -15,6 +15,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 
+import de.alexanderciupka.pokemon.characters.Character;
 import de.alexanderciupka.pokemon.characters.NPC;
 import de.alexanderciupka.pokemon.characters.Player;
 import de.alexanderciupka.pokemon.gui.GameFrame;
@@ -35,6 +36,7 @@ public class Route {
 	private HashMap<String, ArrayList<Point>> buildings;
 	private PokemonPool pokemonPool;
 	private ArrayList<NPC> characters;
+	private BufferedImage tempMap;
 	private BufferedImage map;
 	private RainType rain;
 	private SnowType snow;
@@ -165,6 +167,7 @@ public class Route {
 	}
 
 	public void createMap() {
+		tempMap = new BufferedImage(width * 70, height * 70, BufferedImage.TYPE_4BYTE_ABGR);
 		map = new BufferedImage(width * 70, height * 70, BufferedImage.TYPE_4BYTE_ABGR);
 		Point[] points = new Point[this.width * this.height];
 		for (int x = 0; x < this.width; x++) {
@@ -174,16 +177,22 @@ public class Route {
 		}
 		updateMap(points);
 		saveMap();
+		map = tempMap;
 	}
 
 	public void updateMap(Point... updatePoint) {
+		while(wait) {
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 		wait = true;
-		if (map != null) {
-//			BufferedImage temp = new BufferedImage(630, 630, map.getType());
+		if (tempMap != null) {
 			Player mc = GameController.getInstance().getMainCharacter();
-			Graphics g = map.getGraphics();
+			Graphics g = tempMap.getGraphics();
 
-//			g.drawImage(map, 0, 0, null);
 			for (Point p : updatePoint) {
 				try {
 					g.drawImage(entities[p.y][p.x].getTerrain(), p.x * 70, p.y * 70, null);
@@ -200,29 +209,50 @@ public class Route {
 			for(NPC npc : this.characters) {
 				g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70), (int) (npc.getExactY() * 70), null);
 			}
-//			HashSet<de.alexanderciupka.pokemon.characters.Character> needsRepaint = new HashSet<>();
 			for (String building : this.buildings.keySet()) {
 				BufferedImage currentBuilding = GameController.getInstance().getRouteAnalyzer().getSpriteByName(building);
 				for (Point p : this.buildings.get(building)) {
 					g.drawImage(currentBuilding, p.x * 70, p.y * 70, null);
-//					if(mc != null && (mc.getExactX() * 70 + mc.getCharacterImage().getWidth(null) < p.x * 70 || mc.getExactX() * 70 > p.x * 70 + currentBuilding.getWidth() ||
-//							(mc.getExactY() * 70 + mc.getCharacterImage().getHeight(null) < p.y * 70 || mc.getExactY() * 70 > (p.y + 1) * 70 + currentBuilding.getHeight()))) {
-//						needsRepaint.add(mc);
-//					}
-//					for(NPC npc : this.characters) {
-//						if((npc.getExactX() * 70 + npc.getCharacterImage().getWidth(null) < p.x * 70 || npc.getExactX() * 70 > p.x * 70 + currentBuilding.getWidth()) ||
-//								(npc.getExactY() * 70 + npc.getCharacterImage().getHeight(null) < p.y * 70 || npc.getExactY() * 70 > (p.y + 1) * 70 + currentBuilding.getHeight())) {
-//							needsRepaint.add(npc);
-//						}
-//					}
 				}
 			}
-//			for(de.alexanderciupka.pokemon.characters.Character npc : needsRepaint) {
-//				g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70), (int) (npc.getExactY() * 70), null);
-//			}
-			if (mc != null && this.equals(mc.getCurrentRoute(), false) && this.entities[mc.getCurrentPosition().y][mc.getCurrentPosition().x].getWarp() != null) {
+			
+			ArrayList<Character> character = new ArrayList<>(this.characters);
+			character.add(GameController.getInstance().getMainCharacter());
+			
+			for(int i = 0; i < character.size(); i++) {
+				Character c = character.get(i);
+				boolean repaint = true;
+				for (String building : this.buildings.keySet()) {
+					if(!repaint) {
+						break;
+					}
+					BufferedImage currentBuilding = GameController.getInstance().getRouteAnalyzer().getSpriteByName(building);
+					for (Point p : this.buildings.get(building)) {
+						if(!repaint) {
+							break;
+						}
+						int buildingWidth = currentBuilding.getWidth() - (currentBuilding.getWidth() % GameFrame.GRID_SIZE);
+						int buildingHeight = currentBuilding.getHeight() - (currentBuilding.getHeight() % GameFrame.GRID_SIZE);
+						if((c.getExactX() * 70 + c.getCharacterImage().getWidth(null) < p.x * 70 || 
+								c.getExactX() * 70 > p.x * 70 + buildingWidth) ||
+								(c.getExactY() * 70 + c.getCharacterImage().getHeight(null) < p.y * 70 || 
+										c.getExactY() * 70 > (p.y + 1) * 70 + buildingHeight)) {
+							character.remove(c);
+							repaint = false;
+						}
+					}
+				}
+				if(repaint) {
+					g.drawImage(c.getCharacterImage(), (int) (c.getExactX() * 70), (int) (c.getExactY() * 70), null);
+				}
+			}
+			if (mc != null && this.equals(mc.getCurrentRoute(), false) && 
+					(this.entities[mc.getCurrentPosition().y][mc.getCurrentPosition().x].getWarp() != null ||
+							(mc.getOldPosition().x < this.width && mc.getOldPosition().y < this.height && 
+									this.entities[mc.getOldPosition().y][mc.getOldPosition().x].getWarp() != null))) {
 				g.drawImage(mc.getCharacterImage(), (int) (mc.getExactX() * 70), (int) (mc.getExactY() * 70), null);
 			}
+			map = tempMap;
 		}
 		wait = false;
 	}
@@ -236,6 +266,9 @@ public class Route {
 
 	void saveMap() {
 		try {
+			while(wait) {
+				Thread.sleep(1);
+			}
 			Graphics g = map.getGraphics();
 			g.setFont(g.getFont().deriveFont(20.0f));
 			for (int y = 0; y < height; y++) {
@@ -266,8 +299,11 @@ public class Route {
 
 	public BufferedImage getMap() {
 		while (wait) {
-			System.out.println(wait);
-			Thread.yield();
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 		return this.map;
 	}

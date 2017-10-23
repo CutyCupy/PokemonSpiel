@@ -426,6 +426,7 @@ public class RouteAnalyzer {
 							case "PCD":
 								currentEntity = new Entity(currentRoute, false, "pokecenter_desk", 0,
 										currentRoute.getTerrainName());
+								currentRoute.addBuilding("pokecenter_desk", new Point(x, y));
 								break;
 							case "MD":
 								currentEntity = new Entity(currentRoute, true, "movedown", 0,
