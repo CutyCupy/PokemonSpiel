@@ -8,6 +8,9 @@ import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.Random;
 
+import javax.swing.JComponent;
+import javax.swing.JOptionPane;
+
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -20,7 +23,68 @@ public class Main {
 
 	public static final double FPS = 60;
 
+	public static boolean SONG_PAUSE = false;
+
+	public static JOptionPane getOptionPane(JComponent parent) {
+        JOptionPane pane = null;
+        if (!(parent instanceof JOptionPane)) {
+            pane = getOptionPane((JComponent)parent.getParent());
+        } else {
+            pane = (JOptionPane) parent;
+        }
+        return pane;
+    }
+
+	public static String arrayToString(Object[] array) {
+		String result = "";
+		for(int i = 0; i < array.length; i++) {
+			if(i != 0) {
+				result += "+";
+			}
+			result += array[i];
+		}
+		return result;
+	}
+
 	public static void main(String[] args) throws Exception {
+
+//		JButton again = new JButton("Again");
+//		JButton ok = new JButton("Ok");
+//
+//		again.setName("5");
+//		again.setText("Again (5)");
+//
+//		again.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                JOptionPane pane = getOptionPane((JComponent)e.getSource());
+//                pane.setValue(again);
+//                int agains = Math.max(Integer.parseInt(again.getName()) - 1, 0);
+//                again.setName(String.valueOf(agains));
+//    			again.setText("Again (" + agains + ")");
+//            }
+//        });
+//
+//		ok.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                JOptionPane pane = getOptionPane((JComponent)e.getSource());
+//                pane.setValue(ok);
+//            }
+//        });
+//
+//		for(int i = 0; i < 7; i++) {
+//
+//			if(again.getName().equals("0")) {
+//				again.setEnabled(false);
+//			} else {
+//				again.setEnabled(true);
+//			}
+//
+//			System.out.println(JOptionPane.showOptionDialog(null, "Frage", "Erkenne den Song!", JOptionPane.OK_CANCEL_OPTION,
+//					JOptionPane.QUESTION_MESSAGE, null, new JButton[] {again, ok}, again));
+//		}
+//
 
 		MenuController.getInstance();
 
@@ -31,11 +95,11 @@ public class Main {
 				long startTime = 0;
 				GameController gController = null;
 				GameFrame frame = null;
-				while (gController == null) {
-					gController = GameController.getInstance();
+				while ((gController = GameController.getInstance()) == null) {
+					Thread.yield();
 				}
-				while (frame == null) {
-					frame = gController.getGameFrame();
+				while ((frame = gController.getGameFrame()) == null) {
+					Thread.yield();
 				}
 				boolean firstDialogue = true;
 				boolean wait = false;
@@ -90,7 +154,7 @@ public class Main {
 				Random rng = new Random();
 				File[] songs = new File(Main.class.getResource("/music/songs/").getFile()).listFiles();
 				while (true) {
-					if (!sc.isSongRunning()) {
+					if (!SONG_PAUSE && !sc.isSongRunning()) {
 						File song = songs[rng.nextInt(songs.length)];
 //						sc.playSong(song);
 					}

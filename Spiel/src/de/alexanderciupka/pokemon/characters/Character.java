@@ -318,6 +318,10 @@ public class Character implements Runnable {
 		this.trainer = Boolean.parseBoolean(trainer);
 	}
 
+	public void setTrainer(boolean trainer) {
+		this.trainer = trainer;
+	}
+
 	public int checkStartFight() {
 		if (this.trainer && this.aggro) {
 			if (!this.defeated) {
@@ -661,7 +665,8 @@ public class Character implements Runnable {
 		if(obj instanceof Character) {
 			Character c = (Character) obj;
 			return this.getID().equals(c.getID()) && this.getName().equals(c.getName()) && this.getCurrentPosition().equals(c.getCurrentPosition())
-					&& this.getCurrentRoute().getId().equals(c.getCurrentRoute().getId());
+					&& (this.getCurrentRoute() == null ? c.getCurrentRoute() == null :
+						this.getCurrentRoute().getId().equals(c.getCurrentRoute().getId()));
 		}
 		return false;
 	}

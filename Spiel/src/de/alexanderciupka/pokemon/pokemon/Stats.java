@@ -103,7 +103,7 @@ public class Stats {
 			}
 			levelUpXP = calculateLevelUpXP();
 			newMoves();
-		} else {
+		} else if(this.level == 99){
 			this.level = 100;
 			if(gController.isFighting()) {
 				gController.getGameFrame().getFightPanel().updatePanels();

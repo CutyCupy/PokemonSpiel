@@ -197,6 +197,7 @@ public class GameController {
 		gameFrame.addDialogue(enemy.getName() + ": " + enemy.getBeforeFightDialogue());
 		waitDialogue();
 		this.fighting = true;
+		SoundController.getInstance().stopRain();
 		SoundController.getInstance().playBattleSong(enemy.getName());
 		this.gameFrame.getBackgroundLabel().startFight(enemy.getLogo());
 		this.fight = new Fighting(enemy);
@@ -207,6 +208,7 @@ public class GameController {
 	public void startFight(Pokemon enemy) {
 		this.fight = new Fighting(enemy);
 		this.fighting = true;
+		SoundController.getInstance().stopRain();
 		SoundController.getInstance().playBattleSong(null);
 		getGameFrame().getBackgroundLabel().startEncounter();
 		gameFrame.startFight(fight.getPlayer(), fight.getEnemy());
@@ -257,6 +259,7 @@ public class GameController {
 				fight.getEnemyCharacter().getRewards().clear();
 			}
 		}
+		SoundController.getInstance().startRain(mainCharacter.getCurrentRoute().getRain());
 	}
 
 	public boolean winFight() {
@@ -375,8 +378,8 @@ public class GameController {
 		mainCharacter.setCharacterImage("talih", "front");
 		mainCharacter.setName("Talih");
 		mainCharacter.setID("999");
-		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("bremen"));
-		mainCharacter.setCurrentPosition(9, 13);
+		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("bremen_arena"));
+		mainCharacter.setCurrentPosition(15, 21);
 
 		mainCharacter.getItems().put(Item.POKEBALL, 5);
 
@@ -403,6 +406,7 @@ public class GameController {
 
 
 		mainCharacter.getCurrentRoute().getEntities()[mainCharacter.getCurrentPosition().y][mainCharacter.getCurrentPosition().x].onStep(mainCharacter);
+
 	}
 
 	public boolean loadGame(String path) {
@@ -448,9 +452,11 @@ public class GameController {
 			this.saveGame();
 		case 3:
 			gameFrame.setVisible(false);
+			SoundController.getInstance().stopRain();
 			this.mController.showMenu();
 			break;
 		case 2:
+			SoundController.getInstance().stopRain();
 			this.mController.loadGame();
 			break;
 		default:

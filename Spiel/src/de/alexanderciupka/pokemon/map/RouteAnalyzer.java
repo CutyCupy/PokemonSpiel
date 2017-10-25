@@ -35,6 +35,8 @@ import de.alexanderciupka.pokemon.map.entities.GeneratorEntity;
 import de.alexanderciupka.pokemon.map.entities.HatchEntity;
 import de.alexanderciupka.pokemon.map.entities.ItemEntity;
 import de.alexanderciupka.pokemon.map.entities.PokemonEntity;
+import de.alexanderciupka.pokemon.map.entities.QuestionEntity;
+import de.alexanderciupka.pokemon.map.entities.QuestionType;
 import de.alexanderciupka.pokemon.map.entities.SignEntity;
 import de.alexanderciupka.pokemon.map.entities.TriggeredEvent;
 import de.alexanderciupka.pokemon.menu.MenuController;
@@ -256,6 +258,7 @@ public class RouteAnalyzer {
 				ArrayList<PokemonEntity> pokemons = new ArrayList<PokemonEntity>();
 				ArrayList<ItemEntity> items = new ArrayList<ItemEntity>();
 				ArrayList<SignEntity> signs = new ArrayList<SignEntity>();
+				ArrayList<QuestionEntity> quizzes = new ArrayList<>();
 				float nonGrassEncounterRate = 0;
 				switch (currentRoute.getTerrainName().toLowerCase()) {
 				case "cave":
@@ -275,7 +278,7 @@ public class RouteAnalyzer {
 						if (!currentString.startsWith("W") && !currentString.startsWith("PKM")
 								&& !currentString.startsWith("TRIGGERED") && !currentString.startsWith("ITEM")
 								&& !currentString.startsWith("GRASS") && !currentString.startsWith("SEE")
-								&& !currentString.startsWith("CAVE")) {
+								&& !currentString.startsWith("CAVE") && !currentString.startsWith("QUIZ")) {
 							switch (currentString) {
 							case "OOB":
 								currentEntity = new Entity(currentRoute, false, "free", 0, "free");
@@ -310,9 +313,24 @@ public class RouteAnalyzer {
 								currentEntity = new Entity(currentRoute, false, "spuele", 0,
 										currentRoute.getTerrainName());
 								break;
+							case "FR":
+								currentEntity = new Entity(currentRoute, false, "fridge", 0, currentRoute.getTerrainName());
+								break;
+							case "SV":
+								currentEntity = new Entity(currentRoute, false, "server", 0, currentRoute.getTerrainName());
+								break;
+							case "V":
+								currentEntity = new Entity(currentRoute, false, "vitrine", 0, currentRoute.getTerrainName());
+								break;
 							case "BS":
 								currentEntity = new Entity(currentRoute, false, "bookshelf", 0,
 										currentRoute.getTerrainName());
+								break;
+							case "TL":
+								currentEntity = new Entity(currentRoute, false, "toilette", 0, currentRoute.getTerrainName());
+								break;
+							case "BT":
+								currentEntity = new Entity(currentRoute, false, "bathtub", 0, currentRoute.getTerrainName());
 								break;
 							case "STUHLR":
 								currentEntity = new Entity(currentRoute, true, "chair_r", nonGrassEncounterRate,
@@ -329,6 +347,7 @@ public class RouteAnalyzer {
 							case "STUHLU":
 								currentEntity = new Entity(currentRoute, true, "chair_u", nonGrassEncounterRate,
 										currentRoute.getTerrainName());
+								currentRoute.addBuilding("chair_u", new Point(x, y));
 								break;
 							case "SETTLER":
 								currentEntity = new Entity(currentRoute, true, "settle_r", nonGrassEncounterRate,
@@ -681,6 +700,9 @@ public class RouteAnalyzer {
 							}
 							temp.add(currentEntity);
 							pokemonPools.put(currentString, temp);
+						} else if(currentString.startsWith("QUIZ")) {
+							currentEntity = new QuestionEntity(currentString, currentRoute, currentRoute.getTerrainName());
+							quizzes.add((QuestionEntity) currentEntity);
 						}
 						currentEntity.setX(x);
 						currentEntity.setY(y);
@@ -863,6 +885,7 @@ public class RouteAnalyzer {
 								currentChange.setSpriteUpdate(
 										j.get("sprite_update") != null ? j.get("sprite_update").getAsString() : null);
 								currentChange.setHeal(j.get("heal") != null ? j.get("heal").getAsBoolean() : false);
+								currentChange.setRemove(j.get("remove") != null ? j.get("remove").getAsBoolean() : false);
 								if (j.get("item") != null && j.get("item").isJsonArray()) {
 									for (JsonElement x : j.get("item").getAsJsonArray()) {
 										JsonObject currentItem = x.getAsJsonObject();
@@ -958,6 +981,27 @@ public class RouteAnalyzer {
 								new Point(building.get("x").getAsInt(), building.get("y").getAsInt()));
 					}
 				}
+
+				if(route.get("quizzes") != null) {
+					JsonObject quizData = route.get("quizzes").getAsJsonObject();
+					for(QuestionEntity q : quizzes) {
+						if(quizData.get(q.getID().toUpperCase()) != null) {
+							JsonObject currentQuiz = quizData.get(q.getID().toUpperCase()).getAsJsonObject();
+							q.setQuestion(currentQuiz.get("question") == null ? "" : currentQuiz.get("question").getAsString());
+							q.addOptions(currentQuiz.get("options").getAsString().split("\\+"));
+							q.addSolutions(currentQuiz.get("solutions").getAsString().split("\\+"));
+							q.setSource(currentQuiz.get("source") != null ? currentQuiz.get("source").getAsString() :
+									"nothing");
+							q.setNPC(currentRoute.getNPC(currentQuiz.get("npc").getAsString()));
+							q.setType(QuestionType.valueOf(currentQuiz.get("type").getAsString().toUpperCase()));
+							for(JsonElement e : currentQuiz.get("entities").getAsJsonArray()) {
+								JsonObject entity = e.getAsJsonObject();
+								q.addGates(currentRoute.getEntity(entity.get("x").getAsInt(), entity.get("y").getAsInt()));
+							}
+						}
+					}
+				}
+
 				// warps.clear();
 			} catch (Exception e) {
 				e.printStackTrace();

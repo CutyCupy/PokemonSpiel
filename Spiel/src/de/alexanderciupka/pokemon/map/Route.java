@@ -215,10 +215,12 @@ public class Route {
 					g.drawImage(currentBuilding, p.x * 70, p.y * 70, null);
 				}
 			}
-			
+
 			ArrayList<Character> character = new ArrayList<>(this.characters);
-			character.add(GameController.getInstance().getMainCharacter());
-			
+			if(mc != null && this.equals(mc.getCurrentRoute(), false)) {
+				character.add(mc);
+			}
+
 			for(int i = 0; i < character.size(); i++) {
 				Character c = character.get(i);
 				boolean repaint = true;
@@ -227,17 +229,18 @@ public class Route {
 						break;
 					}
 					BufferedImage currentBuilding = GameController.getInstance().getRouteAnalyzer().getSpriteByName(building);
+					int buildingWidth = currentBuilding.getWidth() - (currentBuilding.getWidth() % GameFrame.GRID_SIZE);
+					int buildingHeight = currentBuilding.getHeight() - (currentBuilding.getHeight() % GameFrame.GRID_SIZE);
+
 					for (Point p : this.buildings.get(building)) {
 						if(!repaint) {
 							break;
 						}
-						int buildingWidth = currentBuilding.getWidth() - (currentBuilding.getWidth() % GameFrame.GRID_SIZE);
-						int buildingHeight = currentBuilding.getHeight() - (currentBuilding.getHeight() % GameFrame.GRID_SIZE);
-						if((c.getExactX() * 70 + c.getCharacterImage().getWidth(null) < p.x * 70 || 
-								c.getExactX() * 70 > p.x * 70 + buildingWidth) ||
-								(c.getExactY() * 70 + c.getCharacterImage().getHeight(null) < p.y * 70 || 
-										c.getExactY() * 70 > (p.y + 1) * 70 + buildingHeight)) {
-							character.remove(c);
+
+						if(((c.getExactX() * 70 + c.getCharacterImage().getWidth(null) > p.x * 70 &&
+								c.getExactX() * 70 < p.x * 70 + buildingWidth) &&
+								(c.getExactY() * 70 + c.getCharacterImage().getHeight(null) > p.y * 70 &&
+										c.getExactY() * 70 < p.y * 70 + buildingHeight))) {
 							repaint = false;
 						}
 					}
@@ -246,9 +249,9 @@ public class Route {
 					g.drawImage(c.getCharacterImage(), (int) (c.getExactX() * 70), (int) (c.getExactY() * 70), null);
 				}
 			}
-			if (mc != null && this.equals(mc.getCurrentRoute(), false) && 
+			if (mc != null && this.equals(mc.getCurrentRoute(), false) &&
 					(this.entities[mc.getCurrentPosition().y][mc.getCurrentPosition().x].getWarp() != null ||
-							(mc.getOldPosition().x < this.width && mc.getOldPosition().y < this.height && 
+							(mc.getOldPosition().x < this.width && mc.getOldPosition().y < this.height &&
 									this.entities[mc.getOldPosition().y][mc.getOldPosition().x].getWarp() != null))) {
 				g.drawImage(mc.getCharacterImage(), (int) (mc.getExactX() * 70), (int) (mc.getExactY() * 70), null);
 			}

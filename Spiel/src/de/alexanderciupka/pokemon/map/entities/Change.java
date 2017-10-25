@@ -32,9 +32,10 @@ public class Change {
 	private Point camPosition;
 	private boolean camAnimation;
 	private boolean centerCharacter;
-	
+
 	private long delay;
 	private boolean unknown;
+	private boolean remove;
 
 	private Character character;
 	private Route route;
@@ -189,21 +190,29 @@ public class Change {
 	public void setWait(boolean wait) {
 		this.waitSound = wait;
 	}
-	
+
 	public long getDelay() {
 		return this.delay;
 	}
-	
+
 	public void setDelay(long delay) {
 		this.delay = delay;
 	}
-	
+
 	public boolean isUnknown() {
 		return this.unknown;
 	}
-	
+
 	public void setUnknown(boolean unknown) {
 		this.unknown = unknown;
+	}
+
+	public boolean getRemove() {
+		return this.remove;
+	}
+
+	public void setRemove(boolean remove) {
+		this.remove = remove;
 	}
 
 	@Override
@@ -221,7 +230,8 @@ public class Change {
 					(this.item == null && other.item == null) || (this.item != null && this.item.equals(other.item)) &&
 					this.camAnimation == other.camAnimation && this.centerCharacter == other.centerCharacter &&
 					(this.camPosition == null && other.camPosition == null) || (this.camPosition != null && this.camPosition.equals(other.camPosition)) &&
-					(this.sound == null ? other.sound == null : this.sound.equals(other.sound)) && this.delay == other.delay && this.unknown == other.unknown);
+					(this.sound == null ? other.sound == null : this.sound.equals(other.sound)) && this.delay == other.delay && this.unknown == other.unknown
+					&& this.remove == other.remove);
 		}
 		return false;
 	}
@@ -249,6 +259,7 @@ public class Change {
 		clone.setWait(this.waitSound);
 		clone.setUnknown(this.unknown);
 		clone.setDelay(this.delay);
+		clone.setRemove(this.remove);
 		return clone;
 	}
 }

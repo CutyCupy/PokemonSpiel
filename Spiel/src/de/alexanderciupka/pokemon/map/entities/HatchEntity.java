@@ -26,7 +26,6 @@ public class HatchEntity extends Entity {
 	}
 
 	public void setMinimum(int minimum) {
-		System.out.println("setMinimum: " + getRoute().getId() + " - " + minimum);
 		this.minimum = minimum;
 	}
 
@@ -75,7 +74,6 @@ public class HatchEntity extends Entity {
 				}
 			}
 		}
-		System.out.println(done + " - " + minimum);
 //		return done >= this.minimum;
 		return true;
 	}

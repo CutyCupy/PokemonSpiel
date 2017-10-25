@@ -70,13 +70,13 @@ public class GeneratorPanel extends JPanel {
 					waitProgressAccess();
 					if (hits(zeigerX, great)) {
 						progress.setValue(Math.min(progress.getValue() + 250, progress.getMaximum()));
-						SoundController.getInstance().playSound("great_success");
+						SoundController.getInstance().playSound(SoundController.GREAT_SUCCESS);
 					} else if (hits(zeigerX, good)) {
-						SoundController.getInstance().playSound("success");
+						SoundController.getInstance().playSound(SoundController.SUCCESS);
 					} else {
 						punishFrames = 100;
 						progress.setValue(Math.max(progress.getValue() - 500, 0));
-						SoundController.getInstance().playSound("explosion");
+						SoundController.getInstance().playSound(SoundController.EXPLOSION);
 					}
 					progressAccess = true;
 				}

@@ -216,11 +216,8 @@ public class Entity {
 				gController.resetCharacterPositions();
 				gController.setCurrentRoute(gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()));
 			}
-			System.out.println(c.getOldPosition());
 			c.setCurrentRoute(gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()));
-			System.out.println(c.getOldPosition());
 			c.setCurrentPosition(warp.getNewPosition());
-			System.out.println(c.getOldPosition());
 			c.setCurrentDirection(warp.getNewDirection());
 			if (c instanceof NPC) {
 				gController.getRouteAnalyzer().getRouteById(warp.getOldRoute()).removeCharacter(c);
@@ -426,7 +423,7 @@ public class Entity {
 						c.getTeam().restoreTeam();
 					}
 					if(character.hasRewards()) {
-						c.earnRewards(character.getRewards());
+						c.earnRewards(character.getRewards(), true);
 						character.getRewards().clear();
 					}
 				}

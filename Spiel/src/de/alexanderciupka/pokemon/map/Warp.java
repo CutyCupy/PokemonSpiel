@@ -74,8 +74,6 @@ public class Warp {
 	public boolean equals(Object obj) {
 		if(obj instanceof Warp) {
 			Warp other = (Warp) obj;
-			System.out.println(this.oldRoute);
-			System.out.println(this.newRoute);
 			return (this.warpString.equals(other.warpString) &&
 					this.oldRoute.equals(other.oldRoute) && this.newRoute.equals(other.newRoute) &&
 					this.newPosition.equals(other.newPosition) && this.newDirection.equals(other.newDirection));

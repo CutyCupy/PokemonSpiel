@@ -53,6 +53,7 @@ public class BackgroundLabel extends JLabel {
 		double x = (c.getX() - (w / 2.0));
 		double y = (c.getY() - (h / 2.0));
 
+
 		double xOffset = 0;
 		double yOffset = 0;
 

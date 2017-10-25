@@ -117,6 +117,7 @@ public class Player extends Character {
 		for(Item i : rewards.keySet()) {
 			if(withText) {
 				gController.getGameFrame().addDialogue("Du hast " + i.getName() + " (x" + rewards.get(i) + ") erhalten!");
+				gController.getGameFrame().getDialogue().waitText();
 			}
 			addItem(i, rewards.get(i));
 		}

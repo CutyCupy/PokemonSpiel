@@ -46,6 +46,9 @@ public class SoundController {
 	public static final String THUNDER = "thunder"; // DONE
 	public static final String ALERT = "alert"; // DONE
 	public static final String LOW = "pokemon_low"; // DONE
+	public static final String SUCCESS = "success";
+	public static final String GREAT_SUCCESS = "great_success";
+	public static final String EXPLOSION = "explosion";
 
 	private SoundController() {
 	}
@@ -211,6 +214,8 @@ public class SoundController {
 				rain.open(AudioSystem.getAudioInputStream(
 						new File(Main.class.getResource("/music/sounds/heavy_rain.wav").getFile())));
 				break;
+			default:
+				return;
 			}
 			rain.loop(Clip.LOOP_CONTINUOUSLY);
 			rain.start();

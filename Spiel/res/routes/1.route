@@ -1,0 +1,12 @@
+{"route":{"id":"1","name":"1","terrain":"grassy","height":1,"width":1,"0.0":"QUIZ0"},"warps":[],"characters":[],"items":[],"encounters":{},"events":{},"buildings":[],
+"quizzes":{
+    "QUIZ0":{
+        "options":"",
+        "solutions":"Twice+tt+",
+        "source":"twice_tt",
+        "npc":"",
+        "entities":[],
+        "type":"SOUND_GAME"
+    }
+}
+}

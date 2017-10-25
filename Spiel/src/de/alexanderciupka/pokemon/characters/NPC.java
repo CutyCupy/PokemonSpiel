@@ -188,6 +188,7 @@ public class NPC extends Character {
 				importRewards(dialogue.get("reward").getAsString());
 			}
 		} catch (Exception e) {
+			System.out.println(this + " - " + this.currentRoute.getName());
 			e.printStackTrace();
 		}
 	}
@@ -280,5 +281,10 @@ public class NPC extends Character {
 		}
 
 		return false;
+	}
+
+	@Override
+	public String toString() {
+		return this.id + " - " + this.name;
 	}
 }

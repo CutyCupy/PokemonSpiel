@@ -260,6 +260,13 @@ public class TriggeredEvent {
 						e.printStackTrace();
 					}
 				}
+				for(int j = 0; j < currentChanges.length; j++) {
+					Change c = currentChanges[j];
+					if(c.getRemove() && c.getCharacter() instanceof NPC) {
+						c.getCharacter().getCurrentRoute().removeCharacter(c.getCharacter());
+						c.getCharacter().getCurrentRoute().updateMap(c.getCharacter().getCurrentPosition());
+					}
+				}
 			}
 			for(Character c : allParticipants) {
 				c.setEvent(false);
