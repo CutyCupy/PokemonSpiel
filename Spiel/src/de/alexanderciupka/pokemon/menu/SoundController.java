@@ -199,6 +199,9 @@ public class SoundController {
 	}
 
 	public void startRain(RainType type) {
+		if(type == null) {
+			return;
+		}
 		if (rain != null) {
 			rain.stop();
 		}

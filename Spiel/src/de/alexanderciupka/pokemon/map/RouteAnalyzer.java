@@ -243,7 +243,7 @@ public class RouteAnalyzer {
 				try {
 					currentRoute.setRain(RainType.valueOf(routeDetails.get("rain").getAsString().toUpperCase()));
 				} catch (Exception e) {
-					currentRoute.setRain(null);
+					currentRoute.setRain(RainType.NONE);
 				}
 				try {
 					currentRoute.setSnow(SnowType.valueOf(routeDetails.get("snow").getAsString().toUpperCase()));
