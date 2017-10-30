@@ -14,6 +14,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -31,6 +32,7 @@ import javax.swing.border.EmptyBorder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import de.alexanderciupka.hoverbutton.Main;
 import de.alexanderciupka.pokemon.characters.Direction;
 import de.alexanderciupka.pokemon.characters.NPC;
 import de.alexanderciupka.pokemon.map.entities.QuestionEntity;
@@ -59,6 +61,7 @@ public class RouteCreator extends JFrame {
 	private JButton save;
 	private JComboBox<String> terrains;
 	private ArrayList<QuestionEntity> questions;
+	private static HashSet<String> sprites;
 	private boolean active;
 
 	HashMap<String, ArrayList<Point>> buildings = new HashMap<>();
@@ -66,7 +69,7 @@ public class RouteCreator extends JFrame {
 	private RouteAnalyzer routeAnalyzer;
 
 	private static final String[][] TYPES = { { "Free", "" }, { "Out of Bounds", "OOB" }, { "Grassy", "GR" },
-			{ "Snow", "SN" }, { "See", "S" }, { "Sand", "SA" }, { "Stone", "STO" }, { "Leiter hoch", "WLU" },
+			{ "Snow", "SN" }, {"Eis", "ICE"}, { "See", "S" }, { "Sand", "SA" }, { "Stone", "STO" }, { "Leiter hoch", "WLU" },
 			{ "Leiter runter", "WLD" }, { "Treppe hoch links", "WSUL" }, { "Treppe hoch rechts", "WSUR" },
 			{ "Treppe runter links", "WSDL" }, { "Treppe runter rechts", "WSDR" }, { "Stärke", "ST" },
 			{ "Zerschneider", "TC" }, { "Wand", "MW" }, { "Fenster", "MWW" }, { "Fenster+Gardine", "MWWC" },
@@ -75,8 +78,8 @@ public class RouteCreator extends JFrame {
 			{ "Badewanne", "BT" }, { "Item", "ITEM" }, { "Laptop", "LAPTOP" }, { "PC", "PC" }, { "Quiz", "QUIZ" },
 			{ "Table", "TA" }, { "Kaffee", "KAFFEE" }, { "Chair UP", "STUHLU" }, { "Chair DOWN", "STUHLD" },
 			{ "Chair LEFT", "STUHLL" }, { "Chair RIGHT", "STUHLR" }, { "Settle UP", "SETTLEU" },
-			{ "Settle DOWN", "SETTLED" }, { "Settle LEFT", "SETTLEL" }, { "Settle RIGHT", "SETTLER" }, { "Tree", "T" },
-			{ "Snow Tree", "TS" }, { "Grass", "GRASS" }, { "Mauer", "M" }, { "LKW Links", "LKWL" },
+			{ "Settle DOWN", "SETTLED" }, { "Settle LEFT", "SETTLEL" }, { "Settle RIGH T", "SETTLER" }, { "Tree", "T" },
+			{ "Snow Tree", "TS" }, { "Grass", "GRASS" }, {"Schneegrass", "GRASSSNOW"}, { "Mauer", "M" }, { "LKW Links", "LKWL" },
 			{ "LKW Rechts", "LKWR" }, { "Pokemon Center", "P" }, { "House Small", "HS" }, { "Gym", "A" },
 			{ "Warp", "W" }, { "Character", "C" }, { "Bridge", "B" }, { "JoyHealing", "JH" }, { "MoveDown", "MD" },
 			{ "MoveUp", "MU" }, { "MoveLeft", "ML" }, { "MoveRight", "MR" }, { "MoveStop", "MS" },
@@ -86,14 +89,35 @@ public class RouteCreator extends JFrame {
 			{ "Höhle linkshinten außen", "HWLB" }, { "Höhle rechtshinten außen", "HWRB" },
 			{ "Höhle rechtsvorne außen", "HWRF" }, { "Höhle Mitte", "HM" }, { "Höhle linksvorne innen", "HWLFI" },
 			{ "Höhle linkshinten innen", "HWLBI" }, { "Höhle rechtshinten innen", "HWRBI" },
-			{ "Höhle rechtsvorne innen", "HWRFI" }, { "RockBig", "RB" }, { "RockGroup", "RG" }, { "Rock", "R" },
-			{ "Luke", "WH" }, { "Generator", "GENERATOR" }, { "Haken", "HOOK" }, { "Zaun linksunten", "ZLU" },
-			{ "Zaun linksoben", "ZLO" }, { "Zaun rechtsunten", "ZRU" }, { "Zaun rechtsoben", "ZRO" },
-			{ "Zaun links", "ZL" }, { "Zaun rechts", "ZR" }, { "Zaun front", "ZF" } };
+			{ "Höhle rechtsvorne innen", "HWRFI" }, { "Treppe vorne", "SCF"}, { "RockBig", "RB" }, { "RockGroup", "RG" },
+			{ "Rock", "R" }, {"Eisstein", "IR"}, {"Eissäule", "IP"}, {"Eisfels", "IRB"}, { "Luke", "WH" },
+			{ "Generator", "GENERATOR" }, { "Haken", "HOOK" }, { "Zaun linksunten", "ZLU" }, { "Zaun linksoben", "ZLO" },
+			{ "Zaun rechtsunten", "ZRU" }, { "Zaun rechtsoben", "ZRO" }, { "Zaun links", "ZL" }, { "Zaun rechts", "ZR" },
+			{ "Zaun front", "ZF" } };
 
 	private static final int SIZE = 25;
 
 	public RouteCreator() {
+
+		if(sprites == null) {
+			sprites = new HashSet<>();
+			for(File f : new File(Main.class.getResource("/characters/").getFile()).listFiles()) {
+				if(f.isDirectory()) {
+					continue;
+				}
+				String[] name = f.getName().split("_");
+				String currentName = "";
+				for(int i = 0; i < name.length - 2; i++) {
+					if(i != 0) {
+						currentName += " ";
+					}
+					currentName += name[i];
+				}
+				sprites.add(currentName);
+			}
+			System.out.println(sprites);
+		}
+
 		int width = Integer.parseInt(JOptionPane.showInputDialog("Breite (max: 65): "));
 		int height = Integer.parseInt(JOptionPane.showInputDialog("Höhe (max: 40): "));
 		String name = JOptionPane.showInputDialog("Name der Route: ");
@@ -304,6 +328,9 @@ public class RouteCreator extends JFrame {
 										} catch(Exception e1) {
 											npc.setCurrentDirection(Direction.DOWN);
 										}
+										npc.setCharacterImage(JOptionPane.showInputDialog(null, "Welches Sprite?",
+												text, JOptionPane.QUESTION_MESSAGE, null, sprites.toArray(),
+												sprites.toArray()[0]).toString());
 										characters.put(npc, new Point(xCoord, yCoord));
 										JOptionPane.showMessageDialog(null, text + characterCounter + " added!");
 										text = ((JLabel) e.getComponent()).getText();
@@ -355,10 +382,12 @@ public class RouteCreator extends JFrame {
 												q.addSolutions(s);
 											}
 											q.setSource(JOptionPane.showInputDialog("Welche Datei wird benötigt?"));
-											q.setNPC((NPC) JOptionPane.showInputDialog(null,
-													"Welcher NPC?", "",
-													JOptionPane.QUESTION_MESSAGE, null, characters.keySet().toArray(),
-													null));
+											try {
+												q.setNPC((NPC) JOptionPane.showInputDialog(null,
+														"Welcher NPC?", "",
+														JOptionPane.QUESTION_MESSAGE, null, characters.keySet().toArray(),
+														null));
+											} catch(Exception e1) {}
 											questions.add(q);
 										} catch (Exception e1) {
 											e1.printStackTrace();
@@ -551,7 +580,7 @@ public class RouteCreator extends JFrame {
 				}
 				curQ.addProperty("solutions", result);
 				curQ.addProperty("source", q.getSource());
-				curQ.addProperty("npc", q.getNpc().getID());
+				curQ.addProperty("npc", q.getNpc() != null ? q.getNpc().getID() : "");
 				curQ.add("entities", new JsonArray());
 				curQ.addProperty("type", q.getType().name());
 				quizzes.add(q.getID().toUpperCase(), curQ);

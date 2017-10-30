@@ -147,9 +147,9 @@ public class QuestionEntity extends Entity {
 		GameFrame gf = gController.getGameFrame();
 		if (!answered) {
 			gf.addDialogue(
-					"Beantwortest du die folgende Frage richtig, so darfst du direkt durch das Tor laufen. "
-					+ "Solltest du allerdings diese Frage falsch beantworten, so musst du "
-					+ "eventuell gegen einen Trainer kämpfen!");
+					"Beantwortest du die folgende Frage richtig, so öffnen sich die Tore. "
+					+ (npc != null ? "Solltest du allerdings diese Frage falsch beantworten, so musst du "
+							+ "eventuell gegen einen Trainer kämpfen!" : ""));
 			gf.addDialogue(type.getInformation());
 			gf.getDialogue().waitText();
 			ArrayList<String> answers = new ArrayList<>();

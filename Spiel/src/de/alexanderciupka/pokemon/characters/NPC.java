@@ -4,6 +4,9 @@ import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 
 import com.google.gson.JsonNull;
@@ -15,7 +18,6 @@ import de.alexanderciupka.pokemon.pokemon.Pokemon;
 
 public class NPC extends Character {
 
-
 	private File teamFile;
 	private File dialogueFile;
 	private String beforeFight;
@@ -26,10 +28,12 @@ public class NPC extends Character {
 
 	public NPC() {
 		super();
+		this.rewards = new HashMap<>();
 	}
 
 	public NPC(String currentString) {
 		super(currentString);
+		this.rewards = new HashMap<>();
 	}
 
 	public void resetPosition() {
@@ -38,7 +42,7 @@ public class NPC extends Character {
 			setCurrentPosition(originalPosition);
 			currentRoute.updateMap(this.oldPosition);
 		}
-		if(currentDirection != originalDirection) {
+		if (currentDirection != originalDirection) {
 			setCurrentDirection(originalDirection);
 		}
 		currentRoute.updateMap(currentPosition);
@@ -60,8 +64,8 @@ public class NPC extends Character {
 			break;
 		}
 		currentRoute.updateMap(currentPosition);
-//		gController.sleep(50);
-//		gController.repaint();
+		// gController.sleep(50);
+		// gController.repaint();
 	}
 
 	public void setBeforeFightDialogue(String dialog) {
@@ -116,10 +120,11 @@ public class NPC extends Character {
 				y = -1;
 				break;
 			}
-			for(int i = 1; i < 5; i++) {
-				if(currentPosition.x + (i*x) == mainX && currentPosition.y + (i*y) == mainY) {
+			for (int i = 1; i < 5; i++) {
+				if (currentPosition.x + (i * x) == mainX && currentPosition.y + (i * y) == mainY) {
 					break;
-				} else if(!currentRoute.getEntities()[currentPosition.y + (i*y)][currentPosition.x + (i*x)].isAccessible(this)) {
+				} else if (!currentRoute.getEntities()[currentPosition.y + (i * y)][currentPosition.x + (i * x)]
+						.isAccessible(this)) {
 					return false;
 				}
 			}
@@ -138,7 +143,7 @@ public class NPC extends Character {
 				break;
 			}
 			gController.getGameFrame().getBackgroundLabel().spotted(this);
-//			gController.getGameFrame().repaint();
+			// gController.getGameFrame().repaint();
 			while (!(currentPosition.x + x == mainX && currentPosition.y + y == mainY)) {
 				currentRoute.updateMap(currentPosition);
 				this.changePosition(this.getCurrentDirection(), true);
@@ -152,15 +157,16 @@ public class NPC extends Character {
 	@Override
 	public void setCurrentDirection(Direction direction) {
 		super.setCurrentDirection(direction);
-		if(currentRoute != null) {
+		if (currentRoute != null) {
 			this.currentRoute.updateMap(this.currentPosition);
 		}
 	}
 
 	public void importTeam() {
 		try {
-			teamFile = new File(
-					this.getClass().getResource("/characters/teams/" + this.currentRoute.getId() + "/" + getFileName() + ".txt").getFile());
+			teamFile = new File(this.getClass()
+					.getResource("/characters/teams/" + this.currentRoute.getId() + "/" + getFileName() + ".txt")
+					.getFile());
 			BufferedReader reader = new BufferedReader(new FileReader(teamFile));
 			String currentLine;
 			while ((currentLine = reader.readLine()) != null) {
@@ -171,41 +177,71 @@ public class NPC extends Character {
 			}
 			trainer = true;
 		} catch (Exception e) {
+			new File("res/characters/teams/" + this.currentRoute.getId() + "/").mkdir();
+			File f = new File("res/characters/teams/" + this.currentRoute.getId() + "/" + getFileName() + ".txt");
+			try {
+				if(f.exists()) {
+					return;
+				}
+				f.createNewFile();
+				PrintWriter writer = new PrintWriter(new FileWriter(f));
+				writer.write("25,1");
+				writer.flush();
+				importTeam();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
 			trainer = false;
 		}
 	}
 
 	public void importDialogue() {
 		try {
-			dialogueFile = new File(
-					this.getClass().getResource("/characters/dialoge/" + this.currentRoute.getId() + "/" +  getFileName() + ".char").getFile());
-			JsonObject dialogue = new JsonParser().parse(new BufferedReader(new FileReader(dialogueFile))).getAsJsonObject();
+			dialogueFile = new File(this.getClass()
+					.getResource("/characters/dialoge/" + this.currentRoute.getId() + "/" + getFileName() + ".char")
+					.getFile());
+			JsonObject dialogue = new JsonParser().parse(new BufferedReader(new FileReader(dialogueFile)))
+					.getAsJsonObject();
 			this.beforeFight = dialogue.get("before") == null ? null : dialogue.get("before").getAsString();
 			this.noFight = dialogue.get("no") == null ? null : dialogue.get("no").getAsString();
 			this.onDefeat = dialogue.get("on_defeat") == null ? null : dialogue.get("on_defeat").getAsString();
 			this.rewards = new HashMap<>();
-			if(!(dialogue.get("reward") == null)) {
+			if (!(dialogue.get("reward") == null)) {
 				importRewards(dialogue.get("reward").getAsString());
 			}
 		} catch (Exception e) {
+			new File("res/characters/dialoge/" + this.currentRoute.getId() + "/").mkdir();
+			File f = new File("res/characters/dialoge/" + this.currentRoute.getId() + "/" + getFileName() + ".char");
+			try {
+				System.out.println(f);
+				f.createNewFile();
+				JsonObject d = new JsonObject();
+				d.addProperty("before", "");
+				d.addProperty("no", "");
+				d.addProperty("on_defeat", "");
+				d.addProperty("reward", "");
+				FileWriter fw = new FileWriter(f);
+				fw.write(d.toString());
+				fw.flush();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
 			System.out.println(this + " - " + this.currentRoute.getName());
 			e.printStackTrace();
 		}
 	}
 
 	private void importRewards(String rewards) {
-		for(String s : rewards.split("\\+")) {
+		for (String s : rewards.split("\\+")) {
 			Item current = null;
 			try {
 				current = Item.valueOf(s.toUpperCase());
-			} catch(Exception e) {
+			} catch (Exception e) {
 				continue;
 			}
-			this.rewards.put(current,
-					this.rewards.get(current) == null ? 1 : this.rewards.get(current) + 1);
+			this.rewards.put(current, this.rewards.get(current) == null ? 1 : this.rewards.get(current) + 1);
 		}
 	}
-
 
 	private String getFileName() {
 		return this.name.toLowerCase().replace(" ", "_").replace("ä", "ae").replace("ö", "oe").replace("ü", "ue");
@@ -220,17 +256,18 @@ public class NPC extends Character {
 	}
 
 	public boolean hasRewards() {
-		for(Item i : this.rewards.keySet()) {
-			if(this.rewards.get(i) != null && this.rewards.get(i) > 0) {
+		for (Item i : this.rewards.keySet()) {
+			if (this.rewards.get(i) != null && this.rewards.get(i) > 0) {
 				return true;
 			}
 		}
 		return false;
 	}
+
 	public void removeReward(Item reward, Integer amount) {
-		if(this.rewards.get(reward) != null) {
+		if (this.rewards.get(reward) != null) {
 			int delta = this.rewards.get(reward) - amount;
-			if(delta <= 0) {
+			if (delta <= 0) {
 				this.rewards.remove(reward);
 			} else {
 				this.rewards.put(reward, delta);
@@ -253,13 +290,15 @@ public class NPC extends Character {
 		saveData.addProperty("no", this.noFight);
 		saveData.addProperty("after", this.onDefeat);
 		String reward = "";
-		for(Item i : this.rewards.keySet()) {
-			if(this.rewards.get(i) != null && this.rewards.get(i) > 0) {
-				for(int j = 0; j < this.rewards.get(j); j++) {
-					if(j != 0) {
-						reward += "+";
+		if (this.rewards != null) {
+			for (Item i : this.rewards.keySet()) {
+				if (this.rewards.get(i) != null && this.rewards.get(i) > 0) {
+					for (int j = 0; j < this.rewards.get(i); j++) {
+						if (j != 0) {
+							reward += "+";
+						}
+						reward += i.name();
 					}
-					reward += i.name();
 				}
 			}
 		}
@@ -269,12 +308,12 @@ public class NPC extends Character {
 
 	@Override
 	public boolean importSaveData(JsonObject saveData) {
-		if(super.importSaveData(saveData)) {
+		if (super.importSaveData(saveData)) {
 			this.beforeFight = saveData.get("before") instanceof JsonNull ? null : saveData.get("before").getAsString();
 			this.noFight = saveData.get("no") instanceof JsonNull ? null : saveData.get("no").getAsString();
 			this.onDefeat = saveData.get("after") instanceof JsonNull ? null : saveData.get("after").getAsString();
 			this.rewards = new HashMap<>();
-			if(!(saveData.get("reward") instanceof JsonNull)) {
+			if (!(saveData.get("reward") instanceof JsonNull)) {
 				importRewards(saveData.get("reward").getAsString());
 			}
 			return true;

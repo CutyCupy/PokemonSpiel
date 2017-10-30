@@ -167,6 +167,7 @@ public class Route {
 	}
 
 	public void createMap() {
+		System.out.println(this.name);
 		tempMap = new BufferedImage(width * 70, height * 70, BufferedImage.TYPE_4BYTE_ABGR);
 		map = new BufferedImage(width * 70, height * 70, BufferedImage.TYPE_4BYTE_ABGR);
 		Point[] points = new Point[this.width * this.height];
@@ -194,6 +195,9 @@ public class Route {
 			Graphics g = tempMap.getGraphics();
 
 			for (Point p : updatePoint) {
+				if (!(p.x >= 0 && p.x < width && p.y >= 0 && p.y < height)) {
+					continue;
+				}
 				try {
 					g.drawImage(entities[p.y][p.x].getTerrain(), p.x * 70, p.y * 70, null);
 					g.drawImage(entities[p.y][p.x].getSprite(), (int) (entities[p.y][p.x].getExactX() * 70),

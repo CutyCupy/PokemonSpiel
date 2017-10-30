@@ -243,7 +243,7 @@ public class RouteAnalyzer {
 				try {
 					currentRoute.setRain(RainType.valueOf(routeDetails.get("rain").getAsString().toUpperCase()));
 				} catch (Exception e) {
-					currentRoute.setRain(RainType.NONE);
+					currentRoute.setRain(null);
 				}
 				try {
 					currentRoute.setSnow(SnowType.valueOf(routeDetails.get("snow").getAsString().toUpperCase()));
@@ -285,6 +285,9 @@ public class RouteAnalyzer {
 								break;
 							case "T": // Tree
 								currentEntity = new Entity(currentRoute, false, "tree", 0, "grassy");
+								break;
+							case "TS":
+								currentEntity = new Entity(currentRoute, false, "snow_tree", 0, "snow");
 								break;
 							case "SI":
 								currentEntity = new SignEntity(currentRoute);
@@ -519,6 +522,10 @@ public class RouteAnalyzer {
 								currentEntity = new Entity(currentRoute, true, "cave_middle", nonGrassEncounterRate,
 										currentRoute.getTerrainName());
 								break;
+							case "SCF":
+								currentEntity = new Entity(currentRoute, false, false, true, true, "stairway_front",
+										nonGrassEncounterRate, currentRoute.getTerrainName());
+								break;
 							case "ZLU":
 								currentEntity = new Entity(currentRoute, false, "zaun_links_unten",
 										nonGrassEncounterRate, currentRoute.getTerrainName());
@@ -561,7 +568,15 @@ public class RouteAnalyzer {
 								break;
 							case "IR":
 								currentEntity = new Entity(currentRoute, false, "icerock", nonGrassEncounterRate,
-										currentRoute.getTerrainName());
+										"snow");
+								break;
+							case "IP":
+								currentEntity = new Entity(currentRoute, false, "icepillar", nonGrassEncounterRate,
+										"snow");
+								break;
+							case "IRB":
+								currentEntity = new Entity(currentRoute, false, "icerockbig", nonGrassEncounterRate,
+										"snow");
 								break;
 							case "TC":
 								currentEntity = new Entity(currentRoute, false, "treecut", nonGrassEncounterRate,
@@ -676,8 +691,13 @@ public class RouteAnalyzer {
 									false);
 							items.add((ItemEntity) currentEntity);
 						} else if (currentString.startsWith("GRASS")) {
-							currentEntity = new Entity(currentRoute, true, "grass", Entity.POKEMON_GRASS_RATE,
-									"grassy");
+							if(currentString.contains("SNOW")) {
+								currentEntity = new Entity(currentRoute, true, "snow_grass", Entity.POKEMON_GRASS_RATE,
+										"snow");
+							} else {
+								currentEntity = new Entity(currentRoute, true, "grass", Entity.POKEMON_GRASS_RATE,
+										"grassy");
+							}
 							ArrayList<Entity> temp = pokemonPools.get(currentString);
 							if (temp == null) {
 								temp = new ArrayList<Entity>();

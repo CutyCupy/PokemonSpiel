@@ -13,7 +13,7 @@
     {"id":"C4","x":18,"y":7,"name":"Christoph","char_sprite":"schulkindm","direction":"left","is_trainer":true,"aggro":false},
     {"id":"C8","x":10,"y":19,"name":"Jascha","char_sprite":"nerd","direction":"back","is_trainer":true,"aggro":false},
     {"id":"C7","x":10,"y":14,"name":"Karl-Heinz","char_sprite":"dennis","direction":"back","is_trainer":true,"aggro":false},
-    {"id":"C9","x":,"y":,"name":"CutyCupy","x":15,"y":24,"char_sprite":"cutycupy","direction":"right","is_trainer":false}
+    {"id":"C9","name":"CutyCupy","x":15,"y":24,"char_sprite":"cutycupy","direction":"right","is_trainer":false}
 ],
 "items":[],
 "encounters":{},
@@ -46,7 +46,8 @@
         ],
         [
             {"character":"CutyCupy","dialog":"Ey Kaja! Komm mal zu dem Haus wo vorhin dieser Lappen davorstand ... Da scheint wohl gerade was abzugehen!","remove":true},
-            {"character":"source","dialog":"Verfolgt der Kerl mich?"}
+            {"character":"source","dialog":"Hm..."},
+            {"character":"Rüpel Melina","route":"bremen","remove":true}
         ]
     ]
 },

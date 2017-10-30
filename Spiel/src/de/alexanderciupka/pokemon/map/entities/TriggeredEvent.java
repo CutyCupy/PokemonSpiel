@@ -11,6 +11,7 @@ import de.alexanderciupka.pokemon.characters.Character;
 import de.alexanderciupka.pokemon.characters.Direction;
 import de.alexanderciupka.pokemon.characters.NPC;
 import de.alexanderciupka.pokemon.characters.Player;
+import de.alexanderciupka.pokemon.main.Main;
 import de.alexanderciupka.pokemon.map.Camera;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.menu.SoundController;
@@ -163,6 +164,10 @@ public class TriggeredEvent {
 						currentChar.getTeam().restoreTeam();
 						SoundController.getInstance().playSound(SoundController.ITEM_HEAL, true);
 					}
+				}
+				Main.FORCE_REPAINT = true;
+				while(Main.FORCE_REPAINT) {
+					Thread.yield();
 				}
 				for(int j = 0; j < currentChanges.length; j++) {
 					if(currentChanges[j].getDialog() != null) {

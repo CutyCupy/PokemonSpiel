@@ -24,6 +24,7 @@ public class Main {
 	public static final double FPS = 60;
 
 	public static boolean SONG_PAUSE = false;
+	public static boolean FORCE_REPAINT = false;
 
 	public static JOptionPane getOptionPane(JComponent parent) {
         JOptionPane pane = null;
@@ -102,44 +103,58 @@ public class Main {
 					Thread.yield();
 				}
 				boolean firstDialogue = true;
-				boolean wait = false;
-				int waitFrames = 0;
+//				boolean wait = false;
+//				int waitFrames = 0;
 				while (true) {
 					startTime = System.currentTimeMillis();
-					wait = false;
+//					wait = false;
 					if (!frame.getDialogue().isVisible()
-							|| (gController.isFighting() && !frame.getFightPanel().getTextLabel().isVisible()) && !frame.getDialogue().isVisible()) {
-						wait = true;
+							|| (gController.isFighting() && !frame.getFightPanel().getTextLabel().isVisible()) || FORCE_REPAINT) {
+//						wait = true;
 						firstDialogue = true;
-						waitFrames = 0;
-					} else {
-						if (waitFrames <= 5) {
-							waitFrames++;
-						}
-					}
-
-					if (firstDialogue) {
 						frame.repaint();
-						if (waitFrames > 5) {
-							firstDialogue = false;
+//						waitFrames = 0;
+						if(FORCE_REPAINT) {
+							FORCE_REPAINT = false;
 						}
 					} else {
 						if (frame.getDialogue().isVisible()) {
 							frame.getDialogue().repaint();
-							wait = true;
+//							wait = true;
 						} else if (frame.getFightPanel().getTextLabel().isVisible()) {
 							frame.getFightPanel().getTextLabel().repaint();
-							wait = true;
+//							wait = true;
 						}
+//						if (waitFrames <= 15) {
+//							wait = true;
+//							waitFrames++;
+//						}
 					}
-					if (wait) {
+
+//					waitFrames = 16;
+
+//					if (firstDialogue) {
+//						frame.repaint();
+////						if (waitFrames > 15) {
+//							firstDialogue = false;
+////						}
+//					} else {
+//						if (frame.getDialogue().isVisible()) {
+//							frame.getDialogue().repaint();
+////							wait = true;
+//						} else if (frame.getFightPanel().getTextLabel().isVisible()) {
+//							frame.getFightPanel().getTextLabel().repaint();
+////							wait = true;
+//						}
+//					}
+//					if (wait) {
 						try {
 							Thread.sleep(
 									(long) Math.max(1000.0 / Main.FPS - (System.currentTimeMillis() - startTime), 0));
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
-					}
+//					}
 				}
 			}
 		});

@@ -10,6 +10,7 @@ import javax.swing.ImageIcon;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 
+import de.alexanderciupka.pokemon.main.Main;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.map.Route;
 import de.alexanderciupka.pokemon.map.entities.Entity;
@@ -298,6 +299,7 @@ public class Character implements Runnable {
 			this.currentDirection = direction;
 			if(this.currentRoute != null) {
 				this.currentRoute.updateMap(this.currentPosition);
+				Main.FORCE_REPAINT = true;
 			}
 		}
 	}

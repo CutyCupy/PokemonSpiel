@@ -37,7 +37,7 @@ public class Entity {
 
 	private boolean water;
 
-	public static final float POKEMON_GRASS_RATE = 1.0f;
+	public static final float POKEMON_GRASS_RATE = 0f;
 
 	private int x;
 	private int y;

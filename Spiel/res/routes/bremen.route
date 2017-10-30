@@ -5,13 +5,14 @@
     {"id":"WDA2","new_route":"bremen_arena","new_x":16,"new_y":25},
     {"id":"WDP3","new_route":"pokemon_center","new_x":2,"new_y":4},
     {"id":"WDH3","new_route":"haus_von_cutycupy","new_x":8,"new_y":1,"direction":"down"},
-    {"id":"WDH4","new_route":"haus_von_cutycupy","new_x":8,"new_y":1,"direction":"down"},
-    {"id":"W5","new_route":"wald_von_alzenau","new_x":58,"new_y":14},
-    {"id":"W6","new_route":"wald_von_alzenau","new_x":58,"new_y":15}
+    {"id":"WDH4","new_route":"team_kek(s)_versteck_bremen","new_x":5,"new_y":13,"direction":"down"},
+    {"id":"W5","new_route":"bremen_vorort","new_x":16,"new_y":6},
+    {"id":"W6","new_route":"bremen_vorort","new_x":16,"new_y":7}
 ],"characters":[
     {"id":"C0","char_sprite":"woman","name":"Undine","is_trainer":"true","direction":"front","x":5,"y":4},
     {"id":"C1","char_sprite":"man","name":"Marcus","is_trainer":"false","direction":"front","x":25,"y":7},
-    {"id":"C2","char_sprite":"man","name":"Tony","is_trainer":"false","direction":"front","x":27,"y":7}
+    {"id":"C2","char_sprite":"man","name":"Tony","is_trainer":"false","direction":"front","x":27,"y":7},
+    {"id":"C3","char_sprite":"team_kek(s)w","name":"Rüpel Melina","is_trainer":false,"direction":"front","x":32,"y":25}
 ],"encounters":
 {   
     "GRASS1": [

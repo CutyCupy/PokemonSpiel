@@ -116,7 +116,6 @@ public class BackgroundLabel extends JLabel {
 
 		oldX = x - xOffset;
 		oldY = y - yOffset;
-
 	}
 
 	private void waitAccess() {
