@@ -593,8 +593,8 @@ public class RouteCreator extends JFrame {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		routeAnalyzer.readRoute(newRoute);
-		routeAnalyzer.getRouteById(routeID).saveMap();
+//		routeAnalyzer.readRoute(newRoute);
+//		routeAnalyzer.getRouteById(routeID).saveMap();
 	}
 
 	private void floodFill(String text, boolean[][] visited, int x, int y, int startX, int startY) {

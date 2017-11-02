@@ -1,4 +1,0 @@
-before
-Wasser ist nass!
-no
-Du bist stark!

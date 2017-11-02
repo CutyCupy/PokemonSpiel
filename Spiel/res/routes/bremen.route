@@ -16,7 +16,9 @@
 ],"encounters":
 {   
     "GRASS1": [
-        {"id":25,"level":1}
+        {"id":602,"level":22,"ammount":4},
+        {"id":81,"level":22,"ammount":4},
+        {"id":595,"level":22,"ammount":4}
     ]
 },"buildings":
 [

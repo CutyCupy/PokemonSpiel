@@ -1,4 +1,0 @@
-before
-Its me, MARIO!
-no
-Game Over...

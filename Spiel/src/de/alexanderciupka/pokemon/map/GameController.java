@@ -2,6 +2,7 @@ package de.alexanderciupka.pokemon.map;
 
 import java.awt.Point;
 
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import de.alexanderciupka.pokemon.characters.Direction;
@@ -378,17 +379,18 @@ public class GameController {
 		mainCharacter.setCharacterImage("talih", "front");
 		mainCharacter.setName("Talih");
 		mainCharacter.setID("999");
-		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("duesseldorf"));
-		mainCharacter.setCurrentPosition(4, 20);
+		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("eigenes_zimmer"));
+		mainCharacter.setCurrentPosition(5, 4);
 
-		mainCharacter.getItems().put(Item.POKEBALL, 5);
+		mainCharacter.getItems().put(Item.POKEBALL, 5 * 99);
+		mainCharacter.getItems().put(Item.POTION, 10);
 
-//		 mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("eigenes_zimmer"));
-//		 mainCharacter.setCurrentPosition(START.x, START.y);
+		 mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("eigenes_zimmer"));
+		 mainCharacter.setCurrentPosition(START.x, START.y);
 		currentBackground = new Background(mainCharacter.getCurrentRoute());
 
-		Pokemon player = new Pokemon(150);
-		player.getStats().generateStats((short) 100);
+		Pokemon player = new Pokemon(152);
+		player.getStats().generateStats((short) 5);
 
 		player.setName("Mandarine");
 
@@ -431,8 +433,12 @@ public class GameController {
 	public void saveGame() {
 		if (!interactionPause) {
 			interactionPause = true;
-			if (!routeAnalyzer.saveGame(mController.saveGame())) {
-				System.err.println("ERROR");
+			if(!mainCharacter.getCurrentRoute().getId().equals("pokemon_center")) {
+				if (!routeAnalyzer.saveGame(mController.saveGame())) {
+					JOptionPane.showMessageDialog(this.gameFrame, "Das Speichern ist fehlgeschlagen!", "Speichern fehlgeschlagen!", JOptionPane.ERROR_MESSAGE);
+				}
+			} else {
+				JOptionPane.showMessageDialog(this.gameFrame, "Du kannst nicht im Pokemon Center speichern!", "Speichern fehlgeschlagen!", JOptionPane.ERROR_MESSAGE);
 			}
 			interactionPause = false;
 		}

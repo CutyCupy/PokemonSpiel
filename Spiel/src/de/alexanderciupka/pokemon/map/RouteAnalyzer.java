@@ -6,7 +6,6 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -24,11 +23,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import de.alexanderciupka.hoverbutton.Main;
 import de.alexanderciupka.pokemon.characters.Direction;
 import de.alexanderciupka.pokemon.characters.NPC;
 import de.alexanderciupka.pokemon.gui.overlay.RainType;
 import de.alexanderciupka.pokemon.gui.overlay.SnowType;
+import de.alexanderciupka.pokemon.main.Main;
 import de.alexanderciupka.pokemon.map.entities.Change;
 import de.alexanderciupka.pokemon.map.entities.Entity;
 import de.alexanderciupka.pokemon.map.entities.GeneratorEntity;
@@ -86,6 +85,7 @@ public class RouteAnalyzer {
 	}
 
 	public void init() {
+		System.out.println("init");
 		readAllSprites();
 		readAllTerrains();
 		readAllPokeballs();
@@ -223,7 +223,7 @@ public class RouteAnalyzer {
 		for (int counter = 0; counter < 2; counter++) {
 			try {
 				currentReader = new BufferedReader(new FileReader(file));
-			} catch (FileNotFoundException e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			Route currentRoute = new Route();
@@ -1023,7 +1023,6 @@ public class RouteAnalyzer {
 
 				// warps.clear();
 			} catch (Exception e) {
-				System.out.println(file);
 				e.printStackTrace();
 				continue;
 			}

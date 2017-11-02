@@ -49,6 +49,8 @@ public class Main {
 
 	public static void main(String[] args) throws Exception {
 
+		System.out.println(new File(""));
+
 		MenuController.getInstance();
 
 		Thread repainter = new Thread(new Runnable() {
@@ -102,7 +104,7 @@ public class Main {
 				while (true) {
 					if (!SONG_PAUSE && !sc.isSongRunning()) {
 						File song = songs[rng.nextInt(songs.length)];
-//						sc.playSong(song);
+						sc.playSong(song);
 					}
 					Thread.yield();
 				}

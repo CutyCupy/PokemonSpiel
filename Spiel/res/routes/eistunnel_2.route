@@ -5,7 +5,7 @@
     {"id":"WLD2","new_route":"eistunnel_3","new_x":"14","new_y":"6"},
     {"id":"WLU3","new_route":"eistunnel","new_x":"48","new_y":"11"}
 ],"characters":[
-    {"id":"C0","x":40,"y":15,"name":"Joey","char_sprite":"teenagerm","direction":"left","is_trainer":true,"aggro":true}
+    {"id":"C0","x":40,"y":15,"name":"Joey","char_sprite":"teenager","direction":"left","is_trainer":true,"aggro":true}
 ],
 "items":[
     {"entity_id":"ITEM1","name":"REVIVE","hidden":"FALSE"},

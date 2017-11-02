@@ -3,4 +3,20 @@
     {"id":"WHER0","new_route":"eistunnel","new_x":"49","new_y":"28"},
     {"id":"W1","new_route":"bremen","new_x":"2","new_y":"19"},
     {"id":"W2","new_route":"bremen","new_x":"2","new_y":"18"}
-],"characters":[{"id":"C0","x":5,"y":6,"name":"Karl","char_sprite":"hiker","direction":"right","is_trainer":false,"aggro":false}],"items":[],"encounters":{},"events":{},"buildings":[],"quizzes":{}}
+],
+"characters":[
+    {"id":"C0","x":5,"y":6,"name":"Karl","char_sprite":"hiker","direction":"right","is_trainer":false,"aggro":false}
+],
+"items":[],
+"encounters":{
+    "GRASS":[
+        {"id":602,"level":22,"ammount":4},
+        {"id":81,"level":22,"ammount":4},
+        {"id":595,"level":22,"ammount":4}
+    ],
+    "GRASSSNOW":[
+        {"id":124,"level":23,"ammount":4},
+        {"id":613,"level":22,"ammount":4},
+        {"id":459,"level":22,"ammount":5}
+    ]
+},"events":{},"buildings":[],"quizzes":{}}

@@ -7,7 +7,16 @@
 ],
 "characters":[],
 "items":[{"entity_id":"ITEM10","name":"MAXREVIVE","hidden":"FALSE"},{"entity_id":"ITEM2","name":"MAXREPEL","hidden":"TRUE"},{"entity_id":"ITEM1","name":"FREEZEHEAL","hidden":"FALSE"},{"entity_id":"ITEM0","name":"RARECANDY","hidden":"FALSE"},{"entity_id":"ITEM6","name":"DAWNSTONE","hidden":"FALSE"},{"entity_id":"ITEM5","name":"FULLHEAL","hidden":"TRUE"},{"entity_id":"ITEM4","name":"HYPERBALL","hidden":"FALSE"},{"entity_id":"ITEM3","name":"ESCAPEROPE","hidden":"FALSE"},{"entity_id":"ITEM9","name":"MAXREPEL","hidden":"FALSE"},{"entity_id":"ITEM8","name":"ZWIEBACKNUTELLA","hidden":"FALSE"},{"entity_id":"ITEM7","name":"REVIVE","hidden":"FALSE"}],
-"encounters":{},
+"encounters":{
+    "DEFAULT":[
+        {"id":361,"level":25,"ammount":4},
+        {"id":582,"level":25,"ammount":4},
+        {"id":220,"level":25,"ammount":4}, 
+        {"id":215,"level":25,"ammount":4},
+        {"id":363,"level":25,"ammount":4},
+        {"id":613,"level":25,"ammount":4}
+    ]
+},
 "events":{},
 "buildings":[],
 "quizzes":{}}

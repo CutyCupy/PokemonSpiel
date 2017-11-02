@@ -23,7 +23,13 @@
     {"id":"C9","char_sprite":"Man","name":"Walter","is_trainer":"true","direction":"front","sprite":"grass","x":31,"y":3}
 ],
 "encounters":{
-    
+    "GRASS1":[
+        {"id":36,"level":30,"ammount":4},
+        {"id":176,"level":29,"ammount":4},
+        {"id":209,"level":28,"ammount":4},
+        {"id":4,"level":28,"ammount":4},
+        {"id":5,"level":29,"ammount":4}     
+    ]
 },
 "buildings":[
     {"building":"house_small","x":12,"y":3}

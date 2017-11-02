@@ -1,6 +1,5 @@
 package de.alexanderciupka.pokemon.map;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.image.BufferedImage;
@@ -283,8 +282,8 @@ public class Route {
 			g.setFont(g.getFont().deriveFont(20.0f));
 			for (int y = 0; y < height; y++) {
 				for (int x = 0; x < width; x++) {
-					g.setColor(Color.red);
-					g.drawString(x + "|" + y, x * GameFrame.GRID_SIZE + 10, (int) ((y + .5) * GameFrame.GRID_SIZE));
+//					g.setColor(Color.red);
+//					g.drawString(x + "|" + y, x * GameFrame.GRID_SIZE + 10, (int) ((y + .5) * GameFrame.GRID_SIZE));
 				}
 			}
 			ImageIO.write(map, "png", new File("./res/routes/" + this.id + ".png"));

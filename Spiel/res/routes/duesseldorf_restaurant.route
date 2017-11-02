@@ -90,7 +90,8 @@
             {"character":"source","target_x":8,"target_y":29},
             {"character":"Türsteher","route":"duesseldorf_kino","target_x":7,"target_y":14},
             {"character":"CutyCupy","route":"duesseldorf_kino","remove":true},
-            {"character":"Vladimir","route":"duesseldorf","remove":true}
+            {"character":"Vladimir","route":"duesseldorf","remove":true},
+            {"character":"taeyang","route":"duesseldorf_restaurant","remove":true}
         ]
     ]
 }
