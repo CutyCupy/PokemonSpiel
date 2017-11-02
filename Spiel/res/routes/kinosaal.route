@@ -1,0 +1,1 @@
+{"route":{"id":"kinosaal","name":"Kinosaal","terrain":"grassy","height":2,"width":1,"0.0":"","0.1":"W0"},"warps":[{"id":"W0","new_route":"duesseldorf_kino","new_x":"3","new_y":"1"}],"characters":[],"items":[],"encounters":{},"events":{},"buildings":[],"quizzes":{}}

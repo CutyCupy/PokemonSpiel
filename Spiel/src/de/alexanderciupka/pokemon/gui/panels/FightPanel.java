@@ -498,6 +498,7 @@ public class FightPanel extends JPanel {
 		this.mine = gController.getFight().getPlayer();
 		if(playSound) {
 			addText("Los " + mine.getName() + "!", false);
+			this.textLabel.waitText();
 		}
 		ownPokemon.setIcon(new ImageIcon(mine.getSpriteBack()));
 		updateMoves();
@@ -517,11 +518,12 @@ public class FightPanel extends JPanel {
 
 	public void setEnemy() {
 		boolean playSound = !gController.getFight().getEnemy().equals(this.enemy);
-		this.enemy = gController.getFight().getEnemy();
 		this.enemyPokemon.setVisible(false);
-		if (!gController.getFight().canEscape() && !gController.getFight().getEnemy().equals(this.enemy)) {
+		this.enemy = gController.getFight().getEnemy();
+		if (!gController.getFight().canEscape() && playSound) {
 			this.addText(
 					gController.getFight().getEnemyCharacter().getName() + " setzt " + this.enemy.getName() + " ein!");
+			this.textLabel.waitText();
 		}
 		enemyPokemon.setIcon(new ImageIcon(enemy.getSpriteFront()));
 //		gController.getFight().setVisible(this.enemy, true);

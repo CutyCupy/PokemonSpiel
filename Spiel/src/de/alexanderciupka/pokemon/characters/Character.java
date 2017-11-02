@@ -325,7 +325,7 @@ public class Character implements Runnable {
 	}
 
 	public int checkStartFight() {
-		if (this.trainer && this.aggro) {
+		if (this.trainer && this.aggro && false) {
 			if (!this.defeated) {
 				int mainX = gController.getMainCharacter().getCurrentPosition().x;
 				int mainY = gController.getMainCharacter().getCurrentPosition().y;
@@ -664,6 +664,7 @@ public class Character implements Runnable {
 
 	@Override
 	public boolean equals(Object obj) {
+		System.out.println(obj);
 		if(obj instanceof Character) {
 			Character c = (Character) obj;
 			return this.getID().equals(c.getID()) && this.getName().equals(c.getName()) && this.getCurrentPosition().equals(c.getCurrentPosition())

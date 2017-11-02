@@ -62,9 +62,10 @@ public class Player extends Character {
 				break;
 			}
 		}
+		System.out.println(currentRoute);
 		routeHistory.add(currentRoute.getId());
 		super.setCurrentRoute(currentRoute);
-		if(gController.getGameFrame() != null) {
+		if(gController.getGameFrame() != null && this.equals(gController.getCurrentBackground().getCamera().getCenter())) {
 			gController.getGameFrame().getBackgroundLabel().changeRoute(currentRoute);
 		}
 	}
@@ -115,11 +116,11 @@ public class Player extends Character {
 
 	public void earnRewards(HashMap<Item, Integer> rewards, boolean withText) {
 		for(Item i : rewards.keySet()) {
+			addItem(i, rewards.get(i));
 			if(withText) {
 				gController.getGameFrame().addDialogue("Du hast " + i.getName() + " (x" + rewards.get(i) + ") erhalten!");
 				gController.getGameFrame().getDialogue().waitText();
 			}
-			addItem(i, rewards.get(i));
 		}
 	}
 

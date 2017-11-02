@@ -3,7 +3,6 @@ package de.alexanderciupka.pokemon.map.entities;
 import java.awt.Color;
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import com.google.gson.JsonObject;
 
@@ -15,7 +14,6 @@ import de.alexanderciupka.pokemon.main.Main;
 import de.alexanderciupka.pokemon.map.Camera;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.menu.SoundController;
-import de.alexanderciupka.pokemon.pokemon.Item;
 
 public class TriggeredEvent {
 
@@ -240,22 +238,30 @@ public class TriggeredEvent {
 //							gController.getGameFrame().repaint();
 							return;
 						}
-					}
-				}
-				for(int j = 0; j < currentChanges.length; j++) {
-					HashMap<Item, Integer> rewards = currentChanges[j].getItem();
-					for(Item currentItem : rewards.keySet()) {
-						if(rewards.get(currentItem) > 0) {
-							for(int x = 0; x < rewards.get(currentItem); x++) {
-								source.addItem(currentItem);
-							}
-							gController.getGameFrame().addDialogue("Du hast " + rewards.get(currentItem) + " " + currentItem.getName() + " erhalten!");
+						try {
+							Thread.sleep(2000);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
 						}
 					}
 				}
 				for(int j = 0; j < currentChanges.length; j++) {
+//					HashMap<Item, Integer> rewards = currentChanges[j].getItem();
+					source.earnRewards(currentChanges[j].getItem(), true);
+//					for(Item currentItem : rewards.keySet()) {
+//						if(rewards.get(currentItem) > 0) {
+//							for(int x = 0; x < rewards.get(currentItem); x++) {
+//							}
+//							gController.getGameFrame().addDialogue("Du hast " + rewards.get(currentItem) + " " + currentItem.getName() + " erhalten!");
+//						}
+//					}
+				}
+				for(int j = 0; j < currentChanges.length; j++) {
 					if(currentChanges[j].getSound() != null) {
-						SoundController.getInstance().playSound(currentChanges[j].getSound(), currentChanges[j].isWaiting());
+						SoundController.getInstance().playSound(
+								currentChanges[j].getSound(),
+								currentChanges[j].isWaiting(),
+								currentChanges[j].pauseMusic());
 					}
 				}
 				for(int j = 0; j < currentChanges.length; j++) {

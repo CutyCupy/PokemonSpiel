@@ -66,15 +66,15 @@ public class BackgroundLabel extends JLabel {
 			y = 0;
 		}
 
-		if (x + w > gController.getCurrentBackground().getCurrentRoute().getWidth()) {
-			w = (gController.getCurrentBackground().getCurrentRoute().getWidth() - x);
+		if (x + w > c.getRoute().getWidth()) {
+			w = (c.getRoute().getWidth() - x);
 		}
-		if (y + h > gController.getCurrentBackground().getCurrentRoute().getHeight()) {
-			h = (gController.getCurrentBackground().getCurrentRoute().getHeight() - y);
+		if (y + h > c.getRoute().getHeight()) {
+			h = (c.getRoute().getHeight() - y);
 		}
 
 		g.drawImage(
-				gController.getCurrentBackground().getCurrentRoute().getMap().getSubimage(
+				c.getRoute().getMap().getSubimage(
 						(int) Math.round(x * GameFrame.GRID_SIZE), (int) Math.round(y * GameFrame.GRID_SIZE),
 						(int) Math.round(w * GameFrame.GRID_SIZE), (int) Math.round(h * GameFrame.GRID_SIZE)),
 				(int) Math.round(xOffset * GameFrame.GRID_SIZE), (int) Math.round(yOffset * GameFrame.GRID_SIZE), null);
@@ -169,6 +169,8 @@ public class BackgroundLabel extends JLabel {
 			l.createOverlay();
 			this.addOverlay(l);
 			wait(l);
+		} else {
+			startEncounter();
 		}
 	}
 

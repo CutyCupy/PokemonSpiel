@@ -10,6 +10,7 @@ public enum Item {
 	GOODROD("Superangel", "Eine gute Angel.", false),
 	PROROD("Profiangel", "Eine sehr gute Angel.", false),
 	ROD("Angel", "Eine Angel.", false),
+	BACKSTAGEPASS("SF9 VIP Pass", "Ein VIP Pass für das Konzert von SF9 in Düsseldorf.", false),
 
 	POTION("Trank", "Regeneriert @value KP eines Pokemons.", true, 20),
 	SUPERPOTION("Supertrank", "Regeneriert @value KP eines Pokemons.", true, 60),

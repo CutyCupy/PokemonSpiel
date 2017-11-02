@@ -378,8 +378,8 @@ public class GameController {
 		mainCharacter.setCharacterImage("talih", "front");
 		mainCharacter.setName("Talih");
 		mainCharacter.setID("999");
-		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("krefeld"));
-		mainCharacter.setCurrentPosition(9, 13);
+		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("duesseldorf"));
+		mainCharacter.setCurrentPosition(4, 20);
 
 		mainCharacter.getItems().put(Item.POKEBALL, 5);
 

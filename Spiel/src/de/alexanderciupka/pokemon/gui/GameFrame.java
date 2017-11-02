@@ -156,9 +156,10 @@ public class GameFrame extends JFrame {
 		} else {
 			this.getFightPanel().addText("Ein wildes " + enemy.getName() + " erscheint!");
 		}
-		fight.setEnemy();
-		fight.setPlayer();
-		fight.updatePanels();
+		gController.updateFight();
+//		fight.setEnemy();
+//		fight.setPlayer();
+//		fight.updatePanels();
 	}
 
 	public void stopFight() {

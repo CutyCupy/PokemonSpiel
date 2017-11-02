@@ -1,0 +1,50 @@
+{"route":{"id":"düsseldorf_konzerthalle","name":"Düsseldorf Konzerthalle","terrain":"dark_laminat","height":20,"width":17,"0.0":"MW","1.0":"MW","2.0":"MW","3.0":"MWW","4.0":"MW","5.0":"MW","6.0":"MW","7.0":"MWW","8.0":"MW","9.0":"MWW","10.0":"MW","11.0":"MW","12.0":"MW","13.0":"MWW","14.0":"MW","15.0":"MW","16.0":"MW","0.1":"HM","1.1":"HM","2.1":"HM","3.1":"HM","4.1":"HM","5.1":"HM","6.1":"HM","7.1":"HM","8.1":"HM","9.1":"HM","10.1":"HM","11.1":"HM","12.1":"HM","13.1":"HM","14.1":"HM","15.1":"HM","16.1":"HM","0.2":"HM","1.2":"HM","2.2":"HM","3.2":"HM","4.2":"HM","5.2":"HM","6.2":"HM","7.2":"HM","8.2":"HM","9.2":"HM","10.2":"HM","11.2":"HM","12.2":"HM","13.2":"HM","14.2":"HM","15.2":"HM","16.2":"HM","0.3":"HM","1.3":"HM","2.3":"HM","3.3":"HM","4.3":"HM","5.3":"HM","6.3":"HM","7.3":"HM","8.3":"HM","9.3":"HM","10.3":"HM","11.3":"HM","12.3":"HM","13.3":"HM","14.3":"HM","15.3":"HM","16.3":"HM","0.4":"HM","1.4":"HM","2.4":"HM","3.4":"HM","4.4":"HM","5.4":"HM","6.4":"HM","7.4":"HM","8.4":"HM","9.4":"HM","10.4":"HM","11.4":"HM","12.4":"HM","13.4":"HM","14.4":"HM","15.4":"HM","16.4":"HM","0.5":"HM","1.5":"HM","2.5":"HM","3.5":"HM","4.5":"HM","5.5":"HM","6.5":"HM","7.5":"HM","8.5":"HM","9.5":"HM","10.5":"HM","11.5":"HM","12.5":"HM","13.5":"HM","14.5":"HM","15.5":"HM","16.5":"HM","0.6":"HWF","1.6":"HWF","2.6":"HWF","3.6":"HWLFI","4.6":"HM","5.6":"HWRFI","6.6":"HWF","7.6":"HWF","8.6":"HWF","9.6":"HWF","10.6":"HWF","11.6":"HWLFI","12.6":"HM","13.6":"HWRFI","14.6":"HWF","15.6":"HWF","16.6":"HWF","0.7":"","1.7":"","2.7":"","3.7":"HWLF","4.7":"SCF","5.7":"HWRF","6.7":"","7.7":"","8.7":"","9.7":"","10.7":"","11.7":"HWLF","12.7":"SCF","13.7":"HWRF","14.7":"","15.7":"","16.7":"","0.8":"","1.8":"","2.8":"","3.8":"","4.8":"","5.8":"","6.8":"","7.8":"","8.8":"","9.8":"","10.8":"","11.8":"","12.8":"","13.8":"","14.8":"","15.8":"","16.8":"","0.9":"STUHLU","1.9":"STUHLU","2.9":"STUHLU","3.9":"","4.9":"","5.9":"","6.9":"","7.9":"","8.9":"STUHLU","9.9":"","10.9":"","11.9":"","12.9":"","13.9":"","14.9":"STUHLU","15.9":"STUHLU","16.9":"STUHLU","0.10":"STUHLU","1.10":"STUHLU","2.10":"STUHLU","3.10":"","4.10":"","5.10":"","6.10":"STUHLU","7.10":"STUHLU","8.10":"STUHLU","9.10":"STUHLU","10.10":"STUHLU","11.10":"","12.10":"","13.10":"","14.10":"STUHLU","15.10":"STUHLU","16.10":"STUHLU","0.11":"STUHLU","1.11":"STUHLU","2.11":"STUHLU","3.11":"","4.11":"","5.11":"","6.11":"STUHLU","7.11":"STUHLU","8.11":"STUHLU","9.11":"STUHLU","10.11":"STUHLU","11.11":"","12.11":"","13.11":"","14.11":"STUHLU","15.11":"STUHLU","16.11":"STUHLU","0.12":"STUHLU","1.12":"STUHLU","2.12":"","3.12":"","4.12":"","5.12":"STUHLU","6.12":"STUHLU","7.12":"STUHLU","8.12":"STUHLU","9.12":"STUHLU","10.12":"STUHLU","11.12":"STUHLU","12.12":"","13.12":"","14.12":"","15.12":"STUHLU","16.12":"STUHLU","0.13":"STUHLU","1.13":"","2.13":"","3.13":"","4.13":"STUHLU","5.13":"STUHLU","6.13":"STUHLU","7.13":"STUHLU","8.13":"STUHLU","9.13":"STUHLU","10.13":"STUHLU","11.13":"STUHLU","12.13":"STUHLU","13.13":"","14.13":"","15.13":"","16.13":"STUHLU","0.14":"","1.14":"","2.14":"","3.14":"","4.14":"","5.14":"","6.14":"","7.14":"","8.14":"","9.14":"","10.14":"","11.14":"","12.14":"","13.14":"","14.14":"","15.14":"","16.14":"","0.15":"","1.15":"","2.15":"","3.15":"","4.15":"OOB","5.15":"OOB","6.15":"OOB","7.15":"OOB","8.15":"OOB","9.15":"OOB","10.15":"OOB","11.15":"OOB","12.15":"OOB","13.15":"","14.15":"","15.15":"","16.15":"","0.16":"","1.16":"","2.16":"","3.16":"","4.16":"MW","5.16":"MW","6.16":"MW","7.16":"MW","8.16":"MW","9.16":"MW","10.16":"MW","11.16":"MW","12.16":"MW","13.16":"","14.16":"","15.16":"","16.16":"","0.17":"","1.17":"","2.17":"","3.17":"","4.17":"","5.17":"","6.17":"","7.17":"","8.17":"","9.17":"","10.17":"","11.17":"","12.17":"","13.17":"","14.17":"","15.17":"","16.17":"","0.18":"","1.18":"","2.18":"","3.18":"","4.18":"","5.18":"","6.18":"","7.18":"","8.18":"","9.18":"","10.18":"","11.18":"","12.18":"","13.18":"","14.18":"","15.18":"","16.18":"","0.19":"OOB","1.19":"OOB","2.19":"OOB","3.19":"OOB","4.19":"OOB","5.19":"OOB","6.19":"OOB","7.19":"OOB","8.19":"W0","9.19":"OOB","10.19":"OOB","11.19":"OOB","12.19":"OOB","13.19":"OOB","14.19":"OOB","15.19":"OOB","16.19":"OOB"},
+"warps":[
+    {"id":"W0","new_route":"duesseldorf","new_x":"7","new_y":"11"}
+],
+"characters":[
+    {"id":"C0","x":8,"y":5,"name":"Taeyang","char_sprite":"taeyang","direction":"front","is_trainer":true,"aggro":false},
+    {"id":"C1","x":7,"y":4,"name":"Youngbin","char_sprite":"youngbin","direction":"front","is_trainer":false,"aggro":false},
+    {"id":"C2","x":9,"y":4,"name":"Inseong","char_sprite":"youngbin","direction":"front","is_trainer":false,"aggro":false},
+    {"id":"C3","x":6,"y":5,"name":"Jaeyoon","char_sprite":"jaeyoon","direction":"front","is_trainer":false,"aggro":false},
+    {"id":"C4","x":10,"y":5,"name":"Dawon","char_sprite":"youngbin","direction":"front","is_trainer":false,"aggro":false},
+    {"id":"C5","x":11,"y":4,"name":"Zuho","char_sprite":"zuho","direction":"front","is_trainer":false,"aggro":false},
+    {"id":"C6","x":5,"y":4,"name":"Rowoon","char_sprite":"youngbin","direction":"front","is_trainer":false,"aggro":false},
+    {"id":"C7","x":6,"y":3,"name":"Hwiyoung","char_sprite":"hwiyoung","direction":"front","is_trainer":false,"aggro":false},
+    {"id":"C8","x":10,"y":3,"name":"Chani","char_sprite":"chani","direction":"front","is_trainer":false,"aggro":false},
+
+    {"id":"C9","x":0,"y":9,"name":"Rüpel 1","char_sprite":"team_kek(s)m","direction":"back","is_trainer":false,"aggro":false},
+    {"id":"C23","x":0,"y":10,"name":"Rüpel 2","char_sprite":"team_kek(s)m","direction":"back","is_trainer":false,"aggro":false},
+    {"id":"C15","x":7,"y":10,"name":"Kek(s)vorstand Jan","char_sprite":"jan","direction":"back","is_trainer":true,"aggro":false},
+    {"id":"C25","x":6,"y":12,"name":"Rüpel 3","char_sprite":"team_kek(s)w","direction":"back","is_trainer":true,"aggro":false},
+    {"id":"C13","x":15,"y":9,"name":"Rüpel 4","char_sprite":"team_kek(s)m","direction":"back","is_trainer":false,"aggro":false},
+    {"id":"C14","x":16,"y":9,"name":"Rüpel 5","char_sprite":"team_kek(s)m","direction":"back","is_trainer":false,"aggro":false},
+    {"id":"C11","x":2,"y":9,"name":"Rüpel","char_sprite":"team_kek(s)m","direction":"back","is_trainer":false,"aggro":false},
+    {"id":"C18","x":6,"y":10,"name":"Rüpel 6","char_sprite":"team_kek(s)m","direction":"back","is_trainer":false,"aggro":false},
+    {"id":"C16","x":9,"y":10,"name":"Arenaleiterin Kaja","char_sprite":"talih","direction":"back","is_trainer":true,"aggro":false},
+    {"id":"C10","x":1,"y":9,"name":"Rüpel 7","char_sprite":"team_kek(s)w","direction":"back","is_trainer":false,"aggro":false},
+    {"id":"C24","x":1,"y":11,"name":"Rüpel 0","char_sprite":"team_kek(s)w","direction":"back","is_trainer":false,"aggro":false},
+    {"id":"C21","x":15,"y":10,"name":"Rüpel 8","char_sprite":"team_kek(s)w","direction":"back","is_trainer":false,"aggro":false},
+    {"id":"C19","x":10,"y":10,"name":"Rüpel 9","char_sprite":"team_kek(s)m","direction":"back","is_trainer":false,"aggro":false},
+    {"id":"C17","x":8,"y":10,"name":"Rüpel 10","char_sprite":"team_kek(s)m","direction":"back","is_trainer":false,"aggro":false},
+    {"id":"C22","x":16,"y":10,"name":"Rüpel 11","char_sprite":"team_kek(s)m","direction":"back","is_trainer":false,"aggro":false},
+    {"id":"C12","x":14,"y":9,"name":"Rüpel 12","char_sprite":"team_kek(s)m","direction":"back","is_trainer":false,"aggro":false},
+    {"id":"C20","x":14,"y":10,"name":"Rüpel 13","char_sprite":"team_kek(s)w","direction":"back","is_trainer":false,"aggro":false},
+    {"id":"C26","x":8,"y":11,"name":"Rüpel 14","char_sprite":"team_kek(s)w","direction":"back","is_trainer":false,"aggro":false}
+],
+"items":[
+
+],
+"encounters":{
+
+},
+"events":{
+
+},
+"buildings":[
+
+]
+,"quizzes":{
+
+}
+}

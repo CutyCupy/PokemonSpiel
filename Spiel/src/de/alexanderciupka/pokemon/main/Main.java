@@ -27,19 +27,19 @@ public class Main {
 	public static boolean FORCE_REPAINT = false;
 
 	public static JOptionPane getOptionPane(JComponent parent) {
-        JOptionPane pane = null;
-        if (!(parent instanceof JOptionPane)) {
-            pane = getOptionPane((JComponent)parent.getParent());
-        } else {
-            pane = (JOptionPane) parent;
-        }
-        return pane;
-    }
+		JOptionPane pane = null;
+		if (!(parent instanceof JOptionPane)) {
+			pane = getOptionPane((JComponent) parent.getParent());
+		} else {
+			pane = (JOptionPane) parent;
+		}
+		return pane;
+	}
 
 	public static String arrayToString(Object[] array) {
 		String result = "";
-		for(int i = 0; i < array.length; i++) {
-			if(i != 0) {
+		for (int i = 0; i < array.length; i++) {
+			if (i != 0) {
 				result += "+";
 			}
 			result += array[i];
@@ -49,46 +49,7 @@ public class Main {
 
 	public static void main(String[] args) throws Exception {
 
-//		JButton again = new JButton("Again");
-//		JButton ok = new JButton("Ok");
-//
-//		again.setName("5");
-//		again.setText("Again (5)");
-//
-//		again.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                JOptionPane pane = getOptionPane((JComponent)e.getSource());
-//                pane.setValue(again);
-//                int agains = Math.max(Integer.parseInt(again.getName()) - 1, 0);
-//                again.setName(String.valueOf(agains));
-//    			again.setText("Again (" + agains + ")");
-//            }
-//        });
-//
-//		ok.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                JOptionPane pane = getOptionPane((JComponent)e.getSource());
-//                pane.setValue(ok);
-//            }
-//        });
-//
-//		for(int i = 0; i < 7; i++) {
-//
-//			if(again.getName().equals("0")) {
-//				again.setEnabled(false);
-//			} else {
-//				again.setEnabled(true);
-//			}
-//
-//			System.out.println(JOptionPane.showOptionDialog(null, "Frage", "Erkenne den Song!", JOptionPane.OK_CANCEL_OPTION,
-//					JOptionPane.QUESTION_MESSAGE, null, new JButton[] {again, ok}, again));
-//		}
-//
-
 		MenuController.getInstance();
-
 
 		Thread repainter = new Thread(new Runnable() {
 			@Override
@@ -103,58 +64,28 @@ public class Main {
 					Thread.yield();
 				}
 				boolean firstDialogue = true;
-//				boolean wait = false;
-//				int waitFrames = 0;
 				while (true) {
 					startTime = System.currentTimeMillis();
-//					wait = false;
 					if (!frame.getDialogue().isVisible()
-							|| (gController.isFighting() && !frame.getFightPanel().getTextLabel().isVisible()) || FORCE_REPAINT) {
-//						wait = true;
+							|| (gController.isFighting() && !frame.getFightPanel().getTextLabel().isVisible())
+							|| FORCE_REPAINT) {
 						firstDialogue = true;
 						frame.repaint();
-//						waitFrames = 0;
-						if(FORCE_REPAINT) {
+						if (FORCE_REPAINT) {
 							FORCE_REPAINT = false;
 						}
 					} else {
 						if (frame.getDialogue().isVisible()) {
 							frame.getDialogue().repaint();
-//							wait = true;
 						} else if (frame.getFightPanel().getTextLabel().isVisible()) {
 							frame.getFightPanel().getTextLabel().repaint();
-//							wait = true;
 						}
-//						if (waitFrames <= 15) {
-//							wait = true;
-//							waitFrames++;
-//						}
 					}
-
-//					waitFrames = 16;
-
-//					if (firstDialogue) {
-//						frame.repaint();
-////						if (waitFrames > 15) {
-//							firstDialogue = false;
-////						}
-//					} else {
-//						if (frame.getDialogue().isVisible()) {
-//							frame.getDialogue().repaint();
-////							wait = true;
-//						} else if (frame.getFightPanel().getTextLabel().isVisible()) {
-//							frame.getFightPanel().getTextLabel().repaint();
-////							wait = true;
-//						}
-//					}
-//					if (wait) {
-						try {
-							Thread.sleep(
-									(long) Math.max(1000.0 / Main.FPS - (System.currentTimeMillis() - startTime), 0));
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-//					}
+					try {
+						Thread.sleep((long) Math.max(1000.0 / Main.FPS - (System.currentTimeMillis() - startTime), 0));
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		});
@@ -181,7 +112,6 @@ public class Main {
 		songChooser.setName("SONGCHOOSER");
 		songChooser.start();
 		// readDescription();
-
 
 	}
 

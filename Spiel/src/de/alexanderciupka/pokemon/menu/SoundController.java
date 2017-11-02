@@ -50,6 +50,8 @@ public class SoundController {
 	public static final String GREAT_SUCCESS = "great_success";
 	public static final String EXPLOSION = "explosion";
 
+	private long currentPause;
+
 	private SoundController() {
 	}
 
@@ -115,17 +117,38 @@ public class SoundController {
 	}
 
 	public void playSound(String name) {
-		playSound(name, false);
+		playSound(name, false, false);
 	}
 
 	public void playSound(String name, boolean b) {
+		playSound(name, b, false);
+	}
+
+	public void playSound(String name, boolean b, boolean pause) {
 		try {
 			AudioInputStream audioInputStream = AudioSystem
 					.getAudioInputStream(new File(Main.class.getResource("/music/sounds/" + name + ".wav").getFile()));
 			Clip sound = AudioSystem.getClip();
 			sound.open(audioInputStream);
 			sound.start();
-			while (b && (sound.getMicrosecondLength() > sound.getMicrosecondPosition())) {
+			if(pause) {
+				setPause(true);
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						int counter = 0;
+						while(isRunning(sound)) {
+							if(counter % 50000 == 0) {
+								System.out.println((sound.getMicrosecondPosition() * 1.0) / 1000000);
+							}
+							counter++;
+							Thread.yield();
+						}
+						setPause(false);
+					}
+				}).start();
+			}
+			while (b && isRunning(sound)) {
 				Thread.yield();
 			}
 		} catch (Exception e) {
@@ -269,6 +292,18 @@ public class SoundController {
 				generator.start();
 			} catch (Exception e) {
 				e.printStackTrace();
+			}
+		}
+	}
+
+	public void setPause(boolean b) {
+		if(currentSong != null) {
+			if(b) {
+				currentPause = currentSong.getMicrosecondPosition();
+				currentSong.stop();
+			} else {
+				currentSong.setMicrosecondPosition(currentPause);
+				currentSong.start();
 			}
 		}
 	}

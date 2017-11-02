@@ -80,6 +80,14 @@ public class Camera {
 		// gController.getGameFrame().repaint();
 	}
 
+	public Route getRoute() {
+		if(centered != null) {
+			return centered.getCurrentRoute();
+		} else {
+			return gController.getCurrentBackground().getCurrentRoute();
+		}
+	}
+
 	public JsonObject getSaveData() {
 		JsonObject saveData = new JsonObject();
 		while (moving) {
@@ -118,6 +126,10 @@ public class Camera {
 			this.x = saveData.get("x").getAsDouble();
 			this.y = saveData.get("y").getAsDouble();
 		}
+	}
+
+	public de.alexanderciupka.pokemon.characters.Character getCenter() {
+		return this.centered;
 	}
 
 }

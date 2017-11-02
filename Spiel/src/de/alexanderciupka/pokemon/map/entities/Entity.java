@@ -206,15 +206,16 @@ public class Entity {
 				return false;
 			}
 			if (warp.getNewRoute().toLowerCase().equals("pokemon_center")) {
-				System.err.println();
 				gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()).getEntities()[5][2].getWarp()
 						.setNewPosition(c.getCurrentPosition().getLocation());
 				gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()).getEntities()[5][2].getWarp()
 						.setNewRoute(c.getCurrentRoute().getId());
 			}
 			if (c instanceof Player) {
-				gController.resetCharacterPositions();
-				gController.setCurrentRoute(gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()));
+				if(c.equals(gController.getCurrentBackground().getCamera().getCenter())) {
+					gController.resetCharacterPositions();
+					gController.setCurrentRoute(gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()));
+				}
 			}
 			c.setCurrentRoute(gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()));
 			c.setCurrentPosition(warp.getNewPosition());
@@ -567,19 +568,19 @@ public class Entity {
 	}
 
 	public boolean isAccessible(Direction dir) {
+		boolean access = false;
 		switch (dir) {
 		case DOWN:
-			return this.top;
+			access = this.top;
 		case LEFT:
-			return this.right;
+			access = this.right;
 		case RIGHT:
-			return this.left;
+			access = this.left;
 		case UP:
-			return this.bottom;
+			access = this.bottom;
 		case NONE:
-			return true;
 		}
-		return false;
+		return access && !this.isWater();
 	}
 
 	@Override

@@ -115,7 +115,6 @@ public class RouteCreator extends JFrame {
 				}
 				sprites.add(currentName);
 			}
-			System.out.println(sprites);
 		}
 
 		int width = Integer.parseInt(JOptionPane.showInputDialog("Breite (max: 65): "));
@@ -311,7 +310,6 @@ public class RouteCreator extends JFrame {
 										newWarp.setNewRoute(JOptionPane.showInputDialog("New Route: ").toLowerCase()
 												.replace(" ", "_"));
 										warps.add(newWarp);
-										System.out.println(xCoord + " / " + yCoord + " " + newWarp.getWarpString());
 										warpCounter++;
 										text = newWarp.getWarpString();
 									} else if (text.equals("C")) {
@@ -449,9 +447,7 @@ public class RouteCreator extends JFrame {
 					if (y == height - 1 && x == (width - 1) / 2) {
 						labels[yStart + y][xStart + x].setText("WD" + buildingID + warpCounter);
 						Warp newWarp = new Warp("WD" + buildingID + warpCounter, this.routeID);
-						System.out.print("New Route: ");
 						newWarp.setNewRoute(JOptionPane.showInputDialog("New Route: ").toLowerCase().replace(" ", "_"));
-						System.out.println((xStart + x) + " / " + (yStart + y) + newWarp.getWarpString());
 						warps.add(newWarp);
 						warpCounter++;
 					} else if (x != 0 || y != 0) {
@@ -504,7 +500,7 @@ public class RouteCreator extends JFrame {
 				currentCharacter.addProperty("x", characters.get(n).x);
 				currentCharacter.addProperty("y", characters.get(n).y);
 				currentCharacter.addProperty("name", n.getName());
-				currentCharacter.addProperty("char_sprite", "");
+				currentCharacter.addProperty("char_sprite", n.getSpriteName());
 				switch(n.getCurrentDirection()) {
 				case DOWN:
 					currentCharacter.addProperty("direction", "front");

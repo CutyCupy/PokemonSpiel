@@ -857,8 +857,6 @@ public class RouteAnalyzer {
 						}
 						HatchEntity entity = currentHatches.get(hatchIndex);
 
-						System.out.println(routeID + " - " + currentHatch.get("minimum"));
-
 						for (JsonElement g : currentHatch.get("generators").getAsJsonArray()) {
 							JsonObject generator = g.getAsJsonObject();
 							entity.addGenerator(
@@ -886,7 +884,7 @@ public class RouteAnalyzer {
 								Change currentChange = new Change();
 								currentChange.setParticipant(j.get("character").getAsString());
 								currentChange.setRouteID(
-										j.get("route") != null ? j.get("route").getAsString() : currentRoute.getId());
+										j.get("route") != null ? j.get("route").getAsString() : "");
 								currentChange.setMove(
 										new Point(j.get("target_x") != null ? j.get("target_x").getAsInt() : -1,
 												j.get("target_y") != null ? j.get("target_y").getAsInt() : -1));
@@ -927,6 +925,7 @@ public class RouteAnalyzer {
 								currentChange.setWait(j.get("wait") != null ? j.get("wait").getAsBoolean() : true);
 								currentChange.setDelay(j.get("delay") != null ? j.get("delay").getAsLong() : 0);
 								currentChange.setUnknown(j.get("unknown") != null ? j.get("unknown").getAsBoolean() : false);
+								currentChange.setPause(j.get("pause") != null ? j.get("pause").getAsBoolean() : false);
 								changes.add(currentChange);
 							}
 							te.addChanges(changes.toArray(new Change[changes.size()]));
@@ -1024,6 +1023,7 @@ public class RouteAnalyzer {
 
 				// warps.clear();
 			} catch (Exception e) {
+				System.out.println(file);
 				e.printStackTrace();
 				continue;
 			}
@@ -1172,6 +1172,9 @@ public class RouteAnalyzer {
 	}
 
 	public void updateHatches(Route route) {
+		if(route == null) {
+			return;
+		}
 		for (Entity[] rows : route.getEntities()) {
 			for (Entity e : rows) {
 				if (e instanceof HatchEntity) {

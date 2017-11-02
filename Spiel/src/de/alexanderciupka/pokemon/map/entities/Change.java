@@ -36,6 +36,7 @@ public class Change {
 	private long delay;
 	private boolean unknown;
 	private boolean remove;
+	private boolean pause;
 
 	private Character character;
 	private Route route;
@@ -45,6 +46,7 @@ public class Change {
 
 	public Change() {
 		this.gController = GameController.getInstance();
+		this.item = new HashMap<Item, Integer>();
 	}
 
 	public void initiate(Player source) {
@@ -54,7 +56,6 @@ public class Change {
 		this.character = this.character == null ? source : this.character;
 		this.path = this.character.moveTowards(this.move.x == -1 ? this.character.getCurrentPosition().x : this.move.x,
 				this.move.y == -1 ? this.character.getCurrentPosition().y : this.move.y);
-		this.item = new HashMap<Item, Integer>();
 	}
 
 
@@ -260,6 +261,15 @@ public class Change {
 		clone.setUnknown(this.unknown);
 		clone.setDelay(this.delay);
 		clone.setRemove(this.remove);
+		clone.setPause(this.pause);
 		return clone;
+	}
+
+	public boolean pauseMusic() {
+		return this.pause;
+	}
+
+	public void setPause(boolean p) {
+		this.pause = p;
 	}
 }

@@ -282,6 +282,11 @@ public class QuestionEntity extends Entity {
 						Thread.yield();
 					}
 					if(npc.isDefeated()) {
+						try {
+							Thread.sleep(2000);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
 						gf.addDialogue("Super! Die Tore haben sich geöffnet!");
 						gf.getDialogue().waitText();
 						open(c);

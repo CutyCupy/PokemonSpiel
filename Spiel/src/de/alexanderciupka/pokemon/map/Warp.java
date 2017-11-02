@@ -75,7 +75,8 @@ public class Warp {
 		if(obj instanceof Warp) {
 			Warp other = (Warp) obj;
 			return (this.warpString.equals(other.warpString) &&
-					this.oldRoute.equals(other.oldRoute) && this.newRoute.equals(other.newRoute) &&
+					(this.oldRoute == null ? other.oldRoute == null : this.oldRoute.equals(other.oldRoute)) &&
+					(this.newRoute == null ? other.newRoute == null : this.newRoute.equals(other.newRoute)) &&
 					this.newPosition.equals(other.newPosition) && this.newDirection.equals(other.newDirection));
 		}
 		return false;

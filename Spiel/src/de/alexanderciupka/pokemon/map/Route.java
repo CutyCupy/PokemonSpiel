@@ -163,11 +163,10 @@ public class Route {
 			locations = new ArrayList<Point>();
 		}
 		locations.add(location);
-		this.buildings.put(building,locations);
+		this.buildings.put(building, locations);
 	}
 
 	public void createMap() {
-		System.out.println(this.name);
 		tempMap = new BufferedImage(width * 70, height * 70, BufferedImage.TYPE_4BYTE_ABGR);
 		map = new BufferedImage(width * 70, height * 70, BufferedImage.TYPE_4BYTE_ABGR);
 		Point[] points = new Point[this.width * this.height];
@@ -177,12 +176,12 @@ public class Route {
 			}
 		}
 		updateMap(points);
-		saveMap();
+//		 saveMap();
 		map = tempMap;
 	}
 
 	public void updateMap(Point... updatePoint) {
-		while(wait) {
+		while (wait) {
 			try {
 				Thread.sleep(1);
 			} catch (InterruptedException e) {
@@ -210,53 +209,57 @@ public class Route {
 					e.printStackTrace();
 				}
 			}
-			for(NPC npc : this.characters) {
+			for (NPC npc : this.characters) {
 				g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70), (int) (npc.getExactY() * 70), null);
 			}
 			for (String building : this.buildings.keySet()) {
-				BufferedImage currentBuilding = GameController.getInstance().getRouteAnalyzer().getSpriteByName(building);
+				BufferedImage currentBuilding = GameController.getInstance().getRouteAnalyzer()
+						.getSpriteByName(building);
 				for (Point p : this.buildings.get(building)) {
 					g.drawImage(currentBuilding, p.x * 70, p.y * 70, null);
 				}
 			}
 
 			ArrayList<Character> character = new ArrayList<>(this.characters);
-			if(mc != null && this.equals(mc.getCurrentRoute(), false)) {
+			if (mc != null && this.equals(mc.getCurrentRoute(), false)) {
 				character.add(mc);
 			}
 
-			for(int i = 0; i < character.size(); i++) {
+			for (int i = 0; i < character.size(); i++) {
 				Character c = character.get(i);
 				boolean repaint = true;
 				for (String building : this.buildings.keySet()) {
-					if(!repaint) {
+					if (!repaint) {
 						break;
 					}
-					BufferedImage currentBuilding = GameController.getInstance().getRouteAnalyzer().getSpriteByName(building);
+					BufferedImage currentBuilding = GameController.getInstance().getRouteAnalyzer()
+							.getSpriteByName(building);
 					int buildingWidth = currentBuilding.getWidth() - (currentBuilding.getWidth() % GameFrame.GRID_SIZE);
-					int buildingHeight = currentBuilding.getHeight() - (currentBuilding.getHeight() % GameFrame.GRID_SIZE);
+					int buildingHeight = currentBuilding.getHeight()
+							- (currentBuilding.getHeight() % GameFrame.GRID_SIZE);
 
 					for (Point p : this.buildings.get(building)) {
-						if(!repaint) {
+						if (!repaint) {
 							break;
 						}
 
-						if(((c.getExactX() * 70 + c.getCharacterImage().getWidth(null) > p.x * 70 &&
-								c.getExactX() * 70 < p.x * 70 + buildingWidth) &&
-								(c.getExactY() * 70 + c.getCharacterImage().getHeight(null) > p.y * 70 &&
-										c.getExactY() * 70 < p.y * 70 + buildingHeight))) {
+						if (((c.getExactX() * 70 + c.getCharacterImage().getWidth(null) > p.x * 70
+								&& c.getExactX() * 70 < p.x * 70 + buildingWidth)
+								&& (c.getExactY() * 70 + c.getCharacterImage().getHeight(null) > p.y * 70
+										&& c.getExactY() * 70 < p.y * 70 + buildingHeight))) {
 							repaint = false;
 						}
 					}
 				}
-				if(repaint) {
+				if (repaint) {
 					g.drawImage(c.getCharacterImage(), (int) (c.getExactX() * 70), (int) (c.getExactY() * 70), null);
 				}
 			}
-			if (mc != null && this.equals(mc.getCurrentRoute(), false) &&
-					(this.entities[mc.getCurrentPosition().y][mc.getCurrentPosition().x].getWarp() != null ||
-							(mc.getOldPosition().x < this.width && mc.getOldPosition().y < this.height &&
-									this.entities[mc.getOldPosition().y][mc.getOldPosition().x].getWarp() != null))) {
+			if (mc != null && this.equals(mc.getCurrentRoute(), false)
+					&& (this.entities[mc.getCurrentPosition().y][mc.getCurrentPosition().x].getWarp() != null
+							|| (mc.getOldPosition().x < this.width && mc.getOldPosition().y < this.height
+									&& this.entities[mc.getOldPosition().y][mc.getOldPosition().x]
+											.getWarp() != null))) {
 				g.drawImage(mc.getCharacterImage(), (int) (mc.getExactX() * 70), (int) (mc.getExactY() * 70), null);
 			}
 			map = tempMap;
@@ -265,7 +268,7 @@ public class Route {
 	}
 
 	public Entity getEntity(int x, int y) {
-		if(x >= 0 && x < width && y >= 0 && y < height) {
+		if (x >= 0 && x < width && y >= 0 && y < height) {
 			return entities[y][x];
 		}
 		return null;
@@ -273,29 +276,15 @@ public class Route {
 
 	void saveMap() {
 		try {
-			while(wait) {
+			while (wait) {
 				Thread.sleep(1);
 			}
 			Graphics g = map.getGraphics();
 			g.setFont(g.getFont().deriveFont(20.0f));
 			for (int y = 0; y < height; y++) {
 				for (int x = 0; x < width; x++) {
-					try {
-						if (entities[y][x].hasCharacter()) {
-							for (NPC npc : entities[y][x].getCharacters()) {
-								g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() * 70),
-										(int) (npc.getExactY() * 70), null);
-							}
-						}
-//						g.setColor(Color.black);
-//						g.drawRect(GameFrame.GRID_SIZE * x, GameFrame.GRID_SIZE * y, GameFrame.GRID_SIZE,
-//								GameFrame.GRID_SIZE);
-						g.setColor(Color.red);
-						g.drawString(x + "|" + y, x * GameFrame.GRID_SIZE + 10, (int) ((y + .5) * GameFrame.GRID_SIZE));
-
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
+					g.setColor(Color.red);
+					g.drawString(x + "|" + y, x * GameFrame.GRID_SIZE + 10, (int) ((y + .5) * GameFrame.GRID_SIZE));
 				}
 			}
 			ImageIO.write(map, "png", new File("./res/routes/" + this.id + ".png"));
@@ -389,8 +378,8 @@ public class Route {
 				}
 			}
 			return this.id.equals(other.id) && this.name.equals(other.name)
-					&& this.terrainName.equals(other.terrainName) && this.rain == other.rain && this.snow == other.snow &&
-					this.fog == other.fog;
+					&& this.terrainName.equals(other.terrainName) && this.rain == other.rain && this.snow == other.snow
+					&& this.fog == other.fog;
 		}
 		return false;
 	}

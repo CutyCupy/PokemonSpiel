@@ -59,9 +59,7 @@ public class HatchEntity extends Entity {
 	}
 
 	public boolean isDone() {
-		System.err.println(this.getRoute().getId() + " - " + this.minimum);
 		if (minimum == 0 || minimum > generators.size()) {
-			System.err.println("Set minimum");
 			minimum = generators.size();
 		}
 		int done = 0;

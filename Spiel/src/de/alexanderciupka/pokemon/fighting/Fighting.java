@@ -641,8 +641,9 @@ public class Fighting {
 		this.player = playerTeam.getTeam()[0];
 		this.player.startFight();
 //		participants.add(player);
-		// gController.getGameFrame().getFightPanel().addText("Du schaffst das "
-		// + this.player.getName() + "!");
+//		if(gController.getGameFrame().getFightPanel() != null) {
+//			gController.getGameFrame().getFightPanel().addText("Los " + this.player.getName() + "!");
+//		}
 		this.visible = new SimpleEntry<Boolean, Boolean>(true, this.visible.getValue());
 		gController.updateFight();
 	}
@@ -653,6 +654,12 @@ public class Fighting {
 		if(participants == null) {
 			participants = new HashSet<>();
 		}
+//		if(enemyCharacter != null) {
+//			if(gController.getGameFrame().getFightPanel() != null) {
+//				gController.getGameFrame().getFightPanel().addText(
+//						enemyCharacter.getName() + " setzt " + this.enemy.getName() + " ein!");
+//			}
+//		}
 		participants.clear();
 		participants.add(player);
 		this.visible = new SimpleEntry<Boolean, Boolean>(this.visible.getKey(), true);
