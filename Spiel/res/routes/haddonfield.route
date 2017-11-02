@@ -24,7 +24,13 @@
     {"id":"C6","char_sprite":"teenagerw","name":"Marie","is_trainer":"false","direction":"","x":40,"y":24}
 ],
 "encounters":{"GRASS1":[
-    {"id":25,"level":1}
+    {"id":251,"level":14,"ammount":4},
+    {"id":251,"level":15,"ammount":1},
+    {"id":198,"level":14,"ammount":3},
+    {"id":215,"level":13,"ammount":4},
+    {"id":228,"level":14,"ammount":3},
+    {"id":302,"level":13,"ammount":2},
+    {"id":500,"level":14,"ammount":3}
 ]},
 "events":{
     "triggered1":
