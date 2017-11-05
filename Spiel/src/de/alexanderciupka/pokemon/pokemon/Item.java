@@ -4,7 +4,7 @@ public enum Item {
 	CUT("Zerschneider", "Ermöglicht das Zerschneiden von kleinen Bäumen.", false),
 	SURF("Surfer", "Ermöglicht das Surfen über Wasser.", false),
 	ROCKSMASH("Zertrümmerer", "Ermöglicht das Zertrümmern von kleinen Steinen.", false),
-	STRENGTH("Stärke", "Ermöglicht das Verschieben von großen Felsen.", false), //
+	STRENGTH("Stärke", "Ermöglicht das Verschieben von großen Felsen.", false), 
 	FLASH("Taschenlampe", "Leuchtet Höhlen aus.", false),
 	BIKE("Fahrrad", "Das solltest du schon wissen, was man damit machen kann...", false),
 	GOODROD("Superangel", "Eine gute Angel.", false),
@@ -16,12 +16,12 @@ public enum Item {
 	SUPERPOTION("Supertrank", "Regeneriert @value KP eines Pokemons.", true, 60),
 	HYPERPOTION("Hypertrank", "Regeneriert @value KP eines Pokemons.", true, 120),
 	FULLHEAL("Top-Trank", "Regeneriert alle KP eines Pokemons.", true, Integer.MAX_VALUE),
-	FULLRESTORE("Top-Genesung", "Regeneriert alle KP eines Pokemons und heilt die Statusprobleme.", true, Integer.MAX_VALUE / 2), //
+	FULLRESTORE("Top-Genesung", "Regeneriert alle KP eines Pokemons und heilt die Statusprobleme.", true, Integer.MAX_VALUE / 2), 
 	REVIVE("Beleber", "Belebt ein besiegtes Pokemon wieder und stellt dabei @value% der KP wieder her.", true, 50),
 	MAXREVIVE("Top-Beleber", "Belebt ein besiegtes Pokemon wieder und stellt dabei die @value% KP wieder her.", true, 100),
 	PARAHEAL("Paraheiler", "Heilt die Paralyse eines Pokemons.", true, Ailment.PARALYSIS),
 	FREEZEHEAL("Eisheiler", "Heilt die Erfrierung eines Pokemons.", true, Ailment.FREEZE),
-	POISONHEAL("Gegengift", "Heilt die Vergiftung eines Pokemons.", true, Ailment.POISON), //
+	POISONHEAL("Gegengift", "Heilt die Vergiftung eines Pokemons.", true, Ailment.POISON), 
 	SLEEPHEAL("Aufwecker", "Weckt ein Pokemon auf.", true, Ailment.SLEEP),
 	BURNHEAL("Feuerheiler", "Heilt die Verbrennung eines Pokemons.", true, Ailment.BURN),
 	HYPERHEAL("Hyperheiler", "Heilt jede Statusveränderung eines Pokemons.", true),

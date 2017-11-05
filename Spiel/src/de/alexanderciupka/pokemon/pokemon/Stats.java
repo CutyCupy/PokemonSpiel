@@ -14,7 +14,6 @@ import de.alexanderciupka.pokemon.gui.panels.NewAttackPanel;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.menu.SoundController;
 
-//TODO: Unique stats for different Pokemons
 public class Stats {
 
 	private Pokemon pokemon;
@@ -149,16 +148,6 @@ public class Stats {
 			}
 			fightStats.put(s, this.stats.get(s).doubleValue() * calcStatFactor(s, this.fightStatsChanges.get(s)));
 		}
-//		HashMap<Stat, Short> fightStatsChanges = new HashMap<>(this.fightStatsChanges);
-//		this.fightStatsChanges = new HashMap<>();
-//		for (Stat s : fightStatsChanges.keySet()) {
-//			short change = fightStatsChanges.get(s);
-//			if (change > 0) {
-//				increaseStat(s, change);
-//			} else if (change < 0) {
-//				decreaseStat(s, -change);
-//			}
-//		}
 	}
 
 	private double calcStatFactor(Stat s, short value) {
@@ -233,7 +222,7 @@ public class Stats {
 
 	public void evolve(Item i) {
 		if(this.pokemon.evolve(gController.getInformation().checkEvolution(this.pokemon, i))) {
-//			newMoves();
+			
 		}
 	}
 
@@ -381,20 +370,6 @@ public class Stats {
 			return true;
 		}
 
-//		if (fightStatsChanges.get(s) + value > 7) {
-//			gController.getGameFrame().getFightPanel().addText(
-//					s.getText() + " von " + this.pokemon.getName() + " kann nicht weiter erhöht werden!");
-//			return false;
-//		}
-//		for (int i = 0; i < value; i++) {
-//			if (fightStatsChanges.get(s) < 0) {
-//				fightStats.put(s, (fightStats.get(s) * (3 / 2.0)));
-//			} else {
-//				fightStats.put(s, (fightStats.get(s) * (5 / 4.0)));
-//			}
-//			fightStatsChanges.put(s, (short) (fightStatsChanges.get(s) + 1));
-//		}
-//		return true;
 	}
 
 	public boolean decreaseStat(Stat s, int value) {
@@ -416,23 +391,6 @@ public class Stats {
 					" wurde " + (multipleBoost ? "sehr stark " : "") + "gesenkt!");
 			return true;
 		}
-//		if(fightStatsChanges.get(s) == null) {
-//			fightStatsChanges.put(s, (short) 0);
-//		}
-//		if (fightStatsChanges.get(s) + value > 7) {
-//			gController.getGameFrame().getFightPanel().addText(
-//					s.getText() + " von " + this.pokemon.getName() + " kann nicht weiter gesenkt werden!");
-//			return false;
-//		}
-//		for (int i = 0; i < value; i++) {
-//			if (fightStatsChanges.get(s) <= 0) {
-//				fightStats.put(s, (fightStats.get(s) * (2 / 3.0)));
-//			} else {
-//				fightStats.put(s, (fightStats.get(s) * (4 / 5.0)));
-//			}
-//			fightStatsChanges.put(s, (short) (fightStatsChanges.get(s) - 1));
-//		}
-//		return true;
 	}
 
 	public HashMap<Stat, Double> getFightStats() {
@@ -507,10 +465,6 @@ public class Stats {
 		this.currentXP = saveData.get("current_xp").getAsInt();
 		this.currentHP = saveData.get("current_hp").getAsShort();
 		this.nature = saveData.get("nature") != null ? Nature.valueOf(saveData.get("nature").getAsString().toUpperCase()) : Nature.getRandomNature();
-//		JsonObject stats = saveData.get("stats").getAsJsonObject();
-//		for (int i = 0; i < this.stats.length; i++) {
-//			this.stats[i] = stats.get(String.valueOf(i)).getAsShort();
-//		}
 	}
 
 	public Random getRNG() {

@@ -25,11 +25,6 @@ public class PaintingFrame extends JFrame {
 
 	private PaintingController pController;
 	
-//	private boolean drawing;
-//	
-//	private double lastX = -1;
-//	private double lastY = -1;
-
 	public PaintingFrame() {
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		addWindowListener(new PaintingListener());
@@ -39,35 +34,6 @@ public class PaintingFrame extends JFrame {
 		addMouseListener();
 		pController = PaintingController.getInstance();
 		
-//		new Thread(new Runnable() {
-//			@Override
-//			public void run() {
-//				while(true) {
-//					if(drawing) {
-//						int x =  MouseInfo.getPointerInfo().getLocation().x - getX();
-//						int y = MouseInfo.getPointerInfo().getLocation().y - getY();
-////					    if(lastX != -1 && lastY != -1) {
-////					    	double m = (lastY - y) / (lastX - x);
-//////					    	System.out.println(m);
-////					    	double b = y - (m*x);
-////					    	double start = Math.min(lastX, x);
-////					    	double end = Math.max(lastX, x);
-////					    	System.out.println(x + " <-> " + lastX );
-////					    	for(double curX = start ; curX < end; curX += .5) {
-////					    		System.out.println("walking");
-////					    		g.fillOval((int) (curX - pController.getCircleWidth() / 2), (int) (m*curX + b - pController.getCircleWidth() / 2), 
-////					    				pController.getCircleWidth(), pController.getCircleWidth());
-////					    	}
-////					    }
-//						g.fillOval(x - (pController.getCircleWidth() / 2),
-//								y - (pController.getCircleWidth() / 2), pController.getCircleWidth(),
-//								pController.getCircleWidth());
-//						lastX = x;
-//						lastY = y;
-//					}
-//				}
-//			}
-//		}).start();
 	}
 
 	public void start(String name) {
@@ -89,10 +55,8 @@ public class PaintingFrame extends JFrame {
 		this.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
-				// pController.backup();
 				if (!pController.getFloodMode()) {
 					if (SwingUtilities.isLeftMouseButton(e)) {
-//						drawing = true;
 						g.fillOval(e.getX() - (pController.getCircleWidth() / 2),
 								e.getY() - (pController.getCircleWidth() / 2), pController.getCircleWidth(),
 								pController.getCircleWidth());
@@ -108,18 +72,15 @@ public class PaintingFrame extends JFrame {
 			
 			@Override
 			public void mouseReleased(MouseEvent arg0) {
-//				drawing = false;
 			}
 			
 			@Override
 			public void mouseExited(MouseEvent e) {
-//				drawing = false;
 			}
 			
 			@Override
 			public void mouseEntered(MouseEvent e) {
 				updateCursor();	
-//				drawing = false;
 			}
 		});
 		this.addMouseMotionListener(new MouseMotionAdapter() {

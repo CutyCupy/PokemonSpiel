@@ -49,15 +49,12 @@ public class Painting {
 	        if(returnVal == JFileChooser.APPROVE_OPTION) {
 				img = scaleDown(ImageIO.read(chooser.getSelectedFile()));
 				
-//				if(img.getWidth() < pController.getScreenResolution().getWidth() || img.getHeight() < pController.getScreenResolution().getHeight()) {
 					name = chooser.getSelectedFile().getName();
 					int pos = name.lastIndexOf(".");
 					if (pos > 0) {
 					    name = name.substring(0, pos);
 					}
 					return true;
-//				}				
-//				return false;
 	        }
 	        return false;
 		} catch (Exception e) {

@@ -118,9 +118,6 @@ public class PaintingNameFrame extends JFrame {
 		width.addKeyListener(new KeyListener() {
 			@Override
 			public void keyTyped(KeyEvent e) {
-//				if(width.getText().length() > 0) {
-//					widthCheck(e.getKeyChar());
-//				}
 			}
 
 			@Override
@@ -134,18 +131,12 @@ public class PaintingNameFrame extends JFrame {
 
 			@Override
 			public void keyPressed(KeyEvent e) {
-//				if(width.getText().length() > 0) {
-//					widthCheck(e.getKeyChar());
-//				}
 			}
 		});
 		height.addKeyListener(new KeyListener() {
 
 			@Override
 			public void keyTyped(KeyEvent e) {
-//				if(height.getText().length() > 0) {
-//					heightCheck(e.getKeyChar());
-//				}
 			}
 
 			@Override
@@ -159,9 +150,6 @@ public class PaintingNameFrame extends JFrame {
 
 			@Override
 			public void keyPressed(KeyEvent e) {
-//				if(height.getText().length() > 0) {
-//					heightCheck(e.getKeyChar());
-//				}
 			}
 		});
 		startButton.addActionListener(new ActionListener() {

@@ -45,7 +45,6 @@ public enum Type {
 		}
 	};
 
-	//TODO
 	private static EnumMap<Type, Type[]> strongMapping = new EnumMap<Type, Type[]>(Type.class) {
 		private static final long serialVersionUID = 1L;
 		{

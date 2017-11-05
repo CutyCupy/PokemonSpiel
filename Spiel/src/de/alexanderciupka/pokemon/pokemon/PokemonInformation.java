@@ -125,29 +125,6 @@ public class PokemonInformation {
 					currentMove.setAilment(
 							SecondaryAilment.valueOf(currentJson.get("ailment").getAsString().toUpperCase()));
 				}
-				// switch (currentJson.get("ailment").getAsString()) {
-				// case "poison":
-				// currentMove.setAilment(Ailment.POISON);
-				// break;
-				// case "burn":
-				// currentMove.setAilment(Ailment.BURN);
-				// break;
-				// case "sleep":
-				// currentMove.setAilment(Ailment.SLEEP);
-				// break;
-				// case "paralysis":
-				// currentMove.setAilment(Ailment.PARALYSIS);
-				// break;
-				// case "freeze":
-				// currentMove.setAilment(Ailment.FREEZE);
-				// break;
-				// case "confusion":
-				// currentMove.setAilment(Ailment.CONFUSION);
-				// break;
-				// default:
-				// currentMove.setAilment(Ailment.NONE);
-				// break;
-				// }
 
 				try {
 					currentMove.setPriority(currentJson.get("priority").getAsInt());
@@ -195,14 +172,8 @@ public class PokemonInformation {
 						continue;
 					}
 				}
-				if (!foo.contains(currentMove) && currentMove.getCategory().equals("unique")) {
-					foo.add(currentMove);
-				}
 				allMoves.add(currentMove);
 			}
-//			for(String s : uniqueMoves) {
-//				System.out.println(s);
-//			}
 			for (JsonElement element : allPokemonData) {
 				int key = element.getAsJsonObject().get("id").getAsInt();
 				names.put(key, element.getAsJsonObject().get("name").getAsString());
@@ -378,8 +349,6 @@ public class PokemonInformation {
 						}
 						evolve &= has;
 					}
-					// Trade?
-					// held_item
 					if (!(curJson.get("known_move") instanceof JsonNull)) {
 						String move = curJson.get("known_move").getAsString().toLowerCase();
 						boolean has = false;
@@ -392,7 +361,6 @@ public class PokemonInformation {
 						evolve &= has;
 					}
 					if (!(curJson.get("location") instanceof JsonNull)) {
-						// Change routes names
 					}
 					if (evolve) {
 						return j.getAsJsonObject().get("id").getAsInt();
@@ -528,7 +496,6 @@ public class PokemonInformation {
 		return 255;
 	}
 
-	// TODO: Egg-Groups
 
 	public boolean isBaby(int id) {
 		for (JsonElement je : allPokemonData) {

@@ -61,9 +61,6 @@ public class MenuController {
 
 	public void startEditor() {
 		new RouteCreator();
-//		if(paintingFrame == null)
-//			paintingFrame = new PaintingNameFrame();
-//		paintingFrame.setVisible(true);
 	}
 
 	public void openEditor(String pictureName, int width, int height) {

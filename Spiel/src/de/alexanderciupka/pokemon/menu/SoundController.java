@@ -136,12 +136,7 @@ public class SoundController {
 				new Thread(new Runnable() {
 					@Override
 					public void run() {
-						int counter = 0;
 						while(isRunning(sound)) {
-							if(counter % 50000 == 0) {
-								System.out.println((sound.getMicrosecondPosition() * 1.0) / 1000000);
-							}
-							counter++;
 							Thread.yield();
 						}
 						setPause(false);

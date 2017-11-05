@@ -176,7 +176,6 @@ public class Pokemon {
 	}
 
 	public void addMove(String moveName) {
-		// TODO: what happens when 4 moves already learned
 		for (int i = 0; i < 4; i++) {
 			if (moves[i] == null) {
 				moves[i] = gController.getInformation().getMoveByName(moveName).clone();
@@ -206,7 +205,6 @@ public class Pokemon {
 		}
 	}
 
-	// TODO: Change to return this.types
 	public Type[] getTypes() {
 		return this.types;
 	}
@@ -481,7 +479,6 @@ public class Pokemon {
 				this.stats.loseHP((int) (this.stats.getStats().get(Stat.HP) / 8.0));
 				fightPanel.addText(ailment.getAffected().replace("@pokemon", this.getName()));
 			case PERISHSONG:
-				// TODO: implement
 				break;
 			case YAWN:
 				if (ailment.getInflictedTurn() + 1 <= turn) {

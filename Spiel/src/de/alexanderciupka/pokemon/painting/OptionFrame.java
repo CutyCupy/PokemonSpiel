@@ -62,7 +62,6 @@ public class OptionFrame extends JFrame {
 		saveButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-//				pController.loadBackup();
 				pController.savePainting();
 			}
 		});
