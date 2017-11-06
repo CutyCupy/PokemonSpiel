@@ -278,14 +278,6 @@ public class Route {
 			while (wait) {
 				Thread.sleep(1);
 			}
-			Graphics g = map.getGraphics();
-			g.setFont(g.getFont().deriveFont(20.0f));
-			for (int y = 0; y < height; y++) {
-				for (int x = 0; x < width; x++) {
-//					g.setColor(Color.red);
-//					g.drawString(x + "|" + y, x * GameFrame.GRID_SIZE + 10, (int) ((y + .5) * GameFrame.GRID_SIZE));
-				}
-			}
 			ImageIO.write(map, "png", new File("./res/routes/" + this.id + ".png"));
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -19,7 +19,7 @@ public class ItemEntity extends Entity {
 	private boolean hidden;
 
 	public ItemEntity(Route parent, String terrainName, String id, boolean hidden) {
-		super(parent, hidden, "warp", 0, terrainName);
+		super(parent, hidden, "free", 0, terrainName);
 		this.hidden = hidden;
 		this.setId(id);
 	}
@@ -96,7 +96,6 @@ public class ItemEntity extends Entity {
 		} else {
 			super.onInteraction(c);
 		}
-//		gController.getGameFrame().repaint();
 	}
 
 	@Override

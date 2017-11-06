@@ -18,6 +18,7 @@ import de.alexanderciupka.pokemon.menu.SoundController;
 import de.alexanderciupka.pokemon.pokemon.Item;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
 import de.alexanderciupka.pokemon.pokemon.PokemonInformation;
+import de.alexanderciupka.pokemon.pokemon.Stat;
 
 public class GameController {
 
@@ -216,17 +217,6 @@ public class GameController {
 		gameFrame.getFightPanel().showMenu();
 	}
 
-//	public boolean playerAttack(Move move) {
-//		return fight.playerAttack(move);
-//	}
-//
-//	public boolean enemyAttack() {
-//		return fight.enemyAttack();
-//	}
-//
-//	public boolean enemyAttack(Move move) {
-//		return fight.enemyAttack(move);
-//	}
 	public boolean checkDead(Pokemon p) {
 		if (p.getStats().getCurrentHP() == 0) {
 			p.changeHappiness(-1);
@@ -246,9 +236,6 @@ public class GameController {
 	public void endFight() {
 		SoundController.getInstance().updatePokemonLow(null);
 		this.fighting = false;
-//		for (int i = 0; i < this.mainCharacter.getTeam().getAmmount(); i++) {
-//			this.mainCharacter.getTeam().getTeam()[i].
-//		}
 		gameFrame.stopFight();
 		if (this.fight.won) {
 			if (!gameFrame.getEvolutionPanel().getPokemon().isEmpty()) {
@@ -360,10 +347,6 @@ public class GameController {
 		}
 	}
 
-	public void repaint() {
-		// gameFrame.paint(gameFrame.getGraphics());
-	}
-
 	public void resetCharacterPositions() {
 		for (NPC c : currentBackground.getCurrentRoute().getCharacters()) {
 			c.resetPosition();
@@ -379,20 +362,29 @@ public class GameController {
 		mainCharacter.setCharacterImage("talih", "front");
 		mainCharacter.setName("Talih");
 		mainCharacter.setID("999");
-		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("eigenes_zimmer"));
-		mainCharacter.setCurrentPosition(5, 4);
+		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("haddonfield"));
+		mainCharacter.setCurrentPosition(25, 20);
 
 		mainCharacter.getItems().put(Item.POKEBALL, 5 * 99);
 		mainCharacter.getItems().put(Item.POTION, 10);
 
-		 mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("eigenes_zimmer"));
-		 mainCharacter.setCurrentPosition(START.x, START.y);
+		mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("eigenes_zimmer"));
+		mainCharacter.setCurrentPosition(START.x, START.y);
 		currentBackground = new Background(mainCharacter.getCurrentRoute());
 
 		Pokemon player = new Pokemon(152);
 		player.getStats().generateStats((short) 5);
 
 		player.setName("Mandarine");
+		for(Stat s : Stat.values()) {
+			switch(s) {
+			case ACCURACY:
+			case EVASION:
+				continue;
+			default: 
+				player.getStats().setDV(s, 31);
+			}
+		}
 
 		mainCharacter.getTeam().addPokemon(player);
 
@@ -419,14 +411,12 @@ public class GameController {
 				gameFrame = new GameFrame();
 			}
 			gameFrame.getBackgroundLabel().changeRoute(currentBackground.getCurrentRoute());
-			this.repaint();
 			return true;
 		}
 		return false;
 	}
 
 	public void waitDialogue() {
-//		gameFrame.setActive();
 		gameFrame.getDialogue().waitText();
 	}
 
@@ -477,7 +467,6 @@ public class GameController {
 		}
 		this.gameFrame.setCurrentPanel(this.gameFrame.getReportPanel());
 		((ReportPanel) this.gameFrame.getReportPanel()).setPokemon(pokemon, others, this.gameFrame.getPokemonPanel());
-		this.repaint();
 	}
 
 	public void setInteractionPause(boolean b) {

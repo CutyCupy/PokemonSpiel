@@ -85,7 +85,6 @@ public class RouteAnalyzer {
 	}
 
 	public void init() {
-		System.out.println("init");
 		readAllSprites();
 		readAllTerrains();
 		readAllPokeballs();
@@ -93,16 +92,6 @@ public class RouteAnalyzer {
 		readAllItems();
 		readAllRoutes();
 		readAllAnimations();
-
-		// for (String s : loadedRoutes.keySet()) {
-		// System.out.println("Loaded: " + loadedRoutes.get(s).getName());
-		// }
-
-		HashMap<Integer, HashSet<String>> locations = getAllPokemonLocations();
-		for (int i = 1; i < 650; i++) {
-			if (!locations.get(i).isEmpty())
-				System.out.println(gController.getInformation().getName(i) + " - " + locations.get(i));
-		}
 
 	}
 
@@ -251,7 +240,6 @@ public class RouteAnalyzer {
 					currentRoute.setSnow(null);
 				}
 				ArrayList<Warp> warps = new ArrayList<Warp>();
-				// ArrayList<NPC> characters = new ArrayList<NPC>();
 				ArrayList<NPC> stones = new ArrayList<NPC>();
 				HashMap<String, ArrayList<Point>> events = new HashMap<String, ArrayList<Point>>();
 				HashMap<String, ArrayList<Entity>> pokemonPools = new HashMap<>();
@@ -679,7 +667,7 @@ public class RouteAnalyzer {
 									currentString);
 							pokemons.add((PokemonEntity) currentEntity);
 						} else if (currentString.startsWith("TRIGGERED")) {
-							currentEntity = new Entity(currentRoute, true, "warp", 0, currentRoute.getTerrainName());
+							currentEntity = new Entity(currentRoute, true, "free", 0, currentRoute.getTerrainName());
 							ArrayList<Point> temp = events.get(currentString);
 							if (temp == null) {
 								temp = new ArrayList<Point>();
@@ -879,7 +867,6 @@ public class RouteAnalyzer {
 							JsonArray currentStep = step.getAsJsonArray();
 							ArrayList<Change> changes = new ArrayList<Change>();
 							for (JsonElement current : currentStep) {
-//								System.out.println(current);
 								JsonObject j = current.getAsJsonObject();
 								Change currentChange = new Change();
 								currentChange.setParticipant(j.get("character").getAsString());
@@ -1020,8 +1007,6 @@ public class RouteAnalyzer {
 						}
 					}
 				}
-
-				// warps.clear();
 			} catch (Exception e) {
 				e.printStackTrace();
 				continue;

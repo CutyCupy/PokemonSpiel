@@ -30,7 +30,6 @@ public class TextLabel extends JLabel implements Runnable {
 		after = After.NOTHING;
 		isActive = false;
 		text = new ArrayList<String>();
-		//24 chars max length row
 		this.setVisible(true);
 		this.setFont(new Font(Font.MONOSPACED, Font.BOLD, 35));
 		this.setBorder(BorderFactory.createCompoundBorder(new LineBorder(Color.BLACK, 5), new EmptyBorder(2, 10, 2, 10)));

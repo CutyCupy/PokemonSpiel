@@ -37,7 +37,7 @@ public class Entity {
 
 	private boolean water;
 
-	public static final float POKEMON_GRASS_RATE = 0f;
+	public static final float POKEMON_GRASS_RATE = 0.1f;
 
 	private int x;
 	private int y;
@@ -408,7 +408,6 @@ public class Entity {
 								gController.getCurrentBackground().getCurrentRoute().getEntities()[0][1]
 										.setSprite("joyhealing" + (i % (c.getTeam().getAmmount() + 1)));
 								gController.getCurrentBackground().getCurrentRoute().updateMap(new Point(1, 0));
-								// gController.getGameFrame().repaint();
 								if (i == c.getTeam().getAmmount()) {
 									SoundController.getInstance().playSound(SoundController.POKECENTER_HEAL);
 									gController.sleep(1500);
@@ -467,7 +466,6 @@ public class Entity {
 							for (int i = 1; i <= 3; i++) {
 								setSprite("treecut" + i);
 								source.getCurrentRoute().updateMap(source.getInteractionPoint());
-								// gController.getGameFrame().repaint();
 								try {
 									Thread.sleep(100);
 								} catch (InterruptedException e) {
@@ -503,7 +501,6 @@ public class Entity {
 				} else {
 					gController.getGameFrame().addDialogue("Dieser Felsen könnte zertrümmert werden!");
 				}
-				// gController.getGameFrame().repaint();
 			} else {
 				return false;
 			}

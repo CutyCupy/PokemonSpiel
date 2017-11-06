@@ -19,8 +19,6 @@ import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.pokemon.Ailment;
 import de.alexanderciupka.pokemon.pokemon.Item;
 
-//630 * 630
-
 @SuppressWarnings("serial")
 public class PokemonPanel extends JPanel {
 
@@ -39,7 +37,6 @@ public class PokemonPanel extends JPanel {
 		gController = GameController.getInstance();
 		for (int i = 0; i < 6; i++) {
 			PokemonButton pokemonButton = new PokemonButton(gController.getMainCharacter().getTeam().getTeam()[i], i);
-//			pokemonButton.setOpaque(false);
 			pokemonButton.setSize(300, 96);
 			if (i % 2 == 0) {
 				pokemonButton.setLocation(10, 100 + i * 62);
@@ -87,7 +84,6 @@ public class PokemonPanel extends JPanel {
 								}
 							} else {
 								if (source.getIndex() != firstOne) {
-//									source.setBackground(Color.LIGHT_GRAY);
 									if (firstOne != -1) {
 										gController.getMainCharacter().getTeam().swapPokemon(firstOne, source.getIndex());
 										firstOne = -1;
@@ -96,7 +92,6 @@ public class PokemonPanel extends JPanel {
 										firstOne = source.getIndex();
 									}
 								} else {
-//									source.setBackground(Color.WHITE);
 									firstOne = -1;
 								}
 							}
@@ -121,7 +116,6 @@ public class PokemonPanel extends JPanel {
 								} else {
 									if(!gController.getGameFrame().getEvolutionPanel().getPokemon().isEmpty()) {
 										gController.getGameFrame().setCurrentPanel(gController.getGameFrame().getEvolutionPanel());
-//										gController.getGameFrame().repaint();
 										gController.getGameFrame().getEvolutionPanel().start();
 									}
 								}
@@ -132,7 +126,6 @@ public class PokemonPanel extends JPanel {
 								} else {
 									gController.getGameFrame().setCurrentPanel(gController.getGameFrame().getLastPanel(false));
 								}
-//								gController.getGameFrame().repaint();
 								for(PokemonButton p : pokemonButtons) {
 									if(p.getPokemon() != null) {
 										p.setEnabled(true);
@@ -181,7 +174,6 @@ public class PokemonPanel extends JPanel {
 				} else {
 					gController.getGameFrame().setCurrentPanel(gController.getGameFrame().getLastPanel());
 				}
-//				gController.getGameFrame().repaint();
 			}
 		});
 	}

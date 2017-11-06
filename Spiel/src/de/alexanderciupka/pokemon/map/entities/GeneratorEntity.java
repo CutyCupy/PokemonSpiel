@@ -1,5 +1,7 @@
 package de.alexanderciupka.pokemon.map.entities;
 
+import com.google.gson.JsonObject;
+
 import de.alexanderciupka.pokemon.characters.Player;
 import de.alexanderciupka.pokemon.gui.panels.GeneratorPanel;
 import de.alexanderciupka.pokemon.map.Route;
@@ -37,6 +39,30 @@ public class GeneratorEntity extends Entity {
 			this.gController.getGameFrame().setCurrentPanel(gp);
 			gp.start(this);
 		}
+	}
+	
+	@Override
+	public JsonObject getSaveData(Entity entity) {
+		GeneratorEntity origin = (GeneratorEntity) entity;
+		JsonObject saveData = super.getSaveData(entity);
+		if(this.percentage != origin.percentage) {
+			saveData.addProperty("percentage", percentage);
+		}
+		return saveData;
+	}
+	
+	@Override
+	public boolean importSaveData(JsonObject saveData, Entity entity) {
+		if(super.importSaveData(saveData, entity) && entity instanceof ItemEntity) {
+			GeneratorEntity other = (GeneratorEntity) entity;
+			if(saveData.get("percentage") != null) {
+				this.percentage = saveData.get("percentage").getAsDouble();
+			} else {
+				this.percentage = other.percentage;
+			}
+			return true;
+		}
+		return false;
 	}
 
 }

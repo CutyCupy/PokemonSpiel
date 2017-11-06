@@ -126,7 +126,6 @@ public class PokemonEntity extends Entity {
 				gController.waitDialogue();
 			}
 		}
-//		gController.getGameFrame().repaint();
 	}
 
 	public void importRequiredItems(JsonElement je) {

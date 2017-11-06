@@ -229,11 +229,6 @@ public class RouteCreator extends JFrame {
 			horizontal[index].addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					// if(getSelectedButton().getText().equals("Free") ||
-					// getSelectedButton().getText().equals("Tree") ||
-					// getSelectedButton().getText().equals("Grass") ||
-					// getSelectedButton().getText().equals("Sand") ||
-					// getSelectedButton().getText().equals("See")) {
 					for (int y = 0; y < labels.length; y++) {
 						String text = "";
 						for (int i = 0; i < TYPES.length; i++) {
@@ -243,7 +238,6 @@ public class RouteCreator extends JFrame {
 						}
 						labels[y][Integer.parseInt(((JButton) e.getSource()).getName())].setText(text);
 					}
-					// }
 				}
 			});
 		}
@@ -494,7 +488,6 @@ public class RouteCreator extends JFrame {
 			JsonArray characterDetails = new JsonArray();
 			for (NPC n : characters.keySet()) {
 
-				// for(int i = 0; i < characters.size(); i++) {
 				JsonObject currentCharacter = new JsonObject();
 				currentCharacter.addProperty("id", n.getID());
 				currentCharacter.addProperty("x", characters.get(n).x);
@@ -593,8 +586,8 @@ public class RouteCreator extends JFrame {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-//		routeAnalyzer.readRoute(newRoute);
-//		routeAnalyzer.getRouteById(routeID).saveMap();
+		routeAnalyzer.readRoute(newRoute);
+		routeAnalyzer.getRouteById(routeID).saveMap();
 	}
 
 	private void floodFill(String text, boolean[][] visited, int x, int y, int startX, int startY) {

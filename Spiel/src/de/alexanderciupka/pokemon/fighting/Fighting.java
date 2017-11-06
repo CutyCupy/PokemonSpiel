@@ -117,9 +117,6 @@ public class Fighting {
 		} else {
 			if (gController.getFight().attack(enemy, player, enemyMove)) {
 				gController.getFight().attack(player, enemy, playerMove);
-			} else {
-//				gController.getFight().setCurrentFightOption(FightOption.POKEMON);
-				gController.repaint();
 			}
 		}
 		endTurn();
@@ -132,15 +129,13 @@ public class Fighting {
 			if (gController.checkDead(player)) {
 				gController.getGameFrame().getFightPanel().addText(player.getName() + " wurde besiegt!");
 				gController.getGameFrame().getFightPanel().updatePanels();
-				if (!gController.loseFight()) {
-					gController.repaint();
-//					setPlayer();
-				}
+				gController.loseFight();
 			}
 			if (gController.checkDead(enemy)) {
 				gController.getGameFrame().getFightPanel().addText(enemy.getName() + " wurde besiegt!");
-				if (!gController.winFight()) {
-//					gController.getGameFrame().getFightPanel().setEnemy();
+				if(!gController.winFight()) {
+					gController.getGameFrame().getFightPanel().setEnemy();
+					gController.getGameFrame().getFightPanel().updatePanels();
 				}
 			}
 			increaseTurn();
@@ -173,7 +168,6 @@ public class Fighting {
 				gController.getGameFrame().getFightPanel().addText("Die Attacke ging daneben");
 				setRecharge(attacker, false);
 				setVisible(attacker, true);
-				// gController.getGameFrame().getFightPanel().updatePanels();
 			}
 		}
 		gController.getGameFrame().getFightPanel().updatePanels();
@@ -181,10 +175,7 @@ public class Fighting {
 		if (gController.checkDead(player)) {
 			gController.getGameFrame().getFightPanel().addText(player.getName() + " wurde besiegt!");
 			gController.getGameFrame().getFightPanel().updatePanels();
-			if (!gController.loseFight()) {
-				gController.repaint();
-//				setPlayer();
-			}
+			gController.loseFight();
 			dead = true;
 		}
 		if (gController.checkDead(enemy)) {
@@ -197,104 +188,6 @@ public class Fighting {
 		}
 		return !dead;
 	}
-
-	// public boolean playerAttack(Move move) {
-	// String message = player.canAttack();
-	// if (message != null) {
-	// gController.getGameFrame().getFightPanel().addText(message);
-	// gController.getGameFrame().getFightPanel().updatePanels();
-	// return true;
-	// }
-	// gController.getGameFrame().getFightPanel().addText(player.getName() + " setzt
-	// " + move.getName() + " ein!");
-	// if (!playerHit(move)) {
-	// gController.getGameFrame().getFightPanel().addText("Die Attacke ging
-	// daneben");
-	// return true;
-	// }
-	// gController.getGameFrame().getFightPanel().updatePanels();
-	// if (gController.checkEnemyDead()) {
-	// gController.getGameFrame().getFightPanel().addText(enemy.getName() + " wurde
-	// besiegt!");
-	// if (!gController.winFight()) {
-	// gController.getGameFrame().getFightPanel().setEnemy();
-	// }
-	// return false;
-	// } else if (gController.checkPlayerDead()) {
-	// gController.getGameFrame().getFightPanel().addText(player.getName() + " wurde
-	// besiegt!");
-	// gController.getGameFrame().getFightPanel().updatePanels();
-	// if (!gController.loseFight()) {
-	// gController.repaint();
-	// setPlayer();
-	// }
-	// return false;
-	// } else {
-	// if (move.checkStatChange()) {
-	// if (move.checkUserBuff()) {
-	// buff(player, move);
-	// }
-	// if (move.checkEnemyBuff()) {
-	// buff(enemy, move);
-	// }
-	// }
-	// return true;
-	// }
-	// }
-	//
-	// public boolean enemyAttack() {
-	// return enemyAttack(enemy.getMove(this.player));
-	// }
-	//
-	// public boolean enemyAttack(Move move) {
-	// String message = enemy.canAttack();
-	// if (message != null) {
-	// gController.getGameFrame().getFightPanel().addText(message);
-	// gController.getGameFrame().getFightPanel().updatePanels();
-	// return true;
-	// }
-	// gController.getGameFrame().getFightPanel().addText(enemy.getName() + " setzt
-	// " + move.getName() + " ein!");
-	// if (!enemyHit(move)) {
-	// gController.getGameFrame().getFightPanel().addText("Die Attacke ging
-	// daneben");
-	// return true;
-	// }
-	// gController.getGameFrame().getFightPanel().updatePanels();
-	// if (gController.checkPlayerDead()) {
-	// gController.getGameFrame().getFightPanel().addText(player.getName() + " wurde
-	// besiegt!");
-	// gController.getGameFrame().getFightPanel().updatePanels();
-	// if (!gController.loseFight()) {
-	// gController.repaint();
-	// setPlayer();
-	// }
-	// return false;
-	// } else if (gController.checkEnemyDead()) {
-	// gController.getGameFrame().getFightPanel().addText(enemy.getName() + " wurde
-	// besiegt!");
-	// gController.getGameFrame().getFightPanel()
-	// .addText(player.getName() + " erhält " + (int) ((enemy.getStats().getLevel()
-	// * 1.25 * 100) / 7));
-	// gController.getGameFrame().getFightPanel().updatePanels();
-	// if (!gController.winFight()) {
-	// enemy = gController.getFight().getEnemy();
-	// gController.getGameFrame().getFightPanel().setEnemy();
-	// }
-	// return false;
-	// } else {
-	// if (move.checkStatChange()) {
-	// if (move.checkUserBuff()) {
-	// buff(enemy, move);
-	// }
-	// if (move.checkEnemyBuff()) {
-	// buff(player, move);
-	// }
-	// }
-	//
-	// return true;
-	// }
-	// }
 
 	public boolean hit(Pokemon attacker, Pokemon defender, Move move) {
 		boolean stop = false;
@@ -358,64 +251,6 @@ public class Fighting {
 		}
 		return false;
 	}
-
-	// public boolean playerHit(Move playerMove) {
-	// double hitChance = playerMove.getAccuracy() *
-	// (player.getStats().getFightStats().get(Stat.ACCURACY)
-	// / enemy.getStats().getFightStats().get(Stat.EVASION));
-	// playerMove.reducePP();
-	// if (rng.nextFloat() * 100 < hitChance && playerMove.getCurrentPP() > 0) {
-	// int hits = rng.nextInt(playerMove.getMaxHits() - playerMove.getMinHits() + 1)
-	// + playerMove.getMinHits();
-	// switch(playerMove.getTarget()) {
-	// case ALL:
-	// damageCalculation(player, enemy, playerMove, hits);
-	// damageCalculation(player, player, playerMove, hits);
-	// break;
-	// case OPPONENT:
-	// damageCalculation(player, enemy, playerMove, hits);
-	// break;
-	// case USER:
-	// damageCalculation(player, player, playerMove, hits);
-	// break;
-	// default:
-	// break;
-	//
-	// }
-	// gController.sleep(150);
-	// return true;
-	// }
-	// return false;
-	// }
-	//
-	// public boolean enemyHit(Move enemyMove) {
-	// double hitChance = enemyMove.getAccuracy() *
-	// (enemy.getStats().getFightStats().get(Stat.ACCURACY)
-	// / player.getStats().getFightStats().get(Stat.EVASION));
-	// enemyMove.reducePP();
-	// if (enemyMove.getAccuracy() > 100 || rng.nextFloat() * 100 < hitChance &&
-	// enemyMove.getCurrentPP() > 0) {
-	// int hits = rng.nextInt(enemyMove.getMaxHits() - enemyMove.getMinHits() + 1) +
-	// enemyMove.getMinHits();
-	// switch(enemyMove.getTarget()) {
-	// case ALL:
-	// damageCalculation(enemy, player, enemyMove, hits);
-	// damageCalculation(enemy, enemy, enemyMove, hits);
-	// break;
-	// case OPPONENT:
-	// damageCalculation(enemy, player, enemyMove, hits);
-	// break;
-	// case USER:
-	// damageCalculation(enemy, enemy, enemyMove, hits);
-	// break;
-	// default:
-	// break;
-	//
-	// }
-	// return true;
-	// }
-	// return false;
-	// }
 
 	public void buff(Pokemon pokemon, Move move) {
 		for (Stat s : Stat.values()) {
@@ -640,10 +475,6 @@ public class Fighting {
 	private void setPlayer() {
 		this.player = playerTeam.getTeam()[0];
 		this.player.startFight();
-//		participants.add(player);
-//		if(gController.getGameFrame().getFightPanel() != null) {
-//			gController.getGameFrame().getFightPanel().addText("Los " + this.player.getName() + "!");
-//		}
 		this.visible = new SimpleEntry<Boolean, Boolean>(true, this.visible.getValue());
 		gController.updateFight();
 	}
@@ -654,12 +485,6 @@ public class Fighting {
 		if(participants == null) {
 			participants = new HashSet<>();
 		}
-//		if(enemyCharacter != null) {
-//			if(gController.getGameFrame().getFightPanel() != null) {
-//				gController.getGameFrame().getFightPanel().addText(
-//						enemyCharacter.getName() + " setzt " + this.enemy.getName() + " ein!");
-//			}
-//		}
 		participants.clear();
 		participants.add(player);
 		this.visible = new SimpleEntry<Boolean, Boolean>(this.visible.getKey(), true);
@@ -670,9 +495,6 @@ public class Fighting {
 		return enemy;
 	}
 
-	/**
-	 * @return false if player has another Pokemon
-	 */
 	public boolean playerDead() {
 		participants.remove(player);
 		if (playerTeam.getFirstFightPokemon() == null) {
@@ -689,9 +511,6 @@ public class Fighting {
 		return false;
 	}
 
-	/**
-	 * @return false if enemy has another Pokemon
-	 */
 	public boolean enemyDead() {
 		gController.getGameFrame().getFightPanel().removeEnemy();
 		if (enemyTeam.getFirstFightPokemon() == null) {

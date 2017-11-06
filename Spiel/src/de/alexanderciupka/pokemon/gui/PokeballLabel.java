@@ -18,8 +18,6 @@ public class PokeballLabel extends JLabel {
 
 	private Item ball;
 	private BufferedImage image;
-	private GameController gController;
-
 	private static HashMap<Integer, Integer> coordinates;
 
 	private int x;
@@ -28,7 +26,7 @@ public class PokeballLabel extends JLabel {
 	private double degree;
 
 	public PokeballLabel() {
-		gController = GameController.getInstance();
+		GameController.getInstance();
 		setBounds(0, 0, GameFrame.FRAME_SIZE, GameFrame.FRAME_SIZE);
 
 		if(coordinates == null) {

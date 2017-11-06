@@ -51,7 +51,6 @@ public class CollapseOverlay extends Overlay {
 	public void update(int visionSize) {
 		this.visionSize = visionSize;
 		createOverlay();
-//		parent.repaint();
 	}
 
 	public int getVisionSize() {
@@ -74,7 +73,6 @@ public class CollapseOverlay extends Overlay {
 				while(visionSize != 0) {
 					visionSize = visionSize - stepSize > 0 ? visionSize - stepSize : 0;
 					update(visionSize);
-//					parent.repaint();
 					try {
 						Thread.sleep(pause);
 					} catch (InterruptedException e) {
@@ -82,7 +80,6 @@ public class CollapseOverlay extends Overlay {
 					}
 				}
 				finished = true;
-//				parent.repaint();
 			}
 		}).start();
 	}

@@ -72,8 +72,7 @@ public class HatchEntity extends Entity {
 				}
 			}
 		}
-//		return done >= this.minimum;
-		return true;
+		return done >= this.minimum;
 	}
 
 	@Override

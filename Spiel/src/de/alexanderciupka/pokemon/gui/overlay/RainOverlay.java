@@ -37,6 +37,8 @@ public class RainOverlay extends Overlay {
 			this.fog = new FogOverlay(parent, size, FogType.MIST);
 			this.fog.createOverlay();
 			break;
+		default:
+			break;
 		}
 	}
 

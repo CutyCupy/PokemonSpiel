@@ -62,10 +62,10 @@ public class NPC extends Character {
 		case LEFT:
 			setCurrentDirection(de.alexanderciupka.pokemon.characters.Direction.RIGHT);
 			break;
+		default:
+			return;
 		}
 		currentRoute.updateMap(currentPosition);
-		// gController.sleep(50);
-		// gController.repaint();
 	}
 
 	public void setBeforeFightDialogue(String dialog) {
@@ -119,6 +119,8 @@ public class NPC extends Character {
 				}
 				y = -1;
 				break;
+			default:
+				return false;
 			}
 			for (int i = 1; i < 5; i++) {
 				if (currentPosition.x + (i * x) == mainX && currentPosition.y + (i * y) == mainY) {
@@ -141,9 +143,10 @@ public class NPC extends Character {
 			case UP:
 				gController.getMainCharacter().setCurrentDirection(Direction.DOWN);
 				break;
+			default:
+				break;
 			}
 			gController.getGameFrame().getBackgroundLabel().spotted(this);
-			// gController.getGameFrame().repaint();
 			while (!(currentPosition.x + x == mainX && currentPosition.y + y == mainY)) {
 				currentRoute.updateMap(currentPosition);
 				this.changePosition(this.getCurrentDirection(), true);

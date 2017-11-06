@@ -66,7 +66,6 @@ public class Camera {
 			for (double i = 0; i < pathLength; i += .1) {
 				this.x += xChange;
 				this.y += yChange;
-				// gController.getGameFrame().repaint();
 				try {
 					Thread.sleep(20);
 				} catch (InterruptedException e) {
@@ -77,7 +76,6 @@ public class Camera {
 		this.x = x;
 		this.y = y;
 		moving = false;
-		// gController.getGameFrame().repaint();
 	}
 
 	public Route getRoute() {

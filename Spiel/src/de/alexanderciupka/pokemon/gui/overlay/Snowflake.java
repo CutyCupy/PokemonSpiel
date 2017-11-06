@@ -14,7 +14,7 @@ public class Snowflake {
 	
 	private double speed;
 
-	public static Color COLOR = Color.WHITE; //new Color(255, 255, 255);
+	public static Color COLOR = Color.WHITE;
 	
 	private Random rng;
 	

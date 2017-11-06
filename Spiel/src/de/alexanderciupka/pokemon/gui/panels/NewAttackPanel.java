@@ -88,11 +88,9 @@ public class NewAttackPanel extends JPanel {
 					public void run() {
 						if(gController.isFighting()) {
 							gController.getFight().setCurrentFightOption(FightOption.FIGHT);
-							gController.repaint();
 							gController.getGameFrame().getFightPanel().addText(pokemon.getName() + " hat " + newMove.getName() + " nicht erlernt!");
 						} else {
 							gController.getGameFrame().setCurrentPanel(gController.getGameFrame().getLastPanel());
-							gController.repaint();
 							gController.getGameFrame().addDialogue(pokemon.getName() + " hat " + newMove.getName() + " nicht erlernt!");
 							gController.waitDialogue();
 						}
@@ -161,8 +159,6 @@ public class NewAttackPanel extends JPanel {
 		idLabel.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		idLabel.setBounds(50, 83, 60, 25);
 		add(idLabel);
-
-		//TODO: Description
 
 		firstTypeLabel = new TypeLabel();
 		firstTypeLabel.setLocation(120, 83);
@@ -301,25 +297,23 @@ public class NewAttackPanel extends JPanel {
 		updateMoves();
 		Stats stats = this.pokemon.getStats();
 
-		//Pokemon Data
 		this.pokemonLabel.setIcon(new ImageIcon(Painting.toBufferedImage(this.pokemon.getSpriteFront()).getScaledInstance(150, 150, Image.SCALE_SMOOTH)));
 		this.nameLabel.setText("Name: " + this.pokemon.getName());
 		this.idLabel.setText("ID: " + this.pokemon.getId());
 		this.firstTypeLabel.setType(this.pokemon.getTypes()[0]);
 		this.secondTypeLabel.setType(this.pokemon.getTypes()[1]);
 
-		//XP
 		this.xpLabel.setText(stats.getCurrentXP() + " / " + stats.getLevelUpXP());
 		this.xpBar.setMaximum(stats.getLevelUpXP());
 		this.xpBar.setValue(stats.getCurrentXP());
 		this.levelLabel.setText("Level: " + stats.getLevel());
-		//KP
+
 		this.kpLabel.setText(stats.getCurrentHP() + " / " + stats.getStats().get(Stat.HP));
 		this.hpBar.setMaximum(stats.getStats().get(Stat.HP));
 		this.hpBar.setValue(stats.getCurrentHP());
 		this.hpBar.setForeground(stats.getHPColor());
 		this.ailmentLabel.setAilment(this.pokemon.getAilment());
-		//Stats
+
 		for(int i = 0; i < Stat.values().length - 3; i++) {
 			this.stats[i].setText(Stat.values()[i].getText() + ": " + stats.getStats().get(Stat.values()[i]));
 		}

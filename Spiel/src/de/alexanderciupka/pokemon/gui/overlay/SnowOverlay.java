@@ -27,6 +27,8 @@ public class SnowOverlay extends Overlay {
 			this.fog = new FogOverlay(parent, size, FogType.MIST);
 			this.fog.createOverlay();
 			break;
+		default:
+			break;
 		}
 	}
 

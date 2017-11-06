@@ -93,8 +93,6 @@ public class PC {
 
 	public void importSaveData(JsonArray data) {
 		reset();
-
-
 		for(int i = 0; i < data.size(); i++) {
 			JsonObject currentBox = data.get(i).getAsJsonObject();
 			this.boxes.get(i).setName(currentBox.get("name").getAsString());

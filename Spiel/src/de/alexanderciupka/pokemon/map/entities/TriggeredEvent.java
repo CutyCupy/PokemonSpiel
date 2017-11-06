@@ -44,7 +44,6 @@ public class TriggeredEvent {
 	}
 
 	public void startEvent(Player source) {
-//		triggered = true;
 		if(!triggered) {
 			triggered = true;
 			while(gController.getInteractionPause()) {
@@ -110,7 +109,6 @@ public class TriggeredEvent {
 							currentChar.setCurrentDirection(currentChanges[c].getDirection());
 						}
 					}
-//					gController.getGameFrame().repaint();
 				}
 				if(max == 0) {
 					for(int c = 0; c < currentChanges.length; c++) {
@@ -120,7 +118,6 @@ public class TriggeredEvent {
 							currentChar.setCurrentDirection(currentChanges[c].getDirection());
 						}
 					}
-//					gController.getGameFrame().repaint();
 				}
 				for(int j = 0; j < currentChanges.length; j++) {
 					currentChar = currentChanges[j].getCharacter();
@@ -185,7 +182,6 @@ public class TriggeredEvent {
 					if(currentChanges[j].isFight() && currentChar instanceof NPC && currentChar.isTrainer() && !currentChar.isDefeated()) {
 						NPC enemy = (NPC) currentChar;
 						gController.startFight(enemy);
-//						gController.getGameFrame().repaint();
 						do {
 							Thread.yield();
 						} while(gController.isFighting());
@@ -235,7 +231,6 @@ public class TriggeredEvent {
 							}
 							triggered = false;
 							gController.setInteractionPause(false);
-//							gController.getGameFrame().repaint();
 							return;
 						}
 						try {
@@ -246,15 +241,7 @@ public class TriggeredEvent {
 					}
 				}
 				for(int j = 0; j < currentChanges.length; j++) {
-//					HashMap<Item, Integer> rewards = currentChanges[j].getItem();
 					source.earnRewards(currentChanges[j].getItem(), true);
-//					for(Item currentItem : rewards.keySet()) {
-//						if(rewards.get(currentItem) > 0) {
-//							for(int x = 0; x < rewards.get(currentItem); x++) {
-//							}
-//							gController.getGameFrame().addDialogue("Du hast " + rewards.get(currentItem) + " " + currentItem.getName() + " erhalten!");
-//						}
-//					}
 				}
 				for(int j = 0; j < currentChanges.length; j++) {
 					if(currentChanges[j].getSound() != null) {

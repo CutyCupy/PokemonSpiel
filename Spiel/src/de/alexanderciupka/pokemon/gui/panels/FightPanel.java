@@ -94,8 +94,6 @@ public class FightPanel extends JPanel {
 		super();
 		setLayout(new BorderLayout());
 		gController = GameController.getInstance();
-//		this.enemy = enemy;
-//		this.mine = mine;
 		playerHPBar = new HPBar();
 		enemyHPBar = new HPBar();
 		menu = new JButton[4];
@@ -131,12 +129,6 @@ public class FightPanel extends JPanel {
 				.getEntities()[gController.getMainCharacter().getCurrentPosition().y][gController.getMainCharacter()
 						.getCurrentPosition().x].isWater() ? RouteType.WATER.getBattleBackground()
 								: gController.getMainCharacter().getCurrentRoute().getType().getBattleBackground()));
-		// playerStats.setBorder(
-		// BorderFactory.createCompoundBorder(new LineBorder(Color.BLACK), new
-		// EmptyBorder(2, 10, 2, 10)));
-		// enemyStats.setBorder(
-		// BorderFactory.createCompoundBorder(new LineBorder(Color.BLACK), new
-		// EmptyBorder(2, 10, 2, 10)));
 
 		pokeball.setVisible(false);
 		pokeball.setOpaque(false);
@@ -243,13 +235,13 @@ public class FightPanel extends JPanel {
 
 		background.setBounds(0, 0, 630, 420);
 
-		enemyPokemon.setBounds(395, 100, 160, 160); // 475, 180 mitte
+		enemyPokemon.setBounds(395, 100, 160, 160);
 		enemyStatPanel.setBounds(45, 150, 180, 40);
-		ownPokemon.setBounds(50, 260, 160, 160); // 130, 250
+		ownPokemon.setBounds(50, 260, 160, 160);
 		playerStatPanel.setBounds(375, 275, 180, 40);
 
-		enemyAnimations.setBounds(enemyPokemon.getBounds());//enemyPokemon.getX() - 16, enemyPokemon.getY() - 16, 192, 192);
-		ownAnimations.setBounds(ownPokemon.getBounds());//ownPokemon.getX() - 16, ownPokemon.getY() - 16, 192, 192);
+		enemyAnimations.setBounds(enemyPokemon.getBounds());
+		ownAnimations.setBounds(ownPokemon.getBounds());
 
 		enemyStats.setLocation(0, 0);
 		enemyStats.setSize(enemyStatPanel.getSize());
@@ -312,7 +304,6 @@ public class FightPanel extends JPanel {
 					}
 					back.setVisible(true);
 				}
-//				repaint();
 			}
 		});
 		escape.addActionListener(new ActionListener() {
@@ -326,7 +317,6 @@ public class FightPanel extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				gController.getFight().setCurrentFightOption(FightOption.POKEMON);
 				gController.getGameFrame().getPokemonPanel().update();
-				gController.repaint();
 				enemyAttack = true;
 			}
 		});
@@ -345,8 +335,6 @@ public class FightPanel extends JPanel {
 			moves[i].addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					// if (!attacked && mine.getMoveByName(((JButton)
-					// e.getSource()).getName()).getCurrentPP() > 0) {
 					attacked = true;
 					new Thread(new Runnable() {
 						@Override
@@ -362,40 +350,12 @@ public class FightPanel extends JPanel {
 										return;
 									}
 								}
-								gController.getFight().startRound(playerMove, gController.getInformation().getMoveByName("Donnerwelle"));//enemy.getMove(mine));
-//								Move playerMove = mine.getMoveByName(((JButton) e.getSource()).getName());
-//								if (!playerMove.equals(gController.getFight().canUse(mine, playerMove))) {
-//									addText(mine.getName() + " kann " + playerMove.getName() + " nicht einsetzen!");
-//									if (gController.getFight().canUse(mine, playerMove) == null) {
-//										showMenu();
-//										return;
-//									}
-//								}
-//								Move enemyMove = enemy.getMove(mine);
-//								boolean playerStarts = gController.getFight().isPlayerStart(playerMove, enemyMove);
-//								if (playerStarts) {
-//									if (gController.getFight().attack(mine, enemy, playerMove)) {
-//										gController.getFight().attack(enemy, mine, enemyMove);
-//									} else {
-//									}
-//								} else {
-//									if (gController.getFight().attack(enemy, mine, enemyMove)) {
-//										gController.getFight().attack(mine, enemy, playerMove);
-//									} else {
-//										gController.getFight().setCurrentFightOption(FightOption.POKEMON);
-//										gController.repaint();
-//									}
-//								}
-//								mine.afterTurnDamage();
-//								enemy.afterTurnDamage();
-//								gController.getFight().increaseTurn();
+								gController.getFight().startRound(playerMove, enemy.getMove(mine));
 								updateMoves();
 								showMenu();
-								// attacked = false;
 							} while (!gController.getFight().canChooseAction());
 						}
 					}).start();
-					// }
 				}
 			});
 		}
@@ -404,7 +364,6 @@ public class FightPanel extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				gController.getGameFrame().getInventoryPanel().update(gController.getMainCharacter());
 				gController.getFight().setCurrentFightOption(FightOption.BAG);
-				// gController.getGameFrame().repaint();
 				enemyAttack = true;
 			}
 		});
@@ -458,7 +417,6 @@ public class FightPanel extends JPanel {
 					}
 					if (!gController.getFight().attack(enemy, mine)) {
 						gController.getFight().setCurrentFightOption(FightOption.POKEMON);
-						gController.repaint();
 					}
 					throwPokeball = false;
 					showMenu();
@@ -526,7 +484,6 @@ public class FightPanel extends JPanel {
 			this.textLabel.waitText();
 		}
 		enemyPokemon.setIcon(new ImageIcon(enemy.getSpriteFront()));
-//		gController.getFight().setVisible(this.enemy, true);
 		this.enemyPokemon.setVisible(gController.getFight().isVisible(this.enemy));
 
 		if(playSound) {

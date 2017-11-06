@@ -13,7 +13,6 @@ public class HPBar extends JProgressBar implements Runnable {
 	public static final Color EMPTY = Color.RED;
 
 	private int nextValue = -1;
-	private static final long time = 1;
 	private boolean finished = true;
 	private boolean falling = false;;
 
@@ -72,9 +71,7 @@ public class HPBar extends JProgressBar implements Runnable {
 				}
 			}
 			this.setValue(nextValue, false);
-		} //else if(nextValue >= this.getValue()) {
-//			this.setValue(nextValue);
-//		}
+		}
 		this.falling = false;
 		setFinished(true);
 	}

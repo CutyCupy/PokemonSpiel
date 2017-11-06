@@ -114,7 +114,6 @@ public class ReportPanel extends JPanel {
 				} else {
 					gController.getGameFrame().setCurrentPanel(gController.getGameFrame().getLastPanel());
 				}
-				// GameController.getInstance().getGameFrame().repaint();
 			}
 		});
 		back.setBounds(125, 530, 360, 40);
@@ -279,7 +278,7 @@ public class ReportPanel extends JPanel {
 		previousPokemonB = new JButton();
 		previousPokemonB.setBounds(480, 130, 125, 70);
 		previousPokemonB.setBorder(DEFAULT_BORDER);
-		previousPokemonB.setBackground(new Color(238, 238, 238));// this.getBackground());
+		previousPokemonB.setBackground(new Color(238, 238, 238));
 		this.add(previousPokemonB);
 
 		nextPokemonB = new JButton();
@@ -365,7 +364,6 @@ public class ReportPanel extends JPanel {
 		updateMoves();
 		Stats stats = this.pokemon.getStats();
 
-		// Pokemon Data
 		this.pokemonLabel.setIcon(new ImageIcon(Painting.toBufferedImage(this.pokemon.getSpriteFront())
 				.getScaledInstance(150, 150, Image.SCALE_SMOOTH)));
 		this.nameLabel.setText("Name: " + this.pokemon.getName());
@@ -378,18 +376,16 @@ public class ReportPanel extends JPanel {
 		this.firstTypeLabel.setType(this.pokemon.getTypes()[0]);
 		this.secondTypeLabel.setType(this.pokemon.getTypes()[1]);
 
-		// XP
 		this.xpLabel.setText(stats.getCurrentXP() + " / " + stats.getLevelUpXP());
 		this.xpBar.setMaximum(stats.getLevelUpXP());
 		this.xpBar.setValue(stats.getCurrentXP());
 		this.levelLabel.setText("Level: " + stats.getLevel());
-		// KP
+
 		this.kpLabel.setText(stats.getCurrentHP() + " / " + stats.getStats().get(Stat.HP));
 		this.hpBar.setMaximum(stats.getStats().get(Stat.HP));
 		this.hpBar.setValue(stats.getCurrentHP());
-//		this.hpBar.setForeground(stats.getHPColor());
 		this.ailmentLabel.setAilment(this.pokemon.getAilment());
-		// Stats
+		
 		for (int i = 0; i < this.stats.length; i++) {
 			this.stats[i].setText(Stat.values()[i].getText() + ": " + stats.getStats().get(Stat.values()[i]));
 			if (Stat.values()[i].equals(stats.getNature().getIncrease())) {

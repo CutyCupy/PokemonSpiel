@@ -149,7 +149,6 @@ public class GameFrame extends JFrame {
 		fight.setLayout(null);
 		this.fighting = true;
 		pokemon.update();
-		// repaint();
 		if (!gController.getFight().canEscape()) {
 			this.getFightPanel()
 					.addText("Eine Herausforderung von " + gController.getFight().getEnemyCharacter().getName() + "!");
@@ -157,15 +156,11 @@ public class GameFrame extends JFrame {
 			this.getFightPanel().addText("Ein wildes " + enemy.getName() + " erscheint!");
 		}
 		gController.updateFight();
-//		fight.setEnemy();
-//		fight.setPlayer();
-//		fight.updatePanels();
 	}
 
 	public void stopFight() {
 		gController.waitDialogue();
 		setCurrentPanel(null);
-		// repaint();
 	}
 
 	public FightPanel getFightPanel() {
@@ -206,7 +201,6 @@ public class GameFrame extends JFrame {
 		} else {
 			this.setCurrentPanel(this.newMove);
 		}
-		gController.repaint();
 	}
 
 	public NewAttackPanel getNewAttackPanel() {
@@ -512,7 +506,6 @@ public class GameFrame extends JFrame {
 				if (!gController.isFighting() && !gController.getInteractionPause()) {
 					pokemon.update();
 					currentPanel = pokemon;
-					// repaint();
 				}
 			}
 		});
@@ -524,7 +517,6 @@ public class GameFrame extends JFrame {
 				if (!gController.isFighting() && !gController.getInteractionPause()) {
 					inventory.update(gController.getMainCharacter());
 					currentPanel = inventory;
-					// repaint();
 				}
 			}
 		});
@@ -539,15 +531,6 @@ public class GameFrame extends JFrame {
 				}
 			}
 		});
-
-		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("C"), "cheat");
-		map.getActionMap().put("cheat", new AbstractAction() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				gController.getMainCharacter().ignoreCollisions = !gController.getMainCharacter().ignoreCollisions;
-			}
-		});
-
 	}
 
 	public void displayPC(Player owner) {
@@ -557,7 +540,6 @@ public class GameFrame extends JFrame {
 		this.pc.setPC(owner.getPC());
 		SoundController.getInstance().playSound(SoundController.PC_BOOT, true);
 		this.setCurrentPanel(this.pc.getContentPane());
-		// this.repaint();
 	}
 
 	public JPanel getReportPanel() {

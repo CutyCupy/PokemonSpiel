@@ -23,6 +23,7 @@ import de.alexanderciupka.pokemon.menu.SoundController;
 
 public class GeneratorPanel extends JPanel {
 
+	private static final long serialVersionUID = 7749339076796915860L;
 	private JLabel good;
 	private JLabel great;
 	private JLabel bar;
@@ -61,12 +62,14 @@ public class GeneratorPanel extends JPanel {
 		getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("SPACE"), "space");
 
 		getActionMap().put("space", new AbstractAction() {
+			private static final long serialVersionUID = -4074916340116617809L;
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (bar.isVisible()) {
 					stop = true;
-					int zeigerX = zeiger.getX() + zeiger.getWidth() / 2;// (int) Math.round(zeiger.getX() +
-																		// (zeiger.getWidth() * 1.0) / 2);
+					int zeigerX = zeiger.getX() + zeiger.getWidth() / 2;
+					
 					waitProgressAccess();
 					if (hits(zeigerX, great)) {
 						progress.setValue(Math.min(progress.getValue() + 250, progress.getMaximum()));
@@ -86,6 +89,8 @@ public class GeneratorPanel extends JPanel {
 		getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ESCAPE"), "escape");
 
 		getActionMap().put("escape", new AbstractAction() {
+			private static final long serialVersionUID = 3138663353013351616L;
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				interrupt = true;
@@ -152,8 +157,6 @@ public class GeneratorPanel extends JPanel {
 	}
 
 	public void start(GeneratorEntity generator) {
-
-		generator.setPercentage(90);
 
 		interrupt = false;
 
@@ -234,8 +237,8 @@ public class GeneratorPanel extends JPanel {
 				}
 			}
 
-			int x = getWidth() / 2 - bar.getWidth() / 2;//rng.nextInt(350) + 10;
-			int y = getHeight() / 2 - bar.getHeight() / 2;//rng.nextInt(350) + 10;
+			int x = getWidth() / 2 - bar.getWidth() / 2;
+			int y = getHeight() / 2 - bar.getHeight() / 2;
 			bar.setLocation(x, y);
 			int min = bar.getWidth() / 5;
 			great.setLocation(x + rng.nextInt(bar.getWidth() - min) + min, y);

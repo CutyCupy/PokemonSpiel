@@ -62,7 +62,6 @@ public class Player extends Character {
 				break;
 			}
 		}
-		System.out.println(currentRoute);
 		routeHistory.add(currentRoute.getId());
 		super.setCurrentRoute(currentRoute);
 		if(gController.getGameFrame() != null && this.equals(gController.getCurrentBackground().getCamera().getCenter())) {
@@ -91,7 +90,6 @@ public class Player extends Character {
 		gController.setCurrentRoute(this.getCurrentRoute());
 		team.restoreTeam();
 		gController.getCurrentBackground().getCamera().setCharacter(this, false);
-//		gController.getGameFrame().repaint();
 	}
 
 	public ArrayList<String> getRouteHistory() {
@@ -234,7 +232,6 @@ public class Player extends Character {
 		if(result) {
 			removeItem(i);
 			gController.getGameFrame().setCurrentPanel(null);
-//			gController.getGameFrame().repaint();
 		}
 		gController.waitDialogue();
 		gController.setInteractionPause(false);

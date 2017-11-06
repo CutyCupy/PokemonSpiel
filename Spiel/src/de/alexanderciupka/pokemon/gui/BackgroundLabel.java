@@ -210,9 +210,6 @@ public class BackgroundLabel extends JLabel {
 			r.createOverlay();
 			this.addOverlay(r);
 			waitFrames = 5;
-//			oldX = gController.getCurrentBackground().getCamera().getX();
-//			oldY = gController.getCurrentBackground().getCamera().getY();
-//			repaint();
 		}
 	}
 

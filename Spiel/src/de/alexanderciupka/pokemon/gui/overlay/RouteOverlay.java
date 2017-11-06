@@ -63,10 +63,8 @@ public class RouteOverlay extends Overlay {
 					e.printStackTrace();
 				}
 				finished = true;
-//				parent.repaint();
 			}
 		}).start();
-//		parent.repaint();
 	}
 
 	public Route getRoute() {

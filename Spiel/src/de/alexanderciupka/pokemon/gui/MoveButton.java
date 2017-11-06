@@ -79,6 +79,10 @@ public class MoveButton extends JButton {
 	public Move getMove() {
 		return this.move;
 	}
+	
+	public Pokemon getSource() {
+		return this.source;
+	}
 
 
 }

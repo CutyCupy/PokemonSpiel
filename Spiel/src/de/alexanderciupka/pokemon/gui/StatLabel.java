@@ -18,7 +18,7 @@ public class StatLabel extends JLabel {
 
 	private Pokemon pokemon;
 
-	private static final Font NAME_FONT = new Font(Font.DIALOG, Font.BOLD, 12);//MenuController.importFont("/fonts/pokemon_text.ttf").deriveFont(12f).deriveFont(Font.BOLD);
+	private static final Font NAME_FONT = new Font(Font.DIALOG, Font.BOLD, 12);
 
 	public StatLabel() {
 		setBorder(BorderFactory.createCompoundBorder(new LineBorder(Color.BLACK), new EmptyBorder(2, 10, 2, 10)));

@@ -92,7 +92,6 @@ public class EvolutionPanel extends JPanel {
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
-//					repaint();
 				}
 				pokemonLabel.setLocation(235, 235);
 			}
