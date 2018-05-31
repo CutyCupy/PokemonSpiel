@@ -2,7 +2,7 @@ package de.alexanderciupka.pokemon.gui.overlay;
 
 public enum RainType {
 
-
+	CLEAR(0),
 	NIZZLE(100),
 	HEAVY(1000),
 	STORM(1000);

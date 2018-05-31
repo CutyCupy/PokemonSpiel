@@ -2,8 +2,11 @@ package de.alexanderciupka.pokemon.gui.overlay;
 
 public enum SnowType {
 	
+	CLEAR(0, 0, 0, 0, 0),
 	NIZZLE(100, .1, .5, 1, 15),
 	BLIZZARD(2000, 15, 10, 13, 0);
+	
+	
 	private int snowflakes;
 	private double wind;
 	private double minSpeed;

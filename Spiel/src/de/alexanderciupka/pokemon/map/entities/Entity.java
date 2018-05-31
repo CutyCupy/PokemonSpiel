@@ -11,14 +11,15 @@ import de.alexanderciupka.pokemon.characters.Character;
 import de.alexanderciupka.pokemon.characters.Direction;
 import de.alexanderciupka.pokemon.characters.NPC;
 import de.alexanderciupka.pokemon.characters.Player;
+import de.alexanderciupka.pokemon.exceptions.InvalidEntityDataException;
 import de.alexanderciupka.pokemon.gui.overlay.DarkOverlay;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.map.Route;
+import de.alexanderciupka.pokemon.map.RouteAnalyzer;
 import de.alexanderciupka.pokemon.map.Warp;
 import de.alexanderciupka.pokemon.menu.SoundController;
 import de.alexanderciupka.pokemon.pokemon.Item;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
-import de.alexanderciupka.pokemon.pokemon.PokemonPool;
 
 public class Entity {
 
@@ -48,9 +49,15 @@ public class Entity {
 	private Random rng;
 	protected GameController gController;
 
-	private PokemonPool pokemonPool;
+	// private PokemonPool pokemonPool;
+	private int pokemonPool;
 	private TriggeredEvent event;
 	private Route parent;
+
+	public Entity(Route currentRoute) {
+		gController = GameController.getInstance();
+		this.parent = currentRoute;
+	}
 
 	public Entity(String parentID, boolean left, boolean right, boolean top, boolean bottom, String spriteName,
 			float pokemonRate, String terrainName) {
@@ -188,14 +195,19 @@ public class Entity {
 	}
 
 	public boolean checkPokemon() {
-		if (pokemonRate > 0 && ((this.pokemonPool != null && this.pokemonPool.getPokemonPool().size() > 0)
-				|| (gController.getMainCharacter().getCurrentRoute().getPokemonPool() != null && gController
-						.getMainCharacter().getCurrentRoute().getPokemonPool().getPokemonPool().size() > 0))) {
-			if (rng.nextFloat() <= pokemonRate) {
-				return true;
-			}
+		if (pokemonRate > 0 && this.parent.getPoolById(pokemonPool) != null
+				&& this.parent.getPoolById(pokemonPool).getPokemonPool().size() > 0) {
+			return true;
 		}
 		return false;
+	}
+
+	public float getEncounterRate() {
+		return this.pokemonRate;
+	}
+
+	public void setEncounterRate(float f) {
+		this.pokemonRate = f;
 	}
 
 	public boolean startWarp(Character c) {
@@ -212,7 +224,7 @@ public class Entity {
 						.setNewRoute(c.getCurrentRoute().getId());
 			}
 			if (c instanceof Player) {
-				if(c.equals(gController.getCurrentBackground().getCamera().getCenter())) {
+				if (c.equals(gController.getCurrentBackground().getCamera().getCenter())) {
 					gController.resetCharacterPositions();
 					gController.setCurrentRoute(gController.getRouteAnalyzer().getRouteById(warp.getNewRoute()));
 				}
@@ -311,11 +323,11 @@ public class Entity {
 		return exactY;
 	}
 
-	public PokemonPool getPokemonPool() {
+	public int getPokemonPool() {
 		return pokemonPool;
 	}
 
-	public void setPokemonPool(PokemonPool pokemonPool) {
+	public void setPokemonPool(int pokemonPool) {
 		this.pokemonPool = pokemonPool;
 	}
 
@@ -353,8 +365,8 @@ public class Entity {
 		} else if (!c.isEvent() && c instanceof Player && !((Player) c).isProtected() && checkPokemon()) {
 			if (!this.gController.isFighting()) {
 				Pokemon encounter = null;
-				if (this.pokemonPool != null) {
-					encounter = this.pokemonPool.getEncounter();
+				if (this.parent.getPoolById(pokemonPool) != null) {
+					encounter = this.parent.getPoolById(pokemonPool).getEncounter();
 				}
 				if (encounter == null) {
 					encounter = gController.getCurrentBackground().chooseEncounter();
@@ -422,7 +434,7 @@ public class Entity {
 					if (character.getName().equals("Maria") && character.getCurrentRoute().getId().equals("zuhause")) {
 						c.getTeam().restoreTeam();
 					}
-					if(character.hasRewards()) {
+					if (character.hasRewards()) {
 						c.earnRewards(character.getRewards(), true);
 						character.getRewards().clear();
 					}
@@ -609,6 +621,22 @@ public class Entity {
 		clone.x = this.x;
 		clone.y = this.y;
 		return clone;
+	}
+
+	public void load(JsonObject data) throws InvalidEntityDataException {
+		final String[] MUST_HAVES = new String[] { "terrain", "sprite", "accessible", "encounter_rate" };
+		if (RouteAnalyzer.getWrongMember(data, MUST_HAVES) != null) {
+			throw new InvalidEntityDataException(this, RouteAnalyzer.getWrongMember(data, MUST_HAVES));
+		}
+
+		setTerrain(data.get("terrain").getAsString());
+		setSprite(data.get("sprite").getAsString());
+		setAccessible(data.get("accessible").getAsBoolean());
+
+		if (data.has("pool")) {
+			setPokemonPool(data.get("pool").getAsInt());
+		}
+
 	}
 
 	public JsonObject getSaveData(Entity entity) {

@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -206,6 +207,53 @@ public class RouteAnalyzer {
 
 	public void readRoute(String name) {
 		readRoute(new File(this.getClass().getResource("/routes/" + name + ".route").getFile()));
+	}
+	
+	
+	
+	public void temp(File file) {
+		/**
+		 * TODO: Completely new Route saving.
+		 * File format will be JSON.
+		 * Height and weight wont be a parameter
+		 * 	-> Dynamically calculated while reading the file
+		 * Split the terrain and the sprite
+		 * 	-> e.g.: "1.1":{"terrain":"snow", "sprite":"chair_up", "accessible":true, 
+		 * 			        "pool":1, "encounterRate":0.1}
+		 * 
+		 * 	-> No "default" Terrain.
+		 * Warps etc. will no longer be part of the Entity details
+		 * 	-> Locations of special events will be declared in the details of this event (end of file)
+		 * 
+		 * 
+		 * Add trainer movement
+		 * 	-> Spinners
+		 * 	-> Walking trainer
+		 */
+		for(int counter = 0; counter < 2; counter++) {
+			try {
+				currentReader = new BufferedReader(new FileReader(file));
+			} catch (FileNotFoundException e) {
+				return;
+			}
+			Route currentRoute = new Route();
+			String routeID = file.getName().split("\\.")[0];
+			try {
+				JsonObject route = parser.parse(currentReader).getAsJsonObject();
+				currentRoute.setId(routeID);
+				currentRoute.loadRouteData(route.get("details").getAsJsonObject()); //Route properties + Entities
+				currentRoute.loadExtras(route.get("extras").getAsJsonObject()); //warps, characters, pools, etc.
+			} catch (Exception e) {
+				e.printStackTrace();
+				continue;
+			}
+			if (counter == 0) {
+				currentRoute.createMap();
+				loadedRoutes.put(routeID, currentRoute);
+			} else {
+				originalRoutes.put(routeID, currentRoute);
+			}
+		}
 	}
 
 	public void readRoute(File file) {
@@ -1167,5 +1215,14 @@ public class RouteAnalyzer {
 			}
 		}
 	}
-
+	
+	public static String getWrongMember(JsonObject data, String[] members) {
+		for(String member : members) {
+			if(!data.has(member)) {
+				return member;
+			}
+		}
+		return null;
+	}
+	
 }
