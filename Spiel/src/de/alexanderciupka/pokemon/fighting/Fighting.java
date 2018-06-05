@@ -26,6 +26,7 @@ public class Fighting {
 	private Team enemyTeam;
 	private Pokemon enemy;
 	private FightOption currentFightOption;
+	private Field field;
 	private Character enemyCharacter;
 	private HashSet<Pokemon> participants;
 	private Random rng;
@@ -42,58 +43,63 @@ public class Fighting {
 	public boolean won;
 
 	public Fighting(Pokemon pokemonTwo) {
-		init();
-		playerTeam = new Team(gController.getMainCharacter().getTeam().getTeam(), gController.getMainCharacter());
-		this.player = playerTeam.getFirstFightPokemon();
-		enemyTeam = new Team(null);
-		enemyTeam.addPokemon(pokemonTwo);
+		this.init();
+		this.playerTeam = new Team(this.gController.getMainCharacter().getTeam().getTeam(),
+				this.gController.getMainCharacter());
+		this.player = this.playerTeam.getFirstFightPokemon();
+		this.enemyTeam = new Team(null);
+		this.enemyTeam.addPokemon(pokemonTwo);
 		this.enemy = pokemonTwo;
-		escape = true;
-		getStartPokemon();
-		player.startFight();
-		enemy.startFight();
+		this.escape = true;
+		this.getStartPokemon();
+		this.player.startFight();
+		this.enemy.startFight();
+		this.field = new Field(this.gController.getMainCharacter().getCurrentRoute().getWeather());
 	}
 
 	public Fighting(Character enemyCharacter) {
-		init();
+		this.init();
 		this.enemyCharacter = enemyCharacter;
-		playerTeam = new Team(gController.getMainCharacter().getTeam().getTeam(), gController.getMainCharacter());
-		this.player = playerTeam.getFirstFightPokemon();
-		enemyTeam = new Team(enemyCharacter.getTeam().getTeam(), enemyCharacter);
-		this.enemy = enemyTeam.getFirstFightPokemon();
-		escape = false;
-		getStartPokemon();
-		player.startFight();
-		enemy.startFight();
+		this.playerTeam = new Team(this.gController.getMainCharacter().getTeam().getTeam(),
+				this.gController.getMainCharacter());
+		this.player = this.playerTeam.getFirstFightPokemon();
+		this.enemyTeam = new Team(enemyCharacter.getTeam().getTeam(), enemyCharacter);
+		this.enemy = this.enemyTeam.getFirstFightPokemon();
+		this.escape = false;
+		this.getStartPokemon();
+		this.player.startFight();
+		this.enemy.startFight();
+		this.field = new Field(this.gController.getMainCharacter().getCurrentRoute().getWeather());
 	}
 
 	private void init() {
-		lastMoves = new HashMap<>();
-		chargeMoves = new HashMap<>();
-		needsRecharge = new HashMap<>();
-		turn = 0;
-		gController = GameController.getInstance();
-		rng = new Random();
-		currentFightOption = FightOption.FIGHT;
-		participants = new HashSet<Pokemon>();
+		this.lastMoves = new HashMap<>();
+		this.chargeMoves = new HashMap<>();
+		this.needsRecharge = new HashMap<>();
+		this.turn = 0;
+		this.gController = GameController.getInstance();
+		this.rng = new Random();
+		this.currentFightOption = FightOption.FIGHT;
+		this.participants = new HashSet<Pokemon>();
 		this.visible = new SimpleEntry<Boolean, Boolean>(true, true);
 
 	}
 
 	private void getStartPokemon() {
-		player = playerTeam.getFirstFightPokemon();
-		sendOut(playerTeam.getIndex(player));
+		this.player = this.playerTeam.getFirstFightPokemon();
+		this.sendOut(this.playerTeam.getIndex(this.player));
 	}
 
 	public boolean isPlayerStart(Move playerMove, Move enemyMove) {
 		if (playerMove.getPriority() > enemyMove.getPriority()) {
 			return true;
 		} else if (playerMove.getPriority() == enemyMove.getPriority()) {
-			if (player.getStats().getFightStats().get(Stat.SPEED) > enemy.getStats().getFightStats().get(Stat.SPEED)) {
-				return true;
-			} else if (player.getStats().getFightStats().get(Stat.SPEED) == enemy.getStats().getFightStats()
+			if (this.player.getStats().getFightStats().get(Stat.SPEED) > this.enemy.getStats().getFightStats()
 					.get(Stat.SPEED)) {
-				return rng.nextBoolean();
+				return true;
+			} else if (this.player.getStats().getFightStats().get(Stat.SPEED) == this.enemy.getStats().getFightStats()
+					.get(Stat.SPEED)) {
+				return this.rng.nextBoolean();
 			} else {
 				return false;
 			}
@@ -104,85 +110,85 @@ public class Fighting {
 
 	public void startRound(Move playerMove, Move enemyMove) {
 		if (playerMove == null) {
-			playerMove = gController.getInformation().getMoveByName("Verzweifler");
+			playerMove = this.gController.getInformation().getMoveByName("Verzweifler");
 		}
 		if (enemyMove == null) {
-			enemyMove = gController.getInformation().getMoveByName("Verzweifler");
+			enemyMove = this.gController.getInformation().getMoveByName("Verzweifler");
 		}
-		boolean playerStarts = gController.getFight().isPlayerStart(playerMove, enemyMove);
+		boolean playerStarts = this.gController.getFight().isPlayerStart(playerMove, enemyMove);
 		if (playerStarts) {
-			if (gController.getFight().attack(player, enemy, playerMove)) {
-				gController.getFight().attack(enemy, player, enemyMove);
+			if (this.gController.getFight().attack(this.player, this.enemy, playerMove)) {
+				this.gController.getFight().attack(this.enemy, this.player, enemyMove);
 			}
 		} else {
-			if (gController.getFight().attack(enemy, player, enemyMove)) {
-				gController.getFight().attack(player, enemy, playerMove);
+			if (this.gController.getFight().attack(this.enemy, this.player, enemyMove)) {
+				this.gController.getFight().attack(this.player, this.enemy, playerMove);
 			}
 		}
-		endTurn();
+		this.endTurn();
 	}
 
 	public void endTurn() {
-		if (gController.isFighting()) {
-			player.afterTurnDamage();
-			enemy.afterTurnDamage();
-			if (gController.checkDead(player)) {
-				gController.getGameFrame().getFightPanel().addText(player.getName() + " wurde besiegt!");
-				gController.getGameFrame().getFightPanel().updatePanels();
-				gController.loseFight();
+		if (this.gController.isFighting()) {
+			this.player.afterTurnDamage();
+			this.enemy.afterTurnDamage();
+			if (this.gController.checkDead(this.player)) {
+				this.gController.getGameFrame().getFightPanel().addText(this.player.getName() + " wurde besiegt!");
+				this.gController.getGameFrame().getFightPanel().updatePanels();
+				this.gController.loseFight();
 			}
-			if (gController.checkDead(enemy)) {
-				gController.getGameFrame().getFightPanel().addText(enemy.getName() + " wurde besiegt!");
-				if(!gController.winFight()) {
-					gController.getGameFrame().getFightPanel().setEnemy();
-					gController.getGameFrame().getFightPanel().updatePanels();
+			if (this.gController.checkDead(this.enemy)) {
+				this.gController.getGameFrame().getFightPanel().addText(this.enemy.getName() + " wurde besiegt!");
+				if (!this.gController.winFight()) {
+					this.gController.getGameFrame().getFightPanel().setEnemy();
+					this.gController.getGameFrame().getFightPanel().updatePanels();
 				}
 			}
-			increaseTurn();
+			this.increaseTurn();
 		}
 	}
 
 	public boolean attack(Pokemon attacker, Pokemon defender) {
-		return attack(attacker, defender, attacker.getMove(defender));
+		return this.attack(attacker, defender, attacker.getMove(defender));
 	}
 
 	public boolean attack(Pokemon attacker, Pokemon defender, Move move) {
-		if(!this.gController.isFighting()) {
+		if (!this.gController.isFighting()) {
 			return true;
 		}
 		if (this.needsRecharge(attacker)) {
-			gController.getGameFrame().getFightPanel().addText(attacker.getName() + " muss sich erholen.");
+			this.gController.getGameFrame().getFightPanel().addText(attacker.getName() + " muss sich erholen.");
 			this.setRecharge(attacker, false);
 			return true;
 		}
 		String message = attacker.canAttack();
 		if (message != null) {
-			gController.getGameFrame().getFightPanel().addText(message);
+			this.gController.getGameFrame().getFightPanel().addText(message);
 			this.setVisible(attacker, true);
 			this.chargeMoves.put(attacker, null);
 		} else {
 			this.lastMoves.put(attacker, move);
-			gController.getGameFrame().getFightPanel()
+			this.gController.getGameFrame().getFightPanel()
 					.addText(attacker.getName() + " setzt " + move.getName() + " ein!");
-			if (!hit(attacker, defender, move)) {
-				gController.getGameFrame().getFightPanel().addText("Die Attacke ging daneben");
-				setRecharge(attacker, false);
-				setVisible(attacker, true);
+			if (!this.hit(attacker, defender, move)) {
+				this.gController.getGameFrame().getFightPanel().addText("Die Attacke ging daneben");
+				this.setRecharge(attacker, false);
+				this.setVisible(attacker, true);
 			}
 		}
-		gController.getGameFrame().getFightPanel().updatePanels();
+		this.gController.getGameFrame().getFightPanel().updatePanels();
 		boolean dead = false;
-		if (gController.checkDead(player)) {
-			gController.getGameFrame().getFightPanel().addText(player.getName() + " wurde besiegt!");
-			gController.getGameFrame().getFightPanel().updatePanels();
-			gController.loseFight();
+		if (this.gController.checkDead(this.player)) {
+			this.gController.getGameFrame().getFightPanel().addText(this.player.getName() + " wurde besiegt!");
+			this.gController.getGameFrame().getFightPanel().updatePanels();
+			this.gController.loseFight();
 			dead = true;
 		}
-		if (gController.checkDead(enemy)) {
-			gController.getGameFrame().getFightPanel().addText(enemy.getName() + " wurde besiegt!");
-			if (!gController.winFight()) {
-				gController.getGameFrame().getFightPanel().setEnemy();
-				gController.getGameFrame().getFightPanel().updatePanels();
+		if (this.gController.checkDead(this.enemy)) {
+			this.gController.getGameFrame().getFightPanel().addText(this.enemy.getName() + " wurde besiegt!");
+			if (!this.gController.winFight()) {
+				this.gController.getGameFrame().getFightPanel().setEnemy();
+				this.gController.getGameFrame().getFightPanel().updatePanels();
 			}
 			dead = true;
 		}
@@ -211,7 +217,7 @@ public class Fighting {
 		double hitChance = move.getAccuracy() * (attacker.getStats().getFightStats().get(Stat.ACCURACY)
 				/ defender.getStats().getFightStats().get(Stat.EVASION));
 		move.reducePP();
-		float p = rng.nextFloat() * 100;
+		float p = this.rng.nextFloat() * 100;
 		if (p < hitChance) {
 			for (String category : move.getCategory().split("\\+")) {
 				if (category.equals("recharge")) {
@@ -225,28 +231,28 @@ public class Fighting {
 					attacker.getStats().loseHP(attacker.getStats().getCurrentHP());
 				}
 			}
-			if(defender.getSecondaryAilments().contains(SecondaryAilment.PROTECTED)) {
-				gController.getGameFrame().getFightPanel().addText(SecondaryAilment.PROTECTED.getAffected()
-						.replace("@pokemon", defender.getName()));
+			if (defender.getSecondaryAilments().contains(SecondaryAilment.PROTECTED)) {
+				this.gController.getGameFrame().getFightPanel()
+						.addText(SecondaryAilment.PROTECTED.getAffected().replace("@pokemon", defender.getName()));
 				return true;
 			}
-			int hits = rng.nextInt(move.getMaxHits() - move.getMinHits() + 1) + move.getMinHits();
+			int hits = this.rng.nextInt(move.getMaxHits() - move.getMinHits() + 1) + move.getMinHits();
 			switch (move.getTarget()) {
 			case ALL:
-				damageCalculation(attacker, defender, move, hits);
-				damageCalculation(attacker, attacker, move, hits);
+				this.damageCalculation(attacker, defender, move, hits);
+				this.damageCalculation(attacker, attacker, move, hits);
 				break;
 			case OPPONENT:
-				damageCalculation(attacker, defender, move, hits);
+				this.damageCalculation(attacker, defender, move, hits);
 				break;
 			case USER:
-				damageCalculation(attacker, attacker, move, hits);
+				this.damageCalculation(attacker, attacker, move, hits);
 				break;
 			default:
 				break;
 
 			}
-			gController.sleep(150);
+			this.gController.sleep(150);
 			return true;
 		}
 		return false;
@@ -258,12 +264,12 @@ public class Fighting {
 			if (change == 0) {
 				continue;
 			}
-			if (gController.isFighting()) {
-				if (pokemon.equals(gController.getFight().getPlayer())) {
-					gController.getGameFrame().getFightPanel().getPlayerAnimation()
+			if (this.gController.isFighting()) {
+				if (pokemon.equals(this.gController.getFight().getPlayer())) {
+					this.gController.getGameFrame().getFightPanel().getPlayerAnimation()
 							.playAnimation(change < 0 ? "debuff" : "buff");
 				} else {
-					gController.getGameFrame().getFightPanel().getEnemyAnimation()
+					this.gController.getGameFrame().getFightPanel().getEnemyAnimation()
 							.playAnimation(change < 0 ? "debuff" : "buff");
 				}
 			}
@@ -280,39 +286,43 @@ public class Fighting {
 		double damage = 40;
 		double def = stats.getFightStats().get(Stat.DEFENSE);
 		double atk = stats.getFightStats().get(Stat.ATTACK);
-		if (pokemon.equals(player)) {
-			gController.getGameFrame().getFightPanel().getPlayerAnimation().playAnimation("punch");
+		if (pokemon.equals(this.player)) {
+			this.gController.getGameFrame().getFightPanel().getPlayerAnimation().playAnimation("punch");
 		} else {
-			gController.getGameFrame().getFightPanel().getEnemyAnimation().playAnimation("punch");
+			this.gController.getGameFrame().getFightPanel().getEnemyAnimation().playAnimation("punch");
 		}
 		SoundController.getInstance().playSound(SoundController.NORMAL_EFFECTIVE);
 		stats.loseHP((int) (((stats.getLevel() * (2 / 5.0) + 2) * damage * (atk / (50.0 * def)) + 2)
-				* ((rng.nextFloat() * 0.15f + 0.85) / 1)));
+				* ((this.rng.nextFloat() * 0.15f + 0.85) / 1)));
 	}
 
 	private void playAnimation(Pokemon attacker, Pokemon defense, Move usedMove) {
-		if (attacker.equals(gController.getFight().getPlayer())) {
-			gController.getGameFrame().getFightPanel().getPlayerAnimation().playAnimation(usedMove.getUserAnimation());
+		if (attacker.equals(this.gController.getFight().getPlayer())) {
+			this.gController.getGameFrame().getFightPanel().getPlayerAnimation()
+					.playAnimation(usedMove.getUserAnimation());
 		} else {
-			gController.getGameFrame().getFightPanel().getEnemyAnimation().playAnimation(usedMove.getUserAnimation());
+			this.gController.getGameFrame().getFightPanel().getEnemyAnimation()
+					.playAnimation(usedMove.getUserAnimation());
 		}
-		if (defense.equals(gController.getFight().getPlayer())) {
-			gController.getGameFrame().getFightPanel().getPlayerAnimation().playAnimation(usedMove.getTargetAnimation());
+		if (defense.equals(this.gController.getFight().getPlayer())) {
+			this.gController.getGameFrame().getFightPanel().getPlayerAnimation()
+					.playAnimation(usedMove.getTargetAnimation());
 		} else {
-			gController.getGameFrame().getFightPanel().getEnemyAnimation().playAnimation(usedMove.getTargetAnimation());
+			this.gController.getGameFrame().getFightPanel().getEnemyAnimation()
+					.playAnimation(usedMove.getTargetAnimation());
 		}
 	}
 
 	private void damageCalculation(Pokemon attacker, Pokemon defense, Move usedMove, int ammount) {
 		Stats attackerStats = attacker.getStats();
 		Stats defenderStats = defense.getStats();
-		double weakness = Type.getEffectiveness(usedMove.getMoveType(), defense.getTypes());
-		if (!isVisible(defense)) {
-			gController.getGameFrame().getFightPanel().addText("Es ist kein Gegner zu sehen!", true);
+		double weakness = Type.getEffectiveness(usedMove.getMoveType(), defense);
+		if (!this.isVisible(defense)) {
+			this.gController.getGameFrame().getFightPanel().addText("Es ist kein Gegner zu sehen!", true);
 			return;
 		}
 		if (weakness == Type.USELESS) {
-			gController.getGameFrame().getFightPanel().addText("Die Attacke zeigte keine Wirkung!", true);
+			this.gController.getGameFrame().getFightPanel().addText("Die Attacke zeigte keine Wirkung!", true);
 			return;
 		}
 		double damage = usedMove.getPower() * Type.calcSTAB(attacker, usedMove);
@@ -332,11 +342,11 @@ public class Fighting {
 				break;
 			}
 			for (int i = 0; i < ammount; i++) {
-				if (gController.isFighting()) {
-					playAnimation(attacker, defense, usedMove);
+				if (this.gController.isFighting()) {
+					this.playAnimation(attacker, defense, usedMove);
 				}
 				int crit = 1;
-				float pCrit = rng.nextFloat();
+				float pCrit = this.rng.nextFloat();
 				switch (usedMove.getCrit() + 1) {
 				case 1:
 					crit = pCrit < 0.0625 ? 2 : 1;
@@ -352,12 +362,12 @@ public class Fighting {
 					break;
 				}
 				if (crit == 2) {
-					gController.getGameFrame().getFightPanel().addText("Ein Volltreffer!", true);
+					this.gController.getGameFrame().getFightPanel().addText("Ein Volltreffer!", true);
 				}
 				damage = (weakness * ((attackerStats.getLevel() * (2 / 5.0) + 2) * damage * (atk / (50.0 * def)) + 2)
-						* crit * ((rng.nextFloat() * 0.15f + 0.85) / 1));
+						* crit * ((this.rng.nextFloat() * 0.15f + 0.85) / 1));
 				damage = Math.max(damage, 1);
-				if(usedMove.getCategory().contains("ohko")) {
+				if (usedMove.getCategory().contains("ohko")) {
 					damage = defense.getStats().getCurrentHP();
 				}
 				defenderStats.loseHP((int) damage);
@@ -368,104 +378,105 @@ public class Fighting {
 				} else if (weakness == 1.0) {
 					SoundController.getInstance().playSound(SoundController.NORMAL_EFFECTIVE);
 				}
-				gController.getGameFrame().getFightPanel().updatePanels();
-				gController.sleep(150);
+				this.gController.getGameFrame().getFightPanel().updatePanels();
+				this.gController.sleep(150);
 
 				if (usedMove.getDrain() > 0) {
 					attackerStats.restoreHP((int) (damage * (usedMove.getDrain() / 100.0)));
-					gController.getGameFrame().getFightPanel().addText(defense.getName() + " wurde Energie abgesaugt!",
-							true);
+					this.gController.getGameFrame().getFightPanel()
+							.addText(defense.getName() + " wurde Energie abgesaugt!", true);
 				} else if (usedMove.getDrain() < 0) {
 					attackerStats.loseHP((int) Math.abs(damage * (usedMove.getDrain() / 100.0)));
-					gController.getGameFrame().getFightPanel()
+					this.gController.getGameFrame().getFightPanel()
 							.addText(attacker.getName() + " hat sich durch den Rückstoß verletzt!", true);
 				}
-				gController.getGameFrame().getFightPanel().updatePanels();
+				this.gController.getGameFrame().getFightPanel().updatePanels();
 				damage = usedMove.getPower() * Type.calcSTAB(attacker, usedMove);
 			}
 			if (weakness >= Type.STRONG) {
-				gController.getGameFrame().getFightPanel().addText("Die Attacke war sehr effektiv!", true);
+				this.gController.getGameFrame().getFightPanel().addText("Die Attacke war sehr effektiv!", true);
 			} else if (weakness <= Type.WEAK) {
-				gController.getGameFrame().getFightPanel().addText("Die Attacke war nicht sehr effektiv!", true);
+				this.gController.getGameFrame().getFightPanel().addText("Die Attacke war nicht sehr effektiv!", true);
 			}
 		} else {
-			playAnimation(attacker, defense, usedMove);
-			if(!attacker.equals(defense) && (usedMove.getAilment() != null || usedMove.getAilment() != Ailment.NONE ||
-					usedMove.getSecondaryAilment() != null) &&
-					defense.getSecondaryAilments().contains(SecondaryAilment.MAGICCOAT)) {
-				gController.getGameFrame().getFightPanel().addText(
-						SecondaryAilment.MAGICCOAT.getAffected().replace("@pokemon", defense.getName()));
+			this.playAnimation(attacker, defense, usedMove);
+			if (!attacker.equals(defense)
+					&& (usedMove.getAilment() != null || usedMove.getAilment() != Ailment.NONE
+							|| usedMove.getSecondaryAilment() != null)
+					&& defense.getSecondaryAilments().contains(SecondaryAilment.MAGICCOAT)) {
+				this.gController.getGameFrame().getFightPanel()
+						.addText(SecondaryAilment.MAGICCOAT.getAffected().replace("@pokemon", defense.getName()));
 				defense = attacker;
-			} else if(usedMove.getCategory().contains("teleport")) {
-				if(this.canEscape()) {
-					gController.getGameFrame().getFightPanel().addText(
-							attacker.getName() + " flieht aus dem Kampf!");
-					gController.endFight();
+			} else if (usedMove.getCategory().contains("teleport")) {
+				if (this.canEscape()) {
+					this.gController.getGameFrame().getFightPanel()
+							.addText(attacker.getName() + " flieht aus dem Kampf!");
+					this.gController.endFight();
 				} else {
-					gController.getGameFrame().getFightPanel().addText("Es schlägt fehl!");
+					this.gController.getGameFrame().getFightPanel().addText("Es schlägt fehl!");
 				}
 			}
 		}
 
-		gController.getGameFrame().getFightPanel().getTextLabel().waitText();
+		this.gController.getGameFrame().getFightPanel().getTextLabel().waitText();
 
 		if (usedMove.getHealing() > 0) {
 			attackerStats.restoreHP((int) (attackerStats.getStats().get(Stat.HP) * (usedMove.getHealing() / 100)));
-			gController.getGameFrame().getFightPanel()
+			this.gController.getGameFrame().getFightPanel()
 					.addText("Die KP von " + attacker.getName() + " wurden aufgefrischt!", true);
-			gController.getGameFrame().getFightPanel().updatePanels();
+			this.gController.getGameFrame().getFightPanel().updatePanels();
 		}
 
-		gController.getGameFrame().getFightPanel().getTextLabel().waitText();
+		this.gController.getGameFrame().getFightPanel().getTextLabel().waitText();
 
 		if (usedMove.checkStatChange()) {
 			if (usedMove.checkUserBuff()) {
-				buff(attacker, usedMove);
+				this.buff(attacker, usedMove);
 			}
 			if (usedMove.checkEnemyBuff()) {
-				buff(defense, usedMove);
+				this.buff(defense, usedMove);
 			}
 		}
 
-		gController.getGameFrame().getFightPanel().getTextLabel().waitText();
+		this.gController.getGameFrame().getFightPanel().getTextLabel().waitText();
 
-		if (rng.nextFloat() * 100 < usedMove.getAilmentChance() || usedMove.getAilmentChance() == 0) {
+		if (this.rng.nextFloat() * 100 < usedMove.getAilmentChance() || usedMove.getAilmentChance() == 0) {
 			if (((usedMove.getAilment() != Ailment.NONE && usedMove.getAilment() != null)
 					&& defense.setAilment(usedMove.getAilment()))) {
-				gController.getGameFrame().getFightPanel()
+				this.gController.getGameFrame().getFightPanel()
 						.addText(defense.getName() + " wurde " + Ailment.getText(usedMove.getAilment()) + "!", true);
 			} else if ((usedMove.getSecondaryAilment() != null)) {
 				defense.addSecondaryAilment(usedMove.getSecondaryAilment());
 			}
-			gController.getGameFrame().getFightPanel().updatePanels();
+			this.gController.getGameFrame().getFightPanel().updatePanels();
 		}
 
-		gController.getGameFrame().getFightPanel().getTextLabel().waitText();
+		this.gController.getGameFrame().getFightPanel().getTextLabel().waitText();
 	}
 
 	public boolean canBeSendOut(int index) {
-		if (playerTeam.getTeam()[index].getStats().getCurrentHP() > 0 && index != 0) {
+		if (this.playerTeam.getTeam()[index].getStats().getCurrentHP() > 0 && index != 0) {
 			return true;
 		}
 		return false;
 	}
 
 	public void sendOut(int index) {
-		playerTeam.swapPokemon(0, index);
-		setPlayer();
-		participants.add(player);
+		this.playerTeam.swapPokemon(0, index);
+		this.setPlayer();
+		this.participants.add(this.player);
 	}
 
 	public Pokemon getPlayer() {
-		return player;
+		return this.player;
 	}
 
 	public Move canUse(Pokemon user, Move move) {
-		if (chargeMoves.get(user) != null) {
-			return chargeMoves.get(user);
+		if (this.chargeMoves.get(user) != null) {
+			return this.chargeMoves.get(user);
 		}
 		if (user.getSecondaryAilments().contains(SecondaryAilment.TORMENT)) {
-			if (move.equals(lastMoves.get(user))) {
+			if (move.equals(this.lastMoves.get(user))) {
 				return null;
 			}
 		}
@@ -473,60 +484,60 @@ public class Fighting {
 	}
 
 	private void setPlayer() {
-		this.player = playerTeam.getTeam()[0];
+		this.player = this.playerTeam.getTeam()[0];
 		this.player.startFight();
 		this.visible = new SimpleEntry<Boolean, Boolean>(true, this.visible.getValue());
-		gController.updateFight();
+		this.gController.updateFight();
 	}
 
 	private void setEnemy() {
-		this.enemy = enemyTeam.getFirstFightPokemon();
-		enemy.startFight();
-		if(participants == null) {
-			participants = new HashSet<>();
+		this.enemy = this.enemyTeam.getFirstFightPokemon();
+		this.enemy.startFight();
+		if (this.participants == null) {
+			this.participants = new HashSet<>();
 		}
-		participants.clear();
-		participants.add(player);
+		this.participants.clear();
+		this.participants.add(this.player);
 		this.visible = new SimpleEntry<Boolean, Boolean>(this.visible.getKey(), true);
-		gController.updateFight();
+		this.gController.updateFight();
 	}
 
 	public Pokemon getEnemy() {
-		return enemy;
+		return this.enemy;
 	}
 
 	public boolean playerDead() {
-		participants.remove(player);
-		if (playerTeam.getFirstFightPokemon() == null) {
-			if (enemyCharacter != null) {
-				enemyCharacter.getTeam().restoreTeam();
+		this.participants.remove(this.player);
+		if (this.playerTeam.getFirstFightPokemon() == null) {
+			if (this.enemyCharacter != null) {
+				this.enemyCharacter.getTeam().restoreTeam();
 			}
 			return true;
 		}
-		setCurrentFightOption(FightOption.POKEMON);
-		gController.getGameFrame().getPokemonPanel().update();
-		while(getCurrentFightOption().equals(FightOption.POKEMON)) {
+		this.setCurrentFightOption(FightOption.POKEMON);
+		this.gController.getGameFrame().getPokemonPanel().update();
+		while (this.getCurrentFightOption().equals(FightOption.POKEMON)) {
 			Thread.yield();
 		}
 		return false;
 	}
 
 	public boolean enemyDead() {
-		gController.getGameFrame().getFightPanel().removeEnemy();
-		if (enemyTeam.getFirstFightPokemon() == null) {
-			if (enemyCharacter != null) {
-				gController.getGameFrame().getFightPanel().addText(enemyCharacter.getName() + " wurde besiegt!");
-				enemyCharacter.defeated(true);
+		this.gController.getGameFrame().getFightPanel().removeEnemy();
+		if (this.enemyTeam.getFirstFightPokemon() == null) {
+			if (this.enemyCharacter != null) {
+				this.gController.getGameFrame().getFightPanel()
+						.addText(this.enemyCharacter.getName() + " wurde besiegt!");
+				this.enemyCharacter.defeated(true);
 			}
 			return true;
 		}
-		setEnemy();
+		this.setEnemy();
 		return false;
 	}
 
-
 	public FightOption getCurrentFightOption() {
-		return currentFightOption;
+		return this.currentFightOption;
 	}
 
 	public void setCurrentFightOption(FightOption currentFightOption) {
@@ -546,17 +557,17 @@ public class Fighting {
 	}
 
 	public int calculateXP(Pokemon player) {
-		int base = enemy.getBaseExperience();
+		int base = this.enemy.getBaseExperience();
 		double OTFactor = 1;
 		double itemFactor = 1;
 		double friendshipFactor = 1;
 		double evolveFactor = player.getEvolves() != 0 ? 1.2 : 1;
-		int enemyLevel = enemy.getStats().getLevel();
+		int enemyLevel = this.enemy.getStats().getLevel();
 		int playerLevel = player.getStats().getLevel();
 		int xp = (int) ((((base * enemyLevel) / 5.0)
 				* (Math.pow(2 * enemyLevel + 10, 2.5) / Math.pow(enemyLevel + playerLevel + 10, 2.5)) + 1) * OTFactor
 				* itemFactor * friendshipFactor * evolveFactor);
-		player.increaseEV(enemy);
+		player.increaseEV(this.enemy);
 		return xp;
 	}
 
@@ -581,7 +592,7 @@ public class Fighting {
 	}
 
 	public Team getPlayerTeam() {
-		return playerTeam;
+		return this.playerTeam;
 	}
 
 	public void setVisible(boolean player, boolean enemy) {
@@ -589,7 +600,7 @@ public class Fighting {
 	}
 
 	public void setVisible(Pokemon p, boolean v) {
-		if (p.equals(player)) {
+		if (p.equals(this.player)) {
 			this.visible = new SimpleEntry<Boolean, Boolean>(v, this.visible.getValue());
 		} else {
 			this.visible = new SimpleEntry<Boolean, Boolean>(this.visible.getKey(), v);
@@ -597,7 +608,7 @@ public class Fighting {
 	}
 
 	public boolean isVisible(Pokemon pokemon) {
-		if (pokemon.equals(player)) {
+		if (pokemon.equals(this.player)) {
 			return this.visible.getKey();
 		} else {
 			return this.visible.getValue();
@@ -616,10 +627,14 @@ public class Fighting {
 	}
 
 	public boolean canChooseAction() {
-		if (chargeMoves.get(player) != null || needsRecharge(player)) {
+		if (this.chargeMoves.get(this.player) != null || this.needsRecharge(this.player)) {
 			return false;
 		}
 		return true;
+	}
+
+	public Field getField() {
+		return this.field;
 	}
 
 }

@@ -12,6 +12,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import de.alexanderciupka.hoverbutton.Main;
+import de.alexanderciupka.pokemon.characters.Direction;
 import de.alexanderciupka.pokemon.characters.Player;
 import de.alexanderciupka.pokemon.map.Route;
 import de.alexanderciupka.pokemon.pokemon.Item;
@@ -24,11 +25,8 @@ public class PokemonEntity extends Entity {
 	private String noInteractionMessage;
 	private String interactionMessage;
 	private Pokemon pokemon;
-	private String id;
-
-	public PokemonEntity(Route parent, String terrainName, String id) {
+	public PokemonEntity(Route parent, String terrainName) {
 		super(parent, false, "25", 0, terrainName);
-		this.setId(id);
 	}
 
 	public void setRequiredItems(Item... items) {
@@ -93,14 +91,6 @@ public class PokemonEntity extends Entity {
 		return this.pokemon;
 	}
 
-	public String getId() {
-		return id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
-	}
-
 	@Override
 	public void onInteraction(Player c) {
 		boolean isInteractable = true;
@@ -145,7 +135,7 @@ public class PokemonEntity extends Entity {
 	public boolean equals(Object obj) {
 		if (super.equals(obj) && obj instanceof PokemonEntity) {
 			PokemonEntity other = (PokemonEntity) obj;
-			return this.id.equals(other.id) && this.interactionMessage.equals(other.interactionMessage)
+			return this.interactionMessage.equals(other.interactionMessage)
 					&& this.noInteractionMessage.equals(other.noInteractionMessage)
 					&& this.requiredItems.equals(other.requiredItems) &&
 					(this.pokemon == null ? other.pokemon == null : this.pokemon.equals(other.pokemon));
@@ -157,7 +147,6 @@ public class PokemonEntity extends Entity {
 	public JsonObject getSaveData(Entity entity) {
 		JsonObject saveData = super.getSaveData(entity);
 		PokemonEntity other = (PokemonEntity) entity;
-		saveData.addProperty("id", this.id);
 		if (!other.interactionMessage.equals(this.interactionMessage)) {
 			saveData.addProperty("interaction_message", this.interactionMessage);
 		}
@@ -192,5 +181,20 @@ public class PokemonEntity extends Entity {
 			return true;
 		}
 		return false;
+	}
+
+	public static PokemonEntity convert(Entity entity) {
+		PokemonEntity result = new PokemonEntity(entity.getRoute(), entity.getTerrainName());
+		if (entity.getWarp() != null) {
+			result.addWarp(entity.getWarp().clone());
+		}
+		result.setAccessible(false);
+		result.setSprite(entity.getSpriteName());
+		result.setEncounterRate(entity.getEncounterRate());
+		result.setWater(entity.isWater());
+		result.setEvent(entity.getEvent() == null ? null : entity.getEvent().clone());
+		result.setX(entity.getX());
+		result.setY(entity.getY());
+		return result;
 	}
 }

@@ -7,9 +7,13 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import de.alexanderciupka.pokemon.gui.TextLabel;
 import de.alexanderciupka.pokemon.map.Route;
 import de.alexanderciupka.pokemon.menu.SoundController;
+import de.alexanderciupka.pokemon.pokemon.Ailment;
 import de.alexanderciupka.pokemon.pokemon.Item;
+import de.alexanderciupka.pokemon.pokemon.Pokemon;
+import de.alexanderciupka.pokemon.pokemon.Type;
 
 public class Player extends Character {
 
@@ -24,26 +28,62 @@ public class Player extends Character {
 
 	public Player() {
 		super();
-		items = new HashMap<Item, Integer>();
-		routeHistory = new ArrayList<String>();
+		this.items = new HashMap<Item, Integer>();
+		this.routeHistory = new ArrayList<String>();
 
-		pc = new PC(this);
+		this.pc = new PC(this);
 
-		init();
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while (true) {
+					NPC follower = Player.this.getFollower();
+					boolean newFollower = follower == null && Player.this.getCurrentRoute() != null;
+					if (newFollower && Player.this.getCurrentRoute() != null) {
+						follower = new NPC("playermon");
+						follower.setCurrentRoute(Player.this.getCurrentRoute());
+						follower.setCurrentPosition(Player.this.getOldPosition());
+						follower.setName(Player.this.getTeam().getTeam()[0].getName());
+						follower.setCurrentDirection(Player.this.getCurrentDirection());
+						follower.setShowName(false);
+					}
+					if (Player.this.getTeam().getTeam()[0] != null
+							&& Player.this.getTeam().getTeam()[0].getAilment() != Ailment.FAINTED) {
+						Pokemon p = Player.this.getTeam().getTeam()[0];
+						follower.setCharacterImage(p.getId() + (p.isShiny() ? "s" : ""));
+						follower.setNoFightDialogue(p.getName());
+						follower.setTextColor(Type.getColor(Player.this.getTeam().getTeam()[0].getTypes()[0]));
+					}
+
+					if (newFollower) {
+						follower.getCurrentRoute().addCharacter(follower);
+						Player.this.setFollower(follower);
+					}
+
+					try {
+						Thread.sleep(1000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}).start();
+
+		this.init();
 	}
 
 	public Player(String id) {
 		super(id);
-		items = new HashMap<Item, Integer>();
-		routeHistory = new ArrayList<String>();
+		this.items = new HashMap<Item, Integer>();
+		this.routeHistory = new ArrayList<String>();
 
-		pc = new PC(this);
+		this.pc = new PC(this);
 
-		init();
+		this.init();
 	}
 
 	private void init() {
-		for(Item i : Item.values()) {
+		for (Item i : Item.values()) {
 			this.items.put(i, 0);
 		}
 	}
@@ -51,21 +91,22 @@ public class Player extends Character {
 	@Override
 	public void changePosition(Direction direction, boolean waiting) {
 		super.changePosition(direction, waiting);
-		onMovement();
+		this.onMovement();
 	}
 
 	@Override
 	public void setCurrentRoute(Route currentRoute) {
-		for(int i = 0; i < routeHistory.size(); i++) {
-			if(routeHistory.get(i).equals(currentRoute.getId())) {
-				routeHistory.remove(i);
+		for (int i = 0; i < this.routeHistory.size(); i++) {
+			if (this.routeHistory.get(i).equals(currentRoute.getId())) {
+				this.routeHistory.remove(i);
 				break;
 			}
 		}
-		routeHistory.add(currentRoute.getId());
+		this.routeHistory.add(currentRoute.getId());
 		super.setCurrentRoute(currentRoute);
-		if(gController.getGameFrame() != null && this.equals(gController.getCurrentBackground().getCamera().getCenter())) {
-			gController.getGameFrame().getBackgroundLabel().changeRoute(currentRoute);
+		if (this.gController.getGameFrame() != null
+				&& this.equals(this.gController.getCurrentBackground().getCamera().getCenter())) {
+			this.gController.getGameFrame().getBackgroundLabel().changeRoute(currentRoute);
 		}
 	}
 
@@ -75,8 +116,8 @@ public class Player extends Character {
 		int y = 4;
 		Direction d = Direction.DOWN;
 
-		for(int centerIndex = this.routeHistory.size() - 1; centerIndex >= 0; centerIndex--) {
-			if(this.routeHistory.get(centerIndex).equals("pokemon_center")) {
+		for (int centerIndex = this.routeHistory.size() - 1; centerIndex >= 0; centerIndex--) {
+			if (this.routeHistory.get(centerIndex).equals("pokemon_center")) {
 				routeID = this.routeHistory.get(centerIndex);
 				x = 2;
 				y = 1;
@@ -84,24 +125,24 @@ public class Player extends Character {
 				break;
 			}
 		}
-		setCurrentPosition(x, y);
-		setCurrentDirection(d);
-		this.setCurrentRoute(gController.getRouteAnalyzer().getRouteById(routeID));
-		gController.setCurrentRoute(this.getCurrentRoute());
-		team.restoreTeam();
-		gController.getCurrentBackground().getCamera().setCharacter(this, false);
+		this.setCurrentPosition(x, y);
+		this.setCurrentDirection(d);
+		this.setCurrentRoute(this.gController.getRouteAnalyzer().getRouteById(routeID));
+		this.gController.setCurrentRoute(this.getCurrentRoute());
+		this.team.restoreTeam();
+		this.gController.getCurrentBackground().getCamera().setCharacter(this, false);
 	}
 
 	public ArrayList<String> getRouteHistory() {
-		return routeHistory;
+		return this.routeHistory;
 	}
 
 	public void addItem(Item reward) {
-		addItem(reward, 1);
+		this.addItem(reward, 1);
 	}
 
 	public void addItem(Item reward, int amount) {
-		if(amount > 0) {
+		if (amount > 0) {
 			SoundController.getInstance().playSound(SoundController.GET_ITEM);
 			this.items.put(reward, this.items.get(reward) + amount);
 			this.gController.getGameFrame().getInventoryPanel().update(this);
@@ -109,26 +150,27 @@ public class Player extends Character {
 	}
 
 	public void earnRewards(HashMap<Item, Integer> rewards) {
-		earnRewards(rewards, false);
+		this.earnRewards(rewards, false);
 	}
 
 	public void earnRewards(HashMap<Item, Integer> rewards, boolean withText) {
-		for(Item i : rewards.keySet()) {
-			addItem(i, rewards.get(i));
-			if(withText) {
-				gController.getGameFrame().addDialogue("Du hast " + i.getName() + " (x" + rewards.get(i) + ") erhalten!");
-				gController.getGameFrame().getDialogue().waitText();
+		for (Item i : rewards.keySet()) {
+			this.addItem(i, rewards.get(i));
+			if (withText) {
+				this.gController.getGameFrame()
+						.addDialogue("Du hast " + i.getName() + " (x" + rewards.get(i) + ") erhalten!");
+				this.gController.getGameFrame().getDialogue().waitText();
 			}
 		}
 	}
 
 	public boolean hasItem(Item i) {
-		return items.get(i) > 0;
+		return this.items.get(i) > 0;
 	}
 
 	public boolean removeItem(Item i) {
 		int value = this.items.get(i);
-		if(value > 0) {
+		if (value > 0) {
 			this.items.put(i, value - 1);
 			return true;
 		} else if (value < 0) {
@@ -149,15 +191,15 @@ public class Player extends Character {
 	public JsonObject getSaveData() {
 		JsonObject saveData = super.getSaveData();
 		JsonArray routeHistory = new JsonArray();
-		for(String r : this.routeHistory) {
+		for (String r : this.routeHistory) {
 			JsonObject currentRoute = new JsonObject();
 			currentRoute.addProperty("id", r);
 			routeHistory.add(currentRoute);
 		}
 		JsonArray items = new JsonArray();
-		for(Item i : this.items.keySet()) {
+		for (Item i : this.items.keySet()) {
 			int amount = this.items.get(i);
-			if(amount == 0) {
+			if (amount == 0) {
 				continue;
 			}
 			JsonObject currentItem = new JsonObject();
@@ -174,14 +216,14 @@ public class Player extends Character {
 
 	@Override
 	public boolean importSaveData(JsonObject saveData) {
-		if(super.importSaveData(saveData)) {
+		if (super.importSaveData(saveData)) {
 			this.routeHistory.clear();
-			for(JsonElement j : saveData.get("route_history").getAsJsonArray()) {
+			for (JsonElement j : saveData.get("route_history").getAsJsonArray()) {
 				this.routeHistory.add(j.getAsJsonObject().get("id").getAsString());
 			}
-			init();
-			for(JsonElement j : saveData.get("items").getAsJsonArray()) {
-				if(j.getAsJsonObject().get("amount") != null) {
+			this.init();
+			for (JsonElement j : saveData.get("items").getAsJsonArray()) {
+				if (j.getAsJsonObject().get("amount") != null) {
 					this.items.put(Item.valueOf(j.getAsJsonObject().get("id").getAsString()),
 							j.getAsJsonObject().get("amount").getAsInt());
 				}
@@ -194,7 +236,7 @@ public class Player extends Character {
 	}
 
 	public boolean useItem(Item i) {
-		gController.setInteractionPause(true);
+		this.gController.setInteractionPause(true);
 		boolean result = false;
 		switch (i) {
 		case CUT:
@@ -202,15 +244,16 @@ public class Player extends Character {
 		case ROCKSMASH:
 		case STRENGTH:
 		case SURF:
-			this.currentRoute.getEntities()[getInteractionPoint().y][getInteractionPoint().x].useVM(this, i);
+			this.currentRoute.getEntities()[this.getInteractionPoint().y][this.getInteractionPoint().x].useVM(this, i);
 			break;
 		case REPEL:
-			if(isProtected()) {
-				gController.getGameFrame().addDialogue("Es wurde bereits ein Schutz eingesetzt!");
+			if (this.isProtected()) {
+				this.gController.getGameFrame().addDialogue("Es wurde bereits ein Schutz eingesetzt!");
 			} else {
 				this.protectedSteps = this.stepCounter + i.getValue();
-				gController.getGameFrame().addDialogue("Du bist jetzt für " + i.getValue() + " Schritte vor wilden Pokemon geschützt!");
-				result =  true;
+				this.gController.getGameFrame()
+						.addDialogue("Du bist jetzt für " + i.getValue() + " Schritte vor wilden Pokemon geschützt!");
+				result = true;
 			}
 		case HYPERBALL:
 		case MASTERBALL:
@@ -218,43 +261,43 @@ public class Player extends Character {
 		case SUPERBALL:
 		case HEALBALL:
 		case PREMIERBALL:
-			if(gController.isFighting()) {
+			if (this.gController.isFighting()) {
 				result = true;
-				gController.getGameFrame().getFightPanel().throwBall(i);
+				this.gController.getGameFrame().getFightPanel().throwBall(i);
 			} else {
-				gController.getGameFrame().addDialogue("Es wird keine Wirkung haben.");
+				this.gController.getGameFrame().addDialogue("Es wird keine Wirkung haben.");
 			}
 			break;
 		default:
-			gController.getGameFrame().addDialogue("Es wird keine Wirkung haben.");
+			this.gController.getGameFrame().addDialogue("Es wird keine Wirkung haben.");
 			result = false;
 		}
-		if(result) {
-			removeItem(i);
-			gController.getGameFrame().setCurrentPanel(null);
+		if (result) {
+			this.removeItem(i);
+			this.gController.getGameFrame().setCurrentPanel(null);
 		}
-		gController.waitDialogue();
-		gController.setInteractionPause(false);
+		this.gController.waitDialogue();
+		this.gController.setInteractionPause(false);
 		return result;
 	}
 
 	public void onMovement() {
 		this.stepCounter++;
-		if(this.stepCounter % 8 == 0) {
-			for(int i = 0; i < this.team.getAmmount(); i++) {
+		if (this.stepCounter % 8 == 0) {
+			for (int i = 0; i < this.team.getAmmount(); i++) {
 				this.team.getTeam()[i].afterWalkingDamage();
 			}
 		}
-		if(this.stepCounter % 128 == 0) {
-			for(int i = 0; i < this.team.getAmmount(); i++) {
+		if (this.stepCounter % 128 == 0) {
+			for (int i = 0; i < this.team.getAmmount(); i++) {
 				this.team.getTeam()[i].changeHappiness(1);
 			}
 		}
-		if(this.protectedSteps > 0) {
+		if (this.protectedSteps > 0) {
 			this.protectedSteps--;
-			if(this.protectedSteps == 0) {
-				gController.getGameFrame().addDialogue("Der Schutz ist ausgelaufen!");
-				gController.waitDialogue();
+			if (this.protectedSteps == 0) {
+				this.gController.getGameFrame().addDialogue("Der Schutz ist ausgelaufen!");
+				this.gController.waitDialogue();
 			}
 		}
 	}

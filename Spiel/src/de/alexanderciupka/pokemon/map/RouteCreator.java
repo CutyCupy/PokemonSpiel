@@ -356,7 +356,7 @@ public class RouteCreator extends JFrame {
 									} else if (text.equals("QUIZ")) {
 										text += questions.size();
 
-										QuestionEntity q = new QuestionEntity(text, null, "stone");
+										QuestionEntity q = new QuestionEntity(null, "stone");
 										try {
 											q.setType((QuestionType) JOptionPane.showInputDialog(null,
 													"Welche Art von Quiz?", "",
@@ -572,7 +572,7 @@ public class RouteCreator extends JFrame {
 				curQ.addProperty("npc", q.getNpc() != null ? q.getNpc().getID() : "");
 				curQ.add("entities", new JsonArray());
 				curQ.addProperty("type", q.getType().name());
-				quizzes.add(q.getID().toUpperCase(), curQ);
+//				quizzes.add(q.getID().toUpperCase(), curQ);
 			}
 
 			route.add("quizzes", quizzes);

@@ -37,7 +37,7 @@ public class BackgroundLabel extends JLabel {
 
 	public BackgroundLabel(int x, int y) {
 		super();
-		gController = GameController.getInstance();
+		this.gController = GameController.getInstance();
 		this.overlays = new ArrayList<Overlay>();
 	}
 
@@ -45,14 +45,13 @@ public class BackgroundLabel extends JLabel {
 	public void paint(Graphics g) {
 		g.clearRect(0, 0, this.getWidth(), this.getHeight());
 
-		Camera c = gController.getCurrentBackground().getCamera();
+		Camera c = this.gController.getCurrentBackground().getCamera();
 
-		double w = 9;
-		double h = 9;
+		double w = GameFrame.FRAME_SIZE / GameFrame.GRID_SIZE;
+		double h = GameFrame.FRAME_SIZE / GameFrame.GRID_SIZE;
 
 		double x = (c.getX() - (w / 2.0));
 		double y = (c.getY() - (h / 2.0));
-
 
 		double xOffset = 0;
 		double yOffset = 0;
@@ -73,33 +72,39 @@ public class BackgroundLabel extends JLabel {
 			h = (c.getRoute().getHeight() - y);
 		}
 
-		g.drawImage(
-				c.getRoute().getMap().getSubimage(
-						(int) Math.round(x * GameFrame.GRID_SIZE), (int) Math.round(y * GameFrame.GRID_SIZE),
-						(int) Math.round(w * GameFrame.GRID_SIZE), (int) Math.round(h * GameFrame.GRID_SIZE)),
+		// g.drawImage(
+		// c.getRoute().getMap().getSubimage(
+		// (int) Math.round(x * GameFrame.GRID_SIZE), (int) Math.round(y *
+		// GameFrame.GRID_SIZE),
+		// (int) Math.round(w * GameFrame.GRID_SIZE), (int) Math.round(h *
+		// GameFrame.GRID_SIZE)),
+		// (int) Math.round(xOffset * GameFrame.GRID_SIZE), (int) Math.round(yOffset *
+		// GameFrame.GRID_SIZE), null);
+		//
+		g.drawImage(c.getRoute().generateMap((int) x, (int) y, (int) w + 1, (int) h + 1),
 				(int) Math.round(xOffset * GameFrame.GRID_SIZE), (int) Math.round(yOffset * GameFrame.GRID_SIZE), null);
 
-		for (int i = 0; i < overlays.size(); i++) {
-			if (overlays.get(i).isFinshed()) {
-				overlays.get(i).onRemove();
-				overlays.remove(i);
+		for (int i = 0; i < this.overlays.size(); i++) {
+			if (this.overlays.get(i).isFinshed()) {
+				this.overlays.get(i).onRemove();
+				this.overlays.remove(i);
 				i--;
 			}
 		}
 
-		waitAccess();
-		for (Overlay o : overlays) {
+		this.waitAccess();
+		for (Overlay o : this.overlays) {
 			if (o.created) {
 				g.drawImage(o.getOverlay(), 0, 0, null);
 			}
 		}
 		this.overlayAccess = true;
 
-		if(waitFrames <= 0) {
-			RainOverlay r = (RainOverlay) getOverlay(RainOverlay.class);
-			SnowOverlay s = (SnowOverlay) getOverlay(SnowOverlay.class);
-			double xo = (oldX - (x - xOffset)) * GameFrame.GRID_SIZE;
-			double yo = (oldY - (y - yOffset)) * GameFrame.GRID_SIZE;
+		if (this.waitFrames <= 0) {
+			RainOverlay r = (RainOverlay) this.getOverlay(RainOverlay.class);
+			SnowOverlay s = (SnowOverlay) this.getOverlay(SnowOverlay.class);
+			double xo = (this.oldX - (x - xOffset)) * GameFrame.GRID_SIZE;
+			double yo = (this.oldY - (y - yOffset)) * GameFrame.GRID_SIZE;
 			if (r != null) {
 				for (Raindrop rd : r.getRaindrops()) {
 					rd.offset(xo, yo);
@@ -111,11 +116,11 @@ public class BackgroundLabel extends JLabel {
 				}
 			}
 		} else {
-			waitFrames--;
+			this.waitFrames--;
 		}
 
-		oldX = x - xOffset;
-		oldY = y - yOffset;
+		this.oldX = x - xOffset;
+		this.oldY = y - yOffset;
 	}
 
 	private void waitAccess() {
@@ -126,7 +131,7 @@ public class BackgroundLabel extends JLabel {
 	}
 
 	public void addOverlay(Overlay ov) {
-		waitAccess();
+		this.waitAccess();
 		this.overlays.add(ov);
 		this.overlayAccess = true;
 	}
@@ -136,7 +141,7 @@ public class BackgroundLabel extends JLabel {
 		SpottedOverlay s = new SpottedOverlay(this, spotter);
 		this.addOverlay(s);
 		s.createOverlay();
-		wait(s);
+		this.wait(s);
 	}
 
 	public void startEncounter() {
@@ -154,7 +159,7 @@ public class BackgroundLabel extends JLabel {
 			break;
 		}
 		this.addOverlay(c);
-		wait(c);
+		this.wait(c);
 	}
 
 	public void wait(Overlay o) {
@@ -164,23 +169,23 @@ public class BackgroundLabel extends JLabel {
 	}
 
 	public void startFight(String logo) {
-		if (logo != null && gController.getRouteAnalyzer().getLogoByName(logo) != null) {
+		if (logo != null && this.gController.getRouteAnalyzer().getLogoByName(logo) != null) {
 			LogoOverlay l = new LogoOverlay(logo, this, this.getSize());
 			l.createOverlay();
 			this.addOverlay(l);
-			wait(l);
+			this.wait(l);
 		} else {
-			startEncounter();
+			this.startEncounter();
 		}
 	}
 
 	public void changeRoute(Route newRoute) {
 		if (newRoute != null) {
-			waitAccess();
+			this.waitAccess();
 			for (int i = 0; i < this.overlays.size(); i++) {
 				if (this.overlays.get(i) instanceof RouteOverlay || this.overlays.get(i) instanceof DarkOverlay
 						|| this.overlays.get(i) instanceof RainOverlay || this.overlays.get(i) instanceof SnowOverlay) {
-					overlays.get(i).onRemove();
+					this.overlays.get(i).onRemove();
 					this.overlays.remove(i);
 					i--;
 				}
@@ -201,7 +206,7 @@ public class BackgroundLabel extends JLabel {
 				snow.startAnimation();
 				this.addOverlay(snow);
 			}
-			if(newRoute.getFog() != null) {
+			if (newRoute.getFog() != null) {
 				FogOverlay fog = new FogOverlay(this, this.getSize(), newRoute.getFog());
 				fog.createOverlay();
 				this.addOverlay(fog);
@@ -209,19 +214,19 @@ public class BackgroundLabel extends JLabel {
 			RouteOverlay r = new RouteOverlay(newRoute, this, this.getSize());
 			r.createOverlay();
 			this.addOverlay(r);
-			waitFrames = 5;
+			this.waitFrames = 5;
 		}
 	}
 
 	public Overlay getOverlay(Class<? extends Overlay> overlay) {
-		waitAccess();
+		this.waitAccess();
 		for (int i = 0; i < this.overlays.size(); i++) {
 			if (overlay.isInstance(this.overlays.get(i))) {
-				overlayAccess = true;
+				this.overlayAccess = true;
 				return overlay.cast(this.overlays.get(i));
 			}
 		}
-		overlayAccess = true;
+		this.overlayAccess = true;
 		return null;
 	}
 }

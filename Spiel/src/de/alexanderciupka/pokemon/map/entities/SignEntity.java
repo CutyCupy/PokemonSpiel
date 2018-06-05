@@ -10,8 +10,8 @@ public class SignEntity extends Entity {
 
 	private String information;
 	
-	public SignEntity(Route parent) {
-		super(parent, false, "sign", 0, parent.getTerrainName());
+	public SignEntity(Route parent, String terrain) {
+		super(parent, false, "sign", 0, terrain);
 	}
 
 	public String getInformation() {
@@ -60,6 +60,21 @@ public class SignEntity extends Entity {
 			}
 		}
 		return false;
+	}
+
+	public static SignEntity convert(Entity entity) {
+		SignEntity result = new SignEntity(entity.getRoute(), entity.getTerrainName());
+		if (entity.getWarp() != null) {
+			result.addWarp(entity.getWarp().clone());
+		}
+		result.setAccessible(false);
+		result.setSprite(entity.getSpriteName());
+		result.setEncounterRate(entity.getEncounterRate());
+		result.setWater(entity.isWater());
+		result.setEvent(entity.getEvent() == null ? null : entity.getEvent().clone());
+		result.setX(entity.getX());
+		result.setY(entity.getY());
+		return result;
 	}
 
 }

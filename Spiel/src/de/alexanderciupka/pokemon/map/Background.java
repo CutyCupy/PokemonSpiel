@@ -14,7 +14,6 @@ public class Background {
 	private BufferedImage background;
 	private Route currentRoute;
 	private Random rng;
-	private BufferedImage terrain;
 	private Camera cam;
 
 	public Background(Route currentRoute) {
@@ -22,11 +21,6 @@ public class Background {
 		background = currentRoute.getMap();
 		this.currentRoute = currentRoute;
 		rng = new Random();
-		try {
-			this.terrain = ImageIO.read(new File(this.getClass().getResource("/routes/terrain/" + currentRoute.getTerrainName()  + ".png").getFile()));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 	public Camera getCamera() {
@@ -34,7 +28,12 @@ public class Background {
 	}
 
 	public Pokemon chooseEncounter() {
-		return currentRoute.getPokemonPool().getEncounter();
+		return currentRoute
+				.getPoolById(currentRoute
+						.getEntity(GameController.getInstance().getMainCharacter().getCurrentPosition().x,
+								GameController.getInstance().getMainCharacter().getCurrentPosition().y)
+						.getPokemonPool())
+				.getEncounter();
 	}
 
 	public int getHeight() {
@@ -56,9 +55,5 @@ public class Background {
 	public void setCurrentRoute(Route route) {
 		background = route.getMap();
 		this.currentRoute = route;
-	}
-
-	public BufferedImage getCurrentTerrain() {
-		return this.terrain;
 	}
 }

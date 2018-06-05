@@ -11,16 +11,16 @@ public class PokemonPool {
 	
 	private Random rng;
 	private ArrayList<SimpleEntry<Integer, Short>> pokemonPool;
-	private String id;
+	private int id;
 	
 	
-	public PokemonPool(String id) {
+	public PokemonPool(int id) {
 		this.rng = new Random();
 		this.pokemonPool = new ArrayList<>();
 		this.id = id;
 	}
 	
-	public String getId() {
+	public int getId() {
 		return this.id;
 	}
 	
@@ -55,7 +55,7 @@ public class PokemonPool {
 	public boolean equals(Object obj) {
 		if(obj instanceof PokemonPool) {
 			PokemonPool other = (PokemonPool) obj;
-			if(!this.id.equals(other.id)) {
+			if(this.id != other.id) {
 				return false;
 			}
 			ArrayList<SimpleEntry<Integer, Short>> otherPool = new ArrayList<>(other.pokemonPool);

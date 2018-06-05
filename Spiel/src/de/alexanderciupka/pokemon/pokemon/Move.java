@@ -5,6 +5,7 @@ import java.util.Random;
 
 import com.google.gson.JsonObject;
 
+import de.alexanderciupka.pokemon.constants.Moves;
 import de.alexanderciupka.pokemon.fighting.Target;
 import de.alexanderciupka.pokemon.map.GameController;
 
@@ -41,17 +42,17 @@ public class Move {
 	private Type moveType;
 
 	public Move(int id) {
-		statChanges = new HashMap<Stat, Integer>();
-		for(Stat s : Stat.values()) {
-			statChanges.put(s, 0);
+		this.statChanges = new HashMap<Stat, Integer>();
+		for (Stat s : Stat.values()) {
+			this.statChanges.put(s, 0);
 		}
 		this.id = id;
 	}
 
 	public Move(String name) {
-		statChanges = new HashMap<Stat, Integer>();
-		for(Stat s : Stat.values()) {
-			statChanges.put(s, 0);
+		this.statChanges = new HashMap<Stat, Integer>();
+		for (Stat s : Stat.values()) {
+			this.statChanges.put(s, 0);
 		}
 		this.name = name;
 	}
@@ -59,7 +60,7 @@ public class Move {
 	public void setPower(String power) {
 		try {
 			this.power = Integer.parseInt(power);
-		} catch(Exception e) {
+		} catch (Exception e) {
 			this.power = 1;
 		}
 	}
@@ -73,11 +74,37 @@ public class Move {
 	}
 
 	public float getAccuracy() {
-		return this.accuracy;
+		float accuracy = this.accuracy;
+
+		if (accuracy <= 1.0f && GameController.getInstance().isFighting()) {
+			switch (GameController.getInstance().getFight().getField().getWeather()) {
+			case FOG:
+				accuracy *= 0.6;
+				break;
+			case HAIL:
+				if (Moves.BLIZZARD.equals(this.getName())) {
+					accuracy = 1f;
+				}
+				break;
+			case RAIN:
+				if (Moves.DONNER.equals(this.getName()) || Moves.ORKAN.equals(this.getName())) {
+					accuracy = 1f;
+				}
+				break;
+			case SUN:
+				if (Moves.DONNER.equals(this.getName()) || Moves.ORKAN.equals(this.getName())) {
+					accuracy = 0.5f;
+				}
+				break;
+			default:
+				break;
+			}
+		}
+		return accuracy;
 	}
 
 	public int getId() {
-		return id;
+		return this.id;
 	}
 
 	public void setId(int id) {
@@ -85,7 +112,7 @@ public class Move {
 	}
 
 	public int getPp() {
-		return pp;
+		return this.pp;
 	}
 
 	public void setPp(int pp) {
@@ -94,15 +121,15 @@ public class Move {
 	}
 
 	public int getMinHits() {
-		return minHits;
+		return this.minHits;
 	}
 
 	public int getMaxHits() {
-		return maxHits;
+		return this.maxHits;
 	}
 
 	public float getAilmentChance() {
-		return ailmentChance;
+		return this.ailmentChance;
 	}
 
 	public void setAilmentChance(int ailmentChance) {
@@ -110,7 +137,7 @@ public class Move {
 	}
 
 	public float getStatChance() {
-		return statChance;
+		return this.statChance;
 	}
 
 	public void setStatChance(float statChance) {
@@ -118,6 +145,33 @@ public class Move {
 	}
 
 	public float getHealing() {
+		float healing = this.healing;
+
+		if (GameController.getInstance().isFighting()) {
+			switch (GameController.getInstance().getFight().getField().getWeather()) {
+			case SUN:
+				if (Moves.MONDSCHEIN.equals(this.getName()) || Moves.MORGENGRAUEN.equals(this.getName())
+						|| Moves.SYNTHESE.equals(this.getName())) {
+					healing = 0.66f;
+				}
+				break;
+			case SANDSTORM:
+				if (Moves.SANDSAMMLER.equals(this.getName())) {
+					healing = 0.66f;
+				}
+			case HAIL:
+			case FOG:
+			case RAIN:
+				if (Moves.MONDSCHEIN.equals(this.getName()) || Moves.MORGENGRAUEN.equals(this.getName())
+						|| Moves.SYNTHESE.equals(this.getName())) {
+					healing = 0.25f;
+				}
+				break;
+			default:
+				break;
+			}
+		}
+
 		return healing;
 	}
 
@@ -126,7 +180,7 @@ public class Move {
 	}
 
 	public float getDrain() {
-		return drain;
+		return this.drain;
 	}
 
 	public void setDrain(float drain) {
@@ -143,7 +197,7 @@ public class Move {
 
 	@Override
 	public boolean equals(Object obj) {
-		if(obj instanceof Move) {
+		if (obj instanceof Move) {
 			return ((Move) obj).getName().equals(this.getName());
 		}
 		return false;
@@ -168,7 +222,7 @@ public class Move {
 		newMove.setPp(this.pp);
 		newMove.setStatChance(this.statChance);
 		newMove.setCurrentPP(this.currentPP);
-		newMove.statChanges = new HashMap<>(statChanges);
+		newMove.statChanges = new HashMap<>(this.statChanges);
 		newMove.setMoveType(this.moveType);
 		newMove.setAilment(this.ailment);
 		newMove.setDamageClass(this.damageClass);
@@ -208,22 +262,22 @@ public class Move {
 	}
 
 	public void addStatChange(Stat s, int change) {
-		statChanges.put(s, change);
+		this.statChanges.put(s, change);
 	}
 
 	public boolean checkStatChange() {
 		Random rng = new Random();
-		if(rng.nextFloat() < statChance) {
+		if (rng.nextFloat() < this.statChance) {
 			return true;
 		}
 		return false;
 	}
 
 	public boolean checkUserBuff() {
-		if(this.category.contains("raise")) {
+		if (this.category.contains("raise")) {
 			return true;
 		}
-		switch(this.target) {
+		switch (this.target) {
 		case ALL:
 		case USER:
 			return true;
@@ -234,10 +288,10 @@ public class Move {
 	}
 
 	public boolean checkEnemyBuff() {
-		if(this.category.contains("raise")) {
+		if (this.category.contains("raise")) {
 			return false;
 		}
-		switch(this.target) {
+		switch (this.target) {
 		case ALL:
 		case OPPONENT:
 			return true;
@@ -248,14 +302,36 @@ public class Move {
 	}
 
 	public int changeStat(Stat s) {
-		if(statChanges.containsKey(s)) {
-			return statChanges.get(s);
+		if (this.statChanges.containsKey(s)) {
+			return this.statChanges.get(s);
 		}
 		return 0;
 	}
 
 	public Type getMoveType() {
-		return moveType;
+		if (GameController.getInstance().isFighting()) {
+			Type type = this.getMoveType();
+			if (Moves.METEOROLOGE.equals(this.getName())) {
+				switch (GameController.getInstance().getFight().getField().getWeather()) {
+				case HAIL:
+					type = Type.ICE;
+					break;
+				case RAIN:
+					type = Type.WATER;
+					break;
+				case SANDSTORM:
+					type = Type.ROCK;
+					break;
+				case SUN:
+					type = Type.FIRE;
+					break;
+				default:
+					break;
+				}
+			}
+			return type;
+		}
+		return this.moveType;
 	}
 
 	public void setMoveType(Type moveType) {
@@ -263,7 +339,7 @@ public class Move {
 	}
 
 	public int getPriority() {
-		return priority;
+		return this.priority;
 	}
 
 	public void setPriority(int priority) {
@@ -271,7 +347,7 @@ public class Move {
 	}
 
 	public String getDescription() {
-		return description;
+		return this.description;
 	}
 
 	public void setDescription(String description) {
@@ -279,7 +355,7 @@ public class Move {
 	}
 
 	public Ailment getAilment() {
-		return ailment;
+		return this.ailment;
 	}
 
 	public void setAilment(Ailment ailment) {
@@ -287,7 +363,7 @@ public class Move {
 	}
 
 	public SecondaryAilment getSecondaryAilment() {
-		return secondaryAilment;
+		return this.secondaryAilment;
 	}
 
 	public void setAilment(SecondaryAilment secondaryAilment) {
@@ -295,7 +371,7 @@ public class Move {
 	}
 
 	public DamageClass getDamageClass() {
-		return damageClass;
+		return this.damageClass;
 	}
 
 	public void setDamageClass(DamageClass damageClass) {
@@ -303,7 +379,7 @@ public class Move {
 	}
 
 	public HashMap<Stat, Integer> getstatChanges() {
-		return statChanges;
+		return this.statChanges;
 	}
 
 	public void setStatChanges(HashMap<Stat, Integer> statChanges) {
@@ -311,7 +387,7 @@ public class Move {
 	}
 
 	public String getCategory() {
-		return category;
+		return this.category;
 	}
 
 	public void setCategory(String category) {
@@ -319,7 +395,7 @@ public class Move {
 	}
 
 	public Target getTarget() {
-		return target;
+		return this.target;
 	}
 
 	public void setTarget(Target target) {
@@ -327,7 +403,7 @@ public class Move {
 	}
 
 	public int getCrit() {
-		return crit;
+		return this.crit;
 	}
 
 	public void setCrit(int crit) {
@@ -356,7 +432,7 @@ public class Move {
 	}
 
 	public String getUserAnimation() {
-		return userAnimation;
+		return this.userAnimation;
 	}
 
 	public void setUserAnimation(String animation) {
@@ -364,7 +440,7 @@ public class Move {
 	}
 
 	public String getTargetAnimation() {
-		return targetAnimation;
+		return this.targetAnimation;
 	}
 
 	public void setTargetAnimation(String animation) {

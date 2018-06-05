@@ -15,11 +15,14 @@ public class TextLabel extends JLabel implements Runnable {
 
 	private boolean isActive;
 	private ArrayList<String> text;
+	private ArrayList<Color> color;
 	private long delay;
 	public static final long SLOW = 30;
 	public static final long FAST = 10;
 	private boolean autoMove;
 	private After after;
+
+	public static final String NEW_LINE = " <n> ";
 
 	private boolean waiting;
 	private JPanel parent;
@@ -27,56 +30,59 @@ public class TextLabel extends JLabel implements Runnable {
 	public TextLabel() {
 		super();
 		new Thread(this).start();
-		after = After.NOTHING;
-		isActive = false;
-		text = new ArrayList<String>();
+		this.after = After.NOTHING;
+		this.isActive = false;
+		this.text = new ArrayList<String>();
+		this.color = new ArrayList<>();
 		this.setVisible(true);
 		this.setFont(new Font(Font.MONOSPACED, Font.BOLD, 35));
-		this.setBorder(BorderFactory.createCompoundBorder(new LineBorder(Color.BLACK, 5), new EmptyBorder(2, 10, 2, 10)));
+		this.setBorder(
+				BorderFactory.createCompoundBorder(new LineBorder(Color.BLACK, 5), new EmptyBorder(2, 10, 2, 10)));
 		this.setHorizontalAlignment(SwingConstants.LEFT);
 		this.setVerticalAlignment(SwingConstants.TOP);
 
-		delay = SLOW;
+		this.delay = SLOW;
 	}
 
 	public void setActive() {
 		try {
-			if(!text.isEmpty()) {
-				isActive = true;
+			if (!this.text.isEmpty()) {
+				this.isActive = true;
 			} else {
-				isActive = false;
+				this.isActive = false;
 				this.setVisible(false);
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	@Override
 	public void run() {
-		while(true) {
-			if(isActive && !waiting) {
+		while (true) {
+			if (this.isActive && !this.waiting) {
 				this.setVisible(true);
+				this.setForeground(this.color.get(0));
 				this.setText("<html>");
-				for(char c : text.get(0).toCharArray()) {
+				for (char c : this.text.get(0).toCharArray()) {
 					this.setText(this.getText() + c);
 					try {
-						Thread.sleep(delay);
+						Thread.sleep(this.delay);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
 				}
-				removeFirst();
-				if(autoMove) {
+				this.removeFirst();
+				if (this.autoMove) {
 					try {
 						Thread.sleep(1000);
-						setActive();
+						this.setActive();
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
 				}
-			} else if(waiting) {
-				setVisible(false);
+			} else if (this.waiting) {
+				this.setVisible(false);
 			}
 			try {
 				Thread.sleep(5);
@@ -87,7 +93,7 @@ public class TextLabel extends JLabel implements Runnable {
 	}
 
 	public boolean setDelay(long delay) {
-		if(delay >= 0) {
+		if (delay >= 0) {
 			this.delay = delay;
 			return true;
 		}
@@ -95,36 +101,47 @@ public class TextLabel extends JLabel implements Runnable {
 	}
 
 	private void removeFirst() {
-		text.remove(0);
-		isActive = false;
+		this.text.remove(0);
+		this.color.remove(0);
+		this.isActive = false;
 	}
 
 	public void addText(String text) {
-		String[] words = text.split(" ");
-		String currentRow = "";
-		String secondRow = "";
-		boolean firstRow = true;
-		for(int i = 0; i < words.length; i++) {
-			if(firstRow) {
-				if(currentRow.length() + words[i].length() <= 24) {
-					currentRow += words[i] + " ";
+		this.addText(text, Color.BLACK);
+	}
+
+	public void addText(String text, Color c) {
+
+		String[] lines = text.split(NEW_LINE);
+		for (String line : lines) {
+			String[] words = line.split(" ");
+			String currentRow = "";
+			String secondRow = "";
+			boolean firstRow = true;
+			for (String word : words) {
+				if (firstRow) {
+					if (currentRow.length() + word.length() <= 24) {
+						currentRow += word + " ";
+					} else {
+						currentRow += "<br>";
+						secondRow = word + " ";
+						firstRow = false;
+					}
 				} else {
-					currentRow += "<br>";
-					secondRow = words[i] + " ";
-					firstRow = false;
-				}
-			} else {
-				if(secondRow.length() + words[i].length() <= 24) {
-					secondRow += words[i] + " ";
-				} else {
-					this.text.add(currentRow + secondRow);
-					currentRow = words[i] + " ";
-					secondRow = "";
-					firstRow = true;
+					if (secondRow.length() + word.length() <= 24) {
+						secondRow += word + " ";
+					} else {
+						this.text.add(currentRow + secondRow);
+						this.color.add(c);
+						currentRow = word + " ";
+						secondRow = "";
+						firstRow = true;
+					}
 				}
 			}
+			this.text.add(currentRow + secondRow);
+			this.color.add(c);
 		}
-		this.text.add(currentRow + secondRow);
 	}
 
 	public boolean isActive() {
@@ -132,7 +149,7 @@ public class TextLabel extends JLabel implements Runnable {
 	}
 
 	public boolean isEmpty() {
-		return text.isEmpty() && !isVisible();
+		return this.text.isEmpty() && !this.isVisible();
 	}
 
 	public void setAutoMove(boolean autoMove) {
@@ -156,7 +173,7 @@ public class TextLabel extends JLabel implements Runnable {
 	}
 
 	public void setParent(JPanel parent) {
-		if(this.parent != null) {
+		if (this.parent != null) {
 			this.parent.remove(this);
 		}
 		this.parent = parent;
@@ -164,10 +181,10 @@ public class TextLabel extends JLabel implements Runnable {
 	}
 
 	public void waitText() {
-		setWaiting(false);
-		while (!isEmpty()) {
+		this.setWaiting(false);
+		while (!this.isEmpty()) {
 			Thread.yield();
-			repaint();
+			this.repaint();
 		}
 	}
 }

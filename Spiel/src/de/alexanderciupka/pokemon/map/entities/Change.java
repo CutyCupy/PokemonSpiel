@@ -3,6 +3,9 @@ package de.alexanderciupka.pokemon.map.entities;
 import java.awt.Point;
 import java.util.HashMap;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
 import de.alexanderciupka.pokemon.characters.Character;
 import de.alexanderciupka.pokemon.characters.Direction;
 import de.alexanderciupka.pokemon.characters.Player;
@@ -42,8 +45,6 @@ public class Change {
 	private Route route;
 	private Direction[] path;
 
-
-
 	public Change() {
 		this.gController = GameController.getInstance();
 		this.item = new HashMap<Item, Integer>();
@@ -58,34 +59,42 @@ public class Change {
 				this.move.y == -1 ? this.character.getCurrentPosition().y : this.move.y);
 	}
 
-
 	public Character getCharacter() {
 		return this.character;
 	}
+
 	public Route getRoute() {
 		return this.route;
 	}
+
 	public String getParticipant() {
 		return participant;
 	}
+
 	public void setParticipant(String participant) {
 		this.participant = participant;
 	}
+
 	public String getRouteID() {
 		return routeID;
 	}
+
 	public void setRouteID(String route) {
 		this.routeID = route;
 	}
+
 	public Direction getDirection() {
 		return direction;
 	}
+
 	public void setDirection(Direction direction) {
 		this.direction = direction;
 	}
+
 	public Point getMove() {
 		return move;
 	}
+
 	public Direction[] getPath() {
 		return path;
 	}
@@ -93,45 +102,59 @@ public class Change {
 	public void setMove(Point move) {
 		this.move = move;
 	}
+
 	public String getDialog() {
 		return dialog;
 	}
+
 	public void setDialog(String dialog) {
 		this.dialog = dialog;
 	}
+
 	public boolean isPositionUpdate() {
 		return positionUpdate;
 	}
+
 	public void setPositionUpdate(boolean positionUpdate) {
 		this.positionUpdate = positionUpdate;
 	}
+
 	public boolean isFight() {
 		return fight;
 	}
+
 	public void setFight(boolean fight) {
 		this.fight = fight;
 	}
+
 	public String getBeforeFightUpdate() {
 		return beforeFightUpdate;
 	}
+
 	public void setBeforeFightUpdate(String beforeFightUpdate) {
 		this.beforeFightUpdate = beforeFightUpdate;
 	}
+
 	public String getNoFightUpdate() {
 		return noFightUpdate;
 	}
+
 	public void setNoFightUpdate(String noFightUpdate) {
 		this.noFightUpdate = noFightUpdate;
 	}
+
 	public String getAfterFightUpdate() {
 		return afterFightUpdate;
 	}
+
 	public void setAfterFightUpdate(String afterFightUpdate) {
 		this.afterFightUpdate = afterFightUpdate;
 	}
+
 	public String getSpriteUpdate() {
 		return spriteUpdate;
 	}
+
 	public void setSpriteUpdate(String spriteUpdate) {
 		this.spriteUpdate = spriteUpdate;
 	}
@@ -218,25 +241,36 @@ public class Change {
 
 	@Override
 	public boolean equals(Object obj) {
-		if(obj instanceof Change) {
+		if (obj instanceof Change) {
 			Change other = (Change) obj;
-			return (this.participant.equals(other.participant) && this.routeID.equals(other.routeID) && this.move.equals(other.move) &&
-					((this.direction == null && other.direction == null) || (this.direction != null && this.direction.equals(other.direction))) &&
-					((this.dialog == null && other.dialog == null) || (this.dialog != null && this.dialog.equals(other.dialog))) &&
-					this.positionUpdate == other.positionUpdate && this.fight == other.fight && this.heal == other.heal &&
-					((this.beforeFightUpdate == null && other.beforeFightUpdate == null) || (this.beforeFightUpdate != null && this.beforeFightUpdate.equals(other.beforeFightUpdate))) &&
-					((this.noFightUpdate == null && other.noFightUpdate == null) || (this.noFightUpdate != null && this.noFightUpdate.equals(other.noFightUpdate))) &&
-					((this.afterFightUpdate == null && other.afterFightUpdate == null) || (this.afterFightUpdate != null && this.afterFightUpdate.equals(other.afterFightUpdate))) &&
-					((this.spriteUpdate == null && other.spriteUpdate == null) || (this.spriteUpdate != null && this.spriteUpdate.equals(other.spriteUpdate))) &&
-					(this.item == null && other.item == null) || (this.item != null && this.item.equals(other.item)) &&
-					this.camAnimation == other.camAnimation && this.centerCharacter == other.centerCharacter &&
-					(this.camPosition == null && other.camPosition == null) || (this.camPosition != null && this.camPosition.equals(other.camPosition)) &&
-					(this.sound == null ? other.sound == null : this.sound.equals(other.sound)) && this.delay == other.delay && this.unknown == other.unknown
-					&& this.remove == other.remove);
+			return (this.participant.equals(other.participant) && this.routeID.equals(other.routeID)
+					&& this.move.equals(other.move)
+					&& ((this.direction == null && other.direction == null)
+							|| (this.direction != null && this.direction.equals(other.direction)))
+					&& ((this.dialog == null && other.dialog == null)
+							|| (this.dialog != null && this.dialog.equals(other.dialog)))
+					&& this.positionUpdate == other.positionUpdate && this.fight == other.fight
+					&& this.heal == other.heal
+					&& ((this.beforeFightUpdate == null && other.beforeFightUpdate == null)
+							|| (this.beforeFightUpdate != null
+									&& this.beforeFightUpdate.equals(other.beforeFightUpdate)))
+					&& ((this.noFightUpdate == null && other.noFightUpdate == null)
+							|| (this.noFightUpdate != null && this.noFightUpdate.equals(other.noFightUpdate)))
+					&& ((this.afterFightUpdate == null && other.afterFightUpdate == null)
+							|| (this.afterFightUpdate != null && this.afterFightUpdate.equals(other.afterFightUpdate)))
+					&& ((this.spriteUpdate == null && other.spriteUpdate == null)
+							|| (this.spriteUpdate != null && this.spriteUpdate.equals(other.spriteUpdate)))
+					&& (this.item == null && other.item == null)
+					|| (this.item != null && this.item.equals(other.item)) && this.camAnimation == other.camAnimation
+							&& this.centerCharacter == other.centerCharacter
+							&& (this.camPosition == null && other.camPosition == null)
+					|| (this.camPosition != null && this.camPosition.equals(other.camPosition))
+							&& (this.sound == null ? other.sound == null : this.sound.equals(other.sound))
+							&& this.delay == other.delay && this.unknown == other.unknown
+							&& this.remove == other.remove);
 		}
 		return false;
 	}
-
 
 	@Override
 	public Change clone() {
@@ -271,5 +305,37 @@ public class Change {
 
 	public void setPause(boolean p) {
 		this.pause = p;
+	}
+
+	public void load(JsonObject move) {
+		setParticipant(move.get("character").getAsString());
+		setRouteID(move.get("route").getAsString());
+		setMove(new Point(move.get("target_x").getAsInt(), move.get("target_y").getAsInt()));
+		setDialog(move.get("dialog") != null ? move.get("dialog").getAsString() : null);
+		setDirection(Direction.valueOf(move.get("direction").getAsString().toUpperCase()));
+		setPositionUpdate(move.get("update").getAsBoolean());
+		setFight(move.get("fight").getAsBoolean());
+		setAfterFightUpdate(move.get("after_fight") != null ? move.get("after_fight").getAsString() : null);
+		setBeforeFightUpdate(move.get("before_fight") != null ? move.get("before_fight").getAsString() : null);
+		setNoFightUpdate(move.get("no_fight") != null ? move.get("no_fight").getAsString() : null);
+		setSpriteUpdate(move.get("sprite_update") != null ? move.get("sprite_update").getAsString() : null);
+		setHeal(move.get("heal").getAsBoolean());
+		setRemove(move.get("remove").getAsBoolean());
+		if (move.has("item") && move.get("item").isJsonArray()) {
+			for (JsonElement x : move.get("item").getAsJsonArray()) {
+				JsonObject currentItem = x.getAsJsonObject();
+				addItem(Item.valueOf(currentItem.get("name").getAsString().toUpperCase()),
+						currentItem.get("amount") != null ? currentItem.get("amount").getAsInt() : 1);
+
+			}
+		}
+		setCamPosition(new Point(move.get("cam_x").getAsInt(), move.get("cam_y").getAsInt()));
+		setCamAnimation(move.get("cam_animation").getAsBoolean());
+		setCenterCharacter(move.get("cam_center").getAsBoolean());
+		setSound(move.has("sound") ? move.get("sound").getAsString() : null);
+		setWait(move.get("wait").getAsBoolean());
+		setDelay(move.get("delay").getAsLong());
+		setUnknown(move.get("unknown").getAsBoolean());
+		setPause(move.get("pause").getAsBoolean());
 	}
 }

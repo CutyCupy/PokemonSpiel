@@ -42,11 +42,8 @@ public class QuestionEntity extends Entity {
 
 	private boolean answered;
 
-	private String id;
-
-	public QuestionEntity(String id, Route parent, String terrainName) {
+	public QuestionEntity(Route parent, String terrainName) {
 		super(parent, false, "sign", 0, terrainName);
-		this.id = id;
 		this.options = new ArrayList<>();
 		this.solutions = new ArrayList<>();
 		this.gates = new ArrayList<>();
@@ -128,10 +125,6 @@ public class QuestionEntity extends Entity {
 
 	public NPC getNpc() {
 		return npc;
-	}
-
-	public String getID() {
-		return this.id;
 	}
 
 	public ArrayList<Entity> getGates() {
@@ -371,5 +364,20 @@ public class QuestionEntity extends Entity {
 			this.answered = saveData.get("answered") != null ? saveData.get("answered").getAsBoolean() : false;
 		}
 		return false;
+	}
+
+	public static QuestionEntity convert(Entity entity) {
+		QuestionEntity result = new QuestionEntity(entity.getRoute(), entity.getTerrainName());
+		if (entity.getWarp() != null) {
+			result.addWarp(entity.getWarp().clone());
+		}
+		result.setAccessible(false);
+		result.setSprite(entity.getSpriteName());
+		result.setEncounterRate(entity.getEncounterRate());
+		result.setWater(entity.isWater());
+		result.setEvent(entity.getEvent() == null ? null : entity.getEvent().clone());
+		result.setX(entity.getX());
+		result.setY(entity.getY());
+		return result;
 	}
 }

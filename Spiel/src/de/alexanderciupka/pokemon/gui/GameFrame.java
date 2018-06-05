@@ -15,6 +15,7 @@ import javax.swing.KeyStroke;
 import javax.swing.border.EmptyBorder;
 
 import de.alexanderciupka.pokemon.characters.Direction;
+import de.alexanderciupka.pokemon.characters.NPC;
 import de.alexanderciupka.pokemon.characters.Player;
 import de.alexanderciupka.pokemon.fighting.FightOption;
 import de.alexanderciupka.pokemon.gui.overlay.DarkOverlay;
@@ -53,8 +54,8 @@ public class GameFrame extends JFrame {
 	private JPanel currentPanel;
 	private static final long COOLDOWN = 250;
 
-	public static final int GRID_SIZE = 70;
-	public static final int FRAME_SIZE = GRID_SIZE * 9;
+	public static final int GRID_SIZE = 42;
+	public static final int FRAME_SIZE = GRID_SIZE * 15;
 
 	private Direction currentDirection;
 	private Stack<JPanel> panelHistory;
@@ -70,71 +71,71 @@ public class GameFrame extends JFrame {
 	}
 
 	public GameFrame() {
-		directions = new ArrayList<>();
-		directions.add(Direction.NONE);
-		currentDirection = Direction.NONE;
-		map = new JPanel(null);
-		setContentPane(map);
-		map.setBackground(Color.black);
-		gController = GameController.getInstance();
-		setUndecorated(true);
-		setVisible(true);
-		setResizable(false);
-		setBounds(MenuController.getToCenter(FRAME_SIZE, FRAME_SIZE));
-		characterX = 315 - gController.getMainCharacter().getCharacterImage().getWidth(null) / 2;
-		characterY = 315 - gController.getMainCharacter().getCharacterImage().getHeight(null) / 2;
-		imageHolder = new BackgroundLabel(characterX, characterY);
-		imageHolder.setBounds(0, 0, FRAME_SIZE, FRAME_SIZE);
-		dialogue = new TextLabel();
-		dialogue.setBounds(5, 480, 600, 110);
-		dialogue.setOpaque(true);
-		dialogue.setVisible(false);
-		dialogue.setBackground(Color.WHITE);
-		inventory = new InventoryPanel();
-		pokemon = new PokemonPanel();
-		pokemon.setBorder(new EmptyBorder(5, 5, 5, 5));
-		pokemon.setLayout(null);
-		report = new ReportPanel();
-		evolution = new EvolutionPanel();
-		map.add(imageHolder);
-		map.add(dialogue);
+		this.directions = new ArrayList<>();
+		this.directions.add(Direction.NONE);
+		this.currentDirection = Direction.NONE;
+		this.map = new JPanel(null);
+		this.setContentPane(this.map);
+		this.map.setBackground(Color.black);
+		this.gController = GameController.getInstance();
+		this.setUndecorated(true);
+		this.setVisible(true);
+		this.setResizable(false);
+		this.setBounds(MenuController.getToCenter(FRAME_SIZE, FRAME_SIZE));
+		this.characterX = 315 - this.gController.getMainCharacter().getCharacterImage().getWidth(null) / 2;
+		this.characterY = 315 - this.gController.getMainCharacter().getCharacterImage().getHeight(null) / 2;
+		this.imageHolder = new BackgroundLabel(this.characterX, this.characterY);
+		this.imageHolder.setBounds(0, 0, FRAME_SIZE, FRAME_SIZE);
+		this.dialogue = new TextLabel();
+		this.dialogue.setBounds(5, 480, 600, 110);
+		this.dialogue.setOpaque(true);
+		this.dialogue.setVisible(false);
+		this.dialogue.setBackground(Color.WHITE);
+		this.inventory = new InventoryPanel();
+		this.pokemon = new PokemonPanel();
+		this.pokemon.setBorder(new EmptyBorder(5, 5, 5, 5));
+		this.pokemon.setLayout(null);
+		this.report = new ReportPanel();
+		this.evolution = new EvolutionPanel();
+		this.map.add(this.imageHolder);
+		this.map.add(this.dialogue);
 
-		panelHistory = new Stack<JPanel>();
+		this.panelHistory = new Stack<JPanel>();
 
-		addActions();
-		this.paint(getGraphics());
+		this.addActions();
+		this.paint(this.getGraphics());
 
 	}
 
 	@Override
 	public void paint(Graphics g) {
-		if (!gController.isFighting()) {
+		if (!this.gController.isFighting()) {
 			if (this.fighting) {
 				this.fighting = false;
 			}
-			if (currentPanel != null) {
-				if (!currentPanel.equals(getContentPane())) {
-					setContentPane(currentPanel);
+			if (this.currentPanel != null) {
+				if (!this.currentPanel.equals(this.getContentPane())) {
+					this.setContentPane(this.currentPanel);
 				}
 			} else {
-				if (!map.equals(getContentPane())) {
-					setContentPane(map);
+				if (!this.map.equals(this.getContentPane())) {
+					this.setContentPane(this.map);
 				}
-				map.repaint();
+				this.map.repaint();
 			}
 		} else if (this.fighting) {
-			if (gController.getCurrentFightPanel() != null
-					&& !gController.getCurrentFightPanel().equals(getContentPane())) {
-				setContentPane(gController.getCurrentFightPanel());
+			if (this.gController.getCurrentFightPanel() != null
+					&& !this.gController.getCurrentFightPanel().equals(this.getContentPane())) {
+				this.setContentPane(this.gController.getCurrentFightPanel());
 			}
 		}
-		getContentPane().repaint();
+		this.getContentPane().repaint();
 	}
 
 	@Override
 	public void setContentPane(Container contentPane) {
-		if (dialogue != null) {
-			dialogue.setParent((JPanel) contentPane);
+		if (this.dialogue != null) {
+			this.dialogue.setParent((JPanel) contentPane);
 		}
 		super.setContentPane(contentPane);
 	}
@@ -144,46 +145,56 @@ public class GameFrame extends JFrame {
 	}
 
 	public void startFight(Pokemon player, Pokemon enemy) {
-		fight = new FightPanel(player, enemy);
-		fight.setBorder(new EmptyBorder(5, 5, 5, 5));
-		fight.setLayout(null);
+		this.fight = new FightPanel(player, enemy);
+		this.fight.setBorder(new EmptyBorder(5, 5, 5, 5));
+		this.fight.setLayout(null);
 		this.fighting = true;
-		pokemon.update();
-		if (!gController.getFight().canEscape()) {
-			this.getFightPanel()
-					.addText("Eine Herausforderung von " + gController.getFight().getEnemyCharacter().getName() + "!");
+		this.pokemon.update();
+		if (!this.gController.getFight().canEscape()) {
+			this.getFightPanel().addText(
+					"Eine Herausforderung von " + this.gController.getFight().getEnemyCharacter().getName() + "!");
 		} else {
 			this.getFightPanel().addText("Ein wildes " + enemy.getName() + " erscheint!");
 		}
-		gController.updateFight();
+		this.gController.updateFight();
 	}
 
 	public void stopFight() {
-		gController.waitDialogue();
-		setCurrentPanel(null);
+		this.gController.waitDialogue();
+		this.setCurrentPanel(null);
 	}
 
 	public FightPanel getFightPanel() {
-		return fight;
+		return this.fight;
 	}
 
 	public PokemonPanel getPokemonPanel() {
-		return pokemon;
+		return this.pokemon;
 	}
 
 	public void addDialogue(String text) {
 		if (text != null) {
-			dialogue.addText(text);
-			dialogue.setActive();
+			this.dialogue.addText(text);
+			this.dialogue.setActive();
+		}
+	}
+
+	public void addDialogue(String text, NPC character) {
+		if (text != null) {
+			if (character.showName()) {
+				text = character.getName() + ": " + text;
+			}
+			this.dialogue.addText(text, character.getTextColor());
+			this.dialogue.setActive();
 		}
 	}
 
 	public boolean isDialogueEmpty() {
-		return dialogue.isEmpty();
+		return this.dialogue.isEmpty();
 	}
 
 	public TextLabel getDialogue() {
-		return dialogue;
+		return this.dialogue;
 	}
 
 	public void setDelay(long slow) {
@@ -196,7 +207,7 @@ public class GameFrame extends JFrame {
 			this.newMove.setBorder(new EmptyBorder(5, 5, 5, 5));
 		}
 		this.newMove.set(pokemon, newMove);
-		if (gController.isFighting()) {
+		if (this.gController.isFighting()) {
 			this.gController.getFight().setCurrentFightOption(FightOption.NEW_ATTACK);
 		} else {
 			this.setCurrentPanel(this.newMove);
@@ -204,7 +215,7 @@ public class GameFrame extends JFrame {
 	}
 
 	public NewAttackPanel getNewAttackPanel() {
-		return newMove;
+		return this.newMove;
 	}
 
 	public void setActive() {
@@ -217,8 +228,8 @@ public class GameFrame extends JFrame {
 						|| (this.currentPanel != null && !this.currentPanel.getClass().isInstance(currentPanel)))) {
 			this.panelHistory.push(this.currentPanel);
 		}
-		if(this.currentPanel instanceof GeneratorPanel) {
-			map.add(imageHolder);
+		if (this.currentPanel instanceof GeneratorPanel) {
+			this.map.add(this.imageHolder);
 		}
 		if (this.gController.isFighting() && currentPanel instanceof PokemonPanel) {
 			this.gController.getFight().setCurrentFightOption(FightOption.POKEMON);
@@ -226,8 +237,8 @@ public class GameFrame extends JFrame {
 			this.gController.getFight().setCurrentFightOption(FightOption.REPORT);
 		} else if (this.gController.isFighting() && currentPanel instanceof InventoryPanel) {
 			this.gController.getFight().setCurrentFightOption(FightOption.BAG);
-		} else if(currentPanel instanceof GeneratorPanel) {
-			currentPanel.add(imageHolder);
+		} else if (currentPanel instanceof GeneratorPanel) {
+			currentPanel.add(this.imageHolder);
 		}
 		this.currentPanel = currentPanel;
 		this.back = false;
@@ -239,12 +250,12 @@ public class GameFrame extends JFrame {
 			@Override
 			public void run() {
 				while (true) {
-					if (!gController.isFighting() && !gController.getInteractionPause()) {
-						if (!active) {
-							active = true;
-							currentDirection = directions.get(0);
-							if (currentDirection != Direction.NONE) {
-								if (!gController.move(currentDirection)) {
+					if (!GameFrame.this.gController.isFighting() && !GameFrame.this.gController.getInteractionPause()) {
+						if (!GameFrame.this.active) {
+							GameFrame.this.active = true;
+							GameFrame.this.currentDirection = GameFrame.this.directions.get(0);
+							if (GameFrame.this.currentDirection != Direction.NONE) {
+								if (!GameFrame.this.gController.move(GameFrame.this.currentDirection)) {
 									SoundController.getInstance().playSound(SoundController.BUMP);
 									try {
 										Thread.sleep(COOLDOWN);
@@ -253,7 +264,7 @@ public class GameFrame extends JFrame {
 									}
 								}
 							}
-							active = false;
+							GameFrame.this.active = false;
 						}
 					}
 					try {
@@ -266,268 +277,271 @@ public class GameFrame extends JFrame {
 
 		}).start();
 
-		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("W"), "up");
-		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("UP"), "up");
-		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released W"), "stopup");
-		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released UP"), "stopup");
+		this.map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("W"), "up");
+		this.map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("UP"), "up");
+		this.map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released W"), "stopup");
+		this.map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released UP"), "stopup");
 
-		map.getActionMap().put("up", new AbstractAction() {
+		this.map.getActionMap().put("up", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (!directions.contains(Direction.UP)) {
-					directions.add(0, Direction.UP);
+				if (!GameFrame.this.directions.contains(Direction.UP)) {
+					GameFrame.this.directions.add(0, Direction.UP);
 				}
 			}
 		});
 
-		map.getActionMap().put("stopup", new AbstractAction() {
+		this.map.getActionMap().put("stopup", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				directions.remove(Direction.UP);
+				GameFrame.this.directions.remove(Direction.UP);
 			}
 		});
 
-		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("A"), "left");
-		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("LEFT"), "left");
-		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released A"), "stopleft");
-		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released LEFT"), "stopleft");
+		this.map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("A"), "left");
+		this.map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("LEFT"), "left");
+		this.map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released A"), "stopleft");
+		this.map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released LEFT"),
+				"stopleft");
 
-		map.getActionMap().put("left", new AbstractAction() {
+		this.map.getActionMap().put("left", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (!directions.contains(Direction.LEFT)) {
-					directions.add(0, Direction.LEFT);
+				if (!GameFrame.this.directions.contains(Direction.LEFT)) {
+					GameFrame.this.directions.add(0, Direction.LEFT);
 				}
 			}
 		});
 
-		map.getActionMap().put("stopleft", new AbstractAction() {
+		this.map.getActionMap().put("stopleft", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				directions.remove(Direction.LEFT);
+				GameFrame.this.directions.remove(Direction.LEFT);
 			}
 		});
 
-		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("D"), "right");
-		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("RIGHT"), "right");
-		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released D"), "stopright");
-		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released RIGHT"), "stopright");
+		this.map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("D"), "right");
+		this.map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("RIGHT"), "right");
+		this.map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released D"), "stopright");
+		this.map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released RIGHT"),
+				"stopright");
 
-		map.getActionMap().put("right", new AbstractAction() {
+		this.map.getActionMap().put("right", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (!directions.contains(Direction.RIGHT)) {
-					directions.add(0, Direction.RIGHT);
+				if (!GameFrame.this.directions.contains(Direction.RIGHT)) {
+					GameFrame.this.directions.add(0, Direction.RIGHT);
 				}
 			}
 		});
 
-		map.getActionMap().put("stopright", new AbstractAction() {
+		this.map.getActionMap().put("stopright", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				directions.remove(Direction.RIGHT);
+				GameFrame.this.directions.remove(Direction.RIGHT);
 			}
 		});
 
-		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("S"), "down");
-		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("DOWN"), "down");
-		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released S"), "stopdown");
-		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released DOWN"), "stopdown");
+		this.map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("S"), "down");
+		this.map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("DOWN"), "down");
+		this.map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released S"), "stopdown");
+		this.map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released DOWN"),
+				"stopdown");
 
-		map.getActionMap().put("down", new AbstractAction() {
+		this.map.getActionMap().put("down", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (!directions.contains(Direction.DOWN)) {
-					directions.add(0, Direction.DOWN);
+				if (!GameFrame.this.directions.contains(Direction.DOWN)) {
+					GameFrame.this.directions.add(0, Direction.DOWN);
 				}
 			}
 		});
 
-		map.getActionMap().put("stopdown", new AbstractAction() {
+		this.map.getActionMap().put("stopdown", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				directions.remove(Direction.DOWN);
+				GameFrame.this.directions.remove(Direction.DOWN);
 			}
 		});
 
-		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("R"), "run");
-		map.getActionMap().put("run", new AbstractAction() {
+		this.map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("R"), "run");
+		this.map.getActionMap().put("run", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				gController.getMainCharacter().toggleWalkingSpeed();
+				GameFrame.this.gController.getMainCharacter().toggleWalkingSpeed();
 			}
 		});
 
-		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("SPACE"), "space");
-		map.getActionMap().put("space", new AbstractAction() {
+		this.map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("SPACE"), "space");
+		this.map.getActionMap().put("space", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (gController.getInteractionPause()) {
-					dialogue.setDelay(TextLabel.FAST);
+				if (GameFrame.this.gController.getInteractionPause()) {
+					GameFrame.this.dialogue.setDelay(TextLabel.FAST);
 				} else {
 					new Thread(new Runnable() {
 						@Override
 						public void run() {
-							gController.checkInteraction();
+							GameFrame.this.gController.checkInteraction();
 						}
 					}).start();
 				}
 			}
 		});
-		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released SPACE"),
+		this.map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released SPACE"),
 				"released space");
-		map.getActionMap().put("released space", new AbstractAction() {
+		this.map.getActionMap().put("released space", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (gController.getInteractionPause()) {
-					dialogue.setDelay(TextLabel.SLOW);
+				if (GameFrame.this.gController.getInteractionPause()) {
+					GameFrame.this.dialogue.setDelay(TextLabel.SLOW);
 				}
 			}
 		});
 
-		pokemon.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("SPACE"), "space");
-		pokemon.getActionMap().put("space", new AbstractAction() {
+		this.pokemon.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("SPACE"), "space");
+		this.pokemon.getActionMap().put("space", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (gController.getInteractionPause()) {
-					dialogue.setDelay(TextLabel.FAST);
+				if (GameFrame.this.gController.getInteractionPause()) {
+					GameFrame.this.dialogue.setDelay(TextLabel.FAST);
 				} else {
 					new Thread(new Runnable() {
 						@Override
 						public void run() {
-							gController.checkInteraction();
+							GameFrame.this.gController.checkInteraction();
 						}
 					}).start();
 				}
 			}
 		});
-		pokemon.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released SPACE"),
+		this.pokemon.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released SPACE"),
 				"released space");
-		pokemon.getActionMap().put("released space", new AbstractAction() {
+		this.pokemon.getActionMap().put("released space", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (gController.getInteractionPause()) {
-					dialogue.setDelay(TextLabel.SLOW);
+				if (GameFrame.this.gController.getInteractionPause()) {
+					GameFrame.this.dialogue.setDelay(TextLabel.SLOW);
 				}
 			}
 		});
 
-		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ENTER"), "enter");
-		map.getActionMap().put("enter", new AbstractAction() {
+		this.map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ENTER"), "enter");
+		this.map.getActionMap().put("enter", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (!gController.isFighting() && gController.getInteractionPause()) {
-					dialogue.setActive();
+				if (!GameFrame.this.gController.isFighting() && GameFrame.this.gController.getInteractionPause()) {
+					GameFrame.this.dialogue.setActive();
 				}
 			}
 		});
 
-		pokemon.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ENTER"), "enter");
-		pokemon.getActionMap().put("enter", new AbstractAction() {
+		this.pokemon.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ENTER"), "enter");
+		this.pokemon.getActionMap().put("enter", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				dialogue.setActive();
+				GameFrame.this.dialogue.setActive();
 			}
 		});
 
-		evolution.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("SPACE"), "space");
-		evolution.getActionMap().put("space", new AbstractAction() {
+		this.evolution.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("SPACE"), "space");
+		this.evolution.getActionMap().put("space", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (gController.getInteractionPause()) {
-					dialogue.setDelay(TextLabel.FAST);
+				if (GameFrame.this.gController.getInteractionPause()) {
+					GameFrame.this.dialogue.setDelay(TextLabel.FAST);
 				}
 			}
 		});
-		evolution.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released SPACE"),
+		this.evolution.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released SPACE"),
 				"released space");
-		evolution.getActionMap().put("released space", new AbstractAction() {
+		this.evolution.getActionMap().put("released space", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (gController.getInteractionPause()) {
-					dialogue.setDelay(TextLabel.SLOW);
+				if (GameFrame.this.gController.getInteractionPause()) {
+					GameFrame.this.dialogue.setDelay(TextLabel.SLOW);
 				}
 			}
 		});
 
-		evolution.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ENTER"), "enter");
-		evolution.getActionMap().put("enter", new AbstractAction() {
+		this.evolution.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ENTER"), "enter");
+		this.evolution.getActionMap().put("enter", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (!gController.isFighting() && gController.getInteractionPause()) {
-					dialogue.setActive();
+				if (!GameFrame.this.gController.isFighting() && GameFrame.this.gController.getInteractionPause()) {
+					GameFrame.this.dialogue.setActive();
 				}
 			}
 		});
 
-		inventory.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("SPACE"), "space");
-		inventory.getActionMap().put("space", new AbstractAction() {
+		this.inventory.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("SPACE"), "space");
+		this.inventory.getActionMap().put("space", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (gController.getInteractionPause()) {
-					dialogue.setDelay(TextLabel.FAST);
+				if (GameFrame.this.gController.getInteractionPause()) {
+					GameFrame.this.dialogue.setDelay(TextLabel.FAST);
 				}
 			}
 		});
-		inventory.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released SPACE"),
+		this.inventory.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("released SPACE"),
 				"released space");
-		inventory.getActionMap().put("released space", new AbstractAction() {
+		this.inventory.getActionMap().put("released space", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (gController.getInteractionPause()) {
-					dialogue.setDelay(TextLabel.SLOW);
+				if (GameFrame.this.gController.getInteractionPause()) {
+					GameFrame.this.dialogue.setDelay(TextLabel.SLOW);
 				}
 			}
 		});
 
-		inventory.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ENTER"), "enter");
-		inventory.getActionMap().put("enter", new AbstractAction() {
+		this.inventory.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ENTER"), "enter");
+		this.inventory.getActionMap().put("enter", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (!gController.isFighting() && gController.getInteractionPause()) {
-					dialogue.setActive();
+				if (!GameFrame.this.gController.isFighting() && GameFrame.this.gController.getInteractionPause()) {
+					GameFrame.this.dialogue.setActive();
 				}
 			}
 		});
 
-		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ESCAPE"), "escape");
-		map.getActionMap().put("escape", new AbstractAction() {
+		this.map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ESCAPE"), "escape");
+		this.map.getActionMap().put("escape", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (!gController.getInteractionPause() && !gController.isFighting()) {
-					gController.returnToMenu();
+				if (!GameFrame.this.gController.getInteractionPause() && !GameFrame.this.gController.isFighting()) {
+					GameFrame.this.gController.returnToMenu();
 				}
 			}
 		});
-		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("P"), "pokemon");
-		map.getActionMap().put("pokemon", new AbstractAction() {
+		this.map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("P"), "pokemon");
+		this.map.getActionMap().put("pokemon", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (!gController.isFighting() && !gController.getInteractionPause()) {
-					pokemon.update();
-					currentPanel = pokemon;
-				}
-			}
-		});
-
-		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("I"), "inventory");
-		map.getActionMap().put("inventory", new AbstractAction() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (!gController.isFighting() && !gController.getInteractionPause()) {
-					inventory.update(gController.getMainCharacter());
-					currentPanel = inventory;
+				if (!GameFrame.this.gController.isFighting() && !GameFrame.this.gController.getInteractionPause()) {
+					GameFrame.this.pokemon.update();
+					GameFrame.this.currentPanel = GameFrame.this.pokemon;
 				}
 			}
 		});
 
-		map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("F"), "flash");
-		map.getActionMap().put("flash", new AbstractAction() {
+		this.map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("I"), "inventory");
+		this.map.getActionMap().put("inventory", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (!GameFrame.this.gController.isFighting() && !GameFrame.this.gController.getInteractionPause()) {
+					GameFrame.this.inventory.update(GameFrame.this.gController.getMainCharacter());
+					GameFrame.this.currentPanel = GameFrame.this.inventory;
+				}
+			}
+		});
+
+		this.map.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("F"), "flash");
+		this.map.getActionMap().put("flash", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				if (gController.getMainCharacter().hasItem(Item.FLASH)
-						&& gController.getMainCharacter().getCurrentRoute().isDark()) {
-					((DarkOverlay) (getBackgroundLabel().getOverlay(DarkOverlay.class))).flash();
+				if (GameFrame.this.gController.getMainCharacter().hasItem(Item.FLASH)
+						&& GameFrame.this.gController.getMainCharacter().getCurrentRoute().isDark()) {
+					((DarkOverlay) (GameFrame.this.getBackgroundLabel().getOverlay(DarkOverlay.class))).flash();
 				}
 			}
 		});
@@ -543,11 +557,11 @@ public class GameFrame extends JFrame {
 	}
 
 	public JPanel getReportPanel() {
-		return report;
+		return this.report;
 	}
 
 	public BackgroundLabel getBackgroundLabel() {
-		return imageHolder;
+		return this.imageHolder;
 	}
 
 	public InventoryPanel getInventoryPanel() {
@@ -559,21 +573,21 @@ public class GameFrame extends JFrame {
 	}
 
 	public JPanel getLastPanel() {
-		return getLastPanel(false);
+		return this.getLastPanel(false);
 	}
 
 	public JPanel getLastPanel(boolean withEvolution) {
 		this.back = true;
-		if (panelHistory.isEmpty()) {
+		if (this.panelHistory.isEmpty()) {
 			return null;
 		} else {
-			JPanel p = panelHistory.pop();
+			JPanel p = this.panelHistory.pop();
 			if (this.currentPanel.getClass().isInstance(p)) {
-				return getLastPanel(withEvolution);
+				return this.getLastPanel(withEvolution);
 			}
 			if (!withEvolution) {
 				if (p instanceof EvolutionPanel) {
-					return getLastPanel(withEvolution);
+					return this.getLastPanel(withEvolution);
 				}
 			}
 			return p;

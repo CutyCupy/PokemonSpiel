@@ -1,12 +1,12 @@
 package de.alexanderciupka.pokemon.characters;
 
+import java.awt.Color;
 import java.awt.Point;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.HashMap;
 
 import com.google.gson.JsonNull;
@@ -26,6 +26,25 @@ public class NPC extends Character {
 	private String logo;
 	private HashMap<Item, Integer> rewards;
 
+	private boolean showName = true;
+	private Color textColor = Color.BLUE;
+
+	public boolean showName() {
+		return this.showName;
+	}
+
+	public void setShowName(boolean s) {
+		this.showName = s;
+	}
+
+	public Color getTextColor() {
+		return this.textColor;
+	}
+
+	public void setTextColor(Color c) {
+		this.textColor = c;
+	}
+
 	public NPC() {
 		super();
 		this.rewards = new HashMap<>();
@@ -37,35 +56,35 @@ public class NPC extends Character {
 	}
 
 	public void resetPosition() {
-		if (!currentPosition.equals(originalPosition)) {
-			this.oldPosition = new Point(currentPosition);
-			setCurrentPosition(originalPosition);
-			currentRoute.updateMap(this.oldPosition);
+		if (!this.currentPosition.equals(this.originalPosition)) {
+			this.oldPosition = new Point(this.currentPosition);
+			this.setCurrentPosition(this.originalPosition);
+			this.currentRoute.updateMap(this.oldPosition);
 		}
-		if (currentDirection != originalDirection) {
-			setCurrentDirection(originalDirection);
+		if (this.currentDirection != this.originalDirection) {
+			this.setCurrentDirection(this.originalDirection);
 		}
-		currentRoute.updateMap(currentPosition);
+		this.currentRoute.updateMap(this.currentPosition);
 	}
 
 	public void faceTowardsMainCharacter() {
-		switch (gController.getMainCharacter().getCurrentDirection()) {
+		switch (this.gController.getMainCharacter().getCurrentDirection()) {
 		case UP:
-			setCurrentDirection(de.alexanderciupka.pokemon.characters.Direction.DOWN);
+			this.setCurrentDirection(de.alexanderciupka.pokemon.characters.Direction.DOWN);
 			break;
 		case RIGHT:
-			setCurrentDirection(de.alexanderciupka.pokemon.characters.Direction.LEFT);
+			this.setCurrentDirection(de.alexanderciupka.pokemon.characters.Direction.LEFT);
 			break;
 		case DOWN:
-			setCurrentDirection(de.alexanderciupka.pokemon.characters.Direction.UP);
+			this.setCurrentDirection(de.alexanderciupka.pokemon.characters.Direction.UP);
 			break;
 		case LEFT:
-			setCurrentDirection(de.alexanderciupka.pokemon.characters.Direction.RIGHT);
+			this.setCurrentDirection(de.alexanderciupka.pokemon.characters.Direction.RIGHT);
 			break;
 		default:
 			return;
 		}
-		currentRoute.updateMap(currentPosition);
+		this.currentRoute.updateMap(this.currentPosition);
 	}
 
 	public void setBeforeFightDialogue(String dialog) {
@@ -89,32 +108,32 @@ public class NPC extends Character {
 	}
 
 	public boolean moveTowardsMainCharacter() {
-		int mainX = gController.getMainCharacter().getCurrentPosition().x;
-		int mainY = gController.getMainCharacter().getCurrentPosition().y;
-		if (currentPosition.x != mainX ^ currentPosition.y != mainY) {
+		int mainX = this.gController.getMainCharacter().getCurrentPosition().x;
+		int mainY = this.gController.getMainCharacter().getCurrentPosition().y;
+		if (this.currentPosition.x != mainX ^ this.currentPosition.y != mainY) {
 			int x = 0;
 			int y = 0;
-			switch (currentDirection) {
+			switch (this.currentDirection) {
 			case DOWN:
-				if (mainX != currentPosition.x || currentPosition.y > mainY) {
+				if (mainX != this.currentPosition.x || this.currentPosition.y > mainY) {
 					return false;
 				}
 				y = 1;
 				break;
 			case LEFT:
-				if (mainY != currentPosition.y || currentPosition.x < mainX) {
+				if (mainY != this.currentPosition.y || this.currentPosition.x < mainX) {
 					return false;
 				}
 				x = -1;
 				break;
 			case RIGHT:
-				if (mainY != currentPosition.y || currentPosition.x > mainX) {
+				if (mainY != this.currentPosition.y || this.currentPosition.x > mainX) {
 					return false;
 				}
 				x = 1;
 				break;
 			case UP:
-				if (mainX != currentPosition.x || currentPosition.y < mainY) {
+				if (mainX != this.currentPosition.x || this.currentPosition.y < mainY) {
 					return false;
 				}
 				y = -1;
@@ -123,34 +142,34 @@ public class NPC extends Character {
 				return false;
 			}
 			for (int i = 1; i < 5; i++) {
-				if (currentPosition.x + (i * x) == mainX && currentPosition.y + (i * y) == mainY) {
+				if (this.currentPosition.x + (i * x) == mainX && this.currentPosition.y + (i * y) == mainY) {
 					break;
-				} else if (!currentRoute.getEntities()[currentPosition.y + (i * y)][currentPosition.x + (i * x)]
-						.isAccessible(this)) {
+				} else if (!this.currentRoute.getEntities()[this.currentPosition.y + (i * y)][this.currentPosition.x
+						+ (i * x)].isAccessible(this)) {
 					return false;
 				}
 			}
 			switch (this.getCurrentDirection()) {
 			case DOWN:
-				gController.getMainCharacter().setCurrentDirection(Direction.UP);
+				this.gController.getMainCharacter().setCurrentDirection(Direction.UP);
 				break;
 			case LEFT:
-				gController.getMainCharacter().setCurrentDirection(Direction.RIGHT);
+				this.gController.getMainCharacter().setCurrentDirection(Direction.RIGHT);
 				break;
 			case RIGHT:
-				gController.getMainCharacter().setCurrentDirection(Direction.LEFT);
+				this.gController.getMainCharacter().setCurrentDirection(Direction.LEFT);
 				break;
 			case UP:
-				gController.getMainCharacter().setCurrentDirection(Direction.DOWN);
+				this.gController.getMainCharacter().setCurrentDirection(Direction.DOWN);
 				break;
 			default:
 				break;
 			}
-			gController.getGameFrame().getBackgroundLabel().spotted(this);
-			while (!(currentPosition.x + x == mainX && currentPosition.y + y == mainY)) {
-				currentRoute.updateMap(currentPosition);
+			this.gController.getGameFrame().getBackgroundLabel().spotted(this);
+			while (!(this.currentPosition.x + x == mainX && this.currentPosition.y + y == mainY)) {
+				this.currentRoute.updateMap(this.currentPosition);
 				this.changePosition(this.getCurrentDirection(), true);
-				currentRoute.updateMap(currentPosition);
+				this.currentRoute.updateMap(this.currentPosition);
 			}
 			return true;
 		}
@@ -160,17 +179,20 @@ public class NPC extends Character {
 	@Override
 	public void setCurrentDirection(Direction direction) {
 		super.setCurrentDirection(direction);
-		if (currentRoute != null) {
+		if (this.currentRoute != null) {
 			this.currentRoute.updateMap(this.currentPosition);
 		}
 	}
 
 	public void importTeam() {
+		if (!this.trainer) {
+			return;
+		}
 		try {
-			teamFile = new File(this.getClass()
-					.getResource("/characters/teams/" + this.currentRoute.getId() + "/" + getFileName() + ".txt")
+			this.teamFile = new File(this.getClass()
+					.getResource("/characters/teams/" + this.currentRoute.getId() + "/" + this.getFileName() + ".txt")
 					.getFile());
-			BufferedReader reader = new BufferedReader(new FileReader(teamFile));
+			BufferedReader reader = new BufferedReader(new FileReader(this.teamFile));
 			String currentLine;
 			while ((currentLine = reader.readLine()) != null) {
 				String[] rowElements = currentLine.split(",");
@@ -178,45 +200,47 @@ public class NPC extends Character {
 				currentPokemon.getStats().generateStats(Short.parseShort(rowElements[1]));
 				this.team.addPokemon(currentPokemon);
 			}
-			trainer = true;
+			this.trainer = true;
 		} catch (Exception e) {
-			new File("res/characters/teams/" + this.currentRoute.getId() + "/").mkdir();
-			File f = new File("res/characters/teams/" + this.currentRoute.getId() + "/" + getFileName() + ".txt");
-			try {
-				if(f.exists()) {
-					return;
-				}
-				f.createNewFile();
-				PrintWriter writer = new PrintWriter(new FileWriter(f));
-				writer.write("25,1");
-				writer.flush();
-				importTeam();
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-			trainer = false;
+			// new File("res/characters/teams/" + this.currentRoute.getId() + "/").mkdir();
+			// File f = new File("res/characters/teams/" + this.currentRoute.getId() + "/" +
+			// getFileName() + ".txt");
+			// try {
+			// if(f.exists()) {
+			// return;
+			// }
+			// f.createNewFile();
+			// PrintWriter writer = new PrintWriter(new FileWriter(f));
+			// writer.write("25,1");
+			// writer.flush();
+			// importTeam();
+			// } catch (IOException e1) {
+			// e1.printStackTrace();
+			// }
+			this.trainer = false;
 		}
 	}
 
 	public void importDialogue() {
 		try {
-			dialogueFile = new File(this.getClass()
-					.getResource("/characters/dialoge/" + this.currentRoute.getId() + "/" + getFileName() + ".char")
+			this.dialogueFile = new File(this.getClass()
+					.getResource(
+							"/characters/dialoge/" + this.currentRoute.getId() + "/" + this.getFileName() + ".char")
 					.getFile());
-			JsonObject dialogue = new JsonParser().parse(new BufferedReader(new FileReader(dialogueFile)))
+			JsonObject dialogue = new JsonParser().parse(new BufferedReader(new FileReader(this.dialogueFile)))
 					.getAsJsonObject();
 			this.beforeFight = dialogue.get("before") == null ? null : dialogue.get("before").getAsString();
 			this.noFight = dialogue.get("no") == null ? null : dialogue.get("no").getAsString();
 			this.onDefeat = dialogue.get("on_defeat") == null ? null : dialogue.get("on_defeat").getAsString();
 			this.rewards = new HashMap<>();
 			if (!(dialogue.get("reward") == null)) {
-				importRewards(dialogue.get("reward").getAsString());
+				this.importRewards(dialogue.get("reward").getAsString());
 			}
 		} catch (Exception e) {
 			new File("res/characters/dialoge/" + this.currentRoute.getId() + "/").mkdir();
-			File f = new File("res/characters/dialoge/" + this.currentRoute.getId() + "/" + getFileName() + ".char");
+			File f = new File(
+					"res/characters/dialoge/" + this.currentRoute.getId() + "/" + this.getFileName() + ".char");
 			try {
-				System.out.println(f);
 				f.createNewFile();
 				JsonObject d = new JsonObject();
 				d.addProperty("before", "");
@@ -229,7 +253,6 @@ public class NPC extends Character {
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
-			System.out.println(this + " - " + this.currentRoute.getName());
 			e.printStackTrace();
 		}
 	}
@@ -251,11 +274,11 @@ public class NPC extends Character {
 	}
 
 	public String getOnDefeatDialogue() {
-		return onDefeat;
+		return this.onDefeat;
 	}
 
 	public HashMap<Item, Integer> getRewards() {
-		return rewards;
+		return this.rewards;
 	}
 
 	public boolean hasRewards() {
@@ -279,7 +302,7 @@ public class NPC extends Character {
 	}
 
 	public String getLogo() {
-		return logo;
+		return this.logo;
 	}
 
 	public void setLogo(String logo) {
@@ -317,7 +340,7 @@ public class NPC extends Character {
 			this.onDefeat = saveData.get("after") instanceof JsonNull ? null : saveData.get("after").getAsString();
 			this.rewards = new HashMap<>();
 			if (!(saveData.get("reward") instanceof JsonNull)) {
-				importRewards(saveData.get("reward").getAsString());
+				this.importRewards(saveData.get("reward").getAsString());
 			}
 			return true;
 		}

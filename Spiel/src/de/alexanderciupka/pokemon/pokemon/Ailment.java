@@ -6,18 +6,20 @@ import de.alexanderciupka.pokemon.map.GameController;
 
 public enum Ailment {
 
-	NONE, BURN, FREEZE,
-	PARALYSIS, SLEEP,
-	POISON, FAINTED;
+	NONE, BURN, FREEZE, PARALYSIS, SLEEP, POISON, HEAVY_POISON, FAINTED;
+
+	// TODO: Implement Heavy Poison damage multiplier
 
 	private int inflictedTurn;
 
 	Ailment() {
-		inflictedTurn = GameController.getInstance().getFight() != null ? GameController.getInstance().getFight().getTurn() : -1;
+		this.inflictedTurn = GameController.getInstance().getFight() != null
+				? GameController.getInstance().getFight().getTurn()
+				: -1;
 	}
 
 	public static String getText(Ailment ailment) {
-		switch(ailment) {
+		switch (ailment) {
 		case BURN:
 			return "verbrannt";
 		case FREEZE:
@@ -26,6 +28,8 @@ public enum Ailment {
 			return "paralysiert";
 		case POISON:
 			return "vergiftet";
+		case HEAVY_POISON:
+			return "stark vergiftet";
 		case SLEEP:
 			return "eingeschlafen";
 		default:
@@ -34,7 +38,7 @@ public enum Ailment {
 	}
 
 	public static String getShorttext(Ailment ailment) {
-		switch(ailment) {
+		switch (ailment) {
 		case BURN:
 			return "BRT";
 		case FREEZE:
@@ -42,6 +46,7 @@ public enum Ailment {
 		case PARALYSIS:
 			return "PAR";
 		case POISON:
+		case HEAVY_POISON:
 			return "GIF";
 		case SLEEP:
 			return "SLF";
@@ -53,13 +58,14 @@ public enum Ailment {
 	}
 
 	public static Color getColor(Ailment ailment) {
-		switch(ailment) {
+		switch (ailment) {
 		case BURN:
 			return Type.getColor(Type.FIRE);
 		case FREEZE:
 			return Type.getColor(Type.ICE);
 		case PARALYSIS:
 			return Type.getColor(Type.ELECTRIC);
+		case HEAVY_POISON:
 		case POISON:
 			return Type.getColor(Type.POISON);
 		case SLEEP:
