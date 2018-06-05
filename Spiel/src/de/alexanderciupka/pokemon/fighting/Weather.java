@@ -14,7 +14,10 @@ public enum Weather {
 
 	RAIN, SANDSTORM, HAIL, SUN, FOG, NONE;
 
+	int turns = 5;
+
 	String startWeather() {
+		this.turns = 5;
 		Weather w = Weather.valueOf(this.name());
 		switch (w) {
 		case RAIN:
@@ -31,6 +34,10 @@ public enum Weather {
 			return null;
 		}
 		return null;
+	}
+
+	void increase() {
+		this.turns = 8;
 	}
 
 	String onStop() {
