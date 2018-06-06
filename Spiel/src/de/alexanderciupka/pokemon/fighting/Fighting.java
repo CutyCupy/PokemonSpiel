@@ -21,41 +21,48 @@ import de.alexanderciupka.pokemon.pokemon.Type;
 
 public class Fighting {
 
-	private Team playerTeam;
-	private Pokemon player;
-	private Team enemyTeam;
-	private Pokemon enemy;
+	/**
+	 * Idea for double battles: Make left- and rightTeam array?
+	 */
+
+	private Team leftPlayerTeam;
+	private Team rightPlayerTeam;
+	private Team leftOpponentTeam;
+	private Team rightOpponentTeam;
+
+	private Pokemon leftPlayerPokemon;
+	private Pokemon rightPlayerPokemon;
+	private Pokemon leftOpponentPokemon;
+	private Pokemon rightOpponentPokemon;
+
+	// private Team playerTeam;
+	// private Pokemon player;
+	// private Team enemyTeam;
+	// private Pokemon enemy;
 	private FightOption currentFightOption;
 	private Field field;
-	private Character enemyCharacter;
-	private HashSet<Pokemon> participants;
+
+	private Character leftPlayer;
+	private Character rightPlayer;
+	private Character leftOpponent;
+	private Character rightOpponent;
+
+	private HashSet<Pokemon> playerParticipants;
+	// private Character enemyCharacter;
 	private Random rng;
 	private GameController gController;
-	private boolean escape;
+	private boolean escapable;
 	private int turn;
 
 	private HashMap<Pokemon, Move> lastMoves;
 	private HashMap<Pokemon, Move> chargeMoves;
 	private HashMap<Pokemon, Boolean> needsRecharge;
 
-	private SimpleEntry<Boolean, Boolean> visible;
+	// private SimpleEntry<Boolean, Boolean> visible;
 
-	public boolean won;
+	private HashMap<Pokemon, Boolean> visible;
 
-	public Fighting(Pokemon pokemonTwo) {
-		this.init();
-		this.playerTeam = new Team(this.gController.getMainCharacter().getTeam().getTeam(),
-				this.gController.getMainCharacter());
-		this.player = this.playerTeam.getFirstFightPokemon();
-		this.enemyTeam = new Team(null);
-		this.enemyTeam.addPokemon(pokemonTwo);
-		this.enemy = pokemonTwo;
-		this.escape = true;
-		this.getStartPokemon();
-		this.player.startFight();
-		this.enemy.startFight();
-		this.field = new Field(this.gController.getMainCharacter().getCurrentRoute().getWeather());
-	}
+	private boolean isDouble;
 
 	public Fighting(Character enemyCharacter) {
 		this.init();
@@ -71,8 +78,185 @@ public class Fighting {
 		this.enemy.startFight();
 		this.field = new Field(this.gController.getMainCharacter().getCurrentRoute().getWeather());
 	}
+	public boolean won;
 
-	private void init() {
+	/**
+	 * Starts a wild 1v1 Battle.
+	 * 
+	 * @param pokemon
+	 *            wild pokemon
+	 * @param escapable
+	 *            true when the player can run away from the battle. might not be
+	 *            possible in some "story" wild pokemon fights. Can still be true
+	 *            even if the opponent Pokemon's ability denies any attempt to run
+	 *            away, because this will be checked later.
+	 * @author CutyCupy
+	 */
+	public Fighting(Pokemon pokemon, boolean escapable) {
+		this(pokemon, null, escapable);
+	}
+
+	/**
+	 * Starts a wild 1v2 Battle.
+	 * 
+	 * @param left
+	 *            "first" wild Pokemon
+	 * @param right
+	 *            "second" wild Pokemon
+	 * @param escapable
+	 *            true when the player can run away from the battle. might not be
+	 *            possible in some "story" wild pokemon fights. Can still be true
+	 *            even if one of the opponent Pokemons' ability denies any attempt
+	 *            to run away, because this will be checked later.
+	 * @author CutyCupy
+	 */
+	public Fighting(Pokemon left, Pokemon right, boolean escapable) {
+		this(null, left, right, escapable);
+	}
+
+	/**
+	 * Starts a wild 2v2 Battle.
+	 * 
+	 * @param teamMate
+	 * @param left
+	 *            "first" wild Pokemon
+	 * @param right
+	 *            "second" wild Pokemon
+	 * @param escapable
+	 *            true when the player can run away from the battle. might not be
+	 *            possible in some "story" wild pokemon fights. Can still be true
+	 *            even if one of the opponent Pokemons' ability denies any attempt
+	 *            to run away, because this will be checked later.
+	 * @author CutyCupy
+	 */
+	public Fighting(Character teamMate, Pokemon left, Pokemon right, boolean escapable) {
+		this();
+		this.leftPlayer = this.gController.getMainCharacter();
+		this.rightPlayer = teamMate == null ? this.gController.getMainCharacter() : teamMate;
+
+		this.leftPlayerTeam = this.leftPlayer.getTeam();
+		this.rightPlayerTeam = this.rightPlayer.getTeam();
+
+		this.leftOpponent = null;
+		this.rightOpponent = null;
+
+		this.leftOpponentTeam = null;
+		this.rightOpponentTeam = null;
+
+		this.leftPlayerPokemon = this.getFirstNonFightingPokemon(this.leftPlayerTeam);
+		this.rightPlayerPokemon = this.getFirstNonFightingPokemon(this.rightPlayerTeam);
+
+		this.leftOpponentPokemon = left;
+		this.rightOpponentPokemon = right;
+
+		this.escapable = escapable;
+
+		if (teamMate == null && right == null) {
+			this.isDouble = false;
+		} else {
+			this.isDouble = true;
+		}
+
+	}
+
+	/**
+	 * Starts a fight against the Trainer opponent 1v1.
+	 * 
+	 * @param opponent
+	 *            The trainer that wants to battle.
+	 * @author CutyCupy
+	 */
+	public Fighting(Character opponent) {
+		this.leftPlayer = this.gController.getMainCharacter();
+		this.rightPlayer = null;
+
+		this.leftPlayerTeam = this.leftPlayer.getTeam();
+		this.rightPlayerTeam = null;
+
+		this.leftOpponent = opponent;
+		this.rightOpponent = null;
+
+		this.leftOpponentTeam = opponent.getTeam();
+		this.rightOpponentTeam = null;
+
+		this.leftPlayerPokemon = this.getFirstNonFightingPokemon(this.leftPlayerTeam);
+		this.rightPlayerPokemon = null;
+
+		this.leftOpponentPokemon = this.getFirstNonFightingPokemon(this.leftOpponentTeam);
+		this.rightOpponentPokemon = null;
+
+		this.escapable = false;
+
+		this.isDouble = false;
+	}
+
+	/**
+	 * Starts a 1v2 Double fight.
+	 * 
+	 * @param leftOpponent
+	 *            "left" opponent on the field.
+	 * @param rightOpponent
+	 *            "right" opponent on the field. if left and right opponent are the
+	 *            same its a 1v1 double battle
+	 * @author CutyCupy
+	 */
+	public Fighting(Character leftOpponent, Character rightOpponent) {
+		// TODO: Implement constructor
+	}
+
+	/**
+	 * Starts a 2v2 Double fight with one teammate against possible two opponents.
+	 * 
+	 * @param teamMate
+	 *            "teammate" who will fight along the player.
+	 * @param leftOpponent
+	 *            "left" opponent on the field.
+	 * @param rightOpponent
+	 *            "right" opponent on the field. Might be null, which would mean
+	 *            that a 1v2 fight will be created.
+	 * @author CutyCupy
+	 */
+	public Fighting(Character teamMate, Character leftOpponent, Character rightOpponent) {
+
+		this.isDouble = true;
+	}
+
+	// public Fighting(Pokemon pokemonTwo) {
+	// this.init();
+	// this.playerTeam = new
+	// Team(this.gController.getMainCharacter().getTeam().getTeam(),
+	// this.gController.getMainCharacter());
+	// this.player = this.playerTeam.getFirstFightPokemon();
+	// this.enemyTeam = new Team(null);
+	// this.enemyTeam.addPokemon(pokemonTwo);
+	// this.enemy = pokemonTwo;
+	// this.escape = true;
+	// this.getStartPokemon();
+	// this.player.startFight();
+	// this.enemy.startFight();
+	// this.field = new
+	// Field(this.gController.getMainCharacter().getCurrentRoute().getWeather());
+	// }
+	//
+	// public Fighting(Character enemyCharacter) {
+	// this.init();
+	// this.enemyCharacter = enemyCharacter;
+	// this.playerTeam = new
+	// Team(this.gController.getMainCharacter().getTeam().getTeam(),
+	// this.gController.getMainCharacter());
+	// this.player = this.playerTeam.getFirstFightPokemon();
+	// this.enemyTeam = new Team(enemyCharacter.getTeam().getTeam(),
+	// enemyCharacter);
+	// this.enemy = this.enemyTeam.getFirstFightPokemon();
+	// this.escape = false;
+	// this.getStartPokemon();
+	// this.player.startFight();
+	// this.enemy.startFight();
+	// this.field = new
+	// Field(this.gController.getMainCharacter().getCurrentRoute().getWeather());
+	// }
+
+	private Fighting() {
 		this.lastMoves = new HashMap<>();
 		this.chargeMoves = new HashMap<>();
 		this.needsRecharge = new HashMap<>();
@@ -80,9 +264,24 @@ public class Fighting {
 		this.gController = GameController.getInstance();
 		this.rng = new Random();
 		this.currentFightOption = FightOption.FIGHT;
-		this.participants = new HashSet<Pokemon>();
-		this.visible = new SimpleEntry<Boolean, Boolean>(true, true);
+		this.playerParticipants = new HashSet<Pokemon>();
+		// this.visible = new SimpleEntry<Boolean, Boolean>(true, true);
+		this.visible = new HashMap<>();
+	}
 
+	private Pokemon getFirstNonFightingPokemon(Team team) {
+		for (int i = 0; i < team.getAmmount(); i++) {
+			if (team.getPokemon(i) != null && team.getPokemon(i).getAilment() != Ailment.FAINTED
+					&& this.notFighting(team.getPokemon(i))) {
+				return team.getPokemon(i);
+			}
+		}
+		return null;
+	}
+
+	private boolean notFighting(Pokemon p) {
+		return !(p.equals(this.leftPlayerPokemon) || p.equals(this.rightPlayerPokemon)
+				|| p.equals(this.leftOpponentPokemon) || p.equals(this.rightOpponentPokemon));
 	}
 
 	private void getStartPokemon() {
@@ -464,7 +663,7 @@ public class Fighting {
 	public void sendOut(int index) {
 		this.playerTeam.swapPokemon(0, index);
 		this.setPlayer();
-		this.participants.add(this.player);
+		this.playerParticipants.add(this.player);
 	}
 
 	public Pokemon getPlayer() {
@@ -493,11 +692,11 @@ public class Fighting {
 	private void setEnemy() {
 		this.enemy = this.enemyTeam.getFirstFightPokemon();
 		this.enemy.startFight();
-		if (this.participants == null) {
-			this.participants = new HashSet<>();
+		if (this.playerParticipants == null) {
+			this.playerParticipants = new HashSet<>();
 		}
-		this.participants.clear();
-		this.participants.add(this.player);
+		this.playerParticipants.clear();
+		this.playerParticipants.add(this.player);
 		this.visible = new SimpleEntry<Boolean, Boolean>(this.visible.getKey(), true);
 		this.gController.updateFight();
 	}
@@ -507,7 +706,7 @@ public class Fighting {
 	}
 
 	public boolean playerDead() {
-		this.participants.remove(this.player);
+		this.playerParticipants.remove(this.player);
 		if (this.playerTeam.getFirstFightPokemon() == null) {
 			if (this.enemyCharacter != null) {
 				this.enemyCharacter.getTeam().restoreTeam();
@@ -549,7 +748,7 @@ public class Fighting {
 	}
 
 	public HashSet<Pokemon> getParticipants() {
-		return this.participants;
+		return this.playerParticipants;
 	}
 
 	public boolean canEscape() {

@@ -76,6 +76,14 @@ public class Team {
 		return -1;
 	}
 
+	public Pokemon getPokemon(int index) {
+		try {
+			return this.pokemon[index];
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
 	public boolean isAnyPokemonAlive() {
 		for (Pokemon p : this.pokemon) {
 			if (p.getStats().getCurrentHP() > 0) {
