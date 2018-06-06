@@ -75,6 +75,8 @@ public class GameController {
 				case RIGHT:
 					result = this.updatePosition(possiblePoint.x + 1, possiblePoint.y);
 					break;
+				case NONE:
+					break;
 				}
 			} else {
 				result = true;
@@ -107,6 +109,8 @@ public class GameController {
 				break;
 			case RIGHT:
 				result = this.updatePosition(possiblePoint.x + 1, possiblePoint.y);
+				break;
+			case NONE:
 				break;
 			}
 			this.setInteractionPause(false);

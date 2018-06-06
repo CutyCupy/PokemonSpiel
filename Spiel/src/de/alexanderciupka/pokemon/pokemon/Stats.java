@@ -419,21 +419,21 @@ public class Stats {
 
 		switch (this.gController.getFight().getField().getWeather()) {
 		case HAIL:
-			if (Abilities.SCHNEESCHARRER.equals(this.pokemon.getAbility().getName())) {
+			if (Abilities.SCHNEESCHARRER == this.pokemon.getAbility().getId()) {
 				result.put(Stat.SPEED, result.get(Stat.SPEED) * 2);
-			} else if (Abilities.SCHNEEMANTEL.equals(this.pokemon.getAbility().getName())) {
+			} else if (Abilities.SCHNEEMANTEL == this.pokemon.getAbility().getId()) {
 				result.put(Stat.EVASION, result.get(Stat.EVASION) * 1.2);
 			}
 			break;
 		case RAIN:
-			if (Abilities.WASSERTEMPO.equals(this.pokemon.getAbility().getName())) {
+			if (Abilities.WASSERTEMPO == this.pokemon.getAbility().getId()) {
 				result.put(Stat.SPEED, result.get(Stat.SPEED) * 2);
 			}
 			break;
 		case SANDSTORM:
-			if (Abilities.SANDSCHARRER.equals(this.pokemon.getAbility().getName())) {
+			if (Abilities.SANDSCHARRER == this.pokemon.getAbility().getId()) {
 				result.put(Stat.SPEED, result.get(Stat.SPEED) * 2);
-			} else if (Abilities.SANDSCHLEIER.equals(this.pokemon.getAbility().getName())) {
+			} else if (Abilities.SANDSCHLEIER == this.pokemon.getAbility().getId()) {
 				result.put(Stat.EVASION, result.get(Stat.EVASION) * 1.2);
 			}
 			if (this.pokemon.hasType(Type.ROCK)) {
@@ -441,17 +441,21 @@ public class Stats {
 			}
 			break;
 		case SUN:
-			if (Abilities.CHLOROPHYLL.equals(this.pokemon.getAbility().getName())) {
+			if (Abilities.CHLOROPHYLL == this.pokemon.getAbility().getId()) {
 				result.put(Stat.SPEED, result.get(Stat.SPEED) * 2);
-			} else if (Abilities.PFLANZENGABE.equals(this.pokemon.getAbility().getName())) {
+			} else if (Abilities.PFLANZENGABE == this.pokemon.getAbility().getId()) {
 				result.put(Stat.ATTACK, result.get(Stat.ATTACK) * 1.5);
 				result.put(Stat.SPECIALDEFENSE, result.get(Stat.SPECIALDEFENSE) * 1.5);
-			} else if (Abilities.SOLARKRAFT.equals(this.pokemon.getAbility().getName())) {
+			} else if (Abilities.SOLARKRAFT == this.pokemon.getAbility().getId()) {
 				result.put(Stat.SPECIALATTACK, result.get(Stat.SPECIALATTACK) * 1.5);
 			}
 			break;
 		default:
 			break;
+		}
+
+		if (this.gController.getFight().getField().isTrickRoom()) {
+			result.put(Stat.SPEED, result.get(Stat.SPEED) * -1);
 		}
 
 		return result;

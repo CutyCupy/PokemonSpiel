@@ -250,6 +250,15 @@ public class PokemonInformation {
 		return this.allMoves.get(id - 1).clone();
 	}
 
+	public String getMoveNameById(int id) {
+		for (Move move : this.allMoves) {
+			if (move.getId() == id) {
+				return move.getName();
+			}
+		}
+		return this.allMoves.get(id - 1).getName();
+	}
+
 	public Move getMoveByName(String name) {
 		for (Move move : this.allMoves) {
 			if (move.getName().equals(name)) {
@@ -605,7 +614,7 @@ public class PokemonInformation {
 
 	public Ability getAbility(int id, boolean hidden) {
 		JsonObject data = this.getAbilityData(id);
-		ArrayList<Integer> possibilities = new ArrayList();
+		ArrayList<Integer> possibilities = new ArrayList<>();
 		for (JsonElement j : data.get("abilities").getAsJsonArray()) {
 			JsonObject ability = j.getAsJsonObject();
 			if (!(hidden ^ ability.get("is_hidden").getAsBoolean())) {

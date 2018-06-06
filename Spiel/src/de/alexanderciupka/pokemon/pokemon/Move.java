@@ -82,17 +82,17 @@ public class Move {
 				accuracy *= 0.6;
 				break;
 			case HAIL:
-				if (Moves.BLIZZARD.equals(this.getName())) {
+				if (Moves.BLIZZARD == this.getId()) {
 					accuracy = 1f;
 				}
 				break;
 			case RAIN:
-				if (Moves.DONNER.equals(this.getName()) || Moves.ORKAN.equals(this.getName())) {
+				if (Moves.DONNER == this.getId() || Moves.ORKAN == this.getId()) {
 					accuracy = 1f;
 				}
 				break;
 			case SUN:
-				if (Moves.DONNER.equals(this.getName()) || Moves.ORKAN.equals(this.getName())) {
+				if (Moves.DONNER == this.getId() || Moves.ORKAN == this.getId()) {
 					accuracy = 0.5f;
 				}
 				break;
@@ -150,20 +150,17 @@ public class Move {
 		if (GameController.getInstance().isFighting()) {
 			switch (GameController.getInstance().getFight().getField().getWeather()) {
 			case SUN:
-				if (Moves.MONDSCHEIN.equals(this.getName()) || Moves.MORGENGRAUEN.equals(this.getName())
-						|| Moves.SYNTHESE.equals(this.getName())) {
+				if (Moves.MONDSCHEIN == this.getId() || Moves.MORGENGRAUEN == this.getId()
+						|| Moves.SYNTHESE == this.getId()) {
 					healing = 0.66f;
 				}
 				break;
 			case SANDSTORM:
-				if (Moves.SANDSAMMLER.equals(this.getName())) {
-					healing = 0.66f;
-				}
 			case HAIL:
 			case FOG:
 			case RAIN:
-				if (Moves.MONDSCHEIN.equals(this.getName()) || Moves.MORGENGRAUEN.equals(this.getName())
-						|| Moves.SYNTHESE.equals(this.getName())) {
+				if (Moves.MONDSCHEIN == this.getId() || Moves.MORGENGRAUEN == this.getId()
+						|| Moves.SYNTHESE == this.getId()) {
 					healing = 0.25f;
 				}
 				break;
@@ -311,7 +308,7 @@ public class Move {
 	public Type getMoveType() {
 		if (GameController.getInstance().isFighting()) {
 			Type type = this.getMoveType();
-			if (Moves.METEOROLOGE.equals(this.getName())) {
+			if (Moves.METEOROLOGE == this.getId()) {
 				switch (GameController.getInstance().getFight().getField().getWeather()) {
 				case HAIL:
 					type = Type.ICE;

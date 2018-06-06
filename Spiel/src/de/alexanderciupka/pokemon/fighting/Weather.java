@@ -40,6 +40,14 @@ public enum Weather {
 		this.turns = 8;
 	}
 
+	int getTurns() {
+		return this.turns;
+	}
+
+	void setTurns(int turns) {
+		this.turns = turns;
+	}
+
 	String onStop() {
 		Weather w = Weather.valueOf(this.name());
 		switch (w) {
@@ -64,7 +72,7 @@ public enum Weather {
 		double power = m.getPower();
 		Type type = m.getMoveType();
 
-		if (Moves.METEOROLOGE.equals(m.getName()) && w != Weather.NONE) {
+		if (Moves.METEOROLOGE == m.getId() && w != Weather.NONE) {
 			power = 100;
 		}
 
@@ -76,9 +84,9 @@ public enum Weather {
 				power *= .5;
 			}
 		case SANDSTORM:
-			if (Moves.SOLARSTRAHL.equals(m.getName())) {
+			if (Moves.SOLARSTRAHL == m.getId()) {
 				power *= .5;
-			} else if (Abilities.SANDGEWALT.equals(user.getAbility().getName())) {
+			} else if (Abilities.SANDGEWALT == user.getAbility().getId()) {
 				if (Type.ROCK.equals(type) || Type.STEEL.equals(type) || Type.GROUND.equals(type)) {
 					power *= 1.3;
 				}
@@ -183,7 +191,7 @@ public enum Weather {
 				GameController.getInstance().getGameFrame().getFightPanel()
 						.addText(p.getName() + " hat sich durch den Hagel verletzt!", true);
 			} else {
-				if (Abilities.EISHAUT.equals(p.getAbility().getName())) {
+				if (Abilities.EISHAUT == p.getAbility().getId()) {
 					p.getStats().restoreHP((int) Math.round(p.getStats().getStats().get(Stat.HP) / 16.0));
 					SoundController.getInstance().playSound(SoundController.ITEM_HEAL);
 					GameController.getInstance().getGameFrame().getFightPanel()
@@ -194,14 +202,13 @@ public enum Weather {
 		case NONE:
 			break;
 		case RAIN:
-			if (Abilities.TROCKENHEIT.equals(p.getAbility().getName())
-					|| Abilities.REGENGENUSS.equals(p.getAbility().getName())) {
+			if (Abilities.TROCKENHEIT == p.getAbility().getId() || Abilities.REGENGENUSS == p.getAbility().getId()) {
 				p.getStats().restoreHP((int) Math.round(p.getStats().getStats().get(Stat.HP)
-						/ (Abilities.TROCKENHEIT.equals(p.getAbility().getName()) ? 8.0 : 16.0)));
+						/ (Abilities.TROCKENHEIT == p.getAbility().getId() ? 8.0 : 16.0)));
 				SoundController.getInstance().playSound(SoundController.NORMAL_EFFECTIVE);
 				GameController.getInstance().getGameFrame().getFightPanel()
 						.addText(p.getName() + " freut sich über den Regen!", true);
-			} else if (Abilities.HYDRATION.equals(p.getAbility().getName())) {
+			} else if (Abilities.HYDRATION == p.getAbility().getId()) {
 				if (p.getAilment() != Ailment.NONE) {
 					p.setAilment(Ailment.NONE);
 					SoundController.getInstance().playSound(SoundController.ITEM_HEAL);
@@ -219,7 +226,7 @@ public enum Weather {
 			}
 			break;
 		case SUN:
-			if (Abilities.TROCKENHEIT.equals(p.getAbility().getName())) {
+			if (Abilities.TROCKENHEIT == p.getAbility().getId()) {
 				p.getStats().loseHP((int) Math.round(p.getStats().getStats().get(Stat.HP) / 8.0));
 				SoundController.getInstance().playSound(SoundController.NORMAL_EFFECTIVE);
 				GameController.getInstance().getGameFrame().getFightPanel()
@@ -236,18 +243,12 @@ public enum Weather {
 
 		switch (Weather.valueOf(this.name())) {
 		case SUN:
-			if (Moves.MONDSCHEIN.equals(m.getName()) || Moves.MONDSCHEIN.equals(m.getName())
-					|| Moves.MONDSCHEIN.equals(m.getName())) {
+			if (Moves.MONDSCHEIN == m.getId() || Moves.MONDSCHEIN == m.getId() || Moves.MONDSCHEIN == m.getId()) {
 				heal = 0.66f;
 			}
 			break;
-		case SANDSTORM:
-			if (Moves.SANDSAMMLER.equals(m.getName())) {
-				heal = 0.66f;
-			}
 		case RAIN:
-			if (Moves.MONDSCHEIN.equals(m.getName()) || Moves.MONDSCHEIN.equals(m.getName())
-					|| Moves.MONDSCHEIN.equals(m.getName())) {
+			if (Moves.MONDSCHEIN == m.getId() || Moves.MONDSCHEIN == m.getId() || Moves.MONDSCHEIN == m.getId()) {
 				heal = 0.25f;
 			}
 			break;

@@ -7,7 +7,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import de.alexanderciupka.pokemon.gui.TextLabel;
 import de.alexanderciupka.pokemon.map.Route;
 import de.alexanderciupka.pokemon.menu.SoundController;
 import de.alexanderciupka.pokemon.pokemon.Ailment;
@@ -24,7 +23,7 @@ public class Player extends Character {
 
 	private int protectedSteps;
 
-	HashMap<Item, Integer> items;
+	private HashMap<Item, Integer> items;
 
 	public Player() {
 		super();

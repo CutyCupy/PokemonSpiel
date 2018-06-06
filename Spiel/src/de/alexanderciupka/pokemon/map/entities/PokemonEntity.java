@@ -12,7 +12,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import de.alexanderciupka.hoverbutton.Main;
-import de.alexanderciupka.pokemon.characters.Direction;
 import de.alexanderciupka.pokemon.characters.Player;
 import de.alexanderciupka.pokemon.map.Route;
 import de.alexanderciupka.pokemon.pokemon.Item;
@@ -25,14 +24,15 @@ public class PokemonEntity extends Entity {
 	private String noInteractionMessage;
 	private String interactionMessage;
 	private Pokemon pokemon;
+
 	public PokemonEntity(Route parent, String terrainName) {
 		super(parent, false, "25", 0, terrainName);
 	}
 
 	public void setRequiredItems(Item... items) {
-		requiredItems = new ArrayList<Item>(items.length);
+		this.requiredItems = new ArrayList<Item>(items.length);
 		for (Item i : items) {
-			addRequiredItem(i);
+			this.addRequiredItem(i);
 		}
 	}
 
@@ -40,10 +40,10 @@ public class PokemonEntity extends Entity {
 		if (item == null) {
 			return;
 		}
-		if (requiredItems == null) {
-			requiredItems = new ArrayList<Item>();
+		if (this.requiredItems == null) {
+			this.requiredItems = new ArrayList<Item>();
 		}
-		requiredItems.add(item);
+		this.requiredItems.add(item);
 	}
 
 	public ArrayList<Item> getRequiredItems() {
@@ -51,7 +51,7 @@ public class PokemonEntity extends Entity {
 	}
 
 	public String getNoInteractionMessage() {
-		return noInteractionMessage;
+		return this.noInteractionMessage;
 	}
 
 	public void setNoInteractionMessage(String noInteractionMessage) {
@@ -59,7 +59,7 @@ public class PokemonEntity extends Entity {
 	}
 
 	public String getInteractionMessage() {
-		return interactionMessage;
+		return this.interactionMessage;
 	}
 
 	public void setInteractionMessage(String interactionMessage) {
@@ -94,7 +94,7 @@ public class PokemonEntity extends Entity {
 	@Override
 	public void onInteraction(Player c) {
 		boolean isInteractable = true;
-		if (requiredItems != null) {
+		if (this.requiredItems != null) {
 			for (Item i : this.requiredItems) {
 				if (!c.hasItem(i)) {
 					isInteractable = false;
@@ -103,17 +103,17 @@ public class PokemonEntity extends Entity {
 			}
 		}
 		if (isInteractable) {
-			if (!interactionMessage.isEmpty()) {
-				gController.getGameFrame().addDialogue(interactionMessage);
-				gController.waitDialogue();
+			if (!this.interactionMessage.isEmpty()) {
+				this.gController.getGameFrame().addDialogue(this.interactionMessage);
+				this.gController.waitDialogue();
 			}
-			gController.startFight(this.pokemon);
-			setPokemon(null);
-			c.getCurrentRoute().updateMap(new Point(getX(), getY()));
+			this.gController.startFight(this.pokemon);
+			this.setPokemon(null);
+			c.getCurrentRoute().updateMap(new Point(this.getX(), this.getY()));
 		} else {
-			if (!noInteractionMessage.isEmpty()) {
-				gController.getGameFrame().addDialogue(noInteractionMessage);
-				gController.waitDialogue();
+			if (!this.noInteractionMessage.isEmpty()) {
+				this.gController.getGameFrame().addDialogue(this.noInteractionMessage);
+				this.gController.waitDialogue();
 			}
 		}
 	}
@@ -137,8 +137,8 @@ public class PokemonEntity extends Entity {
 			PokemonEntity other = (PokemonEntity) obj;
 			return this.interactionMessage.equals(other.interactionMessage)
 					&& this.noInteractionMessage.equals(other.noInteractionMessage)
-					&& this.requiredItems.equals(other.requiredItems) &&
-					(this.pokemon == null ? other.pokemon == null : this.pokemon.equals(other.pokemon));
+					&& this.requiredItems.equals(other.requiredItems)
+					&& (this.pokemon == null ? other.pokemon == null : this.pokemon.equals(other.pokemon));
 		}
 		return false;
 	}
@@ -161,19 +161,19 @@ public class PokemonEntity extends Entity {
 
 	@Override
 	public boolean importSaveData(JsonObject saveData, Entity entity) {
-		if(super.importSaveData(saveData, entity)) {
+		if (super.importSaveData(saveData, entity)) {
 			PokemonEntity other = (PokemonEntity) entity;
-			if(saveData.get("interaction_message") != null) {
+			if (saveData.get("interaction_message") != null) {
 				this.interactionMessage = saveData.get("interaction_message").getAsString();
 			} else {
 				this.interactionMessage = other.interactionMessage;
 			}
-			if(saveData.get("no_interaction_message") != null) {
+			if (saveData.get("no_interaction_message") != null) {
 				this.noInteractionMessage = saveData.get("no_interaction_message").getAsString();
 			} else {
 				this.noInteractionMessage = other.noInteractionMessage;
 			}
-			if(saveData.get("pokemon") != null) {
+			if (saveData.get("pokemon") != null) {
 				this.pokemon = Pokemon.importSaveData(saveData.get("pokemon").getAsJsonObject());
 			} else {
 				this.pokemon = null;

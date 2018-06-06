@@ -312,7 +312,7 @@ public class Pokemon {
 				if (this.gController.isFighting()) {
 					switch (this.gController.getFight().getField().getWeather()) {
 					case SUN:
-						if (Abilities.FLORASCHILD.equals(this.getAbility().getName())) {
+						if (Abilities.FLORASCHILD == this.getAbility().getId()) {
 							this.gController.getGameFrame().getFightPanel().addText(
 									this.getName() + " wird durch " + Abilities.FLORASCHILD + " beschützt!", true);
 							return false;

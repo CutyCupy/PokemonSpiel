@@ -9,7 +9,7 @@ public class Box {
 	private PC pc;
 	private String name;
 
-	public static final int LIMIT = 36;
+	private static final int LIMIT = 36;
 
 	public Box(int number, PC pc) {
 		this.number = number;
@@ -19,17 +19,17 @@ public class Box {
 	}
 
 	public boolean isFull() {
-		for(Pokemon p : this.pokemons) {
-			if(p == null) {
+		for (Pokemon p : this.pokemons) {
+			if (p == null) {
 				return false;
 			}
 		}
 		return true;
- 	}
+	}
 
 	public boolean isEmpty() {
-		for(Pokemon p : this.pokemons) {
-			if(p != null) {
+		for (Pokemon p : this.pokemons) {
+			if (p != null) {
 				return false;
 			}
 		}
@@ -37,10 +37,10 @@ public class Box {
 	}
 
 	public boolean addPokemon(Pokemon p) {
-		for(int i = 0; i < this.pokemons.length; i++) {
-			if(this.pokemons[i] == null) {
+		for (int i = 0; i < this.pokemons.length; i++) {
+			if (this.pokemons[i] == null) {
 				this.pokemons[i] = p;
-				pc.onUpdate();
+				this.pc.onUpdate();
 				return true;
 			}
 		}
@@ -48,10 +48,10 @@ public class Box {
 	}
 
 	public boolean addPokemon(Pokemon p, int index) {
-		if(index >= 0 && index < this.pokemons.length) {
-			if(this.pokemons[index] == null) {
+		if (index >= 0 && index < this.pokemons.length) {
+			if (this.pokemons[index] == null) {
 				this.pokemons[index] = p;
-				pc.onUpdate();
+				this.pc.onUpdate();
 				return true;
 			}
 		}
@@ -59,7 +59,7 @@ public class Box {
 	}
 
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
 	public void setName(String name) {
@@ -67,21 +67,21 @@ public class Box {
 	}
 
 	public Pokemon[] getPokemons() {
-		return pokemons;
+		return this.pokemons;
 	}
 
 	public int getNumber() {
-		return number;
+		return this.number;
 	}
 
 	public PC getPc() {
-		return pc;
+		return this.pc;
 	}
 
 	public int getAmount() {
 		int counter = 0;
-		for(Pokemon p : this.pokemons) {
-			if(p != null) {
+		for (Pokemon p : this.pokemons) {
+			if (p != null) {
 				counter++;
 			}
 		}
@@ -89,18 +89,18 @@ public class Box {
 	}
 
 	public Box getNext() {
-		for(int i = 0; i < pc.getBoxes().length; i++) {
-			if(pc.getBoxes()[i].getNumber() == this.number) {
-				return i != pc.getBoxes().length - 1 ? pc.getBoxes()[i+1] : pc.getBoxes()[0];
+		for (int i = 0; i < this.pc.getBoxes().length; i++) {
+			if (this.pc.getBoxes()[i].getNumber() == this.number) {
+				return i != this.pc.getBoxes().length - 1 ? this.pc.getBoxes()[i + 1] : this.pc.getBoxes()[0];
 			}
 		}
 		return null;
 	}
 
 	public Box getBefore() {
-		for(int i = 0; i < pc.getBoxes().length; i++) {
-			if(pc.getBoxes()[i].getNumber() == this.number) {
-				return i != 0 ? pc.getBoxes()[i-1] : pc.getBoxes()[pc.getBoxes().length - 1];
+		for (int i = 0; i < this.pc.getBoxes().length; i++) {
+			if (this.pc.getBoxes()[i].getNumber() == this.number) {
+				return i != 0 ? this.pc.getBoxes()[i - 1] : this.pc.getBoxes()[this.pc.getBoxes().length - 1];
 			}
 		}
 		return null;
@@ -118,10 +118,11 @@ public class Box {
 
 	@Override
 	public boolean equals(Object obj) {
-		if(obj instanceof Box) {
+		if (obj instanceof Box) {
 			Box other = (Box) obj;
-			for(int i = 0; i < this.pokemons.length; i++) {
-				if(this.pokemons[i] == null ? other.pokemons[i] != null : !this.pokemons[i].equals(other.pokemons[i])) {
+			for (int i = 0; i < this.pokemons.length; i++) {
+				if (this.pokemons[i] == null ? other.pokemons[i] != null
+						: !this.pokemons[i].equals(other.pokemons[i])) {
 					return false;
 				}
 			}

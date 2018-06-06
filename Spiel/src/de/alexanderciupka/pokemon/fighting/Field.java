@@ -1,19 +1,23 @@
 package de.alexanderciupka.pokemon.fighting;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
+import de.alexanderciupka.pokemon.constants.Moves;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
+import de.alexanderciupka.pokemon.pokemon.Stat;
 
 public class Field {
 
 	private Weather weather;
-	private int weatherTurns;
 	private ArrayList<Hazard> leftHazards;
 	private ArrayList<Hazard> rightHazards;
 
 	private ArrayList<Screen> leftScreens;
 	private ArrayList<Screen> rightScreens;
+
+	private int trickRoomTurns;
 
 	public Field(Weather w) {
 		this.weather = w;
@@ -21,6 +25,8 @@ public class Field {
 		this.rightHazards = new ArrayList<>();
 		this.leftScreens = new ArrayList<>();
 		this.rightScreens = new ArrayList<>();
+
+		this.trickRoomTurns = 0;
 	}
 
 	public boolean addHazard(Hazard h, boolean left) {
@@ -60,9 +66,9 @@ public class Field {
 		return result;
 	}
 
-	public String setWeather(Weather w) {
+	public String setWeather(Weather w, Pokemon reason) {
 		this.weather = w;
-		this.weatherTurns = 0;
+		// TODO: Check for weather item
 		return w.startWeather();
 	}
 
@@ -81,19 +87,101 @@ public class Field {
 	}
 
 	public boolean addScreen(Screen s, boolean left) {
-		switch (s) {
-
+		if ((left ? this.leftScreens : this.rightScreens).contains(s)
+				|| (left ? this.leftScreens : this.rightScreens).contains(Screen.AURORASCHLEIER)) {
+			return false;
 		}
-
-		return false;
+		switch (s) {
+		case AURORASCHLEIER:
+			if (!(left ? this.leftScreens : this.rightScreens).isEmpty()) {
+				return false;
+			}
+			break;
+		default:
+			break;
+		}
+		(left ? this.leftScreens : this.rightScreens).add(s);
+		return true;
 	}
 
-	public void endOfTurn(Pokemon first, Pokemon second) {
-		this.weather.onEndOfTurn(first);
-		this.weather.onEndOfTurn(second);
-		this.weatherTurns++;
-		if (this.weatherTurns > 5) {
-			GameController.getInstance().getGameFrame().getFightPanel().addText(this.setWeather(Weather.NONE));
+	public HashMap<Stat, Double> updateFightStats(Pokemon p, boolean left) {
+		HashMap<Stat, Double> result = p.getStats().getFightStats();
+		for (Screen s : (left ? this.leftScreens : this.rightScreens)) {
+			switch (s) {
+			case AURORASCHLEIER:
+				result.put(Stat.DEFENSE, result.get(Stat.DEFENSE) * 1.5);
+				result.put(Stat.SPECIALDEFENSE, result.get(Stat.SPECIALDEFENSE) * 1.5);
+				break;
+			case LICHTSCHILD:
+				result.put(Stat.SPECIALDEFENSE, result.get(Stat.SPECIALDEFENSE) * 1.5);
+				break;
+			case REFLEKTOR:
+				result.put(Stat.DEFENSE, result.get(Stat.DEFENSE) * 1.5);
+				break;
+			default:
+				break;
+			}
+		}
+
+		return result;
+	}
+
+	public void endOfTurn(Pokemon... participants) {
+		for (Pokemon p : participants) {
+			this.weather.onEndOfTurn(p);
+		}
+		this.increaseTurn();
+		if (this.weather.getTurns() <= 0) {
+			GameController.getInstance().getGameFrame().getFightPanel().addText(this.setWeather(Weather.NONE, null));
+		}
+
+		for (int i = 0; i < this.leftScreens.size(); i++) {
+			if (this.leftScreens.get(i).getTurns() <= 0) {
+				GameController.getInstance().getGameFrame().getFightPanel().addText(this.leftScreens.get(i).onStop());
+				this.leftScreens.remove(i);
+				i--;
+			}
+		}
+		for (int i = 0; i < this.rightScreens.size(); i++) {
+			if (this.rightScreens.get(i).getTurns() <= 0) {
+				GameController.getInstance().getGameFrame().getFightPanel().addText(this.rightScreens.get(i).onStop());
+				this.rightScreens.remove(i);
+				i--;
+			}
+		}
+		if (this.trickRoomTurns == 0) {
+			this.stopTrickRoom();
+		}
+	}
+
+	private void stopTrickRoom() {
+		GameController.getInstance().getGameFrame().getFightPanel().addText("Der "
+				+ GameController.getInstance().getInformation().getMoveNameById(Moves.BIZARRORAUM) + " hört auf!");
+		this.trickRoomTurns = -1;
+	}
+
+	private void increaseTurn() {
+		this.weather.setTurns(this.weather.getTurns() - 1);
+		for (Screen s : this.leftScreens) {
+			s.setTurns(s.getTurns() - 1);
+		}
+		for (Screen s : this.rightScreens) {
+			s.setTurns(s.getTurns() - 1);
+		}
+		this.trickRoomTurns--;
+	}
+
+	public boolean isTrickRoom() {
+		return this.trickRoomTurns > 0;
+	}
+
+	public void addTrickRoom() {
+		if (this.isTrickRoom()) {
+			this.stopTrickRoom();
+		} else {
+			this.trickRoomTurns = 5;
+			GameController.getInstance().getGameFrame().getFightPanel().addText("Die Dimension wurde gedreht und ein "
+					+ GameController.getInstance().getInformation().getMoveNameById(Moves.BIZARRORAUM) + " entstand!");
 		}
 	}
 }
