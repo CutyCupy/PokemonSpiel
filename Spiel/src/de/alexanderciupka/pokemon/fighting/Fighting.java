@@ -64,20 +64,6 @@ public class Fighting {
 
 	private boolean isDouble;
 
-	public Fighting(Character enemyCharacter) {
-		this.init();
-		this.enemyCharacter = enemyCharacter;
-		this.playerTeam = new Team(this.gController.getMainCharacter().getTeam().getTeam(),
-				this.gController.getMainCharacter());
-		this.player = this.playerTeam.getFirstFightPokemon();
-		this.enemyTeam = new Team(enemyCharacter.getTeam().getTeam(), enemyCharacter);
-		this.enemy = this.enemyTeam.getFirstFightPokemon();
-		this.escape = false;
-		this.getStartPokemon();
-		this.player.startFight();
-		this.enemy.startFight();
-		this.field = new Field(this.gController.getMainCharacter().getCurrentRoute().getWeather());
-	}
 	public boolean won;
 
 	/**
