@@ -8,28 +8,26 @@ import de.alexanderciupka.pokemon.main.Main;
 
 public class HPBar extends JProgressBar implements Runnable {
 
-	public static final Color FULL  = Color.GREEN;
-	public static final Color HALF  = new Color(255, 255, 0);
+	public static final Color FULL = Color.GREEN;
+	public static final Color HALF = new Color(255, 255, 0);
 	public static final Color EMPTY = Color.RED;
 
 	private int nextValue = -1;
 	private boolean finished = true;
 	private boolean falling = false;;
 
-
 	@Override
 	public void setValue(int n) {
-		setValue(n, true);
+		this.setValue(n, true);
 	}
 
 	public void setValue(int n, boolean needScale) {
 		super.setValue(needScale ? n * 1000 : n);
-		setForeground(getHPColor());
 	}
 
 	public void updateValue(int n) {
-		setFinished(false);
-		nextValue = n * 1000;
+		this.setFinished(false);
+		this.nextValue = n * 1000;
 		new Thread(this).start();
 	}
 
@@ -43,13 +41,14 @@ public class HPBar extends JProgressBar implements Runnable {
 		super.setMaximum(n * 1000);
 	}
 
-	public Color getHPColor() {
+	@Override
+	public Color getForeground() {
 		double life = (this.getValue() / 1000) / ((double) this.getMaximum());
-		if(life > 0.5) {
+		if (life > 0.5) {
 			return FULL;
-		} else if(life > 0.2) {
+		} else if (life > 0.2) {
 			return HALF;
-		} else if(life == 0) {
+		} else if (life == 0) {
 			return new Color(254, 0, 0);
 		} else {
 			return EMPTY;
@@ -58,11 +57,12 @@ public class HPBar extends JProgressBar implements Runnable {
 
 	@Override
 	public void run() {
-		if(nextValue != -1) {
-			int delta = this.getValue() - nextValue;
+		if (this.nextValue != -1) {
+			int delta = this.getValue() - this.nextValue;
 			this.falling = delta > 0;
 			double change = delta / Main.FPS;
-			for(double value = this.getValue(); this.falling ? value > nextValue :  value < nextValue; value -= change) {
+			for (double value = this.getValue(); this.falling ? value > this.nextValue
+					: value < this.nextValue; value -= change) {
 				this.setValue((int) Math.round(value), false);
 				try {
 					Thread.sleep((long) (1000 / Main.FPS));
@@ -70,14 +70,14 @@ public class HPBar extends JProgressBar implements Runnable {
 					e.printStackTrace();
 				}
 			}
-			this.setValue(nextValue, false);
+			this.setValue(this.nextValue, false);
 		}
 		this.falling = false;
-		setFinished(true);
+		this.setFinished(true);
 	}
 
 	public boolean isFinished() {
-		return finished;
+		return this.finished;
 	}
 
 	public void setFinished(boolean finished) {

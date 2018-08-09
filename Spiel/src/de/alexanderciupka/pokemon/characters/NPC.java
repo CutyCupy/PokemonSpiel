@@ -29,6 +29,8 @@ public class NPC extends Character {
 	private boolean showName = true;
 	private Color textColor = Color.BLUE;
 
+	private boolean isDouble;
+
 	public boolean showName() {
 		return this.showName;
 	}
@@ -315,6 +317,7 @@ public class NPC extends Character {
 		saveData.addProperty("before", this.beforeFight);
 		saveData.addProperty("no", this.noFight);
 		saveData.addProperty("after", this.onDefeat);
+		saveData.addProperty("double", this.isDouble);
 		String reward = "";
 		if (this.rewards != null) {
 			for (Item i : this.rewards.keySet()) {
@@ -338,6 +341,7 @@ public class NPC extends Character {
 			this.beforeFight = saveData.get("before") instanceof JsonNull ? null : saveData.get("before").getAsString();
 			this.noFight = saveData.get("no") instanceof JsonNull ? null : saveData.get("no").getAsString();
 			this.onDefeat = saveData.get("after") instanceof JsonNull ? null : saveData.get("after").getAsString();
+			this.isDouble = saveData.get("double").getAsBoolean();
 			this.rewards = new HashMap<>();
 			if (!(saveData.get("reward") instanceof JsonNull)) {
 				this.importRewards(saveData.get("reward").getAsString());

@@ -398,9 +398,8 @@ public class Pokemon {
 	}
 
 	public String canAttack() {
-		AnimationLabel animation = this.equals(this.gController.getFight().getPlayer())
-				? this.gController.getGameFrame().getFightPanel().getPlayerAnimation()
-				: this.gController.getGameFrame().getFightPanel().getEnemyAnimation();
+		AnimationLabel animation = this.gController.getGameFrame().getFightPanel().getPokemonLabel(this)
+				.getAnimationLabel();
 		switch (this.ailment) {
 		case FREEZE:
 			if (this.rng.nextFloat() < 0.2f) {

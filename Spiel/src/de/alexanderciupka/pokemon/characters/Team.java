@@ -162,4 +162,24 @@ public class Team {
 			this.ammount++;
 		}
 	}
+
+	@Override
+	public boolean equals(Object arg0) {
+		if (arg0 instanceof Team) {
+			Team equals = (Team) arg0;
+			for (int i = 0; i < 6; i++) {
+				if (this.getTeam()[i] != null) {
+					if (!this.getTeam()[i].equals(equals.getTeam()[i])) {
+						return false;
+					}
+				} else {
+					if (equals.getTeam()[i] != null) {
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+		return false;
+	}
 }

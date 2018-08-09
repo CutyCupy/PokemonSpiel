@@ -12,38 +12,41 @@ import de.alexanderciupka.pokemon.map.GameController;
 
 public class AnimationLabel extends JLabel {
 
-
 	private JLabel animationLabel;
 
 	private boolean isPlayer;
 
-	public AnimationLabel(boolean isPlayer) {
-		setLayout(null);
+	public AnimationLabel() {
+		this.setLayout(null);
+		this.animationLabel = new JLabel();
+		this.animationLabel.setOpaque(false);
+		this.add(this.animationLabel);
+	}
+
+	public void setIsPlayer(boolean isPlayer) {
 		this.isPlayer = isPlayer;
-		animationLabel = new JLabel();
-		animationLabel.setOpaque(false);
-		this.add(animationLabel);
 	}
 
 	public void playAnimation(String animations) {
-		animationLabel.setBounds(0, 0, this.getWidth(), this.getHeight());
-		for(String animation : animations.split("\\+")) {
+		this.animationLabel.setBounds(0, 0, this.getWidth(), this.getHeight());
+		for (String animation : animations.split("\\+")) {
 			BufferedImage bi = GameController.getInstance().getRouteAnalyzer().getAnimationImage(animation);
-			if(bi == null) {
+			if (bi == null) {
 				continue;
 			}
 			long currentTime = 0;
-			for(int y = 0; y < bi.getHeight(); y += 192) {
-				for(int x = 0; x < bi.getWidth(); x += 192) {
+			for (int y = 0; y < bi.getHeight(); y += 192) {
+				for (int x = 0; x < bi.getWidth(); x += 192) {
 					currentTime = System.currentTimeMillis();
 					BufferedImage image = bi.getSubimage(x, y, 192, 192);
-					if(isPlayer) {
+					if (this.isPlayer) {
 						AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
 						tx.translate(-image.getWidth(null), 0);
 						image = new AffineTransformOp(tx, AffineTransformOp.TYPE_NEAREST_NEIGHBOR).filter(image, null);
 					}
-					animationLabel.setIcon(new ImageIcon(image.getScaledInstance(this.getWidth(), this.getHeight(), Image.SCALE_SMOOTH)));
-					repaint();
+					this.animationLabel.setIcon(new ImageIcon(
+							image.getScaledInstance(this.getWidth(), this.getHeight(), Image.SCALE_SMOOTH)));
+					this.repaint();
 					try {
 						Thread.sleep(Math.max(50 - (System.currentTimeMillis() - currentTime), 0));
 					} catch (InterruptedException e) {
@@ -52,7 +55,7 @@ public class AnimationLabel extends JLabel {
 				}
 			}
 		}
-		animationLabel.setIcon(null);
+		this.animationLabel.setIcon(null);
 	}
 
 }

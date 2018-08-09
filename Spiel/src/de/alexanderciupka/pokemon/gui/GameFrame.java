@@ -144,18 +144,11 @@ public class GameFrame extends JFrame {
 		return this.currentPanel;
 	}
 
-	public void startFight(Pokemon player, Pokemon enemy) {
-		this.fight = new FightPanel(player, enemy);
-		this.fight.setBorder(new EmptyBorder(5, 5, 5, 5));
-		this.fight.setLayout(null);
+	public void startFight() {
+		this.fight = new FightPanel();
 		this.fighting = true;
 		this.pokemon.update();
-		if (!this.gController.getFight().canEscape()) {
-			this.getFightPanel().addText(
-					"Eine Herausforderung von " + this.gController.getFight().getEnemyCharacter().getName() + "!");
-		} else {
-			this.getFightPanel().addText("Ein wildes " + enemy.getName() + " erscheint!");
-		}
+		this.getFightPanel().addText(this.gController.getFight().getEntryText());
 		this.gController.updateFight();
 	}
 

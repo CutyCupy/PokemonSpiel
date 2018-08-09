@@ -29,14 +29,17 @@ public class PokemonPanel extends JPanel {
 
 	private Item currentItem;
 
+	private int index;
+
 	public PokemonPanel() {
 		super();
-		firstOne = -1;
-		setBounds(0, 0, 630, 630);
-		pokemonButtons = new PokemonButton[6];
-		gController = GameController.getInstance();
+		this.firstOne = -1;
+		this.setBounds(0, 0, 630, 630);
+		this.pokemonButtons = new PokemonButton[6];
+		this.gController = GameController.getInstance();
 		for (int i = 0; i < 6; i++) {
-			PokemonButton pokemonButton = new PokemonButton(gController.getMainCharacter().getTeam().getTeam()[i], i);
+			PokemonButton pokemonButton = new PokemonButton(this.gController.getMainCharacter().getTeam().getTeam()[i],
+					i);
 			pokemonButton.setSize(300, 96);
 			if (i % 2 == 0) {
 				pokemonButton.setLocation(10, 100 + i * 62);
@@ -51,48 +54,53 @@ public class PokemonPanel extends JPanel {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					PokemonButton source = (PokemonButton) e.getSource();
-					if(currentItem == null) {
+					if (PokemonPanel.this.currentItem == null) {
 						int result = 1;
-						if(firstOne == -1) {
+						if (PokemonPanel.this.firstOne == -1) {
 							result = JOptionPane.showOptionDialog(null, "Was möchtest du tun?", "Pokemon",
 									JOptionPane.YES_NO_OPTION, JOptionPane.YES_NO_OPTION,
-									new ImageIcon(source.getPokemon().getSpriteFront()), new String[] { "Bericht", "Tauschen" },
-									null);
+									new ImageIcon(source.getPokemon().getSpriteFront()),
+									new String[] { "Bericht", "Tauschen" }, null);
 						}
 						switch (result) {
 						case 0:
-							if(gController.isFighting()) {
-								gController.displayReport(source.getPokemon(), gController.getFight().getPlayerTeam().getTeam());
+							if (PokemonPanel.this.gController.isFighting()) {
+								PokemonPanel.this.gController.displayReport(source.getPokemon(),
+										PokemonPanel.this.gController.getFight().getPlayerTeam().getTeam());
 							} else {
-								gController.displayReport(source.getPokemon(), gController.getMainCharacter().getTeam().getTeam());
+								PokemonPanel.this.gController.displayReport(source.getPokemon(),
+										PokemonPanel.this.gController.getMainCharacter().getTeam().getTeam());
 							}
 							break;
 						case 1:
-							if (gController.isFighting()) {
+							if (PokemonPanel.this.gController.isFighting()) {
 								if (source.getIndex() != 0) {
-									if (gController.getFight().canBeSendOut(source.getIndex())) {
+									if (PokemonPanel.this.gController.getFight().canBeSendOut(source.getIndex())) {
 										new Thread(new Runnable() {
 											@Override
 											public void run() {
-												gController.getFight().setCurrentFightOption(FightOption.FIGHT);
-												gController.getFight().sendOut(source.getIndex());
-												gController.getGameFrame().getFightPanel().checkEnemyAttack();
-												gController.getGameFrame().getFightPanel().showMenu();
+												PokemonPanel.this.gController.getFight()
+														.setCurrentFightOption(FightOption.FIGHT);
+												PokemonPanel.this.gController.getFight().sendOut(source.getIndex());
+												PokemonPanel.this.gController.getGameFrame().getFightPanel()
+														.checkEnemyAttack();
+												PokemonPanel.this.gController.getGameFrame().getFightPanel().showMenu();
 											}
 										}).start();
 									}
 								}
 							} else {
-								if (source.getIndex() != firstOne) {
-									if (firstOne != -1) {
-										gController.getMainCharacter().getTeam().swapPokemon(firstOne, source.getIndex());
-										firstOne = -1;
-										update();
+								if (source.getIndex() != PokemonPanel.this.firstOne) {
+									if (PokemonPanel.this.firstOne != -1) {
+										PokemonPanel.this.gController.getMainCharacter().getTeam()
+												.swapPokemon(PokemonPanel.this.firstOne, source.getIndex());
+										PokemonPanel.this.firstOne = -1;
+										PokemonPanel.this.update();
 									} else {
-										firstOne = source.getIndex();
+										PokemonPanel.this.firstOne = source.getIndex();
 									}
 								} else {
-									firstOne = -1;
+									PokemonPanel.this.firstOne = -1;
 								}
 							}
 							break;
@@ -101,42 +109,50 @@ public class PokemonPanel extends JPanel {
 						new Thread(new Runnable() {
 							@Override
 							public void run() {
-								gController.setInteractionPause(true);
-								for(PokemonButton p : pokemonButtons) {
+								PokemonPanel.this.gController.setInteractionPause(true);
+								for (PokemonButton p : PokemonPanel.this.pokemonButtons) {
 									p.setEnabled(false);
 								}
-								backButton.setEnabled(false);
-								boolean result = source.getPokemon().useItem(gController.getMainCharacter(), currentItem);
+								PokemonPanel.this.backButton.setEnabled(false);
+								boolean result = source.getPokemon().useItem(
+										PokemonPanel.this.gController.getMainCharacter(),
+										PokemonPanel.this.currentItem);
 								source.update(true);
 								source.setEnabled(false);
-								gController.waitDialogue();
-								if(gController.isFighting()) {
-									gController.getGameFrame().getFightPanel().updatePanels();
-									gController.getFight().setCurrentFightOption(FightOption.FIGHT);
+								PokemonPanel.this.gController.waitDialogue();
+								if (PokemonPanel.this.gController.isFighting()) {
+									PokemonPanel.this.gController.getGameFrame().getFightPanel().updatePanels();
+									PokemonPanel.this.gController.getFight().setCurrentFightOption(FightOption.FIGHT);
 								} else {
-									if(!gController.getGameFrame().getEvolutionPanel().getPokemon().isEmpty()) {
-										gController.getGameFrame().setCurrentPanel(gController.getGameFrame().getEvolutionPanel());
-										gController.getGameFrame().getEvolutionPanel().start();
+									if (!PokemonPanel.this.gController.getGameFrame().getEvolutionPanel().getPokemon()
+											.isEmpty()) {
+										PokemonPanel.this.gController.getGameFrame().setCurrentPanel(
+												PokemonPanel.this.gController.getGameFrame().getEvolutionPanel());
+										PokemonPanel.this.gController.getGameFrame().getEvolutionPanel().start();
 									}
 								}
-								gController.getGameFrame().getInventoryPanel().update(gController.getGameFrame().getInventoryPanel().getCurrentPlayer());
-								update();
-								if(currentItem != null) {
-									gController.getGameFrame().setCurrentPanel(gController.getGameFrame().getPokemonPanel());
+								PokemonPanel.this.gController.getGameFrame().getInventoryPanel()
+										.update(PokemonPanel.this.gController.getGameFrame().getInventoryPanel()
+												.getCurrentPlayer());
+								PokemonPanel.this.update();
+								if (PokemonPanel.this.currentItem != null) {
+									PokemonPanel.this.gController.getGameFrame().setCurrentPanel(
+											PokemonPanel.this.gController.getGameFrame().getPokemonPanel());
 								} else {
-									gController.getGameFrame().setCurrentPanel(gController.getGameFrame().getLastPanel(false));
+									PokemonPanel.this.gController.getGameFrame().setCurrentPanel(
+											PokemonPanel.this.gController.getGameFrame().getLastPanel(false));
 								}
-								for(PokemonButton p : pokemonButtons) {
-									if(p.getPokemon() != null) {
+								for (PokemonButton p : PokemonPanel.this.pokemonButtons) {
+									if (p.getPokemon() != null) {
 										p.setEnabled(true);
 									}
 								}
-								backButton.setEnabled(true);
-								gController.setInteractionPause(false);
+								PokemonPanel.this.backButton.setEnabled(true);
+								PokemonPanel.this.gController.setInteractionPause(false);
 
-								if(result && gController.isFighting()) {
-									gController.getGameFrame().getFightPanel().checkEnemyAttack();
-									gController.getGameFrame().getFightPanel().showMenu();
+								if (result && PokemonPanel.this.gController.isFighting()) {
+									PokemonPanel.this.gController.getGameFrame().getFightPanel().checkEnemyAttack();
+									PokemonPanel.this.gController.getGameFrame().getFightPanel().showMenu();
 								}
 								source.repaint();
 							}
@@ -144,55 +160,56 @@ public class PokemonPanel extends JPanel {
 					}
 				}
 			});
-			pokemonButtons[i] = pokemonButton;
-			add(pokemonButton);
+			this.pokemonButtons[i] = pokemonButton;
+			this.add(pokemonButton);
 		}
-		backButton = new JButton("Zurück");
-		backButton.setBounds(90, 510, 450, 100);
-		backButton.setFont(new Font(backButton.getFont().getFontName(), Font.PLAIN, 30));
-		backButton.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-		backButton.setBackground(Color.WHITE);
-		backButton.setOpaque(false);
-		add(backButton);
+		this.backButton = new JButton("Zurück");
+		this.backButton.setBounds(90, 510, 450, 100);
+		this.backButton.setFont(new Font(this.backButton.getFont().getFontName(), Font.PLAIN, 30));
+		this.backButton.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		this.backButton.setBackground(Color.WHITE);
+		this.backButton.setOpaque(false);
+		this.add(this.backButton);
 
-		addActionListeners();
+		this.addActionListeners();
 
 		JLabel background = new JLabel(new ImageIcon(Main.class.getResource("/backgrounds/team_pink.png")));
-		background.setBounds(getBounds());
+		background.setBounds(this.getBounds());
 		this.add(background);
 
-		this.setComponentZOrder(background, getComponentCount() - 1);
+		this.setComponentZOrder(background, this.getComponentCount() - 1);
 	}
 
 	private void addActionListeners() {
-		backButton.addActionListener(new ActionListener() {
+		this.backButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				currentItem = null;
-				if (gController.isFighting()) {
-					gController.getFight().setCurrentFightOption(FightOption.FIGHT);
+				PokemonPanel.this.currentItem = null;
+				if (PokemonPanel.this.gController.isFighting()) {
+					PokemonPanel.this.gController.getFight().setCurrentFightOption(FightOption.FIGHT);
 				} else {
-					gController.getGameFrame().setCurrentPanel(gController.getGameFrame().getLastPanel());
+					PokemonPanel.this.gController.getGameFrame()
+							.setCurrentPanel(PokemonPanel.this.gController.getGameFrame().getLastPanel());
 				}
 			}
 		});
 	}
 
 	public void update() {
-		if(this.currentItem != null &&
-				this.gController.getGameFrame().getInventoryPanel().getCurrentPlayer().getItems().get(currentItem) == 0 &&
-				!gController.isFighting()) {
-			while(!this.getClass().isInstance(gController.getGameFrame().getCurrentPanel())) {
+		if (this.currentItem != null && this.gController.getGameFrame().getInventoryPanel().getCurrentPlayer()
+				.getItems().get(this.currentItem) == 0 && !this.gController.isFighting()) {
+			while (!this.getClass().isInstance(this.gController.getGameFrame().getCurrentPanel())) {
 				Thread.yield();
 			}
-			gController.getGameFrame().addDialogue("Du hast deinen letzten " + this.currentItem.getName() + " benutzt!");
+			this.gController.getGameFrame()
+					.addDialogue("Du hast deinen letzten " + this.currentItem.getName() + " benutzt!");
 			this.currentItem = null;
-			gController.waitDialogue();
+			this.gController.waitDialogue();
 		}
-		for (int i = 0; i < pokemonButtons.length; i++) {
-			pokemonButtons[i].update(false);
+		for (PokemonButton pokemonButton : this.pokemonButtons) {
+			pokemonButton.update(false);
 		}
-		if(gController.isFighting() && gController.getFight().getPlayer().getAilment() == Ailment.FAINTED) {
+		if (this.gController.isFighting() && this.gController.getFight().getPlayer().getAilment() == Ailment.FAINTED) {
 			this.backButton.setEnabled(false);
 		} else {
 			this.backButton.setEnabled(true);
@@ -200,8 +217,17 @@ public class PokemonPanel extends JPanel {
 	}
 
 	public void update(Item i) {
-		update();
+		this.update();
 		this.currentItem = i;
+	}
+
+	public void update(int index) {
+		this.update();
+		this.index = index;
+	}
+
+	public int getIndex() {
+		return this.index;
 	}
 
 }

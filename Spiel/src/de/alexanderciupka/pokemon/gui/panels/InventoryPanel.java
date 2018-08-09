@@ -47,35 +47,36 @@ public class InventoryPanel extends JPanel {
 
 	public InventoryPanel() {
 
-		gController = GameController.getInstance();
+		this.gController = GameController.getInstance();
 
-		itemNameLabels = new HashMap<>();
-		itemAmountLabels = new HashMap<>();
+		this.itemNameLabels = new HashMap<>();
+		this.itemAmountLabels = new HashMap<>();
 
-		setBounds(0, 0, 630, 630);
-		setBorder(new EmptyBorder(5, 5, 5, 5));
-		setLayout(null);
+		this.setBounds(0, 0, 630, 630);
+		this.setBorder(new EmptyBorder(5, 5, 5, 5));
+		this.setLayout(null);
 
-		spriteL = new JLabel(" ");
-		spriteL.setBounds(10, 11, 200, 200);
-		add(spriteL);
+		this.spriteL = new JLabel(" ");
+		this.spriteL.setBounds(10, 11, 200, 200);
+		this.add(this.spriteL);
 
-		descriptionL = new JLabel(" ");
-		descriptionL.setBounds(10, 222, 200, 200);
-		add(descriptionL);
+		this.descriptionL = new JLabel(" ");
+		this.descriptionL.setBounds(10, 222, 200, 200);
+		this.add(this.descriptionL);
 
-		pokemonB = new JButton("Pokemon");
-		pokemonB.setFont(FONT);
-		pokemonB.setBounds(10, 473, 200, 48);
-		pokemonB.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-		pokemonB.setBackground(Color.WHITE);
-		pokemonB.setFocusable(false);
+		this.pokemonB = new JButton("Pokemon");
+		this.pokemonB.setFont(FONT);
+		this.pokemonB.setBounds(10, 473, 200, 48);
+		this.pokemonB.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		this.pokemonB.setBackground(Color.WHITE);
+		this.pokemonB.setFocusable(false);
 
-		pokemonB.addMouseListener(new MouseAdapter() {
+		this.pokemonB.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				gController.getGameFrame().getPokemonPanel().update();
-				gController.getGameFrame().setCurrentPanel(gController.getGameFrame().getPokemonPanel());
+				InventoryPanel.this.gController.getGameFrame().getPokemonPanel().update();
+				InventoryPanel.this.gController.getGameFrame()
+						.setCurrentPanel(InventoryPanel.this.gController.getGameFrame().getPokemonPanel());
 				e.getComponent().setBackground(Color.WHITE);
 			}
 
@@ -93,22 +94,23 @@ public class InventoryPanel extends JPanel {
 
 		});
 
-		add(pokemonB);
+		this.add(this.pokemonB);
 
-		backB = new JButton("Zurück");
-		backB.setFont(FONT);
-		backB.setBounds(10, 532, 200, 48);
-		backB.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-		backB.setBackground(Color.WHITE);
-		backB.setFocusable(false);
+		this.backB = new JButton("Zurück");
+		this.backB.setFont(FONT);
+		this.backB.setBounds(10, 532, 200, 48);
+		this.backB.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		this.backB.setBackground(Color.WHITE);
+		this.backB.setFocusable(false);
 
-		backB.addMouseListener(new MouseAdapter() {
+		this.backB.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if(gController.isFighting()) {
-					gController.getFight().setCurrentFightOption(FightOption.FIGHT);
+				if (InventoryPanel.this.gController.isFighting()) {
+					InventoryPanel.this.gController.getFight().setCurrentFightOption(FightOption.FIGHT);
 				} else {
-					gController.getGameFrame().setCurrentPanel(gController.getGameFrame().getLastPanel());
+					InventoryPanel.this.gController.getGameFrame()
+							.setCurrentPanel(InventoryPanel.this.gController.getGameFrame().getLastPanel());
 				}
 				e.getComponent().setBackground(Color.WHITE);
 			}
@@ -127,56 +129,56 @@ public class InventoryPanel extends JPanel {
 
 		});
 
+		this.add(this.backB);
 
-		add(backB);
+		this.itemSP = new JScrollPane();
+		this.itemSP.setBounds(220, 11, 384, 569);
+		this.add(this.itemSP);
 
-		itemSP = new JScrollPane();
-		itemSP.setBounds(220, 11, 384, 569);
-		add(itemSP);
-
-		panel = new JPanel();
-		itemSP.setViewportView(panel);
+		this.panel = new JPanel();
+		this.itemSP.setViewportView(this.panel);
 		GridBagLayout layout = new GridBagLayout();
 		layout.columnWidths = new int[] { 250, 50 };
-		panel.setLayout(layout);
+		this.panel.setLayout(layout);
 
-		itemSP.getVerticalScrollBar().setUnitIncrement(10);
+		this.itemSP.getVerticalScrollBar().setUnitIncrement(10);
 
-		readSprites();
+		this.readSprites();
 	}
 
 	private void readSprites() {
 		this.itemSprites = new HashMap<>(Item.values().length);
-		for(Item i : Item.values()) {
+		for (Item i : Item.values()) {
 			try {
-				this.itemSprites.put(i, new ImageIcon(gController.getRouteAnalyzer().getItemImage(i)));
-			} catch(Exception e) {}
+				this.itemSprites.put(i, new ImageIcon(this.gController.getRouteAnalyzer().getItemImage(i)));
+			} catch (Exception e) {
+			}
 		}
- 	}
+	}
 
-	public void update(Player p) {
-		this.currentPlayer = p;
-		updateItems();
+	public void update(Player character) {
+		this.currentPlayer = character;
+		this.updateItems();
 	}
 
 	private void updateItems() {
-		spriteL.setIcon(null);
-		descriptionL.setText(" ");
+		this.spriteL.setIcon(null);
+		this.descriptionL.setText(" ");
 		if (this.currentPlayer != null) {
 			GridBagConstraints gbc = new GridBagConstraints();
 
 			HashMap<Item, Integer> currentItems = this.currentPlayer.getItems();
 
-			panel.removeAll();
-			itemNameLabels.clear();
-			itemAmountLabels.clear();
+			this.panel.removeAll();
+			this.itemNameLabels.clear();
+			this.itemAmountLabels.clear();
 
 			int row = 0;
 
 			for (Item i : currentItems.keySet()) {
 				int amount = currentItems.get(i);
 				if (i != Item.NONE && amount > 0) {
-					while(amount > 0) {
+					while (amount > 0) {
 						JLabel itemL = new JLabel(i.getName());
 						itemL.setOpaque(true);
 						itemL.setFont(FONT);
@@ -195,8 +197,8 @@ public class InventoryPanel extends JPanel {
 							public void mouseExited(MouseEvent e) {
 								JLabel source = (JLabel) e.getComponent();
 								source.setBackground(LABEL_BACKGROUND);
-								descriptionL.setText("");
-								spriteL.setIcon(null);
+								InventoryPanel.this.descriptionL.setText("");
+								InventoryPanel.this.spriteL.setIcon(null);
 							}
 
 							@Override
@@ -204,10 +206,12 @@ public class InventoryPanel extends JPanel {
 								JLabel source = (JLabel) e.getComponent();
 								source.setBackground(HOVER_BACKGROUND);
 								Item item = Item.getItemByName(source.getText());
-								descriptionL.setFont(FONT.deriveFont(20f));
-								descriptionL.setText(formatText(descriptionL.getWidth(), item.getDescription(),
-										getFontMetrics(descriptionL.getFont()), 5));
-								spriteL.setIcon(itemSprites.get(item));
+								InventoryPanel.this.descriptionL.setFont(FONT.deriveFont(20f));
+								InventoryPanel.this.descriptionL.setText(InventoryPanel.this.formatText(
+										InventoryPanel.this.descriptionL.getWidth(), item.getDescription(),
+										InventoryPanel.this.getFontMetrics(InventoryPanel.this.descriptionL.getFont()),
+										5));
+								InventoryPanel.this.spriteL.setIcon(InventoryPanel.this.itemSprites.get(item));
 							}
 
 							@Override
@@ -217,15 +221,18 @@ public class InventoryPanel extends JPanel {
 									public void run() {
 										JLabel source = (JLabel) e.getComponent();
 										Item i = Item.getItemByName(source.getText());
-										if(i.isUsableOnPokemon()) {
-											gController.getGameFrame().getPokemonPanel().update(i);
-											gController.getGameFrame().setCurrentPanel(gController.getGameFrame().getPokemonPanel());
+										if (i.isUsableOnPokemon()) {
+											InventoryPanel.this.gController.getGameFrame().getPokemonPanel().update(i);
+											InventoryPanel.this.gController.getGameFrame().setCurrentPanel(
+													InventoryPanel.this.gController.getGameFrame().getPokemonPanel());
 										} else {
-											if(currentPlayer.useItem(i)) {
-												if(gController.isFighting()) {
-													gController.getFight().setCurrentFightOption(FightOption.FIGHT);
+											if (InventoryPanel.this.currentPlayer.useItem(i)) {
+												if (InventoryPanel.this.gController.isFighting()) {
+													InventoryPanel.this.gController.getFight()
+															.setCurrentFightOption(FightOption.FIGHT);
 												} else {
-													gController.getGameFrame().setCurrentPanel(null);
+													InventoryPanel.this.gController.getGameFrame()
+															.setCurrentPanel(null);
 												}
 											}
 										}
@@ -235,7 +242,7 @@ public class InventoryPanel extends JPanel {
 							}
 						});
 
-						panel.add(itemL, gbc);
+						this.panel.add(itemL, gbc);
 						JLabel amountL = new JLabel("x" + (amount > 99 ? 99 : amount));
 						amount -= 99;
 						amountL.setFont(FONT);
@@ -249,20 +256,20 @@ public class InventoryPanel extends JPanel {
 						gbc.weightx = 0.5;
 						gbc.weighty = 0;
 
-						panel.add(amountL, gbc);
+						this.panel.add(amountL, gbc);
 
-						itemNameLabels.put(row, itemL);
-						itemAmountLabels.put(row, amountL);
+						this.itemNameLabels.put(row, itemL);
+						this.itemAmountLabels.put(row, amountL);
 
 						row++;
 					}
 				}
 			}
 
-			itemSP.setBorder(null);
+			this.itemSP.setBorder(null);
 
-			itemSP.setSize(itemSP.getWidth(), Math.min(row * 50 + 5, 569));
-			itemSP.repaint();
+			this.itemSP.setSize(this.itemSP.getWidth(), Math.min(row * 50 + 5, 569));
+			this.itemSP.repaint();
 			this.repaint();
 		}
 	}
@@ -284,7 +291,7 @@ public class InventoryPanel extends JPanel {
 		if (rows.size() > maxRows) {
 			this.descriptionL
 					.setFont(this.descriptionL.getFont().deriveFont(this.descriptionL.getFont().getSize() - 1.0f));
-			return formatText(width, text, getFontMetrics(this.descriptionL.getFont()), maxRows);
+			return this.formatText(width, text, this.getFontMetrics(this.descriptionL.getFont()), maxRows);
 		}
 		String result = "<html>";
 		for (String s : rows) {

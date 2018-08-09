@@ -1,12 +1,12 @@
 package de.alexanderciupka.pokemon.fighting;
 
-import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 
 import de.alexanderciupka.pokemon.characters.Character;
-import de.alexanderciupka.pokemon.characters.NPC;
+import de.alexanderciupka.pokemon.characters.Player;
 import de.alexanderciupka.pokemon.characters.Team;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.menu.SoundController;
@@ -47,7 +47,8 @@ public class Fighting {
 	private Character leftOpponent;
 	private Character rightOpponent;
 
-	private HashSet<Pokemon> playerParticipants;
+	private HashSet<Pokemon> leftParticipants;
+	private HashSet<Pokemon> rightParticipants;
 	// private Character enemyCharacter;
 	private Random rng;
 	private GameController gController;
@@ -65,6 +66,15 @@ public class Fighting {
 	private boolean isDouble;
 
 	public boolean won;
+
+	private int activePokemon;
+
+	private HashMap<Pokemon, Attack> turnAttacks;
+
+	public static final int LEFT_PLAYER = 1;
+	public static final int RIGHT_PLAYER = 2;
+	public static final int LEFT_OPPONENT = 3;
+	public static final int RIGHT_OPPONENT = 4;
 
 	/**
 	 * Starts a wild 1v1 Battle.
@@ -97,7 +107,7 @@ public class Fighting {
 	 * @author CutyCupy
 	 */
 	public Fighting(Pokemon left, Pokemon right, boolean escapable) {
-		this(null, left, right, escapable);
+		this(GameController.getInstance().getMainCharacter(), left, right, escapable);
 	}
 
 	/**
@@ -137,11 +147,7 @@ public class Fighting {
 
 		this.escapable = escapable;
 
-		if (teamMate == null && right == null) {
-			this.isDouble = false;
-		} else {
-			this.isDouble = true;
-		}
+		this.isDouble = right != null;
 
 	}
 
@@ -153,27 +159,7 @@ public class Fighting {
 	 * @author CutyCupy
 	 */
 	public Fighting(Character opponent) {
-		this.leftPlayer = this.gController.getMainCharacter();
-		this.rightPlayer = null;
-
-		this.leftPlayerTeam = this.leftPlayer.getTeam();
-		this.rightPlayerTeam = null;
-
-		this.leftOpponent = opponent;
-		this.rightOpponent = null;
-
-		this.leftOpponentTeam = opponent.getTeam();
-		this.rightOpponentTeam = null;
-
-		this.leftPlayerPokemon = this.getFirstNonFightingPokemon(this.leftPlayerTeam);
-		this.rightPlayerPokemon = null;
-
-		this.leftOpponentPokemon = this.getFirstNonFightingPokemon(this.leftOpponentTeam);
-		this.rightOpponentPokemon = null;
-
-		this.escapable = false;
-
-		this.isDouble = false;
+		this(opponent, null);
 	}
 
 	/**
@@ -187,7 +173,7 @@ public class Fighting {
 	 * @author CutyCupy
 	 */
 	public Fighting(Character leftOpponent, Character rightOpponent) {
-		// TODO: Implement constructor
+		this(GameController.getInstance().getMainCharacter(), leftOpponent, rightOpponent);
 	}
 
 	/**
@@ -199,12 +185,30 @@ public class Fighting {
 	 *            "left" opponent on the field.
 	 * @param rightOpponent
 	 *            "right" opponent on the field. Might be null, which would mean
-	 *            that a 1v2 fight will be created.
+	 *            that a 1v1 fight will be created.
 	 * @author CutyCupy
 	 */
 	public Fighting(Character teamMate, Character leftOpponent, Character rightOpponent) {
+		this.leftPlayer = this.gController.getMainCharacter();
+		this.leftPlayerTeam = this.leftPlayer.getTeam();
+		this.leftOpponent = leftOpponent;
+		this.leftOpponentTeam = this.leftOpponent.getTeam();
+		this.leftPlayerPokemon = this.getFirstNonFightingPokemon(this.leftPlayerTeam);
+		this.leftOpponentPokemon = this.getFirstNonFightingPokemon(this.leftOpponentTeam);
+		this.escapable = false;
 
-		this.isDouble = true;
+		if (rightOpponent != null) {
+			this.rightPlayer = teamMate;
+			this.rightPlayerTeam = this.rightPlayer.getTeam();
+			this.rightOpponent = rightOpponent;
+			this.rightOpponentTeam = this.rightOpponent.getTeam();
+			this.rightPlayerPokemon = this.getFirstNonFightingPokemon(this.rightPlayerTeam);
+			this.rightOpponentPokemon = this.getFirstNonFightingPokemon(this.leftOpponentTeam);
+			this.isDouble = true;
+		} else {
+			this.isDouble = false;
+		}
+
 	}
 
 	// public Fighting(Pokemon pokemonTwo) {
@@ -250,12 +254,16 @@ public class Fighting {
 		this.gController = GameController.getInstance();
 		this.rng = new Random();
 		this.currentFightOption = FightOption.FIGHT;
-		this.playerParticipants = new HashSet<Pokemon>();
+		this.leftParticipants = new HashSet<Pokemon>();
+		this.rightParticipants = new HashSet<Pokemon>();
 		// this.visible = new SimpleEntry<Boolean, Boolean>(true, true);
 		this.visible = new HashMap<>();
 	}
 
 	private Pokemon getFirstNonFightingPokemon(Team team) {
+		if (team == null) {
+			return null;
+		}
 		for (int i = 0; i < team.getAmmount(); i++) {
 			if (team.getPokemon(i) != null && team.getPokemon(i).getAilment() != Ailment.FAINTED
 					&& this.notFighting(team.getPokemon(i))) {
@@ -270,67 +278,258 @@ public class Fighting {
 				|| p.equals(this.leftOpponentPokemon) || p.equals(this.rightOpponentPokemon));
 	}
 
-	private void getStartPokemon() {
-		this.player = this.playerTeam.getFirstFightPokemon();
-		this.sendOut(this.playerTeam.getIndex(this.player));
+	// private void getStartPokemon() {
+	// this.player = this.playerTeam.getFirstFightPokemon();
+	// this.sendOut(this.playerTeam.getIndex(this.player));
+	// }
+
+	/**
+	 * Calculates and returns the order of attacks in a pokemon fight.
+	 * 
+	 * @param leftPlayer
+	 *            Move chosen by the left Player pokemon
+	 * @param rightPlayer
+	 *            Move chosen by the right player pokemon
+	 * @param leftOpponent
+	 *            Move chosen by the left opponent pokemon
+	 * @param rightOpponent
+	 *            Move chosen by the right opponent pokemon
+	 * @return Move order
+	 * @author CutyCupy
+	 */
+	private Attack[] getOrder() {
+		ArrayList<Attack> order = new ArrayList<>();
+		Attack[] attacks = new Attack[] { this.turnAttacks.get(this.leftPlayerPokemon),
+				this.turnAttacks.get(this.rightPlayerPokemon), this.turnAttacks.get(this.leftOpponentPokemon),
+				this.turnAttacks.get(this.rightOpponentPokemon) };
+		for (Attack attack : attacks) {
+			if (attack != null) {
+				order.add(this.getOrderIndex(order, attack), attack);
+			}
+		}
+		return order.toArray(new Attack[order.size()]);
 	}
 
-	public boolean isPlayerStart(Move playerMove, Move enemyMove) {
-		if (playerMove.getPriority() > enemyMove.getPriority()) {
+	public Pokemon[] getSpeedOrder() {
+		ArrayList<Pokemon> order = new ArrayList<>();
+		for (Pokemon p : new Pokemon[] { this.leftPlayerPokemon, this.leftOpponentPokemon, this.rightOpponentPokemon,
+				this.leftOpponentPokemon }) {
+			if (p != null) {
+				int index = 0;
+				for (Pokemon cur : order) {
+					if (this.field.updateFightStats(cur, this.isPlayer(cur)).get(Stat.SPEED) < this.field
+							.updateFightStats(p, this.isPlayer(p)).get(Stat.SPEED)) {
+						break;
+					} else if (this.field.updateFightStats(cur, this.isPlayer(cur)).get(Stat.SPEED) == this.field
+							.updateFightStats(p, this.isPlayer(p)).get(Stat.SPEED)) {
+						if (this.rng.nextBoolean()) {
+							break;
+						}
+					}
+					index++;
+				}
+				order.add(index, p);
+			}
+		}
+		return order.toArray(new Pokemon[order.size()]);
+	}
+
+	private int getOrderIndex(ArrayList<Attack> order, Attack attack) {
+		for (int i = 0; i < order.size(); i++) {
+			Attack compare = order.get(i);
+			if (attack.getPriority() > compare.getPriority()) {
+				return i;
+			} else if (attack.getPriority() == compare.getPriority()) {
+				double speedA = this.field.updateFightStats(attack.getSource(), this.isPlayer(attack.getSource()))
+						.get(Stat.SPEED);
+				double speedC = this.field.updateFightStats(attack.getSource(), this.isPlayer(compare.getSource()))
+						.get(Stat.SPEED);
+				if (speedA > speedC) {
+					return i;
+				} else if (speedA == speedC) {
+					if (this.rng.nextBoolean()) {
+						return i;
+					}
+				}
+			}
+		}
+		return order.size();
+	}
+
+	public boolean isPlayer(Pokemon p) {
+		if (p.equals(this.leftPlayerPokemon) || p.equals(this.rightPlayerPokemon)) {
 			return true;
-		} else if (playerMove.getPriority() == enemyMove.getPriority()) {
-			if (this.player.getStats().getFightStats().get(Stat.SPEED) > this.enemy.getStats().getFightStats()
-					.get(Stat.SPEED)) {
-				return true;
-			} else if (this.player.getStats().getFightStats().get(Stat.SPEED) == this.enemy.getStats().getFightStats()
-					.get(Stat.SPEED)) {
-				return this.rng.nextBoolean();
-			} else {
-				return false;
-			}
-		} else {
-			return false;
 		}
+		return false;
 	}
 
-	public void startRound(Move playerMove, Move enemyMove) {
-		if (playerMove == null) {
-			playerMove = this.gController.getInformation().getMoveByName("Verzweifler");
-		}
-		if (enemyMove == null) {
-			enemyMove = this.gController.getInformation().getMoveByName("Verzweifler");
-		}
-		boolean playerStarts = this.gController.getFight().isPlayerStart(playerMove, enemyMove);
-		if (playerStarts) {
-			if (this.gController.getFight().attack(this.player, this.enemy, playerMove)) {
-				this.gController.getFight().attack(this.enemy, this.player, enemyMove);
-			}
-		} else {
-			if (this.gController.getFight().attack(this.enemy, this.player, enemyMove)) {
-				this.gController.getFight().attack(this.player, this.enemy, playerMove);
+	// public boolean isPlayerStart(Move playerMove, Move enemyMove) {
+	// if (playerMove.getPriority() > enemyMove.getPriority()) {
+	// return true;
+	// } else if (playerMove.getPriority() == enemyMove.getPriority()) {
+	// if (this.player.getStats().getFightStats().get(Stat.SPEED) >
+	// this.enemy.getStats().getFightStats()
+	// .get(Stat.SPEED)) {
+	// return true;
+	// } else if (this.player.getStats().getFightStats().get(Stat.SPEED) ==
+	// this.enemy.getStats().getFightStats()
+	// .get(Stat.SPEED)) {
+	// return this.rng.nextBoolean();
+	// } else {
+	// return false;
+	// }
+	// } else {
+	// return false;
+	// }
+	// }
+
+	public void startRound() {
+		for (Attack attack : this.getOrder()) {
+			if (attack.getSource().getAilment() != Ailment.FAINTED) {
+				if (attack.getTargets() != null) {
+					for (Pokemon target : attack.getTargets()) {
+						this.attack(attack.getSource(), target, attack.getMove());
+					}
+				} else if (attack.getItem() != null) {
+					attack.getSource().useItem(null, attack.getItem()); // TODO: Trainers can have items too
+				} else if (attack.getSwap() != null) {
+					this.swap(attack.getSource(), attack.getSwap());
+				}
 			}
 		}
 		this.endTurn();
 	}
 
+	private void swap(Pokemon current, Pokemon next) {
+		int position = 0;
+		if (current.equals(this.leftPlayerPokemon)) {
+			position = 1;
+		} else if (current.equals(this.rightPlayerPokemon)) {
+			position = 2;
+		} else if (current.equals(this.leftOpponentPokemon)) {
+			position = 3;
+		} else {
+			position = 4;
+		}
+		this.sendBack(current, position);
+		this.sendOut(next, position);
+	}
+
+	public void sendBack(Pokemon current, int position) {
+		Character c = null;
+		switch (position) {
+		case 1:
+			c = this.leftPlayer;
+			break;
+		case 2:
+			c = this.rightPlayer;
+			break;
+		case 3:
+			c = this.leftOpponent;
+			break;
+		default:
+			c = this.rightOpponent;
+			break;
+		}
+		if (c == null) {
+			return;
+		}
+		this.gController.getGameFrame().getFightPanel()
+				.addText(c.getName() + " ruft " + current.getName() + " zurück!");
+		SoundController.getInstance().playSound(SoundController.POKEBALL_CATCHING, true);
+	}
+
+	public void sendOut(Pokemon next, int position) {
+		this.setVisible(next, false);
+		Character c = null;
+		switch (position) {
+		case 1:
+			c = this.leftPlayer;
+			this.leftPlayerPokemon = next;
+			break;
+		case 2:
+			c = this.rightPlayer;
+			this.rightPlayerPokemon = next;
+			break;
+		case 3:
+			c = this.leftOpponent;
+			this.leftOpponentPokemon = next;
+			break;
+		default:
+			c = this.rightOpponent;
+			this.rightOpponentPokemon = next;
+			break;
+		}
+		if (c == null) {
+			return;
+		}
+		this.gController.getGameFrame().getFightPanel().addText(c.getName() + " setzt " + next.getName() + " ein!");
+		SoundController.getInstance().playSound(SoundController.POKEBALL_OUT, true);
+		this.setVisible(next, true);
+	}
+
+	private Character getTrainer(Pokemon p) {
+		if (p.equals(this.leftPlayerPokemon)) {
+			return this.leftPlayer;
+		} else if (p.equals(this.rightPlayerPokemon)) {
+			return this.rightPlayer;
+		} else if (p.equals(this.leftOpponentPokemon)) {
+			return this.leftOpponent;
+		} else {
+			return this.rightOpponent;
+		}
+	}
+
+	// public void startRound(Move playerMove, Move enemyMove) {
+	// if (playerMove == null) {
+	// playerMove = this.gController.getInformation().getMoveByName("Verzweifler");
+	// }
+	// if (enemyMove == null) {
+	// enemyMove = this.gController.getInformation().getMoveByName("Verzweifler");
+	// }
+	// boolean playerStarts = this.gController.getFight().isPlayerStart(playerMove,
+	// enemyMove);
+	// if (playerStarts) {
+	// if (this.gController.getFight().attack(this.player, this.enemy, playerMove))
+	// {
+	// this.gController.getFight().attack(this.enemy, this.player, enemyMove);
+	// }
+	// } else {
+	// if (this.gController.getFight().attack(this.enemy, this.player, enemyMove)) {
+	// this.gController.getFight().attack(this.player, this.enemy, playerMove);
+	// }
+	// }
+	// this.endTurn();
+	// }
+
 	public void endTurn() {
+		// TODO: Check player / enemy win
 		if (this.gController.isFighting()) {
-			this.player.afterTurnDamage();
-			this.enemy.afterTurnDamage();
-			if (this.gController.checkDead(this.player)) {
-				this.gController.getGameFrame().getFightPanel().addText(this.player.getName() + " wurde besiegt!");
-				this.gController.getGameFrame().getFightPanel().updatePanels();
-				this.gController.loseFight();
-			}
-			if (this.gController.checkDead(this.enemy)) {
-				this.gController.getGameFrame().getFightPanel().addText(this.enemy.getName() + " wurde besiegt!");
-				if (!this.gController.winFight()) {
-					this.gController.getGameFrame().getFightPanel().setEnemy();
+			for (Pokemon p : this.getSpeedOrder()) {
+				p.afterTurnDamage();
+				if (this.checkDead(p)) {
+					this.gController.getGameFrame().getFightPanel().addText(p.getName() + " wurde besiegt!");
 					this.gController.getGameFrame().getFightPanel().updatePanels();
+					if (this.isPlayer(p)) {
+						this.gController.loseFight();
+					} else {
+						if (!this.gController.winFight()) {
+							this.gController.getGameFrame().getFightPanel().setEnemy();
+							this.gController.getGameFrame().getFightPanel().updatePanels();
+						}
+					}
 				}
 			}
 			this.increaseTurn();
 		}
+	}
+
+	private boolean checkDead(Pokemon p) {
+		if (p != null && p.getAilment() == Ailment.FAINTED) {
+			p.changeHappiness(-1);
+			return true;
+		}
+		return false;
 	}
 
 	public boolean attack(Pokemon attacker, Pokemon defender) {
@@ -363,14 +562,21 @@ public class Fighting {
 		}
 		this.gController.getGameFrame().getFightPanel().updatePanels();
 		boolean dead = false;
-		if (this.gController.checkDead(this.player)) {
-			this.gController.getGameFrame().getFightPanel().addText(this.player.getName() + " wurde besiegt!");
+		if (this.checkDead(defender)) {
+			this.gController.getGameFrame().getFightPanel().addText(defender.getName() + " wurde besiegt!");
 			this.gController.getGameFrame().getFightPanel().updatePanels();
-			this.gController.loseFight();
+			if (this.isPlayer(defender)) {
+				this.gController.loseFight();
+			} else {
+				if (!this.gController.winFight()) {
+					this.gController.getGameFrame().getFightPanel().setEnemy();
+					this.gController.getGameFrame().getFightPanel().updatePanels();
+				}
+			}
 			dead = true;
 		}
-		if (this.gController.checkDead(this.enemy)) {
-			this.gController.getGameFrame().getFightPanel().addText(this.enemy.getName() + " wurde besiegt!");
+		if (this.checkDead(attacker)) {
+			this.gController.getGameFrame().getFightPanel().addText(attacker.getName() + " wurde besiegt!");
 			if (!this.gController.winFight()) {
 				this.gController.getGameFrame().getFightPanel().setEnemy();
 				this.gController.getGameFrame().getFightPanel().updatePanels();
@@ -408,11 +614,7 @@ public class Fighting {
 				if (category.equals("recharge")) {
 					this.setRecharge(attacker, true);
 				} else if (category.equals("explosion")) {
-					if (attacker.equals(this.player)) {
-						this.gController.getGameFrame().getFightPanel().getPlayerAnimation().playAnimation("explosion");
-					} else {
-						this.gController.getGameFrame().getFightPanel().getEnemyAnimation().playAnimation("explosion");
-					}
+					this.playAnimation(attacker, "explosion");
 					attacker.getStats().loseHP(attacker.getStats().getCurrentHP());
 				}
 			}
@@ -450,20 +652,19 @@ public class Fighting {
 				continue;
 			}
 			if (this.gController.isFighting()) {
-				if (pokemon.equals(this.gController.getFight().getPlayer())) {
-					this.gController.getGameFrame().getFightPanel().getPlayerAnimation()
-							.playAnimation(change < 0 ? "debuff" : "buff");
-				} else {
-					this.gController.getGameFrame().getFightPanel().getEnemyAnimation()
-							.playAnimation(change < 0 ? "debuff" : "buff");
-				}
+				this.playAnimation(pokemon, change < 0 ? "debuff" : "buff");
 			}
 			if (change < 0) {
 				pokemon.getStats().decreaseStat(s, Math.abs(change));
-			} else if (change > 0) {
+			} else {
 				pokemon.getStats().increaseStat(s, change);
 			}
 		}
+	}
+
+	private void playAnimation(Pokemon pokemon, String animation) {
+		this.gController.getGameFrame().getFightPanel().getPokemonLabel(pokemon).getAnimationLabel()
+				.playAnimation(animation);
 	}
 
 	public void selfAttack(Pokemon pokemon) {
@@ -471,31 +672,15 @@ public class Fighting {
 		double damage = 40;
 		double def = stats.getFightStats().get(Stat.DEFENSE);
 		double atk = stats.getFightStats().get(Stat.ATTACK);
-		if (pokemon.equals(this.player)) {
-			this.gController.getGameFrame().getFightPanel().getPlayerAnimation().playAnimation("punch");
-		} else {
-			this.gController.getGameFrame().getFightPanel().getEnemyAnimation().playAnimation("punch");
-		}
+		this.playAnimation(pokemon, "punch");
 		SoundController.getInstance().playSound(SoundController.NORMAL_EFFECTIVE);
 		stats.loseHP((int) (((stats.getLevel() * (2 / 5.0) + 2) * damage * (atk / (50.0 * def)) + 2)
 				* ((this.rng.nextFloat() * 0.15f + 0.85) / 1)));
 	}
 
 	private void playAnimation(Pokemon attacker, Pokemon defense, Move usedMove) {
-		if (attacker.equals(this.gController.getFight().getPlayer())) {
-			this.gController.getGameFrame().getFightPanel().getPlayerAnimation()
-					.playAnimation(usedMove.getUserAnimation());
-		} else {
-			this.gController.getGameFrame().getFightPanel().getEnemyAnimation()
-					.playAnimation(usedMove.getUserAnimation());
-		}
-		if (defense.equals(this.gController.getFight().getPlayer())) {
-			this.gController.getGameFrame().getFightPanel().getPlayerAnimation()
-					.playAnimation(usedMove.getTargetAnimation());
-		} else {
-			this.gController.getGameFrame().getFightPanel().getEnemyAnimation()
-					.playAnimation(usedMove.getTargetAnimation());
-		}
+		this.playAnimation(attacker, usedMove.getUserAnimation());
+		this.playAnimation(defense, usedMove.getTargetAnimation());
 	}
 
 	private void damageCalculation(Pokemon attacker, Pokemon defense, Move usedMove, int ammount) {
@@ -639,21 +824,59 @@ public class Fighting {
 		this.gController.getGameFrame().getFightPanel().getTextLabel().waitText();
 	}
 
-	public boolean canBeSendOut(int index) {
-		if (this.playerTeam.getTeam()[index].getStats().getCurrentHP() > 0 && index != 0) {
-			return true;
+	public boolean canBeSendOut(Pokemon p) {
+		return !this.checkDead(p) && this.notFighting(p);
+	}
+
+	public boolean sendOut(int index, Pokemon replacement) {
+		if (!this.canBeSendOut(replacement)) {
+			return false;
 		}
-		return false;
+		switch (index) {
+		case LEFT_PLAYER:
+			this.leftPlayerTeam.swapPokemon(0, this.leftPlayerTeam.getIndex(replacement));
+			this.setPlayer(true);
+			break;
+		case RIGHT_PLAYER:
+			if (this.leftPlayer.equals(this.rightPlayer)) {
+				this.rightPlayerTeam.swapPokemon(1, this.rightPlayerTeam.getIndex(replacement));
+			} else {
+				this.rightPlayerTeam.swapPokemon(0, this.rightPlayerTeam.getIndex(replacement));
+			}
+			this.setPlayer(false);
+			break;
+		case LEFT_OPPONENT:
+			this.leftOpponentTeam.swapPokemon(0, this.leftOpponentTeam.getIndex(replacement));
+			this.setEnemy(true);
+			break;
+		case RIGHT_OPPONENT:
+			if (this.leftOpponent.equals(this.rightOpponent)) {
+				this.rightOpponentTeam.swapPokemon(1, this.rightPlayerTeam.getIndex(replacement));
+			} else {
+				this.rightOpponentTeam.swapPokemon(0, this.rightOpponentTeam.getIndex(replacement));
+			}
+			this.setEnemy(false);
+			break;
+		default:
+			break;
+		}
+		this.addParticipants(true);
+		this.addParticipants(false);
+		return true;
 	}
 
-	public void sendOut(int index) {
-		this.playerTeam.swapPokemon(0, index);
-		this.setPlayer();
-		this.playerParticipants.add(this.player);
-	}
-
-	public Pokemon getPlayer() {
-		return this.player;
+	public Pokemon getPokemon(int index) {
+		switch (index) {
+		case LEFT_PLAYER:
+			return this.leftPlayerPokemon;
+		case RIGHT_PLAYER:
+			return this.rightPlayerPokemon;
+		case LEFT_OPPONENT:
+			return this.leftOpponentPokemon;
+		case RIGHT_OPPONENT:
+			return this.rightOpponentPokemon;
+		}
+		return null;
 	}
 
 	public Move canUse(Pokemon user, Move move) {
@@ -668,56 +891,133 @@ public class Fighting {
 		return move.isDisabled() ? null : move;
 	}
 
-	private void setPlayer() {
-		this.player = this.playerTeam.getTeam()[0];
-		this.player.startFight();
-		this.visible = new SimpleEntry<Boolean, Boolean>(true, this.visible.getValue());
-		this.gController.updateFight();
-	}
-
-	private void setEnemy() {
-		this.enemy = this.enemyTeam.getFirstFightPokemon();
-		this.enemy.startFight();
-		if (this.playerParticipants == null) {
-			this.playerParticipants = new HashSet<>();
-		}
-		this.playerParticipants.clear();
-		this.playerParticipants.add(this.player);
-		this.visible = new SimpleEntry<Boolean, Boolean>(this.visible.getKey(), true);
-		this.gController.updateFight();
-	}
-
-	public Pokemon getEnemy() {
-		return this.enemy;
-	}
-
-	public boolean playerDead() {
-		this.playerParticipants.remove(this.player);
-		if (this.playerTeam.getFirstFightPokemon() == null) {
-			if (this.enemyCharacter != null) {
-				this.enemyCharacter.getTeam().restoreTeam();
+	private void setPlayer(boolean left) {
+		if (left) {
+			if (this.checkDead(this.leftPlayerPokemon)) {
+				this.removeParticipant(this.leftPlayerPokemon);
 			}
-			return true;
+			this.leftPlayerPokemon = this.leftPlayerTeam.getTeam()[0];
+			this.leftPlayerPokemon.startFight();
+			this.setVisible(this.leftPlayerPokemon, true);
+		} else {
+			if (this.leftPlayerTeam.equals(this.rightPlayerTeam)) {
+				if (this.checkDead(this.rightPlayerPokemon)) {
+					this.removeParticipant(this.rightPlayerPokemon);
+				}
+				this.rightPlayerPokemon = this.leftPlayerTeam.getTeam()[1];
+			} else {
+				this.rightPlayerPokemon = this.rightPlayerTeam.getTeam()[0];
+			}
+			this.rightPlayerPokemon.startFight();
+			this.setVisible(this.rightPlayerPokemon, true);
 		}
-		this.setCurrentFightOption(FightOption.POKEMON);
-		this.gController.getGameFrame().getPokemonPanel().update();
-		while (this.getCurrentFightOption().equals(FightOption.POKEMON)) {
-			Thread.yield();
+		this.addParticipants(true);
+		this.addParticipants(false);
+		this.gController.updateFight();
+	}
+
+	private void setEnemy(boolean left) {
+		if (left) {
+			this.leftOpponentPokemon = this.leftOpponentTeam.getTeam()[0];
+			this.leftOpponentPokemon.startFight();
+			this.setVisible(this.leftOpponentPokemon, true);
+		} else {
+			if (this.leftOpponentTeam.equals(this.rightOpponentTeam)) {
+				this.rightOpponentPokemon = this.leftOpponentTeam.getTeam()[1];
+			} else {
+				this.rightOpponentPokemon = this.rightOpponentTeam.getTeam()[0];
+			}
+			this.rightOpponentPokemon.startFight();
+			this.setVisible(this.rightOpponentPokemon, true);
+		}
+		this.clearParticipants(left);
+		this.addParticipants(left);
+		this.gController.updateFight();
+	}
+
+	private void clearParticipants(boolean left) {
+		if (left) {
+			this.leftParticipants.clear();
+		} else {
+			this.rightParticipants.clear();
+		}
+	}
+
+	private void addParticipants(boolean left) {
+		if (left) {
+			this.leftParticipants.add(this.leftPlayerPokemon);
+			if (this.isDouble && this.gController.getMainCharacter().equals(this.rightPlayer)) {
+				this.leftParticipants.add(this.rightPlayerPokemon);
+			}
+		} else {
+			this.rightParticipants.add(this.leftPlayerPokemon);
+			if (this.isDouble && this.gController.getMainCharacter().equals(this.rightPlayer)) {
+				this.rightParticipants.add(this.rightPlayerPokemon);
+			}
+		}
+	}
+
+	public void removeParticipant(Pokemon p) {
+		this.leftParticipants.remove(p);
+		this.rightParticipants.remove(p);
+	}
+
+	public boolean didPlayerLose() {
+		boolean replaceLeft = this.checkDead(this.leftPlayerPokemon);
+		boolean replaceRight = this.checkDead(this.rightPlayerPokemon);
+		if (this.getFirstNonFightingPokemon(this.leftPlayerTeam) == null) {
+			if (!this.isDouble || !(this.rightPlayer instanceof Player)) {
+				if (replaceLeft) {
+					return true;
+				}
+			} else {
+				if (replaceLeft && replaceRight) {
+					return true;
+				}
+			}
+		}
+		if (replaceLeft) {
+			this.setCurrentFightOption(FightOption.POKEMON);
+			this.gController.getGameFrame().getPokemonPanel().update(LEFT_PLAYER);
+			while (this.getCurrentFightOption().equals(FightOption.POKEMON)) {
+				Thread.yield();
+			}
+		}
+		if (replaceRight) {
+			this.setCurrentFightOption(FightOption.POKEMON);
+			this.gController.getGameFrame().getPokemonPanel().update(RIGHT_PLAYER);
+			while (this.getCurrentFightOption().equals(FightOption.POKEMON)) {
+				Thread.yield();
+			}
 		}
 		return false;
 	}
 
-	public boolean enemyDead() {
-		this.gController.getGameFrame().getFightPanel().removeEnemy();
-		if (this.enemyTeam.getFirstFightPokemon() == null) {
-			if (this.enemyCharacter != null) {
-				this.gController.getGameFrame().getFightPanel()
-						.addText(this.enemyCharacter.getName() + " wurde besiegt!");
-				this.enemyCharacter.defeated(true);
-			}
-			return true;
+	public void onDefeat() {
+		if (this.leftOpponent != null) {
+			this.leftOpponent.getTeam().restoreTeam();
 		}
-		this.setEnemy();
+		if (this.rightOpponent != null) {
+			this.rightOpponent.getTeam().restoreTeam();
+		}
+	}
+
+	public boolean enemyDead() {
+		boolean replaceLeft = this.checkDead(this.leftOpponentPokemon);
+		boolean replaceRight = this.checkDead(this.rightOpponentPokemon);
+		this.gController.getGameFrame().getFightPanel().removeEnemy();
+		if (this.getFirstNonFightingPokemon(this.leftOpponentTeam) == null
+				&& this.getFirstNonFightingPokemon(this.rightOpponentTeam) == null) {
+			if ((!this.isDouble && replaceLeft) || (replaceLeft && replaceRight)) {
+				return true;
+			}
+		}
+		if (replaceLeft) {
+			this.sendOut(LEFT_OPPONENT, this.getFirstNonFightingPokemon(this.leftOpponentTeam));
+		}
+		if (replaceRight) {
+			this.sendOut(RIGHT_OPPONENT, this.getFirstNonFightingPokemon(this.rightOpponentTeam));
+		}
 		return false;
 	}
 
@@ -729,35 +1029,31 @@ public class Fighting {
 		this.currentFightOption = currentFightOption;
 	}
 
-	public Pokemon getPokemon(int index) {
-		return this.playerTeam.getTeam()[index];
-	}
-
-	public HashSet<Pokemon> getParticipants() {
-		return this.playerParticipants;
+	public HashSet<Pokemon> getParticipants(boolean left) {
+		return left ? this.leftParticipants : this.rightParticipants;
 	}
 
 	public boolean canEscape() {
-		return this.escape;
+		return this.escapable;
 	}
 
-	public int calculateXP(Pokemon player) {
-		int base = this.enemy.getBaseExperience();
+	public int calculateXP(Pokemon defeated, Pokemon participant) {
+		int base = defeated.getBaseExperience();
 		double OTFactor = 1;
 		double itemFactor = 1;
 		double friendshipFactor = 1;
-		double evolveFactor = player.getEvolves() != 0 ? 1.2 : 1;
-		int enemyLevel = this.enemy.getStats().getLevel();
-		int playerLevel = player.getStats().getLevel();
+		double evolveFactor = participant.getEvolves() != 0 ? 1.2 : 1;
+		int enemyLevel = defeated.getStats().getLevel();
+		int playerLevel = participant.getStats().getLevel();
 		int xp = (int) ((((base * enemyLevel) / 5.0)
 				* (Math.pow(2 * enemyLevel + 10, 2.5) / Math.pow(enemyLevel + playerLevel + 10, 2.5)) + 1) * OTFactor
 				* itemFactor * friendshipFactor * evolveFactor);
-		player.increaseEV(this.enemy);
+		participant.increaseEV(defeated);
 		return xp;
 	}
 
-	public NPC getEnemyCharacter() {
-		return (NPC) this.enemyCharacter;
+	public Character getEnemyCharacter(boolean left) {
+		return left ? this.leftOpponent : this.rightOpponent;
 	}
 
 	public int getTurn() {
@@ -776,28 +1072,46 @@ public class Fighting {
 		return this.lastMoves.get(pokemon);
 	}
 
-	public Team getPlayerTeam() {
-		return this.playerTeam;
+	public Character getCharacter(int index) {
+		switch (index) {
+		case LEFT_PLAYER:
+			return this.leftPlayer;
+		case RIGHT_PLAYER:
+			return this.rightPlayer;
+		case LEFT_OPPONENT:
+			return this.leftOpponent;
+		case RIGHT_OPPONENT:
+			return this.rightOpponent;
+		default:
+			return null;
+		}
 	}
 
-	public void setVisible(boolean player, boolean enemy) {
-		this.visible = new SimpleEntry<Boolean, Boolean>(player, enemy);
+	public Team getTeam(int index) {
+		switch (index) {
+		case LEFT_PLAYER:
+			return this.leftPlayerTeam;
+		case RIGHT_PLAYER:
+			return this.rightPlayerTeam;
+		default:
+			return null;
+		}
+	}
+
+	public boolean isDouble() {
+		return this.isDouble;
 	}
 
 	public void setVisible(Pokemon p, boolean v) {
-		if (p.equals(this.player)) {
-			this.visible = new SimpleEntry<Boolean, Boolean>(v, this.visible.getValue());
-		} else {
-			this.visible = new SimpleEntry<Boolean, Boolean>(this.visible.getKey(), v);
-		}
+		this.visible.put(p, v);
 	}
 
 	public boolean isVisible(Pokemon pokemon) {
-		if (pokemon.equals(this.player)) {
-			return this.visible.getKey();
-		} else {
-			return this.visible.getValue();
+		if (this.visible.get(pokemon) == null) {
+			return false;
 		}
+		return this.visible.get(pokemon);
+
 	}
 
 	public void setRecharge(Pokemon p, boolean v) {
@@ -811,8 +1125,8 @@ public class Fighting {
 		return this.needsRecharge.get(pokemon);
 	}
 
-	public boolean canChooseAction() {
-		if (this.chargeMoves.get(this.player) != null || this.needsRecharge(this.player)) {
+	public boolean canChooseAction(Pokemon p) {
+		if (this.chargeMoves.get(p) != null || this.needsRecharge(p)) {
 			return false;
 		}
 		return true;
@@ -820,6 +1134,44 @@ public class Fighting {
 
 	public Field getField() {
 		return this.field;
+	}
+
+	public boolean registerAttack(Attack attack) {
+		this.turnAttacks.put(attack.getSource(), attack);
+		if (this.isDouble) {
+			if (this.activePokemon == LEFT_PLAYER && this.gController.getMainCharacter().equals(this.rightPlayer)) {
+				this.activePokemon = RIGHT_PLAYER;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * @return A String object that represents the text that should be displayed at
+	 *         the start of the fight.
+	 * @author CutyCupy
+	 */
+	public String getEntryText() {
+		if (this.escapable) {
+			return "Ein wildes " + this.leftOpponentPokemon.getName() + " "
+					+ (this.isDouble ? "und " + this.rightOpponentPokemon.getName() : "") + " erscheint!";
+		} else {
+			if (this.isDouble && !this.rightOpponent.equals(this.leftOpponent)) {
+				return "Eine Herausforderung von " + this.leftOpponent.getName() + " und "
+						+ this.rightOpponent.getName() + "!";
+			} else {
+				return "Eine Herausforderung von " + this.leftOpponent.getName() + "!";
+			}
+		}
+	}
+
+	/**
+	 * @return
+	 * @author CutyCupy
+	 */
+	public int getActivePlayer() {
+		return this.activePokemon;
 	}
 
 }

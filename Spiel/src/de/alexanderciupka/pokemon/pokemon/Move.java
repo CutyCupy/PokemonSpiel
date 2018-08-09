@@ -2,6 +2,7 @@ package de.alexanderciupka.pokemon.pokemon;
 
 import java.util.HashMap;
 import java.util.Random;
+import java.util.UUID;
 
 import com.google.gson.JsonObject;
 
@@ -40,6 +41,8 @@ public class Move {
 	private Target target;
 
 	private Type moveType;
+
+	private String uniqueID = UUID.randomUUID().toString();
 
 	public Move(int id) {
 		this.statChanges = new HashMap<Stat, Integer>();
@@ -195,7 +198,7 @@ public class Move {
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof Move) {
-			return ((Move) obj).getName().equals(this.getName());
+			return ((Move) obj).uniqueID.equals(this.uniqueID);
 		}
 		return false;
 	}

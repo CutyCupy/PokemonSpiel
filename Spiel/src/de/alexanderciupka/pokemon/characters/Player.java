@@ -8,7 +8,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import de.alexanderciupka.pokemon.map.Route;
-import de.alexanderciupka.pokemon.menu.SoundController;
 import de.alexanderciupka.pokemon.pokemon.Ailment;
 import de.alexanderciupka.pokemon.pokemon.Item;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
@@ -19,15 +18,8 @@ public class Player extends Character {
 	private ArrayList<String> routeHistory;
 	private PC pc;
 
-	private int stepCounter;
-
-	private int protectedSteps;
-
-	private HashMap<Item, Integer> items;
-
 	public Player() {
 		super();
-		this.items = new HashMap<Item, Integer>();
 		this.routeHistory = new ArrayList<String>();
 
 		this.pc = new PC(this);
@@ -67,30 +59,13 @@ public class Player extends Character {
 				}
 			}
 		}).start();
-
-		this.init();
 	}
 
 	public Player(String id) {
 		super(id);
-		this.items = new HashMap<Item, Integer>();
 		this.routeHistory = new ArrayList<String>();
 
 		this.pc = new PC(this);
-
-		this.init();
-	}
-
-	private void init() {
-		for (Item i : Item.values()) {
-			this.items.put(i, 0);
-		}
-	}
-
-	@Override
-	public void changePosition(Direction direction, boolean waiting) {
-		super.changePosition(direction, waiting);
-		this.onMovement();
 	}
 
 	@Override
@@ -136,18 +111,6 @@ public class Player extends Character {
 		return this.routeHistory;
 	}
 
-	public void addItem(Item reward) {
-		this.addItem(reward, 1);
-	}
-
-	public void addItem(Item reward, int amount) {
-		if (amount > 0) {
-			SoundController.getInstance().playSound(SoundController.GET_ITEM);
-			this.items.put(reward, this.items.get(reward) + amount);
-			this.gController.getGameFrame().getInventoryPanel().update(this);
-		}
-	}
-
 	public void earnRewards(HashMap<Item, Integer> rewards) {
 		this.earnRewards(rewards, false);
 	}
@@ -163,25 +126,6 @@ public class Player extends Character {
 		}
 	}
 
-	public boolean hasItem(Item i) {
-		return this.items.get(i) > 0;
-	}
-
-	public boolean removeItem(Item i) {
-		int value = this.items.get(i);
-		if (value > 0) {
-			this.items.put(i, value - 1);
-			return true;
-		} else if (value < 0) {
-			this.items.put(i, 0);
-		}
-		return false;
-	}
-
-	public HashMap<Item, Integer> getItems() {
-		return this.items;
-	}
-
 	public PC getPC() {
 		return this.pc;
 	}
@@ -195,21 +139,8 @@ public class Player extends Character {
 			currentRoute.addProperty("id", r);
 			routeHistory.add(currentRoute);
 		}
-		JsonArray items = new JsonArray();
-		for (Item i : this.items.keySet()) {
-			int amount = this.items.get(i);
-			if (amount == 0) {
-				continue;
-			}
-			JsonObject currentItem = new JsonObject();
-			currentItem.addProperty("id", i.name());
-			currentItem.addProperty("amount", amount);
-			items.add(currentItem);
-		}
 		saveData.add("route_history", routeHistory);
-		saveData.add("items", items);
 		saveData.add("pc", this.getPC().getSaveData());
-		saveData.addProperty("step_counter", this.stepCounter);
 		return saveData;
 	}
 
@@ -220,88 +151,15 @@ public class Player extends Character {
 			for (JsonElement j : saveData.get("route_history").getAsJsonArray()) {
 				this.routeHistory.add(j.getAsJsonObject().get("id").getAsString());
 			}
-			this.init();
-			for (JsonElement j : saveData.get("items").getAsJsonArray()) {
-				if (j.getAsJsonObject().get("amount") != null) {
-					this.items.put(Item.valueOf(j.getAsJsonObject().get("id").getAsString()),
-							j.getAsJsonObject().get("amount").getAsInt());
-				}
-			}
 			this.pc.importSaveData(saveData.get("pc").getAsJsonArray());
-			this.stepCounter = saveData.get("step_counter").getAsInt();
 			return true;
 		}
 		return false;
 	}
 
-	public boolean useItem(Item i) {
-		this.gController.setInteractionPause(true);
-		boolean result = false;
-		switch (i) {
-		case CUT:
-		case FLASH:
-		case ROCKSMASH:
-		case STRENGTH:
-		case SURF:
-			this.currentRoute.getEntities()[this.getInteractionPoint().y][this.getInteractionPoint().x].useVM(this, i);
-			break;
-		case REPEL:
-			if (this.isProtected()) {
-				this.gController.getGameFrame().addDialogue("Es wurde bereits ein Schutz eingesetzt!");
-			} else {
-				this.protectedSteps = this.stepCounter + i.getValue();
-				this.gController.getGameFrame()
-						.addDialogue("Du bist jetzt für " + i.getValue() + " Schritte vor wilden Pokemon geschützt!");
-				result = true;
-			}
-		case HYPERBALL:
-		case MASTERBALL:
-		case POKEBALL:
-		case SUPERBALL:
-		case HEALBALL:
-		case PREMIERBALL:
-			if (this.gController.isFighting()) {
-				result = true;
-				this.gController.getGameFrame().getFightPanel().throwBall(i);
-			} else {
-				this.gController.getGameFrame().addDialogue("Es wird keine Wirkung haben.");
-			}
-			break;
-		default:
-			this.gController.getGameFrame().addDialogue("Es wird keine Wirkung haben.");
-			result = false;
-		}
-		if (result) {
-			this.removeItem(i);
-			this.gController.getGameFrame().setCurrentPanel(null);
-		}
-		this.gController.waitDialogue();
-		this.gController.setInteractionPause(false);
-		return result;
-	}
-
-	public void onMovement() {
-		this.stepCounter++;
-		if (this.stepCounter % 8 == 0) {
-			for (int i = 0; i < this.team.getAmmount(); i++) {
-				this.team.getTeam()[i].afterWalkingDamage();
-			}
-		}
-		if (this.stepCounter % 128 == 0) {
-			for (int i = 0; i < this.team.getAmmount(); i++) {
-				this.team.getTeam()[i].changeHappiness(1);
-			}
-		}
-		if (this.protectedSteps > 0) {
-			this.protectedSteps--;
-			if (this.protectedSteps == 0) {
-				this.gController.getGameFrame().addDialogue("Der Schutz ist ausgelaufen!");
-				this.gController.waitDialogue();
-			}
-		}
-	}
-
-	public boolean isProtected() {
-		return this.protectedSteps > 0;
+	@Override
+	public void addItem(Item reward, int amount) {
+		super.addItem(reward, amount);
+		this.gController.getGameFrame().getInventoryPanel().update(this);
 	}
 }

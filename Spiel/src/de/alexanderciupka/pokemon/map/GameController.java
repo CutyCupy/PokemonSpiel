@@ -209,26 +209,18 @@ public class GameController {
 		SoundController.getInstance().playBattleSong(enemy.getName());
 		this.gameFrame.getBackgroundLabel().startFight(enemy.getLogo());
 		this.fight = new Fighting(enemy);
-		this.gameFrame.startFight(this.fight.getPlayer(), this.fight.getEnemy());
+		this.gameFrame.startFight();
 		this.gameFrame.getFightPanel().showMenu();
 	}
 
 	public void startFight(Pokemon enemy) {
-		this.fight = new Fighting(enemy);
+		this.fight = new Fighting(enemy, false);
 		this.fighting = true;
 		SoundController.getInstance().stopRain();
 		SoundController.getInstance().playBattleSong(null);
 		this.getGameFrame().getBackgroundLabel().startEncounter();
-		this.gameFrame.startFight(this.fight.getPlayer(), this.fight.getEnemy());
+		this.gameFrame.startFight();
 		this.gameFrame.getFightPanel().showMenu();
-	}
-
-	public boolean checkDead(Pokemon p) {
-		if (p.getStats().getCurrentHP() == 0) {
-			p.changeHappiness(-1);
-			return true;
-		}
-		return false;
 	}
 
 	public void escape() {
@@ -325,11 +317,10 @@ public class GameController {
 
 	public void checkInteraction() {
 		Point interactionPoint = this.mainCharacter.getInteractionPoint();
-		if (!this.interactionPause && interactionPoint.y >= 0
-				&& interactionPoint.y < this.mainCharacter.getCurrentRoute().getHeight() && interactionPoint.x >= 0
-				&& interactionPoint.x < this.mainCharacter.getCurrentRoute().getWidth()) {
+		if (!this.interactionPause
+				&& this.mainCharacter.getCurrentRoute().getEntity(interactionPoint.x, interactionPoint.y) != null) {
 			this.setInteractionPause(true);
-			this.currentBackground.getCurrentRoute().getEntities()[interactionPoint.y][interactionPoint.x]
+			this.currentBackground.getCurrentRoute().getEntity(interactionPoint.x, interactionPoint.y)
 					.onInteraction(this.mainCharacter);
 			this.setInteractionPause(false);
 		}
