@@ -5,7 +5,7 @@ import java.awt.Point;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.HashSet;
 
-import de.alexanderciupka.pokemon.characters.Character;
+import de.alexanderciupka.pokemon.characters.types.Character;
 import de.alexanderciupka.pokemon.map.Route;
 
 public class HatchEntity extends Entity {

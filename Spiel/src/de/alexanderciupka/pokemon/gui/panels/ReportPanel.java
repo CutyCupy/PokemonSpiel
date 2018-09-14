@@ -224,7 +224,7 @@ public class ReportPanel extends JPanel {
 				public void mouseEntered(MouseEvent e) {
 					if (e.getComponent().isEnabled()) {
 						Move move = pokemon.getMoves()[Integer.parseInt(e.getComponent().getName())];
-						moveTypeLabel.setType(move.getMoveType());
+						moveTypeLabel.setType(move.getMoveType(pokemon));
 						strengthLabel.setText("Stärke: " + (move.getPower() <= 0 ? "---" : move.getPower()));
 						accuracyLabel.setText(
 								"Genauigkeit: " + (move.getAccuracy() > 100 ? "---" : (int) move.getAccuracy()));
@@ -240,6 +240,9 @@ public class ReportPanel extends JPanel {
 							damageClassLabel.setIcon(new ImageIcon(DamageClass.NO_DAMAGE_IMAGE));
 							break;
 						}
+						
+						
+						descriptionLabel.setFont(new Font("Tahoma", Font.PLAIN, 15));
 
 						descriptionLabel.setText(formatText((int) (descriptionLabel.getWidth() * 0.9),
 								move.getDescription(), getFontMetrics(descriptionLabel.getFont()), 3));

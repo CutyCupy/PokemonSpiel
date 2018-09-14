@@ -6,9 +6,8 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import de.alexanderciupka.pokemon.gui.BackgroundLabel;
-import de.alexanderciupka.pokemon.map.GameController;
 
-public class SnowOverlay extends Overlay {
+public class SnowOverlay extends Overlay implements IAnimated {
 
 	private ArrayList<Snowflake> snowflakes;
 
@@ -47,15 +46,9 @@ public class SnowOverlay extends Overlay {
 		}
 
 		created = true;
-		while (GameController.getInstance().getGameFrame().getDialogue().isVisible()) {
-			try {
-				Thread.yield();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
 	}
 
+	@Override
 	public void startAnimation() {
 		if(animation == null) {
 			animation = new Thread(new Runnable() {

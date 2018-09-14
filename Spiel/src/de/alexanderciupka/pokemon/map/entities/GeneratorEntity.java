@@ -2,7 +2,7 @@ package de.alexanderciupka.pokemon.map.entities;
 
 import com.google.gson.JsonObject;
 
-import de.alexanderciupka.pokemon.characters.Player;
+import de.alexanderciupka.pokemon.characters.types.Player;
 import de.alexanderciupka.pokemon.gui.panels.GeneratorPanel;
 import de.alexanderciupka.pokemon.map.Route;
 

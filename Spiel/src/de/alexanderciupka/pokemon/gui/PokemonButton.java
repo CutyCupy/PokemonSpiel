@@ -40,20 +40,22 @@ public class PokemonButton extends JButton {
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		if(pokemon != null) {
+		if (pokemon != null) {
 			try {
 				g.drawImage(pokemon.getSpriteFront().getScaledInstance(96, 96, Image.SCALE_SMOOTH), 0, 0, null);
-			} catch(Exception e) {
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 			g.setColor(Color.BLACK);
 			g.drawString(pokemon.getName(), 101, 25);
 			FontMetrics fm = g.getFontMetrics();
-			if(gender != null) {
-				g.drawImage(gender.getScaledInstance(10, 10, Image.SCALE_SMOOTH), 101 + fm.stringWidth(pokemon.getName()),
+			if (gender != null) {
+				g.drawImage(gender.getScaledInstance(10, 10, Image.SCALE_SMOOTH),
+						101 + fm.stringWidth(pokemon.getName()),
 						(int) (25 - fm.getStringBounds(pokemon.getName().substring(0, 1), g).getHeight() / 2), null);
 			}
-			g.drawString("Lvl: " + pokemon.getStats().getLevel(), hpBar.getX() + hpBar.getWidth() - fm.stringWidth("Lvl: 100") - ailment.getWidth(), 25);
+			g.drawString("Lvl: " + pokemon.getStats().getLevel(),
+					hpBar.getX() + hpBar.getWidth() - fm.stringWidth("Lvl: 100") - ailment.getWidth(), 25);
 		}
 	}
 
@@ -75,18 +77,14 @@ public class PokemonButton extends JButton {
 	}
 
 	public void update(boolean animated) {
-		for(Component c : this.getComponents()) {
+		for (Component c : this.getComponents()) {
 			this.remove(c);
 		}
-		if(gController.isFighting()) {
-			this.pokemon = gController.getFight().getPokemon(this.index);
-		} else {
-			this.pokemon = gController.getMainCharacter().getTeam().getTeam()[this.index];
-		}
-		if(pokemon != null) {
+		this.pokemon = gController.getMainCharacter().getTeam().getTeam()[this.index];
+		if (pokemon != null) {
 			setEnabled(true);
 			hpBar.setMaximum(pokemon.getStats().getStats().get(Stat.HP));
-			if(animated) {
+			if (animated) {
 				hpBar.updateValue(pokemon.getStats().getCurrentHP());
 			} else {
 				hpBar.setValue(pokemon.getStats().getCurrentHP());
@@ -100,7 +98,8 @@ public class PokemonButton extends JButton {
 			typeTwo.setLocation(100 + typeOne.getWidth() + 5, 45);
 
 			ailment.setAilment(this.pokemon.getAilment());
-			ailment.setLocation(hpBar.getWidth() + hpBar.getX() - ailment.getWidth(), hpBar.getY() - ailment.getHeight() - 5);
+			ailment.setLocation(hpBar.getWidth() + hpBar.getX() - ailment.getWidth(),
+					hpBar.getY() - ailment.getHeight() - 5);
 
 			gender = gController.getInformation().getGenderImage(pokemon.getGender());
 

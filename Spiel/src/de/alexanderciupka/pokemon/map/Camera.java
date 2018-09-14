@@ -2,8 +2,8 @@ package de.alexanderciupka.pokemon.map;
 
 import com.google.gson.JsonObject;
 
-import de.alexanderciupka.pokemon.characters.NPC;
-import de.alexanderciupka.pokemon.characters.Player;
+import de.alexanderciupka.pokemon.characters.types.NPC;
+import de.alexanderciupka.pokemon.characters.types.Player;
 
 public class Camera {
 
@@ -11,7 +11,7 @@ public class Camera {
 	private double y;
 	private boolean moving;
 
-	private de.alexanderciupka.pokemon.characters.Character centered;
+	private de.alexanderciupka.pokemon.characters.types.Character centered;
 	private GameController gController;
 
 	public Camera(int x, int y) {
@@ -21,7 +21,7 @@ public class Camera {
 		gController = GameController.getInstance();
 	}
 
-	public void setCharacter(de.alexanderciupka.pokemon.characters.Character c, boolean animated) {
+	public void setCharacter(de.alexanderciupka.pokemon.characters.types.Character c, boolean animated) {
 		if (animated) {
 			moveTowards(c.getExactX(), c.getExactY());
 		}
@@ -110,7 +110,7 @@ public class Camera {
 
 	public void importSaveData(JsonObject saveData) {
 		if (saveData.get("character") != null) {
-			de.alexanderciupka.pokemon.characters.NPC c = new NPC();
+			de.alexanderciupka.pokemon.characters.types.NPC c = new NPC();
 			c.importSaveData(saveData.get("character").getAsJsonObject());
 			for (NPC npc : c.getCurrentRoute().getCharacters()) {
 				if (npc.equals(c)) {
@@ -126,7 +126,7 @@ public class Camera {
 		}
 	}
 
-	public de.alexanderciupka.pokemon.characters.Character getCenter() {
+	public de.alexanderciupka.pokemon.characters.types.Character getCenter() {
 		return this.centered;
 	}
 

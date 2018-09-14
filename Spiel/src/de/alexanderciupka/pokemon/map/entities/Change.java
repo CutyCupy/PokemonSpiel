@@ -6,12 +6,11 @@ import java.util.HashMap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import de.alexanderciupka.pokemon.characters.Character;
 import de.alexanderciupka.pokemon.characters.Direction;
-import de.alexanderciupka.pokemon.characters.Player;
+import de.alexanderciupka.pokemon.characters.types.Character;
+import de.alexanderciupka.pokemon.characters.types.Player;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.map.Route;
-import de.alexanderciupka.pokemon.pokemon.Item;
 
 public class Change {
 
@@ -31,7 +30,7 @@ public class Change {
 	private String sound;
 	private boolean waitSound;
 	private boolean heal;
-	private HashMap<Item, Integer> item;
+	private HashMap<Integer, Integer> item;
 	private Point camPosition;
 	private boolean camAnimation;
 	private boolean centerCharacter;
@@ -47,7 +46,7 @@ public class Change {
 
 	public Change() {
 		this.gController = GameController.getInstance();
-		this.item = new HashMap<Item, Integer>();
+		this.item = new HashMap<Integer, Integer>();
 	}
 
 	public void initiate(Player source) {
@@ -167,11 +166,11 @@ public class Change {
 		this.heal = heal;
 	}
 
-	public HashMap<Item, Integer> getItem() {
+	public HashMap<Integer, Integer> getItem() {
 		return item;
 	}
 
-	public void addItem(Item i, int ammount) {
+	public void addItem(Integer i, int ammount) {
 		this.item.put(i, ammount);
 	}
 
@@ -324,7 +323,7 @@ public class Change {
 		if (move.has("item") && move.get("item").isJsonArray()) {
 			for (JsonElement x : move.get("item").getAsJsonArray()) {
 				JsonObject currentItem = x.getAsJsonObject();
-				addItem(Item.valueOf(currentItem.get("name").getAsString().toUpperCase()),
+				addItem(currentItem.get("id").getAsInt(),
 						currentItem.get("amount") != null ? currentItem.get("amount").getAsInt() : 1);
 
 			}

@@ -45,7 +45,7 @@ public class MoveButton extends JButton {
 			this.setText("<html> <div style='text-align: center;'>" + this.move.getName() + "<br>" + "AP: "
 					+ this.move.getCurrentPP() + "/" + this.move.getPp() + " </div></html>");
 			this.setName(this.move.getName());
-			this.setBorder(BorderFactory.createLineBorder(Type.getColor(this.move.getMoveType()), 5));
+			this.setBorder(BorderFactory.createLineBorder(Type.getColor(this.move.getMoveType(source)), 5));
 			if (this.move.getCurrentPP() == 0 || (GameController.getInstance().isFighting()
 					&& GameController.getInstance().getFight().getCurrentFightOption().equals(FightOption.FIGHT)
 					&& !this.move.equals(GameController.getInstance().getFight().canUse(source, this.move)))) {
@@ -53,7 +53,7 @@ public class MoveButton extends JButton {
 			} else {
 				this.setEnabled(true);
 			}
-			this.type.setType(m.getMoveType());
+			this.type.setType(m.getMoveType(source));
 
 			this.damageType.setLocation(this.getWidth() - this.type.getWidth() - 10, 12);
 

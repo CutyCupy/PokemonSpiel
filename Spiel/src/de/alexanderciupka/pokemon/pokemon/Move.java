@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import com.google.gson.JsonObject;
 
+import de.alexanderciupka.pokemon.constants.Abilities;
 import de.alexanderciupka.pokemon.constants.Moves;
 import de.alexanderciupka.pokemon.fighting.Target;
 import de.alexanderciupka.pokemon.map.GameController;
@@ -37,12 +38,14 @@ public class Move {
 	private String targetAnimation;
 
 	private boolean disabled;
+	private int disabledSince;
 
 	private Target target;
 
 	private Type moveType;
 
 	private String uniqueID = UUID.randomUUID().toString();
+	
 
 	public Move(int id) {
 		this.statChanges = new HashMap<Stat, Integer>();
@@ -131,8 +134,14 @@ public class Move {
 		return this.maxHits;
 	}
 
-	public float getAilmentChance() {
-		return this.ailmentChance;
+	public float getAilmentChance(Pokemon user) {
+		float chance = this.ailmentChance;
+		switch (user.getAbility().getId()) {
+		case Abilities.EDELMUT:
+			chance *= 2;
+			break;
+		}
+		return chance;
 	}
 
 	public void setAilmentChance(int ailmentChance) {
@@ -265,40 +274,26 @@ public class Move {
 		this.statChanges.put(s, change);
 	}
 
-	public boolean checkStatChange() {
+	public boolean checkStatChange(Pokemon user) {
+		double chance = this.statChance;
+		switch (user.getAbility().getId()) {
+		case Abilities.EDELMUT:
+			chance *= 2;
+			break;
+		}
 		Random rng = new Random();
-		if (rng.nextFloat() < this.statChance) {
+		if (rng.nextFloat() < chance) {
 			return true;
 		}
 		return false;
 	}
 
 	public boolean checkUserBuff() {
-		if (this.category.contains("raise")) {
-			return true;
-		}
-		switch (this.target) {
-		case ALL:
-		case USER:
-			return true;
-		case OPPONENT:
-		default:
-			return false;
-		}
+		return this.category.contains("raise");
 	}
 
 	public boolean checkEnemyBuff() {
-		if (this.category.contains("raise")) {
-			return false;
-		}
-		switch (this.target) {
-		case ALL:
-		case OPPONENT:
-			return true;
-		case USER:
-		default:
-			return false;
-		}
+		return true;
 	}
 
 	public int changeStat(Stat s) {
@@ -308,9 +303,13 @@ public class Move {
 		return 0;
 	}
 
-	public Type getMoveType() {
+	public Type getMoveType(Pokemon user) {
+		switch (user.getAbility().getId()) {
+		case Abilities.REGULIERUNG:
+			return Type.NORMAL;
+		}
 		if (GameController.getInstance().isFighting()) {
-			Type type = this.getMoveType();
+			Type type = this.moveType;
 			if (Moves.METEOROLOGE == this.getId()) {
 				switch (GameController.getInstance().getFight().getField().getWeather()) {
 				case HAIL:
@@ -402,8 +401,13 @@ public class Move {
 		this.target = target;
 	}
 
-	public int getCrit() {
-		return this.crit;
+	public int getCrit(Pokemon user) {
+		switch (user.getAbility().getId()) {
+		case Abilities.GLÜCKSPILZ:
+			return this.crit + 1;
+		default:
+			return this.crit;
+		}
 	}
 
 	public void setCrit(int crit) {
@@ -426,8 +430,15 @@ public class Move {
 	public boolean isDisabled() {
 		return this.disabled;
 	}
+	
+	public int getDisabledTurns() {
+		return Math.min(GameController.getInstance().getFight().getTurn() - this.disabledSince, 3);
+	}
 
 	public void setDisabled(boolean disabled) {
+		if(disabled) {
+			this.disabledSince = GameController.getInstance().getFight().getTurn();
+		}
 		this.disabled = disabled;
 	}
 

@@ -1,14 +1,17 @@
 package de.alexanderciupka.pokemon.map;
 
 import java.awt.Point;
+import java.util.AbstractMap.SimpleEntry;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import de.alexanderciupka.pokemon.characters.Direction;
-import de.alexanderciupka.pokemon.characters.NPC;
-import de.alexanderciupka.pokemon.characters.Player;
-import de.alexanderciupka.pokemon.characters.RandomWalker;
+import de.alexanderciupka.pokemon.characters.Team;
+import de.alexanderciupka.pokemon.characters.types.NPC;
+import de.alexanderciupka.pokemon.characters.types.Player;
+import de.alexanderciupka.pokemon.constants.Abilities;
+import de.alexanderciupka.pokemon.constants.Items;
 import de.alexanderciupka.pokemon.fighting.FightOption;
 import de.alexanderciupka.pokemon.fighting.Fighting;
 import de.alexanderciupka.pokemon.gui.GameFrame;
@@ -16,7 +19,7 @@ import de.alexanderciupka.pokemon.gui.TextLabel;
 import de.alexanderciupka.pokemon.gui.panels.ReportPanel;
 import de.alexanderciupka.pokemon.menu.MenuController;
 import de.alexanderciupka.pokemon.menu.SoundController;
-import de.alexanderciupka.pokemon.pokemon.Item;
+import de.alexanderciupka.pokemon.pokemon.Ability;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
 import de.alexanderciupka.pokemon.pokemon.PokemonInformation;
 import de.alexanderciupka.pokemon.pokemon.Stat;
@@ -127,7 +130,7 @@ public class GameController {
 			}
 			boolean changed = false;
 			for (NPC stone : this.mainCharacter.getCurrentRoute().getEntities()[y][x].getCharacters()) {
-				if (stone != null && stone.getID().equals("strength") && this.mainCharacter.hasItem(Item.STRENGTH)) {
+				if (stone != null && "strength".equals(stone.getID()) && this.mainCharacter.getTeam().canUseVM((Items.VM04_STRENGTH))) {
 					this.mainCharacter.getCurrentRoute().updateMap(new Point(x, y));
 					stone.setCurrentDirection(this.mainCharacter.getCurrentDirection());
 					if (this.mainCharacter.getCurrentRoute().getEntities()[stone.getInteractionPoint().y][stone
@@ -202,23 +205,38 @@ public class GameController {
 	}
 
 	public void startFight(NPC enemy) {
-		this.gameFrame.addDialogue(enemy.getBeforeFightDialogue(), enemy);
-		this.waitDialogue();
-		this.fighting = true;
-		SoundController.getInstance().stopRain();
-		SoundController.getInstance().playBattleSong(enemy.getName());
-		this.gameFrame.getBackgroundLabel().startFight(enemy.getLogo());
+		// this.gameFrame.addDialogue(enemy.getBeforeFightDialogue(), enemy);
+		// TODO: Copy this after the opponent is next to the player
+		// this.waitDialogue();
 		this.fight = new Fighting(enemy);
-		this.gameFrame.startFight();
-		this.gameFrame.getFightPanel().showMenu();
+		startFight();
+	}
+
+	public void startFight(NPC enemy1, NPC enemy2) {
+		this.fight = new Fighting(enemy1, enemy2);
+		startFight();
 	}
 
 	public void startFight(Pokemon enemy) {
-		this.fight = new Fighting(enemy, false);
+		this.fight = new Fighting(enemy, true);
+		startFight();
+	}
+
+	public void startFight(Pokemon enemy1, Pokemon enemy2) {
+		this.fight = new Fighting(enemy1, enemy2, true);
+		startFight();
+	}
+
+	private void startFight() {
 		this.fighting = true;
 		SoundController.getInstance().stopRain();
 		SoundController.getInstance().playBattleSong(null);
-		this.getGameFrame().getBackgroundLabel().startEncounter();
+		if (this.fight.canEscape()) {
+			this.getGameFrame().getBackgroundLabel().startEncounter();
+		} else {
+			this.getGameFrame().getBackgroundLabel()
+					.startFight(((NPC) this.fight.getCharacter(Fighting.LEFT_OPPONENT)).getLogo());
+		}
 		this.gameFrame.startFight();
 		this.gameFrame.getFightPanel().showMenu();
 	}
@@ -232,7 +250,7 @@ public class GameController {
 	}
 
 	public void endFight() {
-		SoundController.getInstance().updatePokemonLow(null);
+		SoundController.getInstance().updatePokemonLow();
 		this.fighting = false;
 		this.gameFrame.stopFight();
 		if (this.fight.won) {
@@ -240,31 +258,40 @@ public class GameController {
 				this.gameFrame.setCurrentPanel(this.gameFrame.getEvolutionPanel());
 				this.gameFrame.getEvolutionPanel().start();
 			}
-			if (this.fight.getEnemyCharacter() != null && this.fight.getEnemyCharacter().hasRewards()) {
-				this.mainCharacter.earnRewards(this.fight.getEnemyCharacter().getRewards(), true);
-				this.fight.getEnemyCharacter().getRewards().clear();
+		} else {
+			for (int i : new int[] { Fighting.RIGHT_PLAYER, Fighting.LEFT_OPPONENT, Fighting.RIGHT_OPPONENT }) {
+				Team t = this.fight.getTeam(i);
+				if (t != null) {
+					t.restoreTeam();
+				}
 			}
 		}
 		SoundController.getInstance().startRain(this.mainCharacter.getCurrentRoute().getRain());
 	}
 
-	public boolean winFight() {
-		for (Pokemon p : this.fight.getParticipants()) {
-			int XPGain = this.fight.calculateXP(p);
+	public boolean winFight(Pokemon dead) {
+		if (fight.isPlayer(dead)) {
+			return false;
+		}
+		boolean left = fight.getIndex(dead) == Fighting.LEFT_OPPONENT;
+		for (Pokemon p : this.fight.getParticipants(left)) {
+			int XPGain = this.fight.calculateXP(dead, p);
 			if (p.getStats().getLevel() < 100) {
-				int xp = XPGain / this.fight.getParticipants().size();
+				int xp = XPGain / this.fight.getParticipants(left).size();
 				this.gameFrame.getFightPanel().addText(p.getName() + " erhält " + xp + " Erfahrungspunkte!");
 				p.gainXP(xp);
 			}
 		}
-		if (this.fight.enemyDead()) {
-			this.fight.won = true;
-			if (this.fight.getEnemyCharacter() != null) {
-				this.gameFrame.getFightPanel().addText(this.fight.getEnemyCharacter().getOnDefeatDialogue());
-				this.getGameFrame().getFightPanel()
-						.addText("Du erhälst " + this.fight.getEnemyCharacter().getMoney() + " Cupydollar!");
-				this.getMainCharacter().increaseMoney(this.fight.getEnemyCharacter().getMoney());
-				this.gameFrame.getFightPanel().pause();
+		this.fight.won = this.fight.enemyDead();
+		this.fight.remove(dead);
+		if (this.fight.won) {
+			if (this.fight.getCharacter(Fighting.LEFT_OPPONENT) instanceof NPC) {
+				NPC opponent = ((NPC) this.fight.getCharacter(Fighting.LEFT_OPPONENT));
+				opponent.onDefeat((Player) this.fight.getCharacter(Fighting.LEFT_PLAYER));
+			}
+			if (this.fight.getCharacter(Fighting.RIGHT_OPPONENT) instanceof NPC) {
+				NPC opponent = ((NPC) this.fight.getCharacter(Fighting.RIGHT_OPPONENT));
+				opponent.onDefeat((Player) this.fight.getCharacter(Fighting.LEFT_PLAYER));
 			}
 			this.endFight();
 			return true;
@@ -273,7 +300,7 @@ public class GameController {
 	}
 
 	public boolean loseFight() {
-		if (this.fight.playerDead()) {
+		if (!this.mainCharacter.getTeam().isAnyPokemonAlive()) {
 			this.fight.won = false;
 			this.gameFrame.getFightPanel().addText("Du wurdest besiegt!");
 			this.getMainCharacter().decreaseMoney((long) (this.getMainCharacter().getMoney() * 0.1));
@@ -309,8 +336,7 @@ public class GameController {
 
 	public void updateFight() {
 		if (this.gameFrame.getFightPanel() != null) {
-			this.gameFrame.getFightPanel().setPlayer();
-			this.gameFrame.getFightPanel().setEnemy();
+			this.gameFrame.getFightPanel().updateFight();
 			this.gameFrame.getFightPanel().updatePanels();
 		}
 	}
@@ -326,14 +352,41 @@ public class GameController {
 		}
 	}
 
-	public int checkStartFight() {
-		for (int i = 0; i < this.currentBackground.getCurrentRoute().getCharacters().size(); i++) {
-			int distance = this.currentBackground.getCurrentRoute().getCharacters().get(i).checkStartFight();
-			if (distance > 0) {
-				return i;
+	public SimpleEntry<NPC, NPC> checkStartFight(de.alexanderciupka.pokemon.characters.types.Character c) {
+		if(!(c instanceof Player)) {
+			return null;
+		}
+		NPC left = null;
+		NPC right = null;
+		for (NPC npc : this.currentBackground.getCurrentRoute().getCharacters()) {
+			if(npc.checkStartFight((Player) c)) {
+				switch(npc.getFightingStyle()) {
+				case NPC.DOUBLE:
+					if(left == null) {
+						left = npc;
+						right = npc;
+					}
+					break;
+				case NPC.FOLLOWER_DOUBLE:
+					if(left == null) {
+						left = npc;
+						right = npc.getFollower();
+					}
+					break;
+				case NPC.NO_DOUBLE:
+					if(left != null) {
+						right = npc;
+					} else {
+						left = npc;
+					}
+					break;
+				}
 			}
 		}
-		return -1;
+		if(left != null) {
+			return new SimpleEntry<NPC, NPC>(left, right);
+		}
+		return null;
 	}
 
 	public void sleep(long millis) {
@@ -363,25 +416,19 @@ public class GameController {
 		this.mainCharacter.setCurrentRoute(this.routeAnalyzer.getRouteById("pokemon_center"));
 		this.mainCharacter.setCurrentPosition(0, 0);
 
-		this.mainCharacter.getItems().put(Item.POKEBALL, 5 * 99);
-		this.mainCharacter.getItems().put(Item.POTION, 10);
-
+		this.mainCharacter.getItems().put(Items.POKEBALL, 5 * 99);
+		this.mainCharacter.getItems().put(Items.TRANK, 10);
+		
+		
 		// mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("eigenes_zimmer"));
 		// mainCharacter.setCurrentPosition(START.x, START.y);
-
-		RandomWalker spin = new RandomWalker();
-
-		spin.setCharacterImage("cutycupy", "front");
-
-		spin.setCurrentPosition(new Point(2, 1));
-		spin.setCurrentRoute(this.mainCharacter.getCurrentRoute());
-
-		this.mainCharacter.getCurrentRoute().addCharacter(spin);
 
 		this.currentBackground = new Background(this.mainCharacter.getCurrentRoute());
 
 		Pokemon player = new Pokemon(25);
 		player.getStats().generateStats((short) 5);
+		player.setAbility(new Ability(Abilities.SANDSTURM, "", ""));
+		
 
 		for (Stat s : Stat.values()) {
 			switch (s) {
@@ -393,8 +440,10 @@ public class GameController {
 			}
 		}
 
-		System.out.println(player.getAbility().getName());
+		this.mainCharacter.getTeam().addPokemon(player);
 
+		player = new Pokemon(6);
+		player.getStats().generateStats((short) 100);
 		this.mainCharacter.getTeam().addPokemon(player);
 
 		if (this.gameFrame == null) {
@@ -409,7 +458,6 @@ public class GameController {
 
 		this.mainCharacter.getCurrentRoute().getEntities()[this.mainCharacter.getCurrentPosition().y][this.mainCharacter
 				.getCurrentPosition().x].onStep(this.mainCharacter);
-
 	}
 
 	public boolean loadGame(String path) {

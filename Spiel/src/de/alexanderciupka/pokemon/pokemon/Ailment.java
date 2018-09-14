@@ -8,8 +8,6 @@ public enum Ailment {
 
 	NONE, BURN, FREEZE, PARALYSIS, SLEEP, POISON, HEAVY_POISON, FAINTED;
 
-	// TODO: Implement Heavy Poison damage multiplier
-
 	private int inflictedTurn;
 
 	Ailment() {

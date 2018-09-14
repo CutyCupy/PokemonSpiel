@@ -48,12 +48,11 @@ public class PokemonLabel extends JLabel {
 	@Override
 	protected void paintComponent(Graphics arg0) {
 		super.paintComponent(arg0);
-		Pokemon p = this.getPokemon();
-		if (p != null) {
+		if (this.pokemon != null) {
 			this.setIcon(new ImageIcon(
-					GameController.getInstance().getFight().isPlayer(p) ? p.getSpriteBack() : p.getSpriteFront()));
+					GameController.getInstance().getFight().isPlayer(this.pokemon) ? this.pokemon.getSpriteBack() : this.pokemon.getSpriteFront()));
 		}
-		this.setVisible(GameController.getInstance().getFight().isVisible(p));
+		this.setVisible(GameController.getInstance().getFight().isVisible(this.pokemon));
 	}
 
 }

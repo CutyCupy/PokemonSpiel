@@ -3,6 +3,8 @@ package de.alexanderciupka.pokemon.pokemon;
 import java.awt.Color;
 import java.util.EnumMap;
 
+import de.alexanderciupka.pokemon.constants.Abilities;
+
 public enum Type {
 
 	WATER("Wasser"), GRASS("Pflanze"), FIRE("Feuer"), ROCK("Gestein"), GROUND("Boden"), STEEL("Stahl"), GHOST(
@@ -120,7 +122,7 @@ public enum Type {
 		this.name = name;
 	}
 
-	public static double getEffectiveness(Type attackType, Pokemon defender) {
+	public static double getEffectiveness(Ability user, Type attackType, Pokemon defender) {
 		Type[] targetTypes = defender.getTypes();
 		double factor = DEFAULT;
 		for (Type curType : strongMapping.get(attackType)) {
@@ -140,11 +142,34 @@ public enum Type {
 		for (Type curType : uselessMapping.get(attackType)) {
 			for (Type curTarget : targetTypes) {
 				if (curType.equals(curTarget)) {
-					factor = USELESS;
+					switch (user.getId()) {
+					case Abilities.RAUFLUST:
+						if (curType == Type.GHOST && (attackType == Type.NORMAL || attackType == Type.FIGHTING)) {
+							continue;
+						}
+					default:
+						factor = USELESS;
+						break;
+					}
 				}
 			}
 		}
+		switch (defender.getAbility().getId()) {
+		case Abilities.WUNDERWACHE:
+			if (factor < STRONG) {
+				return USELESS;
+			}
+			break;
+		case Abilities.SCHWEBE:
+			if (attackType == Type.GROUND) {
+				return USELESS;
+			}
+		}
 		return factor;
+	}
+
+	public static double getEffectiveness(Type attackType, Pokemon defender) {
+		return getEffectiveness(new Ability(Abilities.KEINE, "", ""), attackType, defender);
 	}
 
 	@Override
@@ -154,8 +179,13 @@ public enum Type {
 
 	public static double calcSTAB(Pokemon attacker, Move usedMove) {
 		for (Type t : attacker.getTypes()) {
-			if (usedMove.getMoveType().equals(t)) {
-				return STAB;
+			if (usedMove.getMoveType(attacker).equals(t)) {
+				switch (attacker.getAbility().getId()) {
+				case Abilities.ANPASSUNG:
+					return 2;
+				default:
+					return STAB;
+				}
 			}
 		}
 		return DEFAULT;

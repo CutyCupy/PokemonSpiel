@@ -2,7 +2,12 @@ package de.alexanderciupka.pokemon.characters;
 
 import com.google.gson.JsonArray;
 
+import de.alexanderciupka.pokemon.characters.types.Character;
+import de.alexanderciupka.pokemon.characters.types.NPC;
+import de.alexanderciupka.pokemon.constants.Items;
+import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.pokemon.Ailment;
+import de.alexanderciupka.pokemon.pokemon.Move;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
 import de.alexanderciupka.pokemon.pokemon.Stat;
 
@@ -11,10 +16,12 @@ public class Team {
 	private Pokemon[] pokemon;
 	private int ammount;
 	private Character owner;
+	
+	public static final int MAX_SIZE = 6;
 
 	public Team(Character owner) {
 		this.owner = owner;
-		this.pokemon = new Pokemon[6];
+		this.pokemon = new Pokemon[MAX_SIZE];
 		this.ammount = 0;
 	}
 
@@ -60,7 +67,7 @@ public class Team {
 
 	public Pokemon getFirstFightPokemon() {
 		for (int i = 0; i < this.ammount; i++) {
-			if (this.pokemon[i].getStats().getCurrentHP() > 0) {
+			if (this.pokemon[i].getAilment() != Ailment.FAINTED) {
 				return this.pokemon[i];
 			}
 		}
@@ -116,7 +123,7 @@ public class Team {
 	}
 
 	public boolean importSaveData(JsonArray saveData) {
-		this.pokemon = new Pokemon[6];
+		this.pokemon = new Pokemon[MAX_SIZE];
 		for (int p = 0; p < Math.min(saveData.size(), this.pokemon.length); p++) {
 			this.pokemon[p] = Pokemon.importSaveData(saveData.get(p).getAsJsonObject());
 		}
@@ -162,12 +169,21 @@ public class Team {
 			this.ammount++;
 		}
 	}
+	
+	public boolean isDefeated() {
+		for(Pokemon p : this.getTeam()) {
+			if(p != null && p.getAilment() != Ailment.FAINTED) {
+				return false;
+			}
+		}
+		return true;
+	}
 
 	@Override
 	public boolean equals(Object arg0) {
 		if (arg0 instanceof Team) {
 			Team equals = (Team) arg0;
-			for (int i = 0; i < 6; i++) {
+			for (int i = 0; i < MAX_SIZE; i++) {
 				if (this.getTeam()[i] != null) {
 					if (!this.getTeam()[i].equals(equals.getTeam()[i])) {
 						return false;
@@ -179,6 +195,28 @@ public class Team {
 				}
 			}
 			return true;
+		}
+		return false;
+	}
+	
+	public boolean canUseVM(Integer vm) {
+		if(!this.owner.hasItem(vm)) {
+			return false;
+		}
+		Object machine = GameController.getInstance().getInformation().getItemData(Items.ITEM_MACHINE, vm);
+		if(machine != null) {
+			Integer move = Integer.parseInt(machine.toString());
+			for(Pokemon p : this.getTeam()) {
+				if(p != null) {
+					for(Move m : p.getMoves()) {
+						if(m != null) {
+							if(m.getId() == move) {
+								return true;
+							}
+						}
+					}
+				}
+			}
 		}
 		return false;
 	}

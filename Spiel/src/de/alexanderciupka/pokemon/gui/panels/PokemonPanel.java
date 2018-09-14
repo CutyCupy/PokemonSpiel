@@ -13,11 +13,13 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import de.alexanderciupka.hoverbutton.Main;
+import de.alexanderciupka.pokemon.constants.Items;
+import de.alexanderciupka.pokemon.fighting.Attack;
 import de.alexanderciupka.pokemon.fighting.FightOption;
+import de.alexanderciupka.pokemon.fighting.Fighting;
 import de.alexanderciupka.pokemon.gui.PokemonButton;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.pokemon.Ailment;
-import de.alexanderciupka.pokemon.pokemon.Item;
 
 @SuppressWarnings("serial")
 public class PokemonPanel extends JPanel {
@@ -27,7 +29,7 @@ public class PokemonPanel extends JPanel {
 	private JButton backButton;
 	private int firstOne;
 
-	private Item currentItem;
+	private Integer currentItem;
 
 	private int index;
 
@@ -64,9 +66,10 @@ public class PokemonPanel extends JPanel {
 						}
 						switch (result) {
 						case 0:
+							
 							if (PokemonPanel.this.gController.isFighting()) {
 								PokemonPanel.this.gController.displayReport(source.getPokemon(),
-										PokemonPanel.this.gController.getFight().getPlayerTeam().getTeam());
+										PokemonPanel.this.gController.getFight().getTeam(Fighting.LEFT_PLAYER).getTeam());
 							} else {
 								PokemonPanel.this.gController.displayReport(source.getPokemon(),
 										PokemonPanel.this.gController.getMainCharacter().getTeam().getTeam());
@@ -74,17 +77,25 @@ public class PokemonPanel extends JPanel {
 							break;
 						case 1:
 							if (PokemonPanel.this.gController.isFighting()) {
-								if (source.getIndex() != 0) {
-									if (PokemonPanel.this.gController.getFight().canBeSendOut(source.getIndex())) {
+								if (source.getIndex() != 0 && source.getIndex() != PokemonPanel.this.gController.getFight().getActivePlayer()) {
+									if (PokemonPanel.this.gController.getFight().canBeSendOut(source.getPokemon())) {
 										new Thread(new Runnable() {
 											@Override
 											public void run() {
 												PokemonPanel.this.gController.getFight()
-														.setCurrentFightOption(FightOption.FIGHT);
-												PokemonPanel.this.gController.getFight().sendOut(source.getIndex());
-												PokemonPanel.this.gController.getGameFrame().getFightPanel()
-														.checkEnemyAttack();
-												PokemonPanel.this.gController.getGameFrame().getFightPanel().showMenu();
+												.setCurrentFightOption(FightOption.FIGHT);
+												if(gController.getFight().isActiveTurn()) {
+													Fighting.waiting = true;
+													PokemonPanel.this.gController.getFight().swap(
+															gController.getFight().getCurrentPokemon(), source.getPokemon());
+//												PokemonPanel.this.gController.getGameFrame().getFightPanel()
+//														.checkEnemyAttack();
+//												PokemonPanel.this.gController.getGameFrame().getFightPanel().showMenu();
+													Fighting.waiting = false;
+												} else {
+													System.err.println("no active turn");
+													gController.getFight().registerAttack(new Attack(gController.getFight().getCurrentPokemon(), source.getPokemon()));
+												}
 											}
 										}).start();
 									}
@@ -114,7 +125,7 @@ public class PokemonPanel extends JPanel {
 									p.setEnabled(false);
 								}
 								PokemonPanel.this.backButton.setEnabled(false);
-								boolean result = source.getPokemon().useItem(
+								String result = source.getPokemon().useItem(
 										PokemonPanel.this.gController.getMainCharacter(),
 										PokemonPanel.this.currentItem);
 								source.update(true);
@@ -150,10 +161,11 @@ public class PokemonPanel extends JPanel {
 								PokemonPanel.this.backButton.setEnabled(true);
 								PokemonPanel.this.gController.setInteractionPause(false);
 
-								if (result && PokemonPanel.this.gController.isFighting()) {
-									PokemonPanel.this.gController.getGameFrame().getFightPanel().checkEnemyAttack();
-									PokemonPanel.this.gController.getGameFrame().getFightPanel().showMenu();
-								}
+//								if (result && PokemonPanel.this.gController.isFighting()) {
+//									PokemonPanel.this.gController.getGameFrame().getFightPanel().checkEnemyAttack();
+//									PokemonPanel.this.gController.getGameFrame().getFightPanel().showMenu();
+//								}
+								gController.getFight().nextPokemon();
 								source.repaint();
 							}
 						}).start();
@@ -202,28 +214,29 @@ public class PokemonPanel extends JPanel {
 				Thread.yield();
 			}
 			this.gController.getGameFrame()
-					.addDialogue("Du hast deinen letzten " + this.currentItem.getName() + " benutzt!");
+					.addDialogue("Du hast deinen letzten " + this.gController.getInformation().getItemData(Items.ITEM_NAME, this.currentItem).toString() + " benutzt!");
 			this.currentItem = null;
 			this.gController.waitDialogue();
 		}
 		for (PokemonButton pokemonButton : this.pokemonButtons) {
 			pokemonButton.update(false);
 		}
-		if (this.gController.isFighting() && this.gController.getFight().getPlayer().getAilment() == Ailment.FAINTED) {
+		if (this.gController.isFighting() && this.gController.getFight().getPokemon(index).getAilment() == Ailment.FAINTED) {
 			this.backButton.setEnabled(false);
 		} else {
 			this.backButton.setEnabled(true);
 		}
 	}
 
-	public void update(Item i) {
+	public void update(Integer i) {
 		this.update();
 		this.currentItem = i;
 	}
 
 	public void update(int index) {
-		this.update();
 		this.index = index;
+		this.update();
+		this.index = 0;
 	}
 
 	public int getIndex() {

@@ -24,7 +24,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import de.alexanderciupka.pokemon.characters.NPC;
+import de.alexanderciupka.pokemon.characters.types.NPC;
 import de.alexanderciupka.pokemon.exceptions.InvalidRouteDataException;
 import de.alexanderciupka.pokemon.gui.GameFrame;
 import de.alexanderciupka.pokemon.main.Main;
@@ -34,7 +34,6 @@ import de.alexanderciupka.pokemon.map.entities.HatchEntity;
 import de.alexanderciupka.pokemon.menu.MenuController;
 import de.alexanderciupka.pokemon.menu.SoundController;
 import de.alexanderciupka.pokemon.painting.Painting;
-import de.alexanderciupka.pokemon.pokemon.Item;
 
 public class RouteAnalyzer {
 
@@ -52,10 +51,10 @@ public class RouteAnalyzer {
 	private Map<String, Route> originalRoutes;
 	private GameController gController;
 	private HashMap<String, BufferedImage> logos;
-	private HashMap<Item, BufferedImage> items;
+	private HashMap<Integer, BufferedImage> items;
 	private HashMap<String, BufferedImage> sprites;
 	private HashMap<String, BufferedImage> terrains;
-	private HashMap<Item, BufferedImage> pokeballs;
+	private HashMap<Integer, BufferedImage> pokeballs;
 	private HashMap<String, BufferedImage> animations;
 
 	ArrayList<HatchEntity> hatches;
@@ -68,10 +67,10 @@ public class RouteAnalyzer {
 		this.loadedRoutes = new HashMap<String, Route>();
 		this.originalRoutes = new HashMap<String, Route>();
 		this.logos = new HashMap<String, BufferedImage>();
-		this.items = new HashMap<Item, BufferedImage>();
+		this.items = new HashMap<Integer, BufferedImage>();
 		this.sprites = new HashMap<String, BufferedImage>();
 		this.terrains = new HashMap<String, BufferedImage>();
-		this.pokeballs = new HashMap<Item, BufferedImage>();
+		this.pokeballs = new HashMap<Integer, BufferedImage>();
 		this.animations = new HashMap<String, BufferedImage>();
 		this.parser = new JsonParser();
 	}
@@ -79,7 +78,6 @@ public class RouteAnalyzer {
 	public void init() {
 		this.readAllSprites();
 		this.readAllTerrains();
-		this.readAllPokeballs();
 		this.readAllLogos();
 		this.readAllItems();
 		this.readAllRoutes();
@@ -125,30 +123,12 @@ public class RouteAnalyzer {
 		return this.terrains.get(name);
 	}
 
-	private void readAllPokeballs() {
-		File[] pokeballs = POKEBALL_FOLDER.listFiles();
-		for (File currentFile : pokeballs) {
-			if (currentFile.isFile() && currentFile.getName().endsWith(".png")) {
-				try {
-					this.pokeballs.put(Item.valueOf(currentFile.getName().split("\\.")[0].toUpperCase()),
-							ImageIO.read(currentFile));
-				} catch (Exception e) {
-					continue;
-				}
-			}
-		}
-	}
-
-	public BufferedImage getPokeballImage(Item i) {
-		return this.pokeballs.get(i);
-	}
-
 	private void readAllItems() {
 		File[] items = ITEM_FOLDER.listFiles();
 		for (File currentFile : items) {
 			if (currentFile.isFile() && currentFile.getName().endsWith(".png")) {
 				try {
-					this.items.put(Item.valueOf(currentFile.getName().split("\\.")[0].toUpperCase()),
+					this.items.put(Integer.parseInt(currentFile.getName().split("\\.")[0]),
 							ImageIO.read(currentFile));
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -157,7 +137,7 @@ public class RouteAnalyzer {
 		}
 	}
 
-	public BufferedImage getItemImage(Item i) {
+	public BufferedImage getItemImage(Integer i) {
 		return this.items.get(i);
 	}
 

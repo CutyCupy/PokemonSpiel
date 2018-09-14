@@ -8,14 +8,14 @@ import java.awt.image.BufferedImage;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 
-import de.alexanderciupka.pokemon.characters.Player;
+import de.alexanderciupka.pokemon.characters.types.Player;
+import de.alexanderciupka.pokemon.constants.Items;
 import de.alexanderciupka.pokemon.gui.GameFrame;
 import de.alexanderciupka.pokemon.map.Route;
-import de.alexanderciupka.pokemon.pokemon.Item;
 
 public class ItemEntity extends Entity {
 
-	private Item item;
+	private Integer item;
 	private boolean hidden;
 
 	public ItemEntity(Route parent, String terrainName, boolean hidden) {
@@ -23,21 +23,21 @@ public class ItemEntity extends Entity {
 		this.hidden = hidden;
 	}
 
-	public Item getItem() {
+	public Integer getItem() {
 		return this.item;
 	}
 
-	public void setItem(Item item) {
+	public void setItem(Integer item) {
 		this.item = item;
 		if (item != null) {
 			if (this.hidden) {
-				this.setSprite(Item.NONE, this.spriteName);
+				this.setSprite(Items.KEINS, this.spriteName);
 			} else {
 				this.setSprite(item, this.spriteName);
 			}
 			this.setAccessible(this.hidden);
 		} else {
-			this.setSprite(Item.NONE, this.spriteName);
+			this.setSprite(Items.KEINS, this.spriteName);
 			this.setAccessible(true);
 		}
 	}
@@ -51,7 +51,7 @@ public class ItemEntity extends Entity {
 		}
 	}
 
-	private void setSprite(Item item, String spriteName) {
+	private void setSprite(Integer item, String spriteName) {
 		super.setSprite(spriteName);
 		if (!this.hidden) {
 			Image temp = new BufferedImage(this.sprite.getWidth(null), this.sprite.getHeight(null),
@@ -82,7 +82,7 @@ public class ItemEntity extends Entity {
 	public void onInteraction(Player c) {
 		if (this.item != null) {
 			c.addItem(this.item);
-			this.gController.getGameFrame().addDialogue("Du hast einen " + this.item.getName() + " gefunden!");
+			this.gController.getGameFrame().addDialogue("Du hast einen " + this.gController.getInformation().getItemData(Items.ITEM_NAME, this.item).toString() + " gefunden!");
 			this.gController.waitDialogue();
 			this.setItem(null);
 			c.getCurrentRoute().updateMap(new Point(this.getX(), this.getY()));
@@ -106,7 +106,7 @@ public class ItemEntity extends Entity {
 		ItemEntity origin = (ItemEntity) entity;
 		JsonObject saveData = super.getSaveData(entity);
 		if ((this.item != null || origin.item != null) || (this.item != null && !this.item.equals(origin.item))) {
-			saveData.addProperty("item", this.item != null ? this.item.name() : null);
+			saveData.addProperty("item", this.item != null ? this.item : 0);
 		}
 		if (this.hidden != origin.hidden) {
 			saveData.addProperty("hidden", this.hidden);
@@ -119,8 +119,8 @@ public class ItemEntity extends Entity {
 		if (super.importSaveData(saveData, entity) && entity instanceof ItemEntity) {
 			ItemEntity other = (ItemEntity) entity;
 			if (saveData.get("item") != null) {
-				this.setItem(saveData.get("item") instanceof JsonNull ? null
-						: Item.valueOf(saveData.get("item").getAsString().toUpperCase()));
+				this.setItem(saveData.get("item") instanceof JsonNull ? Items.KEINS
+						: saveData.get("item").getAsInt());
 			} else {
 				this.setItem(other.item);
 			}

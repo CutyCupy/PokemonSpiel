@@ -57,5 +57,4 @@ public class AnimationLabel extends JLabel {
 		}
 		this.animationLabel.setIcon(null);
 	}
-
 }

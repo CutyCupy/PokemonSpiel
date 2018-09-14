@@ -10,7 +10,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import de.alexanderciupka.hoverbutton.Main;
-import de.alexanderciupka.pokemon.characters.Character;
+import de.alexanderciupka.pokemon.characters.types.Character;
 import de.alexanderciupka.pokemon.gui.BackgroundLabel;
 import de.alexanderciupka.pokemon.gui.GameFrame;
 import de.alexanderciupka.pokemon.map.Camera;

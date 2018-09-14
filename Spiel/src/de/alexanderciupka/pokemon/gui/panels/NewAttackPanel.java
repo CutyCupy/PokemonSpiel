@@ -101,7 +101,7 @@ public class NewAttackPanel extends JPanel {
 			@Override
 			public void mouseEntered(MouseEvent e) {
 				if(e.getComponent().isEnabled()) {
-					moveTypeLabel.setType(newMove.getMoveType());
+					moveTypeLabel.setType(newMove.getMoveType(pokemon));
 					strengthLabel.setText("Stärke: " + newMove.getPower());
 					accuracyLabel.setText("Genauigkeit: " + (newMove.getAccuracy() > 100 ? "---" : (int) newMove.getAccuracy()));
 
@@ -214,7 +214,7 @@ public class NewAttackPanel extends JPanel {
 							public void run() {
 								pokemon.addMove(pokemon.getMoves()[Integer.parseInt(e.getComponent().getName())].getName(), newMove);
 								if(gController.isFighting()) {
-									gController.getGameFrame().getFightPanel().setPlayer();
+									gController.getGameFrame().getFightPanel().updateFight();
 									gController.getGameFrame().getFightPanel().updatePanels();
 									gController.getFight().setCurrentFightOption(FightOption.FIGHT);
 									gController.getGameFrame().getFightPanel().addText(pokemon.getName() + " hat " + ((MoveButton) e.getComponent()).getMove().getName() + " vergessen und " + newMove.getName() + " erlernt!");
@@ -235,7 +235,7 @@ public class NewAttackPanel extends JPanel {
 				public void mouseEntered(MouseEvent e) {
 					if(e.getComponent().isEnabled()) {
 						Move move = pokemon.getMoves()[Integer.parseInt(e.getComponent().getName())];
-						moveTypeLabel.setType(move.getMoveType());
+						moveTypeLabel.setType(move.getMoveType(pokemon));
 						strengthLabel.setText("Stärke: " + move.getPower());
 						accuracyLabel.setText("Genauigkeit: " + (move.getAccuracy() > 100 ? "---" : (int) move.getAccuracy()));
 

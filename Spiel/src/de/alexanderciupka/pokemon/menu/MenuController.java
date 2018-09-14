@@ -16,7 +16,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import de.alexanderciupka.hoverbutton.Main;
 import de.alexanderciupka.pokemon.map.GameController;
-import de.alexanderciupka.pokemon.map.RouteCreator;
 import de.alexanderciupka.pokemon.painting.PaintingController;
 
 public class MenuController {
@@ -31,10 +30,10 @@ public class MenuController {
 	private PaintingNameFrame paintingFrame;
 	public static final String SAVE_PATH = System.getProperty("user.home") + "/SpielSpeicherdaten/";
 
-
 	public static final Dimension SCREEN_SIZE = Toolkit.getDefaultToolkit().getScreenSize();
 
-	public static final List<Character> forbiddenChars = Arrays.asList('<', '>', '?' , '"', ':', '|', '\\', '/', '*', '.', ',', '[', ']', '(', ')', '!', '\'', '{', '}');
+	public static final List<Character> forbiddenChars = Arrays.asList('<', '>', '?', '"', ':', '|', '\\', '/', '*',
+			'.', ',', '[', ']', '(', ')', '!', '\'', '{', '}');
 
 	private MenuController() {
 	}
@@ -45,14 +44,13 @@ public class MenuController {
 		sController = SoundController.getInstance();
 		new File(SAVE_PATH).mkdir();
 		fileChooser = new JFileChooser(SAVE_PATH);
-		fileChooser.setFileFilter(new FileNameExtensionFilter("Speicherdateien",
-	            "ks"));
+		fileChooser.setFileFilter(new FileNameExtensionFilter("Speicherdateien", "ks"));
 		menuFont = importFont("/fonts/pokemon_solid.ttf");
 		menuFrame = new MainMenuFrame();
 	}
 
 	public static MenuController getInstance() {
-		if(instance == null) {
+		if (instance == null) {
 			instance = new MenuController();
 			instance.start();
 		}
@@ -60,7 +58,6 @@ public class MenuController {
 	}
 
 	public void startEditor() {
-		new RouteCreator();
 	}
 
 	public void openEditor(String pictureName, int width, int height) {
@@ -77,7 +74,7 @@ public class MenuController {
 			Font f = Font.createFont(Font.TRUETYPE_FONT, is);
 			GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(f);
 			is.close();
-		  	return f;
+			return f;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return null;
@@ -92,8 +89,8 @@ public class MenuController {
 	}
 
 	public boolean checkName(String text, char typedChar) {
-		if(text.length() <= 16) {
-			if(forbiddenChars.contains(typedChar)) {
+		if (text.length() <= 16) {
+			if (forbiddenChars.contains(typedChar)) {
 				return false;
 			}
 			return true;
@@ -106,20 +103,23 @@ public class MenuController {
 	}
 
 	public boolean loadGame() {
-		return fileChooser.showDialog(null, "Laden") == 0 ? gController.loadGame(fileChooser.getSelectedFile().getPath()) : false;
+		return fileChooser.showDialog(null, "Laden") == 0
+				? gController.loadGame(fileChooser.getSelectedFile().getPath()) : false;
 	}
 
 	public String saveGame() {
 		fileChooser.showSaveDialog(null);
-		if(fileChooser.getSelectedFile() != null) {
+		if (fileChooser.getSelectedFile() != null) {
 			return fileChooser.getSelectedFile().getName();
 		}
 		return null;
 	}
 
 	public int returnToMenu() {
-		return JOptionPane.showOptionDialog(null, "Was möchtest du tun?", "Menü", JOptionPane.YES_NO_CANCEL_OPTION,  JOptionPane.QUESTION_MESSAGE, null,
-				new Object[]{"Speichern", "Speichern und zum Hauptmenü", "Laden", "Zurück zum Hauptmenü"}, "Speichern");
+		return JOptionPane.showOptionDialog(null, "Was möchtest du tun?", "Menü", JOptionPane.YES_NO_CANCEL_OPTION,
+				JOptionPane.QUESTION_MESSAGE, null,
+				new Object[] { "Speichern", "Speichern und zum Hauptmenü", "Laden", "Zurück zum Hauptmenü" },
+				"Speichern");
 	}
 
 	public void showMenu() {
@@ -133,7 +133,5 @@ public class MenuController {
 	public PaintingNameFrame getPaintingFrame() {
 		return paintingFrame;
 	}
-
-
 
 }

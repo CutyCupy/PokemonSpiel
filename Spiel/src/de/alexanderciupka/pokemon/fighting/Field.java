@@ -3,6 +3,7 @@ package de.alexanderciupka.pokemon.fighting;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import de.alexanderciupka.pokemon.constants.Abilities;
 import de.alexanderciupka.pokemon.constants.Moves;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
@@ -68,11 +69,18 @@ public class Field {
 
 	public String setWeather(Weather w, Pokemon reason) {
 		this.weather = w;
-		// TODO: Check for weather item
 		return w.startWeather();
 	}
 
 	public Weather getWeather() {
+		for(int i : new int[] {Fighting.LEFT_OPPONENT, Fighting.LEFT_PLAYER, Fighting.RIGHT_OPPONENT, Fighting.RIGHT_PLAYER}) {
+			if(GameController.getInstance().getFight().getPokemon(i) != null) {
+				if(GameController.getInstance().getFight().getPokemon(i).getAbility().getId() == Abilities.WOLKE_SIEBEN ||
+						GameController.getInstance().getFight().getPokemon(i).getAbility().getId() == Abilities.KLIMASCHUTZ) {
+					return Weather.NONE;
+				}
+			}
+		}
 		return this.weather;
 	}
 
@@ -104,8 +112,7 @@ public class Field {
 		return true;
 	}
 
-	public HashMap<Stat, Double> updateFightStats(Pokemon p, boolean left) {
-		HashMap<Stat, Double> result = p.getStats().getFightStats();
+	public HashMap<Stat, Double> updateFightStats(HashMap<Stat, Double> result, boolean left) {
 		for (Screen s : (left ? this.leftScreens : this.rightScreens)) {
 			switch (s) {
 			case AURORASCHLEIER:
@@ -122,17 +129,15 @@ public class Field {
 				break;
 			}
 		}
-
 		return result;
 	}
 
-	public void endOfTurn(Pokemon... participants) {
-		for (Pokemon p : participants) {
-			this.weather.onEndOfTurn(p);
-		}
+	public void endOfTurn() {
 		this.increaseTurn();
 		if (this.weather.getTurns() <= 0) {
-			GameController.getInstance().getGameFrame().getFightPanel().addText(this.setWeather(Weather.NONE, null));
+			GameController.getInstance().getGameFrame().getFightPanel().addText(this.weather.onStop());
+			this.setWeather(Weather.NONE, null);
+			GameController.getInstance().getGameFrame().getFightPanel().updateFight();
 		}
 
 		for (int i = 0; i < this.leftScreens.size(); i++) {
@@ -140,6 +145,7 @@ public class Field {
 				GameController.getInstance().getGameFrame().getFightPanel().addText(this.leftScreens.get(i).onStop());
 				this.leftScreens.remove(i);
 				i--;
+				GameController.getInstance().getGameFrame().getFightPanel().updateFight();
 			}
 		}
 		for (int i = 0; i < this.rightScreens.size(); i++) {
@@ -147,10 +153,12 @@ public class Field {
 				GameController.getInstance().getGameFrame().getFightPanel().addText(this.rightScreens.get(i).onStop());
 				this.rightScreens.remove(i);
 				i--;
+				GameController.getInstance().getGameFrame().getFightPanel().updateFight();
 			}
 		}
 		if (this.trickRoomTurns == 0) {
 			this.stopTrickRoom();
+			GameController.getInstance().getGameFrame().getFightPanel().updateFight();
 		}
 	}
 

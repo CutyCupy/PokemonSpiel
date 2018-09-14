@@ -2,24 +2,29 @@ package de.alexanderciupka.pokemon.map.entities;
 
 import java.awt.Image;
 import java.awt.Point;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Random;
 
 import com.google.gson.JsonObject;
 
-import de.alexanderciupka.pokemon.characters.Character;
 import de.alexanderciupka.pokemon.characters.Direction;
-import de.alexanderciupka.pokemon.characters.NPC;
-import de.alexanderciupka.pokemon.characters.Player;
+import de.alexanderciupka.pokemon.characters.types.Character;
+import de.alexanderciupka.pokemon.characters.types.NPC;
+import de.alexanderciupka.pokemon.characters.types.Player;
+import de.alexanderciupka.pokemon.constants.Abilities;
+import de.alexanderciupka.pokemon.constants.Items;
 import de.alexanderciupka.pokemon.exceptions.InvalidEntityDataException;
-import de.alexanderciupka.pokemon.gui.overlay.DarkOverlay;
+import de.alexanderciupka.pokemon.fighting.Weather;
+import de.alexanderciupka.pokemon.main.Main;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.map.Route;
 import de.alexanderciupka.pokemon.map.RouteAnalyzer;
 import de.alexanderciupka.pokemon.map.Warp;
 import de.alexanderciupka.pokemon.menu.SoundController;
-import de.alexanderciupka.pokemon.pokemon.Item;
+import de.alexanderciupka.pokemon.pokemon.Move;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
+import de.alexanderciupka.pokemon.pokemon.PokemonInformation;
 
 public class Entity {
 
@@ -189,7 +194,23 @@ public class Entity {
 	}
 
 	public boolean checkPokemon() {
-		if (this.pokemonRate > 0 && this.parent.getPoolById(this.pokemonPool) != null
+		float rate = this.pokemonRate;
+		switch(this.gController.getMainCharacter().getTeam().getTeam()[0].getAbility().getId()) {
+		case Abilities.ERLEUCHTUNG:
+		case Abilities.AUSWEGLOS:
+			rate *= 2;
+			break;
+		case Abilities.RASANZ:
+		case Abilities.PULVERRAUCH:
+		case Abilities.DUFTNOTE:
+			rate *= .5;
+			break;
+		case Abilities.SCHNEEMANTEL:
+			if(this.parent.getWeather() == Weather.HAIL) {
+				rate *= .5;
+			}
+		}
+		if (Main.RNG.nextFloat() < rate && this.parent.getPoolById(this.pokemonPool) != null
 				&& this.parent.getPoolById(this.pokemonPool).getPokemonPool().size() > 0) {
 			return true;
 		}
@@ -349,15 +370,17 @@ public class Entity {
 				c.setControllable(true);
 			}
 		}
-		int characterIndex = this.gController.checkStartFight();
-		if (!c.isEvent() && c instanceof Player && characterIndex >= 0) {
-			NPC enemy = this.gController.getCurrentBackground().getCurrentRoute().getCharacters().get(characterIndex);
-			if (enemy.moveTowardsMainCharacter()) {
-				if (!this.gController.isFighting()) {
-					this.gController.startFight(enemy);
+		SimpleEntry<NPC, NPC> fight = this.gController.checkStartFight(c);
+		if (!c.isEvent() && fight != null) {
+			if (!this.gController.isFighting()) {
+				fight.getKey().moveTowardsCharacter(c);
+				if(fight.getValue() != null && !fight.getKey().equals(fight.getValue()))  {
+					fight.getValue().moveTowardsCharacter(c);
 				}
+				this.gController.startFight(fight.getKey(), fight.getValue());
 			}
 		} else if (!c.isEvent() && c instanceof Player && !((Player) c).isProtected() && this.checkPokemon()) {
+			System.out.println("pokemon");
 			if (!this.gController.isFighting()) {
 				Pokemon encounter = null;
 				if (this.parent.getPoolById(this.pokemonPool) != null) {
@@ -397,43 +420,45 @@ public class Entity {
 				if (character.getName() == null) {
 					continue;
 				}
-				if (character.isTrainer()) {
-					if (!character.isDefeated()) {
-						character.faceTowardsMainCharacter();
-						this.gController.startFight(character);
-						flag = true;
-					}
-				}
-				if (!flag) {
-					character.faceTowardsMainCharacter();
-					this.gController.getGameFrame().addDialogue(character.getNoFightDialogue(), character);
-					this.gController.waitDialogue();
-					if (character.getName().equals("Joy")) {
-						c.getTeam().restoreTeam();
-						if (character.getCurrentRoute().getId().equals("pokemon_center")) {
-							for (int i = 1; i <= c.getTeam().getAmmount() + 1; i++) {
-								this.gController.getCurrentBackground().getCurrentRoute().getEntities()[0][1]
-										.setSprite("joyhealing" + (i % (c.getTeam().getAmmount() + 1)));
-								this.gController.getCurrentBackground().getCurrentRoute().updateMap(new Point(1, 0));
-								if (i == c.getTeam().getAmmount()) {
-									SoundController.getInstance().playSound(SoundController.POKECENTER_HEAL);
-									this.gController.sleep(1500);
-								} else {
-									this.gController.sleep(750);
-								}
-							}
-						}
-						this.gController.getGameFrame().addDialogue("Deine Pokemon sind nun wieder topfit!");
-						this.gController.waitDialogue();
-					}
-					if (character.getName().equals("Maria") && character.getCurrentRoute().getId().equals("zuhause")) {
-						c.getTeam().restoreTeam();
-					}
-					if (character.hasRewards()) {
-						c.earnRewards(character.getRewards(), true);
-						character.getRewards().clear();
-					}
-				}
+				character.onInteraction(c);
+				this.gController.waitDialogue();
+//				if (character.isTrainer()) {
+//					if (!character.isDefeated()) {
+//						character.faceTowardsMainCharacter();
+//						this.gController.startFight(character);
+//						flag = true;
+//					}
+//				}
+//				if (!flag) {
+//					character.faceTowardsCharacter(c);
+//					this.gController.getGameFrame().addDialogue(character.getDialogue(NPC.DIALOGUE_NO_FIGHT), character);
+//					this.gController.waitDialogue();
+//					if (character.getName().equals("Joy")) {
+//						c.getTeam().restoreTeam();
+//						if (character.getCurrentRoute().getId().equals("pokemon_center")) {
+//							for (int i = 1; i <= c.getTeam().getAmmount() + 1; i++) {
+//								this.gController.getCurrentBackground().getCurrentRoute().getEntities()[0][1]
+//										.setSprite("joyhealing" + (i % (c.getTeam().getAmmount() + 1)));
+//								this.gController.getCurrentBackground().getCurrentRoute().updateMap(new Point(1, 0));
+//								if (i == c.getTeam().getAmmount()) {
+//									SoundController.getInstance().playSound(SoundController.POKECENTER_HEAL);
+//									this.gController.sleep(1500);
+//								} else {
+//									this.gController.sleep(750);
+//								}
+//							}
+//						}
+//						this.gController.getGameFrame().addDialogue("Deine Pokemon sind nun wieder topfit!");
+//						this.gController.waitDialogue();
+//					}
+//					if (character.getName().equals("Maria") && character.getCurrentRoute().getId().equals("zuhause")) {
+//						c.getTeam().restoreTeam();
+//					}
+//					if (character.hasRewards()) {
+//						c.earnRewards(character.getRewards(), true);
+//						character.getRewards().clear();
+//					}
+//				}
 			}
 		} else if (this.getSpriteName().equals("free") && !this.isAccessible(c)) {
 			if (this.y - 1 >= 0) {
@@ -447,21 +472,34 @@ public class Entity {
 			this.gController.getGameFrame().displayPC(c);
 		}
 
-		for (Item i : Item.values()) {
-			if (!i.isUsableOnPokemon()) {
-				this.useVM(c, i);
+		for (Integer item : c.getItems().keySet()) {
+			if(this.gController.getInformation().getItemData(Items.ITEM_NAME, item).toString().contains("hm")) {
+				this.useVM(c, item);
 			}
 		}
 
 	}
 
-	public boolean useVM(Player source, Item vm) {
+	public boolean useVM(Player source, Integer vm) {
+		PokemonInformation info = this.gController.getInformation();
 		boolean result = false;
-		boolean hasItem = source.hasItem(vm);
+		boolean canUse = false;
+		
+		for(Pokemon p : source.getTeam().getTeam()) {
+			if(p != null) {
+				for(Move m : p.getMoves()) {
+					if(m != null) {
+						if(m.getId() == Integer.valueOf(info.getItemData(Items.ITEM_MACHINE, vm).toString())) {
+							canUse = true;
+						}
+					}
+				}
+			}
+		}
 		switch (vm) {
-		case CUT:
+		case Items.VM01_CUT:
 			if (this.spriteName.equals("treecut")) {
-				if (hasItem) {
+				if (canUse) {
 					result = true;
 					this.gController.getGameFrame().addDialogue("Du zerschneidest den Baum!");
 					this.gController.waitDialogue();
@@ -487,18 +525,18 @@ public class Entity {
 				}
 			}
 			break;
-		case FLASH:
-			if (source.getCurrentRoute().isDark()) {
-				if (hasItem) {
-					result = true;
-					((DarkOverlay) (this.gController.getGameFrame().getBackgroundLabel().getOverlay(DarkOverlay.class)))
-							.flash();
-				}
-			}
-			break;
-		case ROCKSMASH:
+//		case FLASH:
+//			if (source.getCurrentRoute().isDark()) {
+//				if (hasItem) {
+//					result = true;
+//					((DarkOverlay) (this.gController.getGameFrame().getBackgroundLabel().getOverlay(DarkOverlay.class)))
+//							.flash();
+//				}
+//			}
+//			break;
+		case Items.VM06_ROCKSMASH:
 			if (this.spriteName.equals("rock")) {
-				if (hasItem) {
+				if (canUse) {
 					result = true;
 					this.gController.getGameFrame().addDialogue("Du hast den Felsen zertrümmert!");
 					SoundController.getInstance().playSound(SoundController.ROCKSMASH);
@@ -513,13 +551,13 @@ public class Entity {
 				return false;
 			}
 			break;
-		case STRENGTH:
+		case Items.VM04_STRENGTH:
 			boolean hasStone = false;
 			if (this.hasCharacter()) {
 				for (NPC character : this.getCharacters()) {
 					if (character.getID().equals("strength")) {
 						hasStone = true;
-						if (hasItem) {
+						if (canUse) {
 							result = true;
 							character.setCurrentDirection(source.getCurrentDirection());
 							character.changePosition(source.getCurrentDirection(), true);
@@ -533,9 +571,9 @@ public class Entity {
 			if (!hasStone) {
 				return false;
 			}
-		case SURF:
+		case Items.VM03_SURFER:
 			if (this.isWater() && !source.isSurfing()) {
-				if (hasItem) {
+				if (canUse) {
 					result = true;
 					this.gController.getGameFrame().addDialogue("Du fängst an zu surfen!");
 					source.setSurfing(true);
@@ -621,6 +659,7 @@ public class Entity {
 		this.setTerrain(data.get("terrain").getAsString());
 		this.setSprite(data.get("sprite").getAsString());
 		this.setAccessible(data.get("accessible").getAsBoolean());
+		this.setEncounterRate(data.get("encounter_rate").getAsFloat());
 
 		if (data.has("pool")) {
 			this.setPokemonPool(data.get("pool").getAsInt());

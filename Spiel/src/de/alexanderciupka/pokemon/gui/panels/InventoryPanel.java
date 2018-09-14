@@ -18,10 +18,10 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
 
-import de.alexanderciupka.pokemon.characters.Player;
+import de.alexanderciupka.pokemon.characters.types.Player;
+import de.alexanderciupka.pokemon.constants.Items;
 import de.alexanderciupka.pokemon.fighting.FightOption;
 import de.alexanderciupka.pokemon.map.GameController;
-import de.alexanderciupka.pokemon.pokemon.Item;
 
 public class InventoryPanel extends JPanel {
 
@@ -43,7 +43,7 @@ public class InventoryPanel extends JPanel {
 	private static final Color LABEL_BACKGROUND = new Color(-1118482);
 	private static final Color HOVER_BACKGROUND = LABEL_BACKGROUND.darker();
 
-	private HashMap<Item, ImageIcon> itemSprites;
+	private HashMap<Integer, ImageIcon> itemSprites;
 
 	public InventoryPanel() {
 
@@ -147,8 +147,8 @@ public class InventoryPanel extends JPanel {
 	}
 
 	private void readSprites() {
-		this.itemSprites = new HashMap<>(Item.values().length);
-		for (Item i : Item.values()) {
+		this.itemSprites = new HashMap<>();
+		for (int i = 1; i < 682; i++) {
 			try {
 				this.itemSprites.put(i, new ImageIcon(this.gController.getRouteAnalyzer().getItemImage(i)));
 			} catch (Exception e) {
@@ -167,7 +167,7 @@ public class InventoryPanel extends JPanel {
 		if (this.currentPlayer != null) {
 			GridBagConstraints gbc = new GridBagConstraints();
 
-			HashMap<Item, Integer> currentItems = this.currentPlayer.getItems();
+			HashMap<Integer, Integer> currentItems = this.currentPlayer.getItems();
 
 			this.panel.removeAll();
 			this.itemNameLabels.clear();
@@ -175,15 +175,15 @@ public class InventoryPanel extends JPanel {
 
 			int row = 0;
 
-			for (Item i : currentItems.keySet()) {
+			for (Integer i : currentItems.keySet()) {
 				int amount = currentItems.get(i);
-				if (i != Item.NONE && amount > 0) {
+				if (amount > 0) {
 					while (amount > 0) {
-						JLabel itemL = new JLabel(i.getName());
+						JLabel itemL = new JLabel(String.valueOf(this.gController.getInformation().getItemData(Items.ITEM_NAME, i)));
 						itemL.setOpaque(true);
 						itemL.setFont(FONT);
 
-						itemL.setName(String.valueOf(row));
+						itemL.setName(String.valueOf(i));
 
 						gbc.gridx = 0;
 						gbc.gridy = row;
@@ -205,10 +205,10 @@ public class InventoryPanel extends JPanel {
 							public void mouseEntered(MouseEvent e) {
 								JLabel source = (JLabel) e.getComponent();
 								source.setBackground(HOVER_BACKGROUND);
-								Item item = Item.getItemByName(source.getText());
+								Integer item = Integer.parseInt(source.getName());
 								InventoryPanel.this.descriptionL.setFont(FONT.deriveFont(20f));
 								InventoryPanel.this.descriptionL.setText(InventoryPanel.this.formatText(
-										InventoryPanel.this.descriptionL.getWidth(), item.getDescription(),
+										InventoryPanel.this.descriptionL.getWidth(), GameController.getInstance().getInformation().getItemData(Items.ITEM_DESC, item).toString(),
 										InventoryPanel.this.getFontMetrics(InventoryPanel.this.descriptionL.getFont()),
 										5));
 								InventoryPanel.this.spriteL.setIcon(InventoryPanel.this.itemSprites.get(item));
@@ -219,24 +219,25 @@ public class InventoryPanel extends JPanel {
 								new Thread(new Runnable() {
 									@Override
 									public void run() {
-										JLabel source = (JLabel) e.getComponent();
-										Item i = Item.getItemByName(source.getText());
-										if (i.isUsableOnPokemon()) {
-											InventoryPanel.this.gController.getGameFrame().getPokemonPanel().update(i);
-											InventoryPanel.this.gController.getGameFrame().setCurrentPanel(
-													InventoryPanel.this.gController.getGameFrame().getPokemonPanel());
-										} else {
-											if (InventoryPanel.this.currentPlayer.useItem(i)) {
-												if (InventoryPanel.this.gController.isFighting()) {
-													InventoryPanel.this.gController.getFight()
-															.setCurrentFightOption(FightOption.FIGHT);
-												} else {
-													InventoryPanel.this.gController.getGameFrame()
-															.setCurrentPanel(null);
-												}
-											}
-										}
-										source.setBackground(LABEL_BACKGROUND);
+										//TODO: Item usage
+//										JLabel source = (JLabel) e.getComponent();
+//										Item i = Item.getItemByName(source.getText());
+//										if (i.isUsableOnPokemon()) {
+//											InventoryPanel.this.gController.getGameFrame().getPokemonPanel().update(i);
+//											InventoryPanel.this.gController.getGameFrame().setCurrentPanel(
+//													InventoryPanel.this.gController.getGameFrame().getPokemonPanel());
+//										} else {
+//											if (InventoryPanel.this.currentPlayer.useItem(i)) {
+//												if (InventoryPanel.this.gController.isFighting()) {
+//													InventoryPanel.this.gController.getFight()
+//															.setCurrentFightOption(FightOption.FIGHT);
+//												} else {
+//													InventoryPanel.this.gController.getGameFrame()
+//															.setCurrentPanel(null);
+//												}
+//											}
+//										}
+//										source.setBackground(LABEL_BACKGROUND);
 									}
 								}).start();
 							}

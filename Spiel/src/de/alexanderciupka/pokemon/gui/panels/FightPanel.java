@@ -6,35 +6,53 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
-import de.alexanderciupka.hoverbutton.Main;
+import de.alexanderciupka.pokemon.characters.Team;
+import de.alexanderciupka.pokemon.characters.types.Player;
+import de.alexanderciupka.pokemon.constants.Abilities;
+import de.alexanderciupka.pokemon.constants.Items;
+import de.alexanderciupka.pokemon.constants.Moves;
+import de.alexanderciupka.pokemon.fighting.Attack;
 import de.alexanderciupka.pokemon.fighting.FightOption;
 import de.alexanderciupka.pokemon.fighting.Fighting;
+import de.alexanderciupka.pokemon.fighting.Weather;
 import de.alexanderciupka.pokemon.gui.After;
-import de.alexanderciupka.pokemon.gui.AnimationLabel;
+import de.alexanderciupka.pokemon.gui.HPBar;
 import de.alexanderciupka.pokemon.gui.MoveButton;
 import de.alexanderciupka.pokemon.gui.PokeballLabel;
 import de.alexanderciupka.pokemon.gui.PokemonLabel;
 import de.alexanderciupka.pokemon.gui.StatLabel;
 import de.alexanderciupka.pokemon.gui.TextLabel;
+import de.alexanderciupka.pokemon.gui.overlay.FogOverlay;
+import de.alexanderciupka.pokemon.gui.overlay.FogType;
+import de.alexanderciupka.pokemon.gui.overlay.IAnimated;
+import de.alexanderciupka.pokemon.gui.overlay.Overlay;
+import de.alexanderciupka.pokemon.gui.overlay.RainOverlay;
+import de.alexanderciupka.pokemon.gui.overlay.RainType;
+import de.alexanderciupka.pokemon.gui.overlay.SandstormOverlay;
+import de.alexanderciupka.pokemon.gui.overlay.SnowOverlay;
+import de.alexanderciupka.pokemon.gui.overlay.SnowType;
+import de.alexanderciupka.pokemon.main.Main;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.map.RouteType;
 import de.alexanderciupka.pokemon.menu.SoundController;
 import de.alexanderciupka.pokemon.painting.Painting;
-import de.alexanderciupka.pokemon.pokemon.Item;
+import de.alexanderciupka.pokemon.pokemon.Ailment;
 import de.alexanderciupka.pokemon.pokemon.Move;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
 import de.alexanderciupka.pokemon.pokemon.Stat;
+import de.alexanderciupka.pokemon.pokemon.Type;
 
 @SuppressWarnings("serial")
 public class FightPanel extends JPanel {
@@ -65,6 +83,7 @@ public class FightPanel extends JPanel {
 	private JButton back;
 	private JButton[] menu;
 	private MoveButton[] moves;
+	private JButton[] targets;
 
 	// private StatLabel leftPlayerStats;
 	// private StatLabel rightPlayerStats;
@@ -76,7 +95,6 @@ public class FightPanel extends JPanel {
 	// private JPanel playerStatPanel;
 	// private JPanel enemyStatPanel;
 	private boolean enemyAttack;
-	private boolean attacked;
 	private boolean throwPokeball;
 	private TextLabel textLabel;
 	private PokeballLabel pokeball;
@@ -98,18 +116,61 @@ public class FightPanel extends JPanel {
 	private Image coloredPokeball;
 	private Image grayPokeball;
 
-	public static HashMap<Item, BufferedImage> pokeballImages;
-	public static HashMap<Item, BufferedImage> openPokeballImages;
+	private JLabel weather;
+	private Overlay weatherOverlay;
+
+	public static HashMap<Integer, BufferedImage> pokeballImages;
+	public static HashMap<Integer, BufferedImage> openPokeballImages;
 
 	private final static Font FONT = new Font(Font.MONOSPACED, Font.BOLD, 18);
 
+	private Attack currentAttack;
+
+	private final ActionListener MOVE_BACK = new ActionListener() {
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			showMenu();
+		}
+	};
+
+	private final ActionListener TARGET_BACK = new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			showMoves();
+		};
+	};
+	
+	private final Thread weatherThread = new Thread(new Runnable() {
+		@Override
+		public void run() {
+			while(GameController.getInstance().isFighting()) {
+				while(weather == null) {
+					Thread.yield();
+				}
+				if(weatherOverlay != null && weatherOverlay.getOverlay() != null) {
+					weather.setIcon(new ImageIcon(weatherOverlay.getOverlay()));
+				} else if(weatherOverlay == null) {
+					weather.setIcon(null);
+				}
+				try {
+					Thread.sleep((long) (1000 / Main.FPS));
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	});
+
 	public FightPanel() {
 		super();
+
 		this.setBorder(new EmptyBorder(5, 5, 5, 5));
 		this.setLayout(null);
 		this.gController = GameController.getInstance();
 		this.menu = new JButton[4];
 		this.moves = new MoveButton[4];
+		this.targets = new JButton[4];
 		this.pokeball = new PokeballLabel();
 		this.textLabel = new TextLabel();
 		this.textLabel.setBounds(5, 480, 600, 110);
@@ -120,13 +181,19 @@ public class FightPanel extends JPanel {
 		this.textLabel.setAutoMove(true);
 		this.setBounds(0, 0, 630, 630);
 
+		this.weather = new JLabel();
+		this.weather.setBounds(0, 0, 630, 420);
+		this.weather.setOpaque(false);
+		
+		this.add(this.weather);
+
 		this.pokemons = new PokemonLabel[4];
 		this.stats = new StatLabel[4];
 
 		for (int i : new int[] { Fighting.LEFT_OPPONENT, Fighting.LEFT_PLAYER, Fighting.RIGHT_OPPONENT,
 				Fighting.RIGHT_PLAYER }) {
-			this.pokemons[i - 1] = new PokemonLabel();
-			this.stats[i - 1] = new StatLabel();
+			this.pokemons[i] = new PokemonLabel();
+			this.stats[i] = new StatLabel();
 		}
 
 		this.background = new JLabel(new ImageIcon(this.gController.getMainCharacter().getCurrentRoute()
@@ -151,8 +218,15 @@ public class FightPanel extends JPanel {
 			MoveButton m = new MoveButton(true);
 			m.setVisible(false);
 
+			JButton target = new JButton();
+			target.setBackground(Color.WHITE);
+			target.setVisible(false);
+			target.setFocusable(false);
+			target.setFont(FONT);
+
 			this.menu[i] = b;
 			this.moves[i] = m;
+			this.targets[i] = target;
 		}
 
 		this.back = new JButton("Zurück");
@@ -160,20 +234,87 @@ public class FightPanel extends JPanel {
 		this.back.setVisible(false);
 		this.back.setFocusable(false);
 
-		this.playerPokemons = new JLabel[6];
-		this.enemyPokemons = new JLabel[6];
-
 		try {
-			double ratio = this.gController.getRouteAnalyzer().getPokeballImage(Item.POKEBALL).getHeight()
-					/ (this.gController.getRouteAnalyzer().getPokeballImage(Item.POKEBALL).getWidth() * 1.0);
-			this.coloredPokeball = this.gController.getRouteAnalyzer().getPokeballImage(Item.POKEBALL)
-					.getScaledInstance(15, (int) (15 * ratio), Image.SCALE_SMOOTH);
-			this.grayPokeball = ImageIO
-					.read(new File(this.getClass().getResource("/pokeballs/gray_pokeball.png").getFile()))
-					.getScaledInstance(15, (int) (15 * ratio), Image.SCALE_SMOOTH);
+			this.coloredPokeball = ImageIO.read(this.getClass().getResourceAsStream("/pokeballs/pokeball.png"))
+					.getScaledInstance(15, 30, Image.SCALE_SMOOTH);
+			this.grayPokeball = ImageIO.read(this.getClass().getResourceAsStream("/pokeballs/gray_pokeball.png"))
+					.getScaledInstance(15, 30, Image.SCALE_SMOOTH);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
+		if (pokeballImages == null || openPokeballImages == null) {
+			pokeballImages = new HashMap<>();
+			openPokeballImages = new HashMap<>();
+			for (int i = 1; i < 682; i++) {
+				try {
+					Object data = this.gController.getInformation().getItemData(Items.ITEM_POCKET, i);
+					if (data != null && data.equals(Items.POKEBALLS)) {
+						Image img = this.gController.getRouteAnalyzer().getItemImage(i);
+						if (img != null) {
+							Image openImg = ImageIO
+									.read(this.getClass().getResourceAsStream("/pokeballs/" + i + "_open.png"));
+							double ratio = img.getHeight(null) / (img.getWidth(null) * 1.0);
+							pokeballImages.put(i, Painting.toBufferedImage(
+									img.getScaledInstance(20, (int) (20 * ratio), Image.SCALE_SMOOTH)));
+							openPokeballImages.put(i, Painting.toBufferedImage(
+									openImg.getScaledInstance(20, (int) (20 * ratio), Image.SCALE_SMOOTH)));
+						}
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+		this.background.setBounds(0, 0, 630, 420);
+
+		this.menu[0].setBounds(65, 450, 500, 100);
+		this.menu[1].setBounds(431, 575, 175, 50);
+		this.menu[2].setBounds(25, 575, 175, 50);
+		this.menu[3].setBounds(228, 580, 175, 50);
+
+		this.moves[0].setBounds(25, 440, 280, 50);
+		this.moves[1].setBounds(325, 440, 280, 50);
+		this.moves[2].setBounds(25, 500, 280, 50);
+		this.moves[3].setBounds(325, 500, 280, 50);
+
+		this.targets[Fighting.LEFT_OPPONENT].setBounds(25, 440, 280, 50);
+		this.targets[Fighting.RIGHT_OPPONENT].setBounds(325, 440, 280, 50);
+		this.targets[Fighting.LEFT_PLAYER].setBounds(25, 500, 280, 50);
+		this.targets[Fighting.RIGHT_PLAYER].setBounds(325, 500, 280, 50);
+
+		this.back.setBounds(50, 570, 530, 60);
+
+		this.addActionListener();
+		this.addComponents();
+
+		if (this.gController.getFight().isDouble()) {
+			setUpDouble();
+		} else {
+			setUpSingle();
+		}
+	}
+
+	public void setUpSingle() {
+		this.pokemons[Fighting.LEFT_PLAYER].setBounds(50, 260, 160, 160);
+		this.pokemons[Fighting.LEFT_PLAYER].setVisible(true);
+		this.pokemons[Fighting.RIGHT_PLAYER].setVisible(false);
+
+		this.pokemons[Fighting.LEFT_OPPONENT].setBounds(395, 100, 160, 160);
+		this.pokemons[Fighting.LEFT_OPPONENT].setVisible(true);
+		this.pokemons[Fighting.RIGHT_OPPONENT].setVisible(false);
+
+		this.stats[Fighting.LEFT_PLAYER].setBounds(375, 275, 180, 40);
+		this.stats[Fighting.LEFT_PLAYER].setVisible(true);
+		this.stats[Fighting.RIGHT_PLAYER].setVisible(false);
+
+		this.stats[Fighting.LEFT_OPPONENT].setBounds(45, 150, 180, 40);
+		this.stats[Fighting.LEFT_OPPONENT].setVisible(true);
+		this.stats[Fighting.RIGHT_OPPONENT].setVisible(false);
+
+		this.playerPokemons = new JLabel[6];
+		this.enemyPokemons = new JLabel[6];
 
 		for (int i = 0; i < this.playerPokemons.length; i++) {
 			JLabel currentPlayer = new JLabel();
@@ -185,8 +326,8 @@ public class FightPanel extends JPanel {
 			currentPlayer.setOpaque(false);
 			currentEnemy.setOpaque(false);
 
-			currentPlayer.setBounds(375 + (16 * i), 257, 15, 15);
-			currentEnemy.setBounds(45 + (16 * i), 132, 15, 15);
+			currentPlayer.setBounds(375 + (16 * (i % 6)), 304, 15, 15);
+			currentEnemy.setBounds(45 + (16 * (i % 6)), 159, 15, 15);
 
 			this.playerPokemons[i] = currentPlayer;
 			this.enemyPokemons[i] = currentEnemy;
@@ -194,146 +335,377 @@ public class FightPanel extends JPanel {
 			this.add(currentPlayer);
 			this.add(currentEnemy);
 		}
+	}
 
-		if (pokeballImages == null || openPokeballImages == null) {
-			pokeballImages = new HashMap<>();
-			openPokeballImages = new HashMap<>();
-			for (Item i : Item.values()) {
-				try {
-					Image img = this.gController.getRouteAnalyzer().getPokeballImage(i);
-					if (img != null) {
-						Image openImg = ImageIO.read(new File(Main.class
-								.getResource("/pokeballs/" + i.name().toLowerCase() + "_open.png").getFile()));
-						double ratio = img.getHeight(null) / (img.getWidth(null) * 1.0);
-						pokeballImages.put(i, Painting
-								.toBufferedImage(img.getScaledInstance(20, (int) (20 * ratio), Image.SCALE_SMOOTH)));
-						openPokeballImages.put(i, Painting.toBufferedImage(
-								openImg.getScaledInstance(20, (int) (20 * ratio), Image.SCALE_SMOOTH)));
+	public void setUpDouble() {
+		this.pokemons[Fighting.LEFT_PLAYER].setBounds(0, 260, 160, 160);
+		this.pokemons[Fighting.LEFT_PLAYER].setVisible(true);
+		this.pokemons[Fighting.RIGHT_PLAYER].setBounds(100, 260, 160, 160);
+		this.pokemons[Fighting.RIGHT_PLAYER].setVisible(true);
+
+		this.pokemons[Fighting.LEFT_OPPONENT].setBounds(345, 100, 160, 160);
+		this.pokemons[Fighting.LEFT_OPPONENT].setVisible(true);
+		this.pokemons[Fighting.RIGHT_OPPONENT].setBounds(435, 100, 160, 160);
+		this.pokemons[Fighting.RIGHT_OPPONENT].setVisible(true);
+
+		this.stats[Fighting.LEFT_PLAYER].setBounds(375, 255, 180, 40);
+		this.stats[Fighting.LEFT_PLAYER].setVisible(true);
+		this.stats[Fighting.RIGHT_PLAYER].setBounds(375, 325, 180, 40);
+		this.stats[Fighting.RIGHT_PLAYER].setVisible(true);
+
+		this.stats[Fighting.LEFT_OPPONENT].setBounds(45, 110, 180, 40);
+		this.stats[Fighting.LEFT_OPPONENT].setVisible(true);
+		this.stats[Fighting.RIGHT_OPPONENT].setBounds(45, 180, 180, 40);
+		this.stats[Fighting.RIGHT_OPPONENT].setVisible(true);
+
+		if (this.gController.getFight().getCharacter(Fighting.LEFT_PLAYER)
+				.equals(this.gController.getFight().getCharacter(Fighting.RIGHT_PLAYER))) {
+			this.playerPokemons = new JLabel[6];
+			for (int i = 0; i < this.playerPokemons.length; i++) {
+				JLabel currentPlayer = new JLabel();
+				currentPlayer.setVisible(false);
+				currentPlayer.setOpaque(false);
+				currentPlayer.setBounds(375 + (16 * (i % 6)), 304, 15, 15);
+				this.playerPokemons[i] = currentPlayer;
+				this.add(currentPlayer);
+			}
+		} else {
+			this.playerPokemons = new JLabel[12];
+			for (int i = 0; i < this.playerPokemons.length; i++) {
+				JLabel currentPlayer = new JLabel();
+				currentPlayer.setVisible(false);
+				currentPlayer.setOpaque(false);
+				currentPlayer.setBounds(375 + (16 * (i % 6)), 234 + (70 * (i / 6)), 15, 15);
+				this.playerPokemons[i] = currentPlayer;
+				this.add(currentPlayer);
+			}
+		}
+
+		if (this.gController.getFight().getCharacter(Fighting.LEFT_OPPONENT) != null
+				&& this.gController.getFight().getCharacter(Fighting.LEFT_OPPONENT)
+						.equals(this.gController.getFight().getCharacter(Fighting.RIGHT_OPPONENT))) {
+			this.enemyPokemons = new JLabel[6];
+
+			for (int i = 0; i < this.enemyPokemons.length; i++) {
+				JLabel currentEnemy = new JLabel();
+				currentEnemy.setVisible(false);
+				currentEnemy.setOpaque(false);
+				currentEnemy.setBounds(45 + (16 * (i % 6)), 159, 15, 15);
+				this.enemyPokemons[i] = currentEnemy;
+				this.add(currentEnemy);
+			}
+		} else {
+			this.enemyPokemons = new JLabel[12];
+
+			for (int i = 0; i < this.enemyPokemons.length; i++) {
+				JLabel currentEnemy = new JLabel();
+				currentEnemy.setVisible(false);
+				currentEnemy.setOpaque(false);
+				currentEnemy.setBounds(45 + (16 * (i % 6)), 89 + (70 * (i / 6)), 15, 15);
+				this.enemyPokemons[i] = currentEnemy;
+				this.add(currentEnemy);
+			}
+		}
+	}
+
+	public void updateFight() {
+		Fighting fight = this.gController.getFight();
+		ArrayList<Integer> newPokemons = new ArrayList<>();
+		for (int i : new int[] { Fighting.LEFT_PLAYER, Fighting.RIGHT_PLAYER, Fighting.LEFT_OPPONENT,
+				Fighting.RIGHT_OPPONENT }) {
+			if ((fight.isDouble() || (i == Fighting.LEFT_OPPONENT || i == Fighting.LEFT_PLAYER))
+					&& (this.pokemons[i].getPokemon() == null ? fight.getPokemon(i) != null
+							: !this.pokemons[i].getPokemon().equals(fight.getPokemon(i)))) {
+				this.pokemons[i].setVisible(false);
+				this.pokemons[i].setPokemon(fight.getPokemon(i));
+				if (fight.getPokemon(i) != null) {
+					if (fight.isPlayer(i)) {
+						this.addText("Los " + fight.getPokemon(i).getName() + "!");
+					} else {
+						if (fight.getCharacter(i) != null) {
+							this.addText(fight.getCharacter(i).getName() + " setzt " + fight.getPokemon(i).getName()
+									+ " ein!");
+						} else {
+							this.addText("Ein wildes " + fight.getPokemon(i).getName() + " erscheint!");
+						}
 					}
-				} catch (IOException e) {
-					e.printStackTrace();
+					this.textLabel.waitText();
+					this.pokemons[i].setVisible(fight.isVisible(fight.getPokemon(i)));
+					SoundController.getInstance().playBattlecry(fight.getPokemon(i).getId());
+					newPokemons.add(i);
+				}
+			}
+			this.pokemons[i].setVisible(fight.isVisible(fight.getPokemon(i)));
+		}
+		Pokemon[] speed = gController.getFight().getSpeedOrder();
+		for (Pokemon p : speed) {
+			if (p != null) {
+				for (int i : newPokemons) {
+					if (gController.getFight().getIndex(p) == i) {
+						switch (p.getAbility().getId()) {
+						case Abilities.DÜRRE:
+							this.addText(gController.getFight().getField().setWeather(Weather.SUN, p));
+							break;
+						case Abilities.NIESEL:
+							this.addText(gController.getFight().getField().setWeather(Weather.RAIN, p));
+							break;
+						case Abilities.SANDSTURM:
+							this.addText(gController.getFight().getField().setWeather(Weather.SANDSTORM, p));
+							break;
+						case Abilities.HAGELALARM:
+							this.addText(gController.getFight().getField().setWeather(Weather.HAIL, p));
+							break;
+						case Abilities.BEDROHER:
+							for (int j : new int[] { Fighting.LEFT_OPPONENT, Fighting.LEFT_PLAYER,
+									Fighting.RIGHT_OPPONENT, Fighting.RIGHT_PLAYER }) {
+								if (fight.getPokemon(j) != null && fight.isPlayer(j) != fight.isPlayer(i)) {
+									fight.getPokemon(j).getStats().decreaseStat(Stat.ATTACK, 1);
+								}
+							}
+							break;
+						case Abilities.FÄHRTE:
+							if (fight.isPlayer(i)) {
+								if (fight.getPokemon(Fighting.LEFT_OPPONENT) != null) {
+									fight.getPokemon(i)
+											.setFightingAbility(fight.getPokemon(Fighting.LEFT_OPPONENT).getAbility());
+								} else {
+									fight.getPokemon(i)
+											.setFightingAbility(fight.getPokemon(Fighting.RIGHT_OPPONENT).getAbility());
+								}
+							} else {
+								if (fight.getPokemon(Fighting.LEFT_PLAYER) != null) {
+									fight.getPokemon(i)
+											.setFightingAbility(fight.getPokemon(Fighting.LEFT_PLAYER).getAbility());
+								} else {
+									fight.getPokemon(i)
+											.setFightingAbility(fight.getPokemon(Fighting.RIGHT_PLAYER).getAbility());
+								}
+							}
+							this.addText(fight.getPokemon(i).getName() + " übernimmt die Fähigkeit "
+									+ fight.getPokemon(i).getAbility().getName());
+							break;
+						case Abilities.DOWNLOAD:
+							Pokemon target = null;
+							if (fight.isPlayer(i)) {
+								if (fight.getPokemon(Fighting.LEFT_OPPONENT) != null) {
+									target = fight.getPokemon(Fighting.LEFT_OPPONENT);
+								} else {
+									target = fight.getPokemon(Fighting.RIGHT_OPPONENT);
+								}
+							} else {
+								if (fight.getPokemon(Fighting.LEFT_PLAYER) != null) {
+									target = fight.getPokemon(Fighting.LEFT_PLAYER);
+								} else {
+									target = fight.getPokemon(Fighting.RIGHT_PLAYER);
+								}
+							}
+							if (target.getStats().getStats().get(Stat.DEFENSE) < target.getStats().getStats()
+									.get(Stat.SPECIALDEFENSE)) {
+								this.addText(
+										"Download von " + fight.getPokemon(i).getName() + " erhöht seinen Angriff!");
+								fight.getPokemon(i).getStats().increaseStat(Stat.ATTACK, 1);
+							} else {
+								this.addText("Download von " + fight.getPokemon(i).getName()
+										+ " erhöht seinen Spezialangriff!");
+								fight.getPokemon(i).getStats().increaseStat(Stat.SPECIALATTACK, 1);
+							}
+							break;
+						case Abilities.VORAHNUNG:
+							boolean scared = false;
+							for (int j = 0; j < 4 && !scared; j++) {
+								Pokemon check = fight.getPokemon(j);
+								if (check != null && fight.isPlayer(check) != fight.isPlayer(i)) {
+									for (Move m : check.getMoves()) {
+										if (m != null) {
+											if (Type.getEffectiveness(m.getMoveType(check),
+													fight.getPokemon(i)) > Type.DEFAULT
+													|| m.getCategory().contains("ohko")) {
+												scared = true;
+												break;
+											}
+										}
+									}
+								}
+							}
+							if (scared) {
+								this.addText(fight.getPokemon(i).getName() + " erschaudert aufgrund von Vorahnung!");
+							}
+							break;
+						case Abilities.ERZWINGER:
+							this.addText(fight.getPokemon(i).getName() + " übt Druck auf die Pokemon aus!");
+							break;
+						case Abilities.ÜBERBRÜCKUNG:
+							this.addText(fight.getPokemon(i).getName()
+									+ " gelingt es, gegnerische Fähigkeiten zu überbrücken!");
+							break;
+						case Abilities.TERAVOLT:
+							this.addText(fight.getPokemon(i).getName() + " strahlt eine knisternde Aura aus!");
+							break;
+						case Abilities.TURBOBRAND:
+							this.addText(fight.getPokemon(i).getName() + " strahlt eine lodernde Aura aus!");
+							break;
+						case Abilities.VORWARNUNG:
+							Move max = null;
+							int maxPower = -1;
+							Pokemon owner = null;
+							for (int j = 0; j < 4; j++) {
+								Pokemon check = fight.getPokemon(j);
+								if (check != null && fight.isPlayer(check) != fight.isPlayer(i)) {
+									for (Move m : check.getMoves()) {
+										if (m != null) {
+											int power = m.getPower();
+											if (m.getCategory().contains("ohko")) {
+												power = 160;
+											}
+											switch (m.getId()) {
+											case Moves.ERUPTION:
+											case Moves.FONTRÄNEN:
+												power = 150;
+												break;
+											case Moves.KONTER:
+											case Moves.SPIEGELCAPE:
+											case Moves.METALLSTOSS:
+												power = 120;
+												break;
+											case Moves.AUSWRINGEN:
+											case Moves.BEERENKRÄFTE:
+											case Moves.DRACHENWUT:
+											case Moves.DRESCHFLEGEL:
+											case Moves.FRUSTRATION:
+											case Moves.FUSSKICK:
+											case Moves.GEGENSCHLAG:
+											case Moves.GEOWURF:
+											case Moves.GYROBALL:
+											case Moves.KRAFTRESERVE:
+											case Moves.NACHTNEBEL:
+											case Moves.NOTSITUATION:
+											case Moves.PSYWELLE:
+											case Moves.RÜCKKEHR:
+											case Moves.STRAUCHLER:
+											case Moves.TRUMPFKARTE:
+											case Moves.ULTRASCHALL:
+											case Moves.QUETSCHGRIFF:
+												power = 80;
+												break;
+											}
+											if (max == null || (power > maxPower)) {
+												max = m;
+												maxPower = power;
+												owner = check;
+											}
+										}
+									}
+								}
+							}
+							this.addText(max.getName() + " von " + owner.getName() + " wurde durschaut!");
+							break;
+						}
+					}
+					this.updateFight();
 				}
 			}
 		}
 
-		this.background.setBounds(0, 0, 630, 420);
 
-		// this.enemyPokemon.setBounds();
-		// this.enemyStatPanel.setBounds();
-		// this.ownPokemon.setBounds();
-		// this.playerStatPanel.setBounds();
-		//
-		// this.enemyAnimations.setBounds(this.enemyPokemon.getBounds());
-		// this.ownAnimations.setBounds(this.ownPokemon.getBounds());
-		//
-		// this.enemyStats.setLocation(0, 0);
-		// this.enemyStats.setSize(this.enemyStatPanel.getSize());
-		//
-		// this.playerStats.setLocation(0, 0);
-		// this.playerStats.setSize(this.playerStatPanel.getSize());
-		//
-		// this.attack.setFont(FONT);
-		// this.bag.setFont(FONT);
-		// this.pokemon.setFont(FONT);
-		// this.escape.setFont(FONT);
-		this.menu[0].setBounds(65, 450, 500, 100);
-		this.menu[1].setBounds(431, 575, 175, 50);
-		this.menu[2].setBounds(25, 575, 175, 50);
-		this.menu[3].setBounds(228, 580, 175, 50);
-		//
-		// this.firstMove.setFont(FONT);
-		// this.secondMove.setFont(FONT);
-		// this.thirdMove.setFont(FONT);
-		// this.fourthMove.setFont(FONT);
-		//
-		this.moves[0].setBounds(25, 440, 280, 50);
-		this.moves[1].setBounds(325, 440, 280, 50);
-		this.moves[2].setBounds(25, 500, 280, 50);
-		this.moves[3].setBounds(325, 500, 280, 50);
+		if(!weatherThread.isAlive()) {
+			weatherThread.start();
+		}
+		try {
+			switch (this.gController.getFight().getField().getWeather()) {
+			case FOG:
+				if(!(weatherOverlay instanceof FogOverlay)) {
+					if(weatherOverlay != null) {
+						weatherOverlay.onRemove();
+					}
+					weatherOverlay = new FogOverlay(null, weather.getSize(), FogType.MIST);
+				}
+				break;
+			case HAIL:
+				if(!(weatherOverlay instanceof SnowOverlay)) {
+					if(weatherOverlay != null) {
+						weatherOverlay.onRemove();
+					}
+					this.weatherOverlay = new SnowOverlay(null, this.weather.getSize(), SnowType.BLIZZARD);
+					((IAnimated) weatherOverlay).startAnimation();
+				}
+				break;
+			case NONE:
+				if(!(weatherOverlay == null)) {
+					weatherOverlay.onRemove();
+				}
+				weatherOverlay = null;
+				break;
+			case RAIN:
+				if(!(weatherOverlay instanceof RainOverlay)) {
+					if(weatherOverlay != null) {
+						weatherOverlay.onRemove();
+					}
+					this.weatherOverlay = new RainOverlay(null, this.weather.getSize(), RainType.HEAVY);
+					((IAnimated) weatherOverlay).startAnimation();
+				}
+				break;
+			case SANDSTORM:
+				if(!(weatherOverlay instanceof SandstormOverlay)) {
+					if(weatherOverlay != null) {
+						weatherOverlay.onRemove();
+					}
+					this.weatherOverlay = new SandstormOverlay(null, this.weather.getSize());
+					((IAnimated) weatherOverlay).startAnimation();
+				}
+				break;
+			case SUN:
+				if(weatherOverlay != null) {
+					weatherOverlay.onRemove();
+				}
+				weatherOverlay = null;
+				break;
+			default:
+				break;
 
-		this.back.setBounds(50, 570, 530, 60);
-
-		this.addActionListener();
-		this.addComponents();
-	}
-
-	public void setUpSingle() {
-		this.pokemons[Fighting.LEFT_PLAYER - 1].setBounds(50, 260, 160, 160);
-		this.playerPokemons[Fighting.LEFT_PLAYER - 1].setVisible(true);
-		this.playerPokemons[Fighting.RIGHT_PLAYER - 1].setVisible(false);
-
-		this.enemyPokemons[Fighting.LEFT_OPPONENT - 1].setBounds(395, 100, 160, 160);
-		this.enemyPokemons[Fighting.LEFT_OPPONENT - 1].setVisible(true);
-		this.enemyPokemons[Fighting.RIGHT_OPPONENT - 1].setVisible(false);
-
-		this.stats[Fighting.LEFT_PLAYER - 1].setBounds(375, 275, 180, 40);
-		this.stats[Fighting.LEFT_PLAYER - 1].setVisible(true);
-		this.stats[Fighting.RIGHT_PLAYER - 1].setVisible(false);
-
-		this.stats[Fighting.LEFT_OPPONENT - 1].setBounds(45, 150, 180, 40);
-		this.stats[Fighting.LEFT_OPPONENT - 1].setVisible(true);
-		this.stats[Fighting.RIGHT_OPPONENT - 1].setVisible(false);
-		this.updateFight();
-	}
-
-	public void setUpDouble() {
-		this.pokemons[Fighting.LEFT_PLAYER - 1].setBounds(0, 260, 160, 160);
-		this.pokemons[Fighting.LEFT_PLAYER - 1].setVisible(true);
-		this.pokemons[Fighting.LEFT_PLAYER - 1].setBounds(100, 260, 160, 160);
-		this.pokemons[Fighting.RIGHT_PLAYER - 1].setVisible(true);
-
-		this.pokemons[Fighting.LEFT_OPPONENT - 1].setBounds(345, 100, 160, 160);
-		this.pokemons[Fighting.LEFT_OPPONENT - 1].setVisible(true);
-		this.pokemons[Fighting.RIGHT_OPPONENT - 1].setBounds(435, 100, 160, 160);
-		this.pokemons[Fighting.RIGHT_OPPONENT - 1].setVisible(true);
-
-		this.stats[Fighting.LEFT_PLAYER - 1].setBounds(375, 255, 180, 40);
-		this.stats[Fighting.LEFT_PLAYER - 1].setVisible(true);
-		this.stats[Fighting.RIGHT_PLAYER - 1].setBounds(375, 295, 180, 40);
-		this.stats[Fighting.RIGHT_PLAYER - 1].setVisible(true);
-
-		this.stats[Fighting.LEFT_OPPONENT - 1].setBounds(45, 110, 180, 40);
-		this.stats[Fighting.LEFT_OPPONENT - 1].setVisible(true);
-		this.stats[Fighting.RIGHT_OPPONENT - 1].setBounds(45, 190, 180, 40);
-		this.stats[Fighting.RIGHT_OPPONENT - 1].setVisible(true);
-		this.updateFight();
-	}
-
-	public void updateFight() {
-
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		updatePanels();
 	}
 
 	private void addActionListener() {
 		this.menu[0].addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				Fighting fight = gController.getFight();
+
 				FightPanel.this.updateMoves();
-				boolean struggle = true;
+				boolean hasMoves = false;
 				for (MoveButton mb : FightPanel.this.moves) {
 					if (mb.isEnabled()) {
-						struggle = false;
+						hasMoves = true;
 						break;
 					}
 				}
-				if (struggle) {
-					new Thread(new Runnable() {
-						@Override
-						public void run() {
-							FightPanel.this.showText();
-							FightPanel.this.textLabel.setActive();
-							FightPanel.this.gController.getFight().startRound(null,
-									FightPanel.this.enemy.getMove(FightPanel.this.mine));
-							FightPanel.this.updateMoves();
-							FightPanel.this.showMenu();
-						}
-					}).start();
+				if (hasMoves) {
+					showMoves();
 				} else {
-					for (int i = 0; i < FightPanel.this.menu.length; i++) {
-						FightPanel.this.menu[i].setVisible(false);
-						FightPanel.this.moves[i].setVisible(true);
-					}
-					FightPanel.this.back.setVisible(true);
+					int struggleTarget = Main.RNG.nextBoolean() ? Fighting.LEFT_OPPONENT : Fighting.RIGHT_OPPONENT;
+					;
+					// if (fight.isDouble()) {
+					// if (fight.getPokemon(Fighting.LEFT_OPPONENT) != null
+					// && fight.getPokemon(Fighting.RIGHT_OPPONENT) != null) {
+					// struggleTarget =
+					//
+					// } else if (fight.getPokemon(Fighting.LEFT_OPPONENT) !=
+					// null) {
+					// struggleTarget = (Fighting.LEFT_OPPONENT);
+					// } else {
+					// struggleTarget = (Fighting.RIGHT_OPPONENT);
+					// }
+					// } else {
+					// struggleTarget = (Fighting.LEFT_OPPONENT);
+					// }
+					fight.registerAttack(new Attack(fight.getCurrentPokemon(),
+							gController.getInformation().getMoveById(Moves.VERZWEIFLER), struggleTarget));
 				}
+
 			}
 		});
 		this.menu[3].addActionListener(new ActionListener() {
@@ -342,7 +714,7 @@ public class FightPanel extends JPanel {
 				FightPanel.this.gController.escape();
 			}
 		});
-		this.menu[1].addActionListener(new ActionListener() {
+		this.menu[2].addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				FightPanel.this.gController.getFight().setCurrentFightOption(FightOption.POKEMON);
@@ -350,51 +722,123 @@ public class FightPanel extends JPanel {
 				FightPanel.this.enemyAttack = true;
 			}
 		});
-		this.back.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				for (int i = 0; i < FightPanel.this.menu.length; i++) {
-					FightPanel.this.menu[i].setVisible(true);
-					FightPanel.this.moves[i].setVisible(false);
-				}
-				FightPanel.this.back.setVisible(false);
-				FightPanel.this.repaint();
-			}
-		});
 		for (MoveButton move : this.moves) {
 			move.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					FightPanel.this.attacked = true;
-					new Thread(new Runnable() {
-						@Override
-						public void run() {
-							do {
-								FightPanel.this.showText();
-								FightPanel.this.textLabel.setActive();
-								Move playerMove = FightPanel.this.mine
-										.getMoveByName(((JButton) e.getSource()).getName());
-								if (!playerMove.equals(FightPanel.this.gController.getFight()
-										.canUse(FightPanel.this.mine, playerMove))) {
-									FightPanel.this.addText(FightPanel.this.mine.getName() + " kann "
-											+ playerMove.getName() + " nicht einsetzen!");
-									if (FightPanel.this.gController.getFight().canUse(FightPanel.this.mine,
-											playerMove) == null) {
-										FightPanel.this.showMenu();
-										return;
-									}
-								}
-								FightPanel.this.gController.getFight().startRound(playerMove,
-										FightPanel.this.enemy.getMove(FightPanel.this.mine));
-								FightPanel.this.updateMoves();
-								FightPanel.this.showMenu();
-							} while (!FightPanel.this.gController.getFight().canChooseAction());
+					currentAttack = new Attack();
+
+					currentAttack.setSource(gController.getFight().getCurrentPokemon());
+
+					currentAttack.setMove(((MoveButton) e.getSource()).getMove());
+
+					Fighting fight = gController.getFight();
+
+					if (gController.getFight().isDouble()) {
+						switch (currentAttack.getMove().getTarget()) {
+						case ALLY:
+							currentAttack.setTargets((fight.getActivePlayer() == Fighting.LEFT_PLAYER
+									? Fighting.RIGHT_PLAYER : Fighting.LEFT_PLAYER));
+							break;
+						case ALL_OPPONENTS:
+							currentAttack.setTargets((Fighting.LEFT_OPPONENT), (Fighting.RIGHT_OPPONENT));
+							break;
+						case ALL_OTHER_POKEMON:
+							currentAttack.setTargets((Fighting.LEFT_OPPONENT), (Fighting.RIGHT_OPPONENT),
+									(fight.getActivePlayer() == Fighting.LEFT_PLAYER ? Fighting.RIGHT_PLAYER
+											: Fighting.LEFT_PLAYER));
+							break;
+						case ALL_POKEMON:
+							currentAttack.setTargets((Fighting.LEFT_OPPONENT), (Fighting.RIGHT_OPPONENT),
+									(Fighting.LEFT_PLAYER), (Fighting.RIGHT_PLAYER));
+							break;
+						case RANDOM_OPPONENT:
+							if (fight.getPokemon(Fighting.LEFT_OPPONENT) != null
+									&& fight.getPokemon(Fighting.RIGHT_OPPONENT) != null) {
+								currentAttack.setTargets(
+										Main.RNG.nextBoolean() ? (Fighting.LEFT_OPPONENT) : (Fighting.RIGHT_OPPONENT));
+							} else if (fight.getPokemon(Fighting.LEFT_OPPONENT) != null) {
+								currentAttack.setTargets((Fighting.LEFT_OPPONENT));
+							} else {
+								currentAttack.setTargets((Fighting.RIGHT_OPPONENT));
+							}
+							break;
+						case USER:
+							currentAttack.setTargets(fight.getActivePlayer());
+							break;
+						case USER_AND_ALLIES:
+							currentAttack.setTargets((Fighting.LEFT_PLAYER), (Fighting.RIGHT_PLAYER));
+							break;
+						default:
+							FightPanel.this.showTargets();
+							return;
 						}
-					}).start();
+						fight.registerAttack(currentAttack);
+					} else {
+						switch (currentAttack.getMove().getTarget()) {
+						case ALL_OPPONENTS:
+						case ALL_OTHER_POKEMON:
+							currentAttack.setTargets((Fighting.LEFT_OPPONENT));
+							break;
+						case ALL_POKEMON:
+							currentAttack.setTargets((Fighting.LEFT_OPPONENT),
+									gController.getFight().getActivePlayer());
+							break;
+						case RANDOM_OPPONENT:
+						case SELECTED_POKEMON:
+						case SELECTED_POKEMON_ME_FIRST:
+							currentAttack.setTargets((Fighting.LEFT_OPPONENT));
+							break;
+						case USER_AND_ALLIES:
+						case USER_OR_ALLY:
+						case USER:
+							currentAttack.setTargets(gController.getFight().getActivePlayer());
+							break;
+						default:
+							break;
+						}
+						gController.getFight().registerAttack(currentAttack);
+					}
+
+					// new Thread(new Runnable() {
+					// @Override
+					// public void run() {
+					// do {
+					// FightPanel.this.showText();
+					// FightPanel.this.textLabel.setActive();
+					// Move playerMove = ((MoveButton) e.getSource()).getMove();
+					// if
+					// (!playerMove.equals(FightPanel.this.gController.getFight()
+					// .canUse(gController.getFight().getCurrentPokemon(),
+					// playerMove))) {
+					// FightPanel.this.addText(gController.getFight().getCurrentPokemon()
+					// + " kann "
+					// + playerMove.getName() + " nicht einsetzen!");
+					// if (FightPanel.this.gController.getFight()
+					// .canUse(gController.getFight().getCurrentPokemon(),
+					// playerMove) == null) {
+					// FightPanel.this.showMenu();
+					// return;
+					// }
+					// }
+					// } while (!FightPanel.this.gController.getFight()
+					// .canChooseAction(gController.getFight().getCurrentPokemon()));
+					// }
+					// }).start();
 				}
 			});
 		}
-		this.menu[2].addActionListener(new ActionListener() {
+		for (int i = 0; i < targets.length; i++) {
+			targets[i].setName(String.valueOf(i));
+			targets[i].addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					currentAttack.setTargets((int) (Integer.valueOf(((JComponent) e.getSource()).getName())));
+					gController.getFight().registerAttack(currentAttack);
+				}
+			});
+		}
+		this.menu[1].addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				FightPanel.this.gController.getGameFrame().getInventoryPanel()
@@ -405,61 +849,106 @@ public class FightPanel extends JPanel {
 		});
 	}
 
-	public void throwBall(Item ball) {
+	public void startRound() {
+		this.gController.getFight().createAIAttacks();
+		// if (gController.getFight().isDouble()) {
+		// // TODO: Get Opponent attacks
+		// } else {
+		// // TODO: Get Opponent attacks
+		// }
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				FightPanel.this.showText();
+				FightPanel.this.textLabel.setActive();
+				FightPanel.this.gController.getFight().startRound();
+				FightPanel.this.updateMoves();
+				FightPanel.this.showMenu();
+			}
+		}).start();
+	}
+
+	public void throwBall(Integer ball) {
 		if (!this.throwPokeball) {
 			this.throwPokeball = true;
 			new Thread(new Runnable() {
+
+				private boolean caught = false;
+
 				@Override
 				public void run() {
 					FightPanel.this.setComponentZOrder(FightPanel.this.pokeball, 1);
 					FightPanel.this.pokeball.setVisible(true);
 					FightPanel.this.pokeball.setBall(ball);
 					FightPanel.this.pokeball.throwBall();
-					if (FightPanel.this.gController.getFight().canEscape()) {
-						FightPanel.this.enemyPokemon.setVisible(false);
-						FightPanel.this.pokeball.drop();
-						if (FightPanel.this.enemy.isCatched(ball)) {
-							FightPanel.this.pokeball.shake(4);
-							SoundController.getInstance().playSound(SoundController.POKEMON_CAUGHT);
-							FightPanel.this.addText(FightPanel.this.enemy.getName() + " wurde gefangen!");
-							if (!FightPanel.this.gController.getMainCharacter().getTeam()
-									.addPokemon(FightPanel.this.enemy)) {
-								FightPanel.this.addText("Dein Team ist voll!");
-								FightPanel.this
-										.addText(
-												FightPanel.this.enemy.getName() + " wurde auf deinem PC in "
-														+ FightPanel.this.gController.getMainCharacter().getPC()
-																.addPokemon(FightPanel.this.enemy).getName()
-														+ " gespeichert!");
-							}
-							FightPanel.this.gController.endFight();
-							FightPanel.this.pokeball.setVisible(false);
-							return;
+					Fighting fight = FightPanel.this.gController.getFight();
+					if (fight.canEscape() && (!fight.isDouble() || (fight.getPokemon(Fighting.LEFT_OPPONENT) == null
+							|| fight.getPokemon(Fighting.RIGHT_OPPONENT) == null))) {
+						if (fight.getPokemon(Fighting.LEFT_OPPONENT) == null) {
+							catching(FightPanel.this.pokemons[Fighting.RIGHT_OPPONENT],
+									FightPanel.this.gController.getFight().getPokemon(Fighting.RIGHT_OPPONENT));
 						} else {
-							FightPanel.this.pokeball.shake(FightPanel.this.enemy.getShakes(ball));
-							FightPanel.this.enemyPokemon.setVisible(true);
-							new Thread(new Runnable() {
-								@Override
-								public void run() {
-									try {
-										Thread.sleep(150);
-									} catch (InterruptedException e) {
-										e.printStackTrace();
-									}
-									FightPanel.this.pokeball.setVisible(false);
-								}
-							}).start();
-							FightPanel.this.addText(FightPanel.this.enemy.getName() + " hat sich befreit!");
+							catching(FightPanel.this.pokemons[Fighting.LEFT_OPPONENT],
+									FightPanel.this.gController.getFight().getPokemon(Fighting.LEFT_OPPONENT));
+						}
+						if (caught) {
+							return;
 						}
 					} else {
+						FightPanel.this.pokeball.drop();
 						FightPanel.this.pokeball.setVisible(false);
 						FightPanel.this.addText("Sei kein Dieb!");
 					}
-					if (!FightPanel.this.gController.getFight().attack(FightPanel.this.enemy, FightPanel.this.mine)) {
-						FightPanel.this.gController.getFight().setCurrentFightOption(FightOption.POKEMON);
-					}
+					// if (!caught &&
+					// !FightPanel.this.gController.getFight().attack(FightPanel.this.enemy,
+					// FightPanel.this.mine)) {
+					// FightPanel.this.gController.getFight().setCurrentFightOption(FightOption.POKEMON);
+					// }
 					FightPanel.this.throwPokeball = false;
-					FightPanel.this.showMenu();
+					FightPanel.this.gController.getFight().startRound();
+				}
+
+				private void catching(JLabel label, Pokemon pokemon) {
+					label.setVisible(false);
+					FightPanel.this.pokeball.drop();
+					int shakes = pokemon.isCatched(ball);
+					if (shakes == 4) {
+						FightPanel.this.pokeball.shake(4);
+						SoundController.getInstance().playSound(SoundController.POKEMON_CAUGHT);
+						FightPanel.this.addText(pokemon.getName() + " wurde gefangen!");
+						Player p = (Player) gController.getFight()
+								.getCharacter(gController.getFight().getActivePlayer());
+						if (p.getPokedex().addToCaught(pokemon.getId())) {
+							FightPanel.this.addText(
+									"Für " + pokemon.getName() + " wurde ein Eintrag in dein Pokedex erstellt!");
+						}
+						if (!FightPanel.this.gController.getMainCharacter().getTeam().addPokemon(pokemon)) {
+							FightPanel.this.addText("Dein Team ist voll!");
+							FightPanel.this
+									.addText(pokemon.getName()
+											+ " wurde auf deinem PC in " + FightPanel.this.gController
+													.getMainCharacter().getPC().addPokemon(pokemon).getName()
+											+ " gespeichert!");
+						}
+						FightPanel.this.gController.endFight();
+						FightPanel.this.pokeball.setVisible(false);
+						return;
+					} else {
+						FightPanel.this.pokeball.shake(shakes);
+						label.setVisible(true);
+						new Thread(new Runnable() {
+							@Override
+							public void run() {
+								try {
+									Thread.sleep(150);
+								} catch (InterruptedException e) {
+									e.printStackTrace();
+								}
+								FightPanel.this.pokeball.setVisible(false);
+							}
+						}).start();
+						FightPanel.this.addText(pokemon.getName() + " hat sich befreit!");
+					}
 				}
 			}).start();
 		}
@@ -476,13 +965,19 @@ public class FightPanel extends JPanel {
 		// this.enemyStatPanel.add(this.enemyStats);
 		// this.playerStatPanel.add(this.playerAilmentLabel);
 		// this.enemyStatPanel.add(this.enemyAilmentLabel);
-		// this.add(this.textLabel);
 		// this.add(this.ownAnimations);
 		// this.add(this.enemyAnimations);
 		// this.add(this.playerStatPanel);
 		// this.add(this.enemyStatPanel);
 		// this.add(this.enemyPokemon);
 		// this.add(this.ownPokemon);
+
+		this.add(this.textLabel);
+		for (int i = this.pokemons.length - 1; i >= 0; i--) {
+			this.add(this.pokemons[i]);
+			this.add(this.stats[i]);
+			this.add(this.targets[i]);
+		}
 		this.add(this.pokeball);
 		this.add(this.back);
 		this.add(this.background);
@@ -491,13 +986,13 @@ public class FightPanel extends JPanel {
 	}
 
 	public void setPokemon(int index) {
-		boolean playSound = !this.gController.getFight().getPokemon(index).equals(this.pokemons[index - 1]);
-		this.pokemons[index - 1].setPokemon(this.gController.getFight().getPokemon(index));
+		boolean playSound = !this.gController.getFight().getPokemon(index).equals(this.pokemons[index]);
+		this.pokemons[index].setPokemon(this.gController.getFight().getPokemon(index));
 		this.updateMoves();
 		if (playSound) {
-			this.addText("Los " + this.pokemons[index - 1].getName() + "!", true);
+			this.addText("Los " + this.pokemons[index].getName() + "!", true);
 			// this.textLabel.waitText();
-			SoundController.getInstance().playBattlecry(this.pokemons[index - 1].getPokemon().getId());
+			SoundController.getInstance().playBattlecry(this.pokemons[index].getPokemon().getId());
 		}
 	}
 
@@ -522,8 +1017,15 @@ public class FightPanel extends JPanel {
 
 	public void updateMoves() {
 		for (int i = 0; i < this.moves.length; i++) {
-			this.moves[i].setMove(this.pokemons[this.gController.getFight().getActivePlayer() - 1].getPokemon(),
-					this.pokemons[this.gController.getFight().getActivePlayer() - 1].getPokemon().getMoves()[i]);
+			Pokemon p = this.gController.getFight().getCurrentPokemon();
+
+			this.moves[i].setMove(p, p.getMoves()[i]);
+
+			if (p.getMoves()[i] == null
+					|| !p.getMoves()[i].equals(this.gController.getFight().canUse(p, p.getMoves()[i]))) {
+				this.moves[i].setEnabled(false);
+			}
+
 		}
 	}
 
@@ -533,7 +1035,8 @@ public class FightPanel extends JPanel {
 	// this.enemyPokemon.setVisible(false);
 	// this.enemy = this.gController.getFight().getEnemy();
 	// if (!this.gController.getFight().canEscape() && playSound) {
-	// this.addText(this.gController.getFight().getEnemyCharacter().getName() + "
+	// this.addText(this.gController.getFight().getEnemyCharacter().getName() +
+	// "
 	// setzt " + this.enemy.getName()
 	// + " ein!");
 	// this.textLabel.waitText();
@@ -547,119 +1050,98 @@ public class FightPanel extends JPanel {
 	// }
 
 	public void updatePanels() {
-		for (int i = 0; i < this.pokemons.length; i++) {
-			Pokemon old = this.stats[i].getPokemon();
+		Fighting fight = this.gController.getFight();
 
-			this.stats[i].setPokemon(this.gController.getFight().getPokemon(i + 1));
-			this.stats[i].setVisible(this.gController.getFight().isVisible(this.stats[i].getPokemon()));
+		Pokemon[] oldPokemon = new Pokemon[4];
 
-			if (!this.stats[i].getPokemon().equals(old)) {
-				this.stats[i].getHPBar().setValue(this.stats[i].getPokemon().getStats().getStats().get(Stat.HP));
+		for (int i : new int[] { Fighting.LEFT_PLAYER, Fighting.RIGHT_PLAYER, Fighting.LEFT_OPPONENT,
+				Fighting.RIGHT_OPPONENT }) {
+			oldPokemon[i] = this.stats[i].getPokemon();
+
+			this.stats[i].setPokemon(fight.getPokemon(i));
+
+			if (fight.getPokemon(i) != null) {
+				if (this.stats[i].getHPBar().getValue() == 0
+						|| (fight.getPokemon(i) != null && !fight.getPokemon(i).equals(oldPokemon[i]))) {
+					this.stats[i].getHPBar().setMaximum(fight.getPokemon(i).getStats().getStats().get(Stat.HP));
+					this.stats[i].getHPBar().setValue(fight.getPokemon(i).getStats().getCurrentHP());
+				} else {
+					this.stats[i].getHPBar().setMaximum(fight.getPokemon(i).getStats().getStats().get(Stat.HP));
+					this.stats[i].getHPBar().updateValue(fight.getPokemon(i).getStats().getCurrentHP());
+				}
 			} else {
-				this.stats[i].getHPBar().updateValue(this.stats[i].getPokemon().getStats().getCurrentHP());
+				this.stats[i].setVisible(false);
 			}
-		}
-		Pokemon oldPlayer = this.playerStats.getPokemon();
-		Pokemon oldEnemy = this.enemyStats.getPokemon();
-		this.playerStats.setPokemon(this.mine);
-		this.enemyStats.setPokemon(this.enemy);
-
-		this.playerHPBar.setMaximum(this.mine.getStats().getStats().get(Stat.HP));
-		this.enemyHPBar.setMaximum(this.enemy.getStats().getStats().get(Stat.HP));
-
-		this.playerStatPanel.setVisible(true);
-		this.enemyStatPanel.setVisible(true);
-
-		if (this.playerHPBar.getValue() == 0 || !this.mine.equals(oldPlayer)) {
-			this.playerHPBar.setValue(this.mine.getStats().getCurrentHP());
-		} else {
-			if (this.playerHPBar.getMaximum() != this.mine.getStats().getStats().get(Stat.HP)) {
-				this.playerHPBar.setValue(this.mine.getStats().getCurrentHP());
-			} else {
-				this.playerHPBar.updateValue(this.mine.getStats().getCurrentHP());
-			}
-		}
-		if (this.enemyHPBar.getValue() == 0 || !this.enemy.equals(oldEnemy)) {
-			this.enemyHPBar.setValue(this.enemy.getStats().getCurrentHP());
-		} else {
-			this.enemyHPBar.updateValue(this.enemy.getStats().getCurrentHP());
 		}
 
 		int counter = 0;
 
-		while (!this.playerHPBar.isFinished() || !this.enemyHPBar.isFinished()) {
-			SoundController.getInstance().updatePokemonLow(this.playerHPBar);
-			if (this.playerHPBar.isFinished()) {
-				this.ownPokemon.setVisible(true);
-			}
-			if (this.enemyHPBar.isFinished()) {
-				this.enemyPokemon.setVisible(true);
-			}
-			if (counter % 10 == 0) {
-				if (this.playerHPBar.isFalling()) {
-					this.ownPokemon.setVisible(!this.ownPokemon.isVisible());
+		while (!isHPFinished()) {
+			for (int i = 0; i < stats.length; i++) {
+				HPBar hp = this.stats[i].getHPBar();
+				if (!hp.isFinished()) {
+					if (counter % 10 == 0) {
+						if (hp.isFalling()) {
+							this.pokemons[i].setVisible(!this.pokemons[i].isVisible());
+						}
+					}
+					try {
+						Thread.sleep(5);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				} else {
+					this.pokemons[i].setVisible(this.gController.getFight().isVisible(this.pokemons[i].getPokemon()));
 				}
-				if (this.enemyHPBar.isFalling()) {
-					this.enemyPokemon.setVisible(!this.enemyPokemon.isVisible());
-				}
 			}
-			try {
-				Thread.sleep(5);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+			if (fight.isDouble()) {
+				SoundController.getInstance().updatePokemonLow(this.stats[Fighting.LEFT_PLAYER].getHPBar(),
+						this.stats[Fighting.RIGHT_PLAYER].getHPBar());
+			} else {
+				SoundController.getInstance().updatePokemonLow(this.stats[Fighting.LEFT_PLAYER].getHPBar());
 			}
 			counter++;
 		}
 
-		SoundController.getInstance().updatePokemonLow(this.playerHPBar);
-
-		this.ownPokemon.setVisible(this.gController.getFight().isVisible(this.mine));
-		this.enemyPokemon.setVisible(this.gController.getFight().isVisible(this.enemy));
-
-		this.stopWaiting();
-
-		this.playerAilmentLabel.setAilment(this.mine.getAilment());
-		this.enemyAilmentLabel.setAilment(this.enemy.getAilment());
-
-		this.playerAilmentLabel.setLocation(this.playerStats.getWidth() - this.playerAilmentLabel.getWidth() - 10, 5);
-		this.enemyAilmentLabel.setLocation(this.enemyStats.getWidth() - this.enemyAilmentLabel.getWidth() - 10, 5);
-
-		this.playerHPBar.setSize(this.playerStats.getWidth() - 20, 10);
-		this.playerHPBar.setLocation(10, this.playerStats.getHeight() - this.playerHPBar.getHeight() - 7);
-
-		this.enemyHPBar.setSize(this.enemyStats.getWidth() - 20, 10);
-		this.enemyHPBar.setLocation(10, this.enemyStats.getHeight() - this.enemyHPBar.getHeight() - 7);
-
-		for (int i = 0; i < this.playerPokemons.length; i++) {
-			this.playerPokemons[i].setVisible(true);
-			if (this.gController.getMainCharacter().getTeam().getTeam()[i] != null) {
-				if (this.gController.getMainCharacter().getTeam().getTeam()[i].getStats().getCurrentHP() > 0) {
-					this.playerPokemons[i].setIcon(new ImageIcon(this.coloredPokeball));
-				} else {
-					this.playerPokemons[i].setIcon(new ImageIcon(this.grayPokeball));
-				}
-			} else {
-				this.playerPokemons[i].setVisible(false);
-			}
+		for (int i : new int[] { Fighting.LEFT_PLAYER, Fighting.RIGHT_PLAYER, Fighting.LEFT_OPPONENT,
+				Fighting.RIGHT_OPPONENT }) {
+			this.pokemons[i].setVisible(fight.isVisible(fight.getPokemon(i)));
+			this.stats[i].updateAilment();
+			this.stopWaiting();
 		}
 
-		for (int i = 0; i < this.enemyPokemons.length; i++) {
-			this.enemyPokemons[i].setVisible(true);
-			if (this.gController.getFight().getEnemyCharacter() != null) {
-				if (this.gController.getFight().getEnemyCharacter().getTeam().getTeam()[i] != null) {
-					if (this.gController.getFight().getEnemyCharacter().getTeam().getTeam()[i].getStats()
-							.getCurrentHP() > 0) {
-						this.enemyPokemons[i].setIcon(new ImageIcon(this.coloredPokeball));
-					} else {
-						this.enemyPokemons[i].setIcon(new ImageIcon(this.grayPokeball));
-					}
+		for (int i : new int[] { Fighting.LEFT_PLAYER, Fighting.RIGHT_PLAYER, Fighting.LEFT_OPPONENT,
+				Fighting.RIGHT_OPPONENT }) {
+			Team team = fight.getTeam(i);
+			int offset = 0;
+			JLabel[] labels = null;
+			switch (i) {
+			case Fighting.RIGHT_PLAYER:
+				offset = 6;
+			case Fighting.LEFT_PLAYER:
+				labels = this.playerPokemons;
+				break;
+			case Fighting.RIGHT_OPPONENT:
+				offset = 6;
+			case Fighting.LEFT_OPPONENT:
+				labels = this.enemyPokemons;
+				break;
+			default:
+				continue;
+			}
+			for (counter = 0; counter < Team.MAX_SIZE && (counter + offset) < labels.length; counter++) {
+				if (team == null || team.getPokemon(counter) == null) {
+					labels[counter + offset].setVisible(false);
+				} else if (team.getPokemon(counter).getAilment() == Ailment.FAINTED) {
+					labels[counter + offset].setIcon(new ImageIcon(this.grayPokeball));
+					labels[counter + offset].setVisible(true);
 				} else {
-					this.enemyPokemons[i].setVisible(false);
+					labels[counter + offset].setIcon(new ImageIcon(this.coloredPokeball));
+					labels[counter + offset].setVisible(true);
 				}
-			} else {
-				this.enemyPokemons[i].setVisible(false);
 			}
 		}
+		Main.FORCE_REPAINT = true;
 	}
 
 	private boolean isHPFinished() {
@@ -675,35 +1157,100 @@ public class FightPanel extends JPanel {
 		for (int i = 0; i < this.menu.length; i++) {
 			this.menu[i].setVisible(true);
 			this.moves[i].setVisible(false);
+			this.targets[i].setVisible(false);
 		}
 		this.back.setVisible(false);
 		this.textLabel.setVisible(false);
 		this.repaint();
 	}
 
-	public void checkEnemyAttack() {
-		if (this.enemyAttack) {
-			this.gController.getFight().attack(this.enemy, this.mine);
-			this.enemyAttack = false;
-			this.gController.getFight().endTurn();
+	public void showMoves() {
+		for (int i = 0; i < FightPanel.this.menu.length; i++) {
+			FightPanel.this.menu[i].setVisible(false);
+			FightPanel.this.moves[i].setVisible(true);
+			this.targets[i].setVisible(false);
 		}
+		FightPanel.this.back.setVisible(true);
+		this.back.removeActionListener(MOVE_BACK);
+		this.back.removeActionListener(TARGET_BACK);
+		this.back.addActionListener(MOVE_BACK);
 	}
 
-	public void pause() {
-		while (!this.textLabel.isEmpty() && !this.textLabel.isWaiting()) {
-			this.gController.sleep(50);
-			this.textLabel.repaint();
+	public void showTargets() {
+		for (int i : new int[] { Fighting.LEFT_OPPONENT, Fighting.LEFT_PLAYER, Fighting.RIGHT_OPPONENT,
+				Fighting.RIGHT_PLAYER }) {
+			// TODO: Check if the move can target current the Pokemon
+			if (this.gController.getFight().getPokemon(i) != null) {
+				targets[i].setText(this.gController.getFight().getPokemon(i).getName());
+				switch (currentAttack.getMove().getTarget()) {
+				case SELECTED_POKEMON:
+					targets[i].setEnabled(i != this.gController.getFight().getActivePlayer());
+					break;
+				case SELECTED_POKEMON_ME_FIRST:
+					// TODO
+					break;
+				case SPECIFIC_MOVE:
+					// TODO
+					break;
+				case USER_OR_ALLY:
+					targets[i].setEnabled(this.gController.getFight().isPlayer(i));
+					break;
+				default:
+					targets[i].setEnabled(false);
+				}
+			} else {
+				targets[i].setText("");
+				targets[i].setEnabled(false);
+			}
 		}
+		for (int i = 0; i < this.menu.length; i++) {
+			this.menu[i].setVisible(false);
+			this.moves[i].setVisible(false);
+			this.targets[i].setVisible(true);
+		}
+		this.back.setVisible(true);
+		this.textLabel.setVisible(false);
+
+		this.back.removeActionListener(MOVE_BACK);
+		this.back.removeActionListener(TARGET_BACK);
+		this.back.addActionListener(TARGET_BACK);
+		this.repaint();
 	}
 
 	public void showText() {
 		for (int i = 0; i < this.menu.length; i++) {
 			this.menu[i].setVisible(false);
 			this.moves[i].setVisible(false);
+			this.targets[i].setVisible(false);
 		}
 		this.back.setVisible(false);
 		this.textLabel.setVisible(true);
 		this.repaint();
+	}
+
+	public void getEnemyMoves() {
+		Fighting fight = this.gController.getFight();
+
+		if (fight.isDouble()) {
+
+		} else {
+
+		}
+	}
+
+	// public void checkEnemyAttack() {
+	// if (this.enemyAttack) {
+	// this.gController.getFight().attack(this.enemy, this.mine);
+	// this.enemyAttack = false;
+	// this.gController.getFight().endTurn();
+	// }
+	// }
+
+	public void pause() {
+		while (!this.textLabel.isEmpty() && !this.textLabel.isWaiting()) {
+			this.gController.sleep(50);
+			this.textLabel.repaint();
+		}
 	}
 
 	public void addText(String text) {
@@ -734,24 +1281,28 @@ public class FightPanel extends JPanel {
 	}
 
 	public void removeEnemy() {
-		this.enemyStatPanel.setVisible(false);
-		this.enemyPokemon.setVisible(false);
-		for (JLabel enemyPokemon2 : this.enemyPokemons) {
-			enemyPokemon2.setVisible(false);
+		this.stats[Fighting.LEFT_OPPONENT].setVisible(false);
+		this.stats[Fighting.RIGHT_OPPONENT].setVisible(false);
+
+		this.pokemons[Fighting.LEFT_OPPONENT].setVisible(false);
+		this.pokemons[Fighting.RIGHT_OPPONENT].setVisible(false);
+
+		for (JLabel pokemon : this.enemyPokemons) {
+			pokemon.setVisible(false);
 		}
 	}
 
-	public AnimationLabel getEnemyAnimation() {
-		return this.enemyAnimations;
-	}
-
-	public AnimationLabel getPlayerAnimation() {
-		return this.ownAnimations;
-	}
+	// public AnimationLabel getEnemyAnimation() {
+	// return this.enemyAnimations;
+	// }
+	//
+	// public AnimationLabel getPlayerAnimation() {
+	// return this.ownAnimations;
+	// }
 
 	public PokemonLabel getPokemonLabel(Pokemon pokemon) {
 		for (PokemonLabel p : this.pokemons) {
-			if (p != null && p.getPokemon().equals(pokemon)) {
+			if (p.getPokemon() != null && p.getPokemon().equals(pokemon)) {
 				return p;
 			}
 		}

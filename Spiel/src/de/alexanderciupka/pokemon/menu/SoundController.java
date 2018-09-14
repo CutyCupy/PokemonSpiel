@@ -131,12 +131,12 @@ public class SoundController {
 			Clip sound = AudioSystem.getClip();
 			sound.open(audioInputStream);
 			sound.start();
-			if(pause) {
+			if (pause) {
 				setPause(true);
 				new Thread(new Runnable() {
 					@Override
 					public void run() {
-						while(isRunning(sound)) {
+						while (isRunning(sound)) {
 							Thread.yield();
 						}
 						setPause(false);
@@ -217,7 +217,7 @@ public class SoundController {
 	}
 
 	public void startRain(RainType type) {
-		if(type == null) {
+		if (type == null) {
 			return;
 		}
 		if (rain != null) {
@@ -252,20 +252,25 @@ public class SoundController {
 		}
 	}
 
-	public void updatePokemonLow(HPBar bar) {
-		if (bar != null && bar.getHPColor().equals(HPBar.EMPTY)
-				&& GameController.getInstance().getFight().getCurrentFightOption().equals(FightOption.FIGHT)) {
-			if (low == null) {
-				try {
-					low = AudioSystem.getClip();
-					low.open(AudioSystem.getAudioInputStream(
-							new File(Main.class.getResource("/music/sounds/" + LOW + ".wav").getFile())));
-					((FloatControl) low.getControl(FloatControl.Type.MASTER_GAIN)).setValue(-10.0f);
-					low.loop(Clip.LOOP_CONTINUOUSLY);
-					low.start();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+	public void updatePokemonLow(HPBar... bars) {
+		boolean isLow = false;
+		for (HPBar bar : bars) {
+			if (bar != null && bar.getForeground().equals(HPBar.EMPTY)
+					&& GameController.getInstance().getFight().getCurrentFightOption().equals(FightOption.FIGHT)) {
+				isLow = true;
+			}
+		}
+
+		if (isLow && low == null) {
+			try {
+				low = AudioSystem.getClip();
+				low.open(AudioSystem.getAudioInputStream(
+						new File(Main.class.getResource("/music/sounds/" + LOW + ".wav").getFile())));
+				((FloatControl) low.getControl(FloatControl.Type.MASTER_GAIN)).setValue(-10.0f);
+				low.loop(Clip.LOOP_CONTINUOUSLY);
+				low.start();
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		} else if (low != null) {
 			low.stop();
@@ -292,8 +297,8 @@ public class SoundController {
 	}
 
 	public void setPause(boolean b) {
-		if(currentSong != null) {
-			if(b) {
+		if (currentSong != null) {
+			if (b) {
 				currentPause = currentSong.getMicrosecondPosition();
 				currentSong.stop();
 			} else {

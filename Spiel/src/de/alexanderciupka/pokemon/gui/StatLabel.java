@@ -14,6 +14,7 @@ import javax.swing.border.LineBorder;
 
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
+import de.alexanderciupka.pokemon.pokemon.Stat;
 
 public class StatLabel extends JLabel {
 
@@ -32,7 +33,7 @@ public class StatLabel extends JLabel {
 
 		this.setBackground(Color.WHITE);
 		this.setVerticalAlignment(SwingConstants.TOP);
-		this.setOpaque(false);
+		this.setOpaque(true);
 
 		this.setSize(180, 40);
 
@@ -61,9 +62,18 @@ public class StatLabel extends JLabel {
 
 	@Override
 	protected void paintComponent(Graphics g) {
+		super.paintComponent(g);
+		this.setVisible(pokemon != null);
 		if (this.pokemon == null) {
 			return;
 		}
+		this.hp.setMaximum(this.pokemon.getStats().getStats().get(Stat.HP));
+		
+		this.ailment.setLocation(this.getWidth() - this.ailment.getWidth() - 10, 5);
+		
+		this.hp.setSize(this.getWidth() - 20, 10);
+		this.hp.setLocation(10, this.getHeight() - this.hp.getHeight() - 7);
+		
 		g.setFont(NAME_FONT);
 		FontMetrics fm = this.getFontMetrics(NAME_FONT);
 		int h = 15;
@@ -75,11 +85,16 @@ public class StatLabel extends JLabel {
 		}
 		fm = g.getFontMetrics();
 		g.drawString("Lv" + this.pokemon.getStats().getLevel(), 125 - fm.stringWidth("Lv100"), h);
-		super.paintComponent(g);
 	}
 
 	public HPBar getHPBar() {
 		return this.hp;
+	}
+
+	public void updateAilment() {
+		if(this.pokemon != null) {
+			this.ailment.setAilment(this.pokemon.getAilment());
+		}
 	}
 
 }

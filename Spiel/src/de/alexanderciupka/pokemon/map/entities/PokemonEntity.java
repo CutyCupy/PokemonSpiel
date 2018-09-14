@@ -1,7 +1,6 @@
 package de.alexanderciupka.pokemon.map.entities;
 
 import java.awt.Point;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -11,15 +10,13 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import de.alexanderciupka.hoverbutton.Main;
-import de.alexanderciupka.pokemon.characters.Player;
+import de.alexanderciupka.pokemon.characters.types.Player;
 import de.alexanderciupka.pokemon.map.Route;
-import de.alexanderciupka.pokemon.pokemon.Item;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
 
 public class PokemonEntity extends Entity {
 
-	private ArrayList<Item> requiredItems;
+	private ArrayList<Integer> requiredItems;
 
 	private String noInteractionMessage;
 	private String interactionMessage;
@@ -29,24 +26,24 @@ public class PokemonEntity extends Entity {
 		super(parent, false, "25", 0, terrainName);
 	}
 
-	public void setRequiredItems(Item... items) {
-		this.requiredItems = new ArrayList<Item>(items.length);
-		for (Item i : items) {
+	public void setRequiredItems(Integer... items) {
+		this.requiredItems = new ArrayList<Integer>(items.length);
+		for (Integer i : items) {
 			this.addRequiredItem(i);
 		}
 	}
 
-	public void addRequiredItem(Item item) {
+	public void addRequiredItem(Integer item) {
 		if (item == null) {
 			return;
 		}
 		if (this.requiredItems == null) {
-			this.requiredItems = new ArrayList<Item>();
+			this.requiredItems = new ArrayList<Integer>();
 		}
 		this.requiredItems.add(item);
 	}
 
-	public ArrayList<Item> getRequiredItems() {
+	public ArrayList<Integer> getRequiredItems() {
 		return this.requiredItems;
 	}
 
@@ -80,8 +77,7 @@ public class PokemonEntity extends Entity {
 	public void setSprite(String spriteName) {
 		this.spriteName = spriteName;
 		try {
-			this.sprite = ImageIO.read(
-					new File(Main.class.getResource("/characters/pokemon/" + spriteName + "/front_0.png").getFile()));
+			this.sprite = ImageIO.read(this.getClass().getResourceAsStream("/characters/pokemon/" + spriteName + "/front_0.png"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -95,7 +91,7 @@ public class PokemonEntity extends Entity {
 	public void onInteraction(Player c) {
 		boolean isInteractable = true;
 		if (this.requiredItems != null) {
-			for (Item i : this.requiredItems) {
+			for (Integer i : this.requiredItems) {
 				if (!c.hasItem(i)) {
 					isInteractable = false;
 					break;
@@ -119,13 +115,14 @@ public class PokemonEntity extends Entity {
 	}
 
 	public void importRequiredItems(JsonElement je) {
-		this.requiredItems = new ArrayList<Item>();
+		this.requiredItems = new ArrayList<Integer>();
 		if (je != null) {
 			JsonArray items = je.getAsJsonArray();
 			for (JsonElement i : items) {
 				try {
-					this.addRequiredItem(Item.valueOf(i.getAsJsonObject().get("item").getAsString().toUpperCase()));
+					this.addRequiredItem(i.getAsJsonObject().get("item").getAsInt());
 				} catch (Exception e) {
+					e.printStackTrace();
 				}
 			}
 		}

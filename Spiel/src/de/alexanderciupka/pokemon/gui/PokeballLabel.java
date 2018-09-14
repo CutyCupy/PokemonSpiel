@@ -9,14 +9,14 @@ import java.util.HashMap;
 
 import javax.swing.JLabel;
 
+import de.alexanderciupka.pokemon.constants.Items;
 import de.alexanderciupka.pokemon.gui.panels.FightPanel;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.menu.SoundController;
-import de.alexanderciupka.pokemon.pokemon.Item;
 
 public class PokeballLabel extends JLabel {
 
-	private Item ball;
+	private Integer ball;
 	private BufferedImage image;
 	private static HashMap<Integer, Integer> coordinates;
 
@@ -37,9 +37,11 @@ public class PokeballLabel extends JLabel {
 		}
 	}
 
-	public void setBall(Item ball) {
-		this.ball = ball;
-		this.image = FightPanel.pokeballImages.get(this.ball);
+	public void setBall(Integer ball) {
+		if(GameController.getInstance().getInformation().getItemData(Items.ITEM_POCKET, ball).equals(Items.POKEBALLS)) {
+			this.ball = ball;
+			this.image = FightPanel.pokeballImages.get(this.ball);
+		}
 	}
 
 	@Override

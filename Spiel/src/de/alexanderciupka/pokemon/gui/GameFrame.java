@@ -15,8 +15,9 @@ import javax.swing.KeyStroke;
 import javax.swing.border.EmptyBorder;
 
 import de.alexanderciupka.pokemon.characters.Direction;
-import de.alexanderciupka.pokemon.characters.NPC;
-import de.alexanderciupka.pokemon.characters.Player;
+import de.alexanderciupka.pokemon.characters.types.NPC;
+import de.alexanderciupka.pokemon.characters.types.Player;
+import de.alexanderciupka.pokemon.constants.Items;
 import de.alexanderciupka.pokemon.fighting.FightOption;
 import de.alexanderciupka.pokemon.gui.overlay.DarkOverlay;
 import de.alexanderciupka.pokemon.gui.panels.EvolutionPanel;
@@ -30,7 +31,6 @@ import de.alexanderciupka.pokemon.gui.panels.ReportPanel;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.menu.MenuController;
 import de.alexanderciupka.pokemon.menu.SoundController;
-import de.alexanderciupka.pokemon.pokemon.Item;
 import de.alexanderciupka.pokemon.pokemon.Move;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
 
@@ -145,10 +145,14 @@ public class GameFrame extends JFrame {
 	}
 
 	public void startFight() {
-		this.fight = new FightPanel();
+		System.out.println("startfight");
 		this.fighting = true;
-		this.pokemon.update();
+		this.fight = new FightPanel();
 		this.getFightPanel().addText(this.gController.getFight().getEntryText());
+		System.out.println("fight update");
+		this.fight.updateFight();
+		System.out.println("fight update finished");
+		this.pokemon.update();
 		this.gController.updateFight();
 	}
 
@@ -423,6 +427,8 @@ public class GameFrame extends JFrame {
 		this.map.getActionMap().put("enter", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				System.out.println(GameFrame.this.gController.isFighting());
+				System.out.println(GameFrame.this.gController.getInteractionPause());
 				if (!GameFrame.this.gController.isFighting() && GameFrame.this.gController.getInteractionPause()) {
 					GameFrame.this.dialogue.setActive();
 				}
@@ -532,10 +538,15 @@ public class GameFrame extends JFrame {
 		this.map.getActionMap().put("flash", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				if (GameFrame.this.gController.getMainCharacter().hasItem(Item.FLASH)
-						&& GameFrame.this.gController.getMainCharacter().getCurrentRoute().isDark()) {
+				if (GameFrame.this.gController.getMainCharacter().getTeam().canUseVM(Items.TM70)) {
 					((DarkOverlay) (GameFrame.this.getBackgroundLabel().getOverlay(DarkOverlay.class))).flash();
 				}
+				// if
+				// (GameFrame.this.gController.getMainCharacter().hasItem(Items.TM70)
+				// &&
+				// GameFrame.this.gController.getMainCharacter().getCurrentRoute().isDark())
+				// {
+				// }
 			}
 		});
 	}

@@ -4,7 +4,6 @@ import de.alexanderciupka.pokemon.constants.Abilities;
 import de.alexanderciupka.pokemon.constants.Moves;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.menu.SoundController;
-import de.alexanderciupka.pokemon.pokemon.Ailment;
 import de.alexanderciupka.pokemon.pokemon.Move;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
 import de.alexanderciupka.pokemon.pokemon.Stat;
@@ -70,7 +69,7 @@ public enum Weather {
 	int getPower(Pokemon user, Move m) {
 		Weather w = Weather.valueOf(this.name());
 		double power = m.getPower();
-		Type type = m.getMoveType();
+		Type type = m.getMoveType(user);
 
 		if (Moves.METEOROLOGE == m.getId() && w != Weather.NONE) {
 			power = 100;
@@ -104,102 +103,24 @@ public enum Weather {
 		return (int) Math.round(power);
 	}
 
-	// Type getMoveType(Move m) {
-	// Type type = m.getMoveType();
-	// if (Moves.METEOROLOGE.equals(m.getName())) {
-	// switch (Weather.valueOf(this.name())) {
-	// case HAIL:
-	// type = Type.ICE;
-	// break;
-	// case RAIN:
-	// type = Type.WATER;
-	// break;
-	// case SANDSTORM:
-	// type = Type.ROCK;
-	// break;
-	// case SUN:
-	// type = Type.FIRE;
-	// break;
-	// default:
-	// break;
-	// }
-	// }
-	// return type;
-	// }
-
-	// Type[] getPokemonTypes(Pokemon p) {
-	// Type[] types = p.getTypes();
-	// Weather w = Weather.valueOf(this.name());
-	// if (PokemonNames.FORMEO == p.getId()) {
-	// switch (w) {
-	// case HAIL:
-	// types = new Type[] { Type.ICE, null };
-	// break;
-	// case RAIN:
-	// types = new Type[] { Type.WATER, null };
-	// break;
-	// case SANDSTORM:
-	// types = new Type[] { Type.ROCK, null };
-	// break;
-	// case SUN:
-	// types = new Type[] { Type.FIRE, null };
-	// break;
-	// default:
-	// break;
-	// }
-	// }
-	// return types;
-	// }
-
-	// float getAccuracy(Pokemon user, Move m) {
-	// Weather w = Weather.valueOf(this.name());
-	//
-	// float accuracy = m.getAccuracy();
-	//
-	// switch (w) {
-	// case FOG:
-	// accuracy *= 0.6;
-	// break;
-	// case HAIL:
-	// if (Moves.BLIZZARD.equals(m.getName())) {
-	// accuracy = 1f;
-	// }
-	// break;
-	// case RAIN:
-	// if (Moves.DONNER.equals(m.getName()) || Moves.ORKAN.equals(m.getName())) {
-	// accuracy = 1f;
-	// }
-	// break;
-	// case SUN:
-	// if (Moves.DONNER.equals(m.getName()) || Moves.ORKAN.equals(m.getName())) {
-	// accuracy = 0.5f;
-	// }
-	// break;
-	// default:
-	// break;
-	//
-	// }
-	// return accuracy;
-	// }
-
 	void onEndOfTurn(Pokemon p) {
+		if(p == null) {
+			return;
+		}
 		switch (Weather.valueOf(this.name())) {
 		case HAIL:
-			if (!p.hasType(Type.ICE)) {
+			if (!p.hasType(Type.ICE) && p.getAbility().getId() != Abilities.SCHNEEMANTEL
+					&& p.getAbility().getId() != Abilities.EISHAUT && p.getAbility().getId() != Abilities.WETTERFEST) {
 				p.getStats().loseHP((int) Math.round(p.getStats().getStats().get(Stat.HP) / 16.0));
 				SoundController.getInstance().playSound(SoundController.NORMAL_EFFECTIVE);
 				GameController.getInstance().getGameFrame().getFightPanel()
 						.addText(p.getName() + " hat sich durch den Hagel verletzt!", true);
-			} else {
-				if (Abilities.EISHAUT == p.getAbility().getId()) {
-					p.getStats().restoreHP((int) Math.round(p.getStats().getStats().get(Stat.HP) / 16.0));
-					SoundController.getInstance().playSound(SoundController.ITEM_HEAL);
-					GameController.getInstance().getGameFrame().getFightPanel()
-							.addText(p.getName() + " freut sich über den Hagelsturm!", true);
-				}
+			} else if (p.getAbility().getId() == Abilities.EISHAUT) {
+				p.getStats().restoreHP((int) Math.round(p.getStats().getStats().get(Stat.HP) / 16.0));
+				SoundController.getInstance().playSound(SoundController.ITEM_HEAL);
+				GameController.getInstance().getGameFrame().getFightPanel()
+						.addText(p.getName() + " freut sich über den Hagelsturm!", true);
 			}
-			break;
-		case NONE:
 			break;
 		case RAIN:
 			if (Abilities.TROCKENHEIT == p.getAbility().getId() || Abilities.REGENGENUSS == p.getAbility().getId()) {
@@ -208,17 +129,13 @@ public enum Weather {
 				SoundController.getInstance().playSound(SoundController.NORMAL_EFFECTIVE);
 				GameController.getInstance().getGameFrame().getFightPanel()
 						.addText(p.getName() + " freut sich über den Regen!", true);
-			} else if (Abilities.HYDRATION == p.getAbility().getId()) {
-				if (p.getAilment() != Ailment.NONE) {
-					p.setAilment(Ailment.NONE);
-					SoundController.getInstance().playSound(SoundController.ITEM_HEAL);
-					GameController.getInstance().getGameFrame().getFightPanel()
-							.addText(p.getName() + " wurde durch den Regen geheilt!", true);
-				}
 			}
 			break;
 		case SANDSTORM:
-			if (!(p.hasType(Type.ROCK) || p.hasType(Type.STEEL) || p.hasType(Type.GROUND))) {
+			if (!(p.hasType(Type.ROCK) || p.hasType(Type.STEEL) || p.hasType(Type.GROUND))
+					&& p.getAbility().getId() != Abilities.WETTERFEST
+					&& p.getAbility().getId() != Abilities.SANDSCHARRER
+					&& p.getAbility().getId() != Abilities.SANDGEWALT) {
 				p.getStats().loseHP((int) Math.round(p.getStats().getStats().get(Stat.HP) / 16.0));
 				SoundController.getInstance().playSound(SoundController.NORMAL_EFFECTIVE);
 				GameController.getInstance().getGameFrame().getFightPanel()
@@ -226,16 +143,26 @@ public enum Weather {
 			}
 			break;
 		case SUN:
-			if (Abilities.TROCKENHEIT == p.getAbility().getId()) {
+			switch (p.getAbility().getId()) {
+			case Abilities.TROCKENHEIT:
 				p.getStats().loseHP((int) Math.round(p.getStats().getStats().get(Stat.HP) / 8.0));
 				SoundController.getInstance().playSound(SoundController.NORMAL_EFFECTIVE);
 				GameController.getInstance().getGameFrame().getFightPanel()
 						.addText(p.getName() + " tut die Sonne nicht gut!", true);
+				break;
+			case Abilities.SOLARKRAFT:
+				p.getStats().loseHP((int) Math.round(p.getStats().getStats().get(Stat.HP) / 8.0));
+				SoundController.getInstance().playSound(SoundController.NORMAL_EFFECTIVE);
+				GameController.getInstance().getGameFrame().getFightPanel()
+						.addText(p.getName() + " nutzt die Kraft der Sonne!", true);
+				break;
 			}
 			break;
 		default:
 			break;
 		}
+		GameController.getInstance().getGameFrame().getFightPanel().updateFight();
+		GameController.getInstance().getGameFrame().getFightPanel().getTextLabel().waitText();
 	}
 
 	float getHealing(Move m) {
@@ -258,139 +185,4 @@ public enum Weather {
 
 		return heal;
 	}
-
-	// int getSpeed(Pokemon p) {
-	// double init = p.getStats().getFightStats().get(Stat.SPEED);
-	// switch (Weather.valueOf(this.name())) {
-	//
-	// case HAIL:
-	// if (Abilities.SCHNEESCHARRER.equals(p.getAbility().getName())) {
-	// init *= 2;
-	// }
-	// break;
-	// case RAIN:
-	// if (Abilities.WASSERTEMPO.equals(p.getAbility().getName())) {
-	// init *= 2;
-	// }
-	// break;
-	// case SANDSTORM:
-	// if (Abilities.SANDSCHARRER.equals(p.getAbility().getName())) {
-	// init *= 2;
-	// }
-	// break;
-	// case SUN:
-	// if (Abilities.CHLOROPHYLL.equals(p.getAbility().getName())) {
-	// init *= 2;
-	// }
-	// break;
-	// default:
-	// break;
-	// }
-	//
-	// return (int) Math.round(init);
-	// }
-	//
-	// int getSpecialDefense(Pokemon p) {
-	//
-	// double spdef = p.getStats().getFightStats().get(Stat.SPECIALDEFENSE);
-	//
-	// switch (Weather.valueOf(this.name())) {
-	// case SANDSTORM:
-	// if (p.hasType(Type.ROCK)) {
-	// spdef *= 1.5;
-	// }
-	// break;
-	// case SUN:
-	// if (Abilities.PFLANZENGABE.equals(pokemon.getAbility().getName())) {
-	// spdef *= 1.5;
-	// }
-	// break;
-	// default:
-	// break;
-	// }
-	//
-	// return (int) Math.round(spdef);
-	// }
-	//
-	// int getDefense(Pokemon p) {
-	// double def = pokemon.getStats().getFightStats().get(Stat.DEFENSE);
-	// switch (Weather.valueOf(this.name())) {
-	// case FOG:
-	// break;
-	// case HAIL:
-	// break;
-	// case NONE:
-	// break;
-	// case RAIN:
-	// break;
-	// case SANDSTORM:
-	// break;
-	// case SUN:
-	// break;
-	// default:
-	// break;
-	// }
-	// return (int) Math.round(def);
-	// }
-	//
-	// int getSpecialAttack(Pokemon p) {
-	// double spatk = pokemon.getStats().getFightStats().get(Stat.SPECIALATTACK);
-	// switch (Weather.valueOf(this.name())) {
-	// case SUN:
-	// if (Abilities.SOLARKRAFT.equals(pokemon.getAbility().getName())) {
-	// spatk *= 1.5;
-	// }
-	// break;
-	// default:
-	// break;
-	// }
-	// return (int) Math.round(spatk);
-	// }
-	//
-	// int getAttack(Pokemon p) {
-	// double atk = pokemon.getStats().getFightStats().get(Stat.ATTACK);
-	// switch (Weather.valueOf(this.name())) {
-	// case SUN:
-	// if (Abilities.PFLANZENGABE.equals(pokemon.getAbility().getName())) {
-	// atk *= 1.5;
-	// }
-	// break;
-	// default:
-	// break;
-	// }
-	// return (int) Math.round(atk);
-	// }
-	//
-	// int getEvasion(Pokemon p) {
-	//
-	// double evasion = pokemon.getStats().getFightStats().get(Stat.EVASION);
-	//
-	// switch(Weather.valueOf(this.name()))
-	// {
-	// case HAIL:
-	// if (Abilities.SCHNEEMANTEL.equals(pokemon.getAbility().getName())) {
-	// this.evasion *= 1.2;
-	// }
-	// break;
-	// case SANDSTORM:
-	// if (Abilities.SANDSCHLEIER.equals(pokemon.getAbility().getName())) {
-	// this.evasion *= 1.2;
-	// }
-	// break;
-	// default:
-	// break;
-	// }return(int)Math.round(evasion);
-	// }
-	//
-	// boolean isStatusable(Pokemon p) {
-	// switch (Weather.valueOf(this.name())) {
-	// case SUN:
-	// if (Abilities.FLORASCHILD.equals(p.getAbility().getName())) {
-	// return false;
-	// }
-	// default:
-	// return true;
-	// }
-	// }
-
 }

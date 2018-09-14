@@ -20,8 +20,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import de.alexanderciupka.pokemon.characters.Direction;
-import de.alexanderciupka.pokemon.characters.NPC;
-import de.alexanderciupka.pokemon.characters.Player;
+import de.alexanderciupka.pokemon.characters.types.NPC;
+import de.alexanderciupka.pokemon.characters.types.Player;
 import de.alexanderciupka.pokemon.gui.GameFrame;
 import de.alexanderciupka.pokemon.main.Main;
 import de.alexanderciupka.pokemon.map.Route;

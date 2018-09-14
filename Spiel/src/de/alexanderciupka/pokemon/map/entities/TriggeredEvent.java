@@ -6,10 +6,10 @@ import java.util.ArrayList;
 
 import com.google.gson.JsonObject;
 
-import de.alexanderciupka.pokemon.characters.Character;
 import de.alexanderciupka.pokemon.characters.Direction;
-import de.alexanderciupka.pokemon.characters.NPC;
-import de.alexanderciupka.pokemon.characters.Player;
+import de.alexanderciupka.pokemon.characters.types.Character;
+import de.alexanderciupka.pokemon.characters.types.NPC;
+import de.alexanderciupka.pokemon.characters.types.Player;
 import de.alexanderciupka.pokemon.main.Main;
 import de.alexanderciupka.pokemon.map.Camera;
 import de.alexanderciupka.pokemon.map.GameController;
@@ -71,9 +71,9 @@ public class TriggeredEvent {
 							allOriginalPoints.add(new Point(c.getCurrentPosition()));
 							allOriginalDirections.add(c.getCurrentDirection());
 							if(c instanceof NPC) {
-								allOriginalBeforeDialoges.add(((NPC) c).getBeforeFightDialogue());
-								allOriginalAfterDialoges.add(((NPC) c).getOnDefeatDialogue());
-								allOriginalNoDialoges.add(((NPC) c).getNoFightDialogue());
+								allOriginalBeforeDialoges.add(((NPC) c).getDialogue(NPC.DIALOGUE_BEFORE_FIGHT));
+								allOriginalAfterDialoges.add(((NPC) c).getDialogue(NPC.DIALOGUE_AFTER_FIGHT));
+								allOriginalNoDialoges.add(((NPC) c).getDialogue(NPC.DIALOGUE_NO_FIGHT));
 							}
 							allOriginalSprites.add(c.getSpriteName());
 						}
@@ -128,13 +128,13 @@ public class TriggeredEvent {
 					if(currentChar instanceof NPC) {
 						NPC currentNPC = (NPC) currentChar;
 						if(currentChanges[j].getAfterFightUpdate() != null) {
-							currentNPC.setAfterFightDialog(currentChanges[j].getAfterFightUpdate());
+							currentNPC.setDialogue(NPC.DIALOGUE_AFTER_FIGHT, currentChanges[j].getAfterFightUpdate());
 						}
 						if(currentChanges[j].getBeforeFightUpdate() != null) {
-							currentNPC.setBeforeFightDialogue(currentChanges[j].getBeforeFightUpdate());
+							currentNPC.setDialogue(NPC.DIALOGUE_BEFORE_FIGHT, currentChanges[j].getBeforeFightUpdate());
 						}
 						if(currentChanges[j].getNoFightUpdate() != null) {
-							currentNPC.setNoFightDialogue(currentChanges[j].getNoFightUpdate());
+							currentNPC.setDialogue(NPC.DIALOGUE_NO_FIGHT, currentChanges[j].getNoFightUpdate());
 						}
 					}
 					if(currentChanges[j].getSpriteUpdate() != null) {
@@ -189,7 +189,6 @@ public class TriggeredEvent {
 							defeats.add(enemy);
 						} else {
 							for(NPC current : defeats) {
-								current.defeated(false);
 								current.getTeam().restoreTeam();
 							}
 							int nonNPCs = 0;
@@ -219,9 +218,9 @@ public class TriggeredEvent {
 								}
 								if(c instanceof NPC) {
 									NPC n = (NPC) c;
-									n.setAfterFightDialog(allOriginalAfterDialoges.get(k-nonNPCs));
-									n.setBeforeFightDialogue(allOriginalBeforeDialoges.get(k-nonNPCs));
-									n.setNoFightDialogue(allOriginalNoDialoges.get(k-nonNPCs));
+									n.setDialogue(NPC.DIALOGUE_AFTER_FIGHT, allOriginalAfterDialoges.get(k-nonNPCs));
+									n.setDialogue(NPC.DIALOGUE_BEFORE_FIGHT, allOriginalBeforeDialoges.get(k-nonNPCs));
+									n.setDialogue(NPC.DIALOGUE_NO_FIGHT		, allOriginalNoDialoges.get(k-nonNPCs));
 								} else {
 									nonNPCs++;
 								}

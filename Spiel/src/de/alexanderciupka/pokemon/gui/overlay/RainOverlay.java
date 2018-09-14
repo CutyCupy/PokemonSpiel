@@ -8,10 +8,9 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import de.alexanderciupka.pokemon.gui.BackgroundLabel;
-import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.menu.SoundController;
 
-public class RainOverlay extends Overlay {
+public class RainOverlay extends Overlay implements IAnimated {
 
 	private ArrayList<Raindrop> raindrops;
 
@@ -79,15 +78,9 @@ public class RainOverlay extends Overlay {
 		}
 		this.overlay = temp;
 		created = true;
-		while (GameController.getInstance().getGameFrame().getDialogue().isVisible()) {
-			try {
-				Thread.yield();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
 	}
 
+	@Override
 	public void startAnimation() {
 		if(animation == null) {
 			animation = new Thread(new Runnable() {

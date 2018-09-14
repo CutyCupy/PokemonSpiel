@@ -3,7 +3,7 @@
  */
 package de.alexanderciupka.pokemon.fighting;
 
-import de.alexanderciupka.pokemon.pokemon.Item;
+import de.alexanderciupka.pokemon.constants.Abilities;
 import de.alexanderciupka.pokemon.pokemon.Move;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
 
@@ -16,20 +16,24 @@ public class Attack {
 
 	private Pokemon source;
 	private Move move;
-	private Pokemon[] targets;
+	private int[] targets;
 
-	private Item item;
+	private Integer item;
 	private Pokemon swap;
 
-	public Attack(Pokemon source, Move move, Pokemon... targets) {
+	public Attack() {
+	}
+
+	public Attack(Pokemon source, Move move, int... targets) {
 		this.source = source;
 		this.move = move;
 		this.targets = targets;
 	}
 
-	public Attack(Pokemon source, Item item) {
+	public Attack(Pokemon source, Integer item, int target) {
 		this.source = source;
 		this.item = item;
+		this.targets = new int[] { target };
 	}
 
 	public Attack(Pokemon source, Pokemon swap) {
@@ -53,19 +57,19 @@ public class Attack {
 		this.move = move;
 	}
 
-	public Pokemon[] getTargets() {
+	public int[] getTargets() {
 		return this.targets;
 	}
 
-	public void setTargets(Pokemon[] targets) {
+	public void setTargets(int... targets) {
 		this.targets = targets;
 	}
 
-	public Item getItem() {
+	public Integer getItem() {
 		return this.item;
 	}
 
-	public void setItem(Item item) {
+	public void setItem(Integer item) {
 		this.item = item;
 	}
 
@@ -79,9 +83,39 @@ public class Attack {
 
 	public int getPriority() {
 		if (this.move != null) {
+			switch (this.source.getAbility().getId()) {
+			case Abilities.STROLCH:
+				switch (this.move.getDamageClass()) {
+				case NO_DAMAGE:
+					return this.move.getPriority() + 1;
+				default:
+					break;
+				}
+				break;
+			}
 			return this.move.getPriority();
 		}
 		return 6;
+	}
+
+	@Override
+	public String toString() {
+		String string = "[source:" + source + ",";
+		if(move != null) {
+			string += "move:" + move + ",targets:";
+			for(int t : this.targets) {
+				string += t + ",";
+			}
+		} else if(item != null) {
+			string += "item:" + item + ",targets:";
+			for(int t : this.targets) {
+				string += t + ",";
+			}
+		} else {
+			string += "swap:" + this.swap + ",";
+		}
+		string += "priority:" + this.getPriority() + "]";
+		return string;
 	}
 
 }

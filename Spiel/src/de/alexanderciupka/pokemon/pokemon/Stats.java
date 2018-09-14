@@ -9,7 +9,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import de.alexanderciupka.pokemon.constants.Abilities;
+import de.alexanderciupka.pokemon.constants.Items;
 import de.alexanderciupka.pokemon.fighting.FightOption;
+import de.alexanderciupka.pokemon.fighting.Fighting;
 import de.alexanderciupka.pokemon.gui.After;
 import de.alexanderciupka.pokemon.gui.panels.NewAttackPanel;
 import de.alexanderciupka.pokemon.map.GameController;
@@ -91,13 +93,14 @@ public class Stats {
 
 	public boolean levelUP() {
 		boolean result = this.level < 100;
-		if (this.level < 99) {
+		if (this.level <= 99) {
 			this.level++;
 			if (this.gController.isFighting()) {
 				this.gController.getGameFrame().getFightPanel().updatePanels();
 				SoundController.getInstance().playSound(SoundController.LEVEL_UP);
-				if (this.pokemon.equals(this.gController.getFight().getPlayer())) {
-					this.gController.getGameFrame().getFightPanel().getPlayerAnimation().playAnimation("levelup");
+				if (this.gController.getGameFrame().getFightPanel().getPokemonLabel(this.pokemon) != null) {
+					this.gController.getGameFrame().getFightPanel().getPokemonLabel(this.pokemon).getAnimationLabel()
+							.playAnimation("levelup");
 				}
 				this.gController.getGameFrame().getFightPanel()
 						.addText(this.pokemon.getName() + " erreicht Level " + this.level + "!");
@@ -110,24 +113,10 @@ public class Stats {
 			}
 			this.levelUpXP = this.calculateLevelUpXP();
 			this.newMoves();
-		} else if (this.level == 99) {
-			this.level = 100;
-			if (this.gController.isFighting()) {
-				this.gController.getGameFrame().getFightPanel().updatePanels();
-				SoundController.getInstance().playSound(SoundController.LEVEL_UP);
-				this.gController.getGameFrame().getFightPanel().getPlayerAnimation().playAnimation("levelup");
-				this.gController.getGameFrame().getFightPanel()
-						.addText(this.pokemon.getName() + " erreicht Level " + this.level + "!");
-			} else {
-				if (!this.generated) {
-					SoundController.getInstance().playSound(SoundController.LEVEL_UP);
-					this.gController.getGameFrame()
-							.addDialogue(this.pokemon.getName() + " erreicht Level " + this.level + "!");
-				}
-			}
+		}
+		if (this.level == 100) {
 			this.currentXP = 0;
 			this.levelUpXP = 0;
-			this.newMoves();
 		}
 		if (result) {
 			if (this.gController.isFighting()) {
@@ -140,7 +129,7 @@ public class Stats {
 				}
 			}
 			if (!this.generated) {
-				this.evolve(Item.NONE);
+				this.evolve(Items.KEINS);
 			}
 			this.updateStats();
 		}
@@ -232,9 +221,9 @@ public class Stats {
 		}
 	}
 
-	public void evolve(Item i) {
+	public void evolve(Integer i) {
 		if (this.pokemon.evolve(this.gController.getInformation().checkEvolution(this.pokemon, i))) {
-
+			// TODO: Evolution?
 		}
 	}
 
@@ -323,17 +312,13 @@ public class Stats {
 	}
 
 	public int restoreHP(int ammount) {
-		if (this.pokemon.getSecondaryAilments().contains(SecondaryAilment.HEALBLOCK)) {
+		if(this.pokemon.getAilment() == Ailment.FAINTED) {
+			return 0;
+		}
+		if (this.pokemon.getSecondaryAilments().containsKey(SecondaryAilment.HEALBLOCK)) {
 			this.gController.getGameFrame().getFightPanel()
 					.addText(SecondaryAilment.HEALBLOCK.getAffected().replace("@pokemon", this.pokemon.getName()));
 			return 0;
-		}
-		if (this.gController.isFighting()) {
-			if (this.pokemon.equals(this.gController.getFight().getPlayer())) {
-				this.gController.getGameFrame().getFightPanel().getPlayerAnimation().playAnimation("heilung");
-			} else {
-				this.gController.getGameFrame().getFightPanel().getEnemyAnimation().playAnimation("heilung");
-			}
 		}
 		short oldHP = this.currentHP;
 		if (this.currentHP + ammount <= this.stats.get(Stat.HP)) {
@@ -341,10 +326,27 @@ public class Stats {
 		} else {
 			this.currentHP = this.stats.get(Stat.HP);
 		}
+		if (this.gController.isFighting() && (this.currentHP - oldHP) > 0
+				&& this.gController.getGameFrame().getFightPanel().getPokemonLabel(this.pokemon) != null) {
+			this.gController.getGameFrame().getFightPanel().getPokemonLabel(this.pokemon).getAnimationLabel()
+					.playAnimation("heilung");
+		}
 		return this.currentHP - oldHP;
 	}
 
 	public int loseHP(int ammount) {
+		if (this.gController.isFighting()) {
+			Fighting fight = this.gController.getFight();
+			for (int i = 0; i < 4; i++) {
+				if (fight.getPokemon(i) != null && fight.isPlayer(i) == fight.isPlayer(this.pokemon)) {
+					switch (fight.getPokemon(i).getAbility().getId()) {
+					case Abilities.FREUNDESHUT:
+						ammount *= .75;
+						break;
+					}
+				}
+			}
+		}
 		int lost = ammount;
 		if (this.currentHP - ammount <= 0) {
 			lost = this.currentHP;
@@ -362,8 +364,24 @@ public class Stats {
 		this.calcFightStats();
 	}
 
+	public void stopFight() {
+		switch (this.pokemon.getAbility().getId()) {
+		case Abilities.INNERE_KRAFT:
+			this.pokemon.setAilment(Ailment.NONE);
+			break;
+		case Abilities.BELEBEKRAFT:
+			this.restoreHP((int) (this.getStats().get(Stat.HP) * (1.0 / 3.0)));
+			break;
+		}
+	}
+
 	public boolean increaseStat(Stat s, int value) {
 		short currentChange = this.fightStatsChanges.get(s);
+		switch (this.pokemon.getAbility().getId()) {
+		case Abilities.WANKELMUT:
+			value *= 2;
+			break;
+		}
 		if (currentChange == MAX_CHANGE) {
 			this.gController.getGameFrame().getFightPanel()
 					.addText(s.getText() + " von " + this.pokemon.getName() + " kann nicht weiter erhöht werden!");
@@ -385,7 +403,57 @@ public class Stats {
 	}
 
 	public boolean decreaseStat(Stat s, int value) {
+		switch (this.pokemon.getAbility().getId()) {
+		case Abilities.NEUTRALTORSO:
+			this.gController.getGameFrame().getFightPanel()
+					.addText(s.getText() + " kann durch die Fähigkeit Neutraltorso nicht gesenkt werden!");
+			return false;
+		case Abilities.PULVERRAUCH:
+			this.gController.getGameFrame().getFightPanel()
+					.addText(s.getText() + " kann durch die Fähigkeit Puderabwehr nicht gesenkt werden!");
+			return false;
+		}
 		short currentChange = this.fightStatsChanges.get(s);
+		boolean nichtSenkbar = false;
+		switch (this.pokemon.getAbility().getId()) {
+		case Abilities.WANKELMUT:
+			value *= 2;
+			break;
+		}
+		switch (s) {
+		case ACCURACY:
+			if (this.pokemon.getAbility().getId() == Abilities.ADLERAUGE) {
+				nichtSenkbar = true;
+			}
+			break;
+		case ATTACK:
+			if (this.pokemon.getAbility().getId() == Abilities.SCHERENMACHT) {
+				nichtSenkbar = true;
+			}
+			break;
+		case DEFENSE:
+			if (this.pokemon.getAbility().getId() == Abilities.BRUSTBIETER) {
+				nichtSenkbar = true;
+			}
+			break;
+		case EVASION:
+			break;
+		case HP:
+			break;
+		case SPECIALATTACK:
+			break;
+		case SPECIALDEFENSE:
+			break;
+		case SPEED:
+			break;
+		default:
+			break;
+		}
+		if (nichtSenkbar) {
+			this.gController.getGameFrame().getFightPanel().addText(s.getText() + " von " + this.pokemon.getName()
+					+ " kann durch " + this.pokemon.getAbility().getName() + " nicht gesenkt werden!");
+			return false;
+		}
 		if (currentChange == -MAX_CHANGE) {
 			this.gController.getGameFrame().getFightPanel()
 					.addText(s.getText() + " von " + this.pokemon.getName() + " kann nicht weiter gesenkt werden!");
@@ -401,27 +469,41 @@ public class Stats {
 			this.calcFightStats();
 			this.gController.getGameFrame().getFightPanel().addText(s.getText() + " von " + this.pokemon.getName()
 					+ " wurde " + (multipleBoost ? "sehr stark " : "") + "gesenkt!");
+
+			switch (this.pokemon.getAbility().getId()) {
+			case Abilities.SIEGESWILLE:
+				this.increaseStat(Stat.ATTACK, 2);
+				break;
+			}
+
 			return true;
 		}
 	}
 
+	public int getStatChange(Stat s) {
+		return this.fightStatsChanges.get(s);
+	}
+
 	public HashMap<Stat, Double> getFightStats() {
+		calcFightStats();
 		HashMap<Stat, Double> result = new HashMap<Stat, Double>(this.fightStats);
 		switch (this.pokemon.getAilment()) {
 		case BURN:
-			result.put(Stat.ATTACK, (result.get(Stat.ATTACK) * 0.5));
+			if (this.pokemon.getAbility().getId() != Abilities.ADRENALIN) {
+				result.put(Stat.ATTACK, (result.get(Stat.ATTACK) * 0.5));
+			}
 			break;
 		case PARALYSIS:
-			result.put(Stat.SPEED, (result.get(Stat.SPEED) * 0.25));
+			if (this.pokemon.getAbility().getId() != Abilities.RASANZ) {
+				result.put(Stat.SPEED, (result.get(Stat.SPEED) * 0.25));
+			}
 		default:
 			break;
 		}
 
 		switch (this.gController.getFight().getField().getWeather()) {
 		case HAIL:
-			if (Abilities.SCHNEESCHARRER == this.pokemon.getAbility().getId()) {
-				result.put(Stat.SPEED, result.get(Stat.SPEED) * 2);
-			} else if (Abilities.SCHNEEMANTEL == this.pokemon.getAbility().getId()) {
+			if (Abilities.SCHNEEMANTEL == this.pokemon.getAbility().getId()) {
 				result.put(Stat.EVASION, result.get(Stat.EVASION) * 1.2);
 			}
 			break;
@@ -443,22 +525,85 @@ public class Stats {
 		case SUN:
 			if (Abilities.CHLOROPHYLL == this.pokemon.getAbility().getId()) {
 				result.put(Stat.SPEED, result.get(Stat.SPEED) * 2);
-			} else if (Abilities.PFLANZENGABE == this.pokemon.getAbility().getId()) {
-				result.put(Stat.ATTACK, result.get(Stat.ATTACK) * 1.5);
-				result.put(Stat.SPECIALDEFENSE, result.get(Stat.SPECIALDEFENSE) * 1.5);
 			} else if (Abilities.SOLARKRAFT == this.pokemon.getAbility().getId()) {
 				result.put(Stat.SPECIALATTACK, result.get(Stat.SPECIALATTACK) * 1.5);
+			}
+			for (int i = 0; i < 4; i++) {
+				Pokemon check = gController.getFight().getPokemon(i);
+				if (check != null
+						&& gController.getFight().isPlayer(check) == gController.getFight().isPlayer(this.pokemon)) {
+					if (check.getAbility().getId() == Abilities.PFLANZENGABE) {
+						result.put(Stat.ATTACK, result.get(Stat.ATTACK) * 1.5);
+						result.put(Stat.SPECIALDEFENSE, result.get(Stat.SPECIALDEFENSE) * 1.5);
+					}
+				}
 			}
 			break;
 		default:
 			break;
 		}
 
+		switch (this.pokemon.getAbility().getId()) {
+		case Abilities.KRAFTKOLOSS:
+		case Abilities.MENTALKRAFT:
+			result.put(Stat.ATTACK, result.get(Stat.ATTACK) * 2);
+			break;
+		case Abilities.MINUS:
+			Pokemon partner = gController.getFight().getPokemon(gController.getFight().getPartner(this.pokemon));
+			if (partner != null && partner.getAbility().getId() == Abilities.PLUS) {
+				result.put(Stat.SPECIALATTACK, result.get(Stat.SPECIALATTACK) * 1.5);
+			}
+			break;
+		case Abilities.PLUS:
+			partner = gController.getFight().getPokemon(gController.getFight().getPartner(this.pokemon));
+			if (partner != null && partner.getAbility().getId() == Abilities.MINUS) {
+				result.put(Stat.SPECIALATTACK, result.get(Stat.SPECIALATTACK) * 1.5);
+			}
+			break;
+		case Abilities.NOTSCHUTZ:
+			if (this.pokemon.getAilment() != Ailment.FAINTED) {
+				result.put(Stat.DEFENSE, result.get(Stat.DEFENSE) * 1.5);
+			}
+			break;
+		case Abilities.ADRENALIN:
+			if (this.pokemon.getAilment() != Ailment.NONE) {
+				result.put(Stat.ATTACK, result.get(Stat.ATTACK) * 1.5);
+			}
+			break;
+		case Abilities.HITZEWAHN:
+			if (this.pokemon.getAilment() == Ailment.BURN) {
+				result.put(Stat.SPECIALATTACK, result.get(Stat.SPECIALATTACK) * 1.5);
+			}
+			break;
+		case Abilities.GIFTWAHN:
+			if (this.pokemon.getAilment() == Ailment.HEAVY_POISON || this.pokemon.getAilment() == Ailment.POISON) {
+				result.put(Stat.ATTACK, result.get(Stat.ATTACK) * 1.5);
+			}
+			break;
+		case Abilities.RASANZ:
+			if (this.pokemon.getAilment() != Ailment.NONE) {
+				result.put(Stat.SPEED, result.get(Stat.SPEED) * 1.5);
+			}
+			break;
+		case Abilities.SAUMSELIG:
+			if (gController.getFight().getTurn() - this.pokemon.getFightingSince() < 5) {
+				result.put(Stat.SPEED, result.get(Stat.SPEED) * .5);
+				result.put(Stat.SPECIALATTACK, result.get(Stat.SPECIALATTACK) * .5);
+				result.put(Stat.SPECIALDEFENSE, result.get(Stat.SPECIALDEFENSE) * .5);
+			}
+		case Abilities.SCHWÄCHLING:
+			if (this.getCurrentHP() <= this.getStats().get(Stat.HP) * 0.5) {
+				result.put(Stat.ATTACK, result.get(Stat.ATTACK) * .5);
+				result.put(Stat.SPECIALATTACK, result.get(Stat.SPECIALATTACK) * .5);
+			}
+		}
+
 		if (this.gController.getFight().getField().isTrickRoom()) {
 			result.put(Stat.SPEED, result.get(Stat.SPEED) * -1);
 		}
 
-		return result;
+		return this.gController.getFight().getField().updateFightStats(result,
+				this.gController.getFight().isPlayer(this.pokemon));
 	}
 
 	public int getCurrentXP() {
@@ -519,8 +664,7 @@ public class Stats {
 		this.currentXP = saveData.get("current_xp").getAsInt();
 		this.currentHP = saveData.get("current_hp").getAsShort();
 		this.nature = saveData.get("nature") != null
-				? Nature.valueOf(saveData.get("nature").getAsString().toUpperCase())
-				: Nature.getRandomNature();
+				? Nature.valueOf(saveData.get("nature").getAsString().toUpperCase()) : Nature.getRandomNature();
 	}
 
 	public Random getRNG() {
@@ -530,6 +674,10 @@ public class Stats {
 	public void setBaseStats(HashMap<Stat, Short> baseStats) {
 		this.baseStats = new HashMap<>(baseStats);
 		this.updateStats();
+	}
+
+	public short getBaseStat(Stat s) {
+		return this.baseStats.get(s);
 	}
 
 	public void increaseEV(Stat stat, short value) {

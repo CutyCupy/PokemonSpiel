@@ -5,9 +5,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 
-import de.alexanderciupka.pokemon.characters.Character;
-import de.alexanderciupka.pokemon.characters.Player;
 import de.alexanderciupka.pokemon.characters.Team;
+import de.alexanderciupka.pokemon.characters.ai.AI;
+import de.alexanderciupka.pokemon.characters.ai.WildPokemonAI;
+import de.alexanderciupka.pokemon.characters.types.Character;
+import de.alexanderciupka.pokemon.characters.types.NPC;
+import de.alexanderciupka.pokemon.characters.types.Player;
+import de.alexanderciupka.pokemon.constants.Abilities;
+import de.alexanderciupka.pokemon.constants.Moves;
+import de.alexanderciupka.pokemon.main.Main;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.menu.SoundController;
 import de.alexanderciupka.pokemon.pokemon.Ailment;
@@ -35,10 +41,6 @@ public class Fighting {
 	private Pokemon leftOpponentPokemon;
 	private Pokemon rightOpponentPokemon;
 
-	// private Team playerTeam;
-	// private Pokemon player;
-	// private Team enemyTeam;
-	// private Pokemon enemy;
 	private FightOption currentFightOption;
 	private Field field;
 
@@ -49,7 +51,7 @@ public class Fighting {
 
 	private HashSet<Pokemon> leftParticipants;
 	private HashSet<Pokemon> rightParticipants;
-	// private Character enemyCharacter;
+
 	private Random rng;
 	private GameController gController;
 	private boolean escapable;
@@ -58,8 +60,6 @@ public class Fighting {
 	private HashMap<Pokemon, Move> lastMoves;
 	private HashMap<Pokemon, Move> chargeMoves;
 	private HashMap<Pokemon, Boolean> needsRecharge;
-
-	// private SimpleEntry<Boolean, Boolean> visible;
 
 	private HashMap<Pokemon, Boolean> visible;
 
@@ -71,21 +71,29 @@ public class Fighting {
 
 	private HashMap<Pokemon, Attack> turnAttacks;
 
-	public static final int LEFT_PLAYER = 1;
-	public static final int RIGHT_PLAYER = 2;
-	public static final int LEFT_OPPONENT = 3;
-	public static final int RIGHT_OPPONENT = 4;
+	public static final int LEFT_PLAYER = 0;
+	public static final int RIGHT_PLAYER = 1;
+	public static final int LEFT_OPPONENT = 2;
+	public static final int RIGHT_OPPONENT = 3;
 
+	private boolean activeTurn;
+
+	public static boolean waiting = false;
+
+	private ArrayList<Integer> alreadyActed;
+	
+	private ArrayList<AI> ais;
+	
 	/**
 	 * Starts a wild 1v1 Battle.
 	 * 
 	 * @param pokemon
 	 *            wild pokemon
 	 * @param escapable
-	 *            true when the player can run away from the battle. might not be
-	 *            possible in some "story" wild pokemon fights. Can still be true
-	 *            even if the opponent Pokemon's ability denies any attempt to run
-	 *            away, because this will be checked later.
+	 *            true when the player can run away from the battle. might not
+	 *            be possible in some "story" wild pokemon fights. Can still be
+	 *            true even if the opponent Pokemon's ability denies any attempt
+	 *            to run away, because this will be checked later.
 	 * @author CutyCupy
 	 */
 	public Fighting(Pokemon pokemon, boolean escapable) {
@@ -100,10 +108,10 @@ public class Fighting {
 	 * @param right
 	 *            "second" wild Pokemon
 	 * @param escapable
-	 *            true when the player can run away from the battle. might not be
-	 *            possible in some "story" wild pokemon fights. Can still be true
-	 *            even if one of the opponent Pokemons' ability denies any attempt
-	 *            to run away, because this will be checked later.
+	 *            true when the player can run away from the battle. might not
+	 *            be possible in some "story" wild pokemon fights. Can still be
+	 *            true even if one of the opponent Pokemons' ability denies any
+	 *            attempt to run away, because this will be checked later.
 	 * @author CutyCupy
 	 */
 	public Fighting(Pokemon left, Pokemon right, boolean escapable) {
@@ -119,19 +127,17 @@ public class Fighting {
 	 * @param right
 	 *            "second" wild Pokemon
 	 * @param escapable
-	 *            true when the player can run away from the battle. might not be
-	 *            possible in some "story" wild pokemon fights. Can still be true
-	 *            even if one of the opponent Pokemons' ability denies any attempt
-	 *            to run away, because this will be checked later.
+	 *            true when the player can run away from the battle. might not
+	 *            be possible in some "story" wild pokemon fights. Can still be
+	 *            true even if one of the opponent Pokemons' ability denies any
+	 *            attempt to run away, because this will be checked later.
 	 * @author CutyCupy
 	 */
 	public Fighting(Character teamMate, Pokemon left, Pokemon right, boolean escapable) {
 		this();
 		this.leftPlayer = this.gController.getMainCharacter();
-		this.rightPlayer = teamMate == null ? this.gController.getMainCharacter() : teamMate;
 
 		this.leftPlayerTeam = this.leftPlayer.getTeam();
-		this.rightPlayerTeam = this.rightPlayer.getTeam();
 
 		this.leftOpponent = null;
 		this.rightOpponent = null;
@@ -140,15 +146,27 @@ public class Fighting {
 		this.rightOpponentTeam = null;
 
 		this.leftPlayerPokemon = this.getFirstNonFightingPokemon(this.leftPlayerTeam);
-		this.rightPlayerPokemon = this.getFirstNonFightingPokemon(this.rightPlayerTeam);
 
 		this.leftOpponentPokemon = left;
 		this.rightOpponentPokemon = right;
 
 		this.escapable = escapable;
 
-		this.isDouble = right != null;
+		if (right != null) {
+			this.rightPlayer = teamMate == null ? this.gController.getMainCharacter() : teamMate;
+			this.rightPlayerTeam = this.rightPlayer.getTeam();
+			this.rightPlayerPokemon = this.getFirstNonFightingPokemon(this.rightPlayerTeam);
+			this.isDouble = true;
+		} else {
+			this.isDouble = false;
+		}
 
+		this.setPlayer(true);
+		this.setPlayer(false);
+		this.setEnemy(true);
+		this.setEnemy(false);
+
+		this.init();
 	}
 
 	/**
@@ -168,8 +186,8 @@ public class Fighting {
 	 * @param leftOpponent
 	 *            "left" opponent on the field.
 	 * @param rightOpponent
-	 *            "right" opponent on the field. if left and right opponent are the
-	 *            same its a 1v1 double battle
+	 *            "right" opponent on the field. if left and right opponent are
+	 *            the same its a 1v1 double battle
 	 * @author CutyCupy
 	 */
 	public Fighting(Character leftOpponent, Character rightOpponent) {
@@ -177,7 +195,8 @@ public class Fighting {
 	}
 
 	/**
-	 * Starts a 2v2 Double fight with one teammate against possible two opponents.
+	 * Starts a 2v2 Double fight with one teammate against possible two
+	 * opponents.
 	 * 
 	 * @param teamMate
 	 *            "teammate" who will fight along the player.
@@ -189,6 +208,7 @@ public class Fighting {
 	 * @author CutyCupy
 	 */
 	public Fighting(Character teamMate, Character leftOpponent, Character rightOpponent) {
+		this();
 		this.leftPlayer = this.gController.getMainCharacter();
 		this.leftPlayerTeam = this.leftPlayer.getTeam();
 		this.leftOpponent = leftOpponent;
@@ -209,6 +229,23 @@ public class Fighting {
 			this.isDouble = false;
 		}
 
+		this.setPlayer(true);
+		this.setPlayer(false);
+		this.setEnemy(true);
+		this.setEnemy(false);
+
+		this.init();
+	}
+	
+	public void init() {
+		this.ais = new ArrayList<>();
+		for(int i = 0; i < 4; i++) {
+			if(this.getCharacter(i) instanceof NPC || this.getPokemon(i) != null) {
+				AI ai = new WildPokemonAI();
+				ai.setPosition(i);
+				this.ais.add(ai);
+			}
+		}
 	}
 
 	// public Fighting(Pokemon pokemonTwo) {
@@ -258,6 +295,9 @@ public class Fighting {
 		this.rightParticipants = new HashSet<Pokemon>();
 		// this.visible = new SimpleEntry<Boolean, Boolean>(true, true);
 		this.visible = new HashMap<>();
+
+		this.field = new Field(this.gController.getMainCharacter().getCurrentRoute().getWeather());
+
 	}
 
 	private Pokemon getFirstNonFightingPokemon(Team team) {
@@ -307,21 +347,24 @@ public class Fighting {
 				order.add(this.getOrderIndex(order, attack), attack);
 			}
 		}
+		System.out.println(order);
 		return order.toArray(new Attack[order.size()]);
 	}
 
 	public Pokemon[] getSpeedOrder() {
 		ArrayList<Pokemon> order = new ArrayList<>();
 		for (Pokemon p : new Pokemon[] { this.leftPlayerPokemon, this.leftOpponentPokemon, this.rightOpponentPokemon,
-				this.leftOpponentPokemon }) {
+				this.rightPlayerPokemon }) {
 			if (p != null) {
 				int index = 0;
 				for (Pokemon cur : order) {
-					if (this.field.updateFightStats(cur, this.isPlayer(cur)).get(Stat.SPEED) < this.field
-							.updateFightStats(p, this.isPlayer(p)).get(Stat.SPEED)) {
+					if (this.field.updateFightStats(cur.getStats().getFightStats(), this.isPlayer(cur))
+							.get(Stat.SPEED) < this.field
+									.updateFightStats(p.getStats().getFightStats(), this.isPlayer(p)).get(Stat.SPEED)) {
 						break;
-					} else if (this.field.updateFightStats(cur, this.isPlayer(cur)).get(Stat.SPEED) == this.field
-							.updateFightStats(p, this.isPlayer(p)).get(Stat.SPEED)) {
+					} else if (this.field.updateFightStats(cur.getStats().getFightStats(), this.isPlayer(cur))
+							.get(Stat.SPEED) == this.field
+									.updateFightStats(p.getStats().getFightStats(), this.isPlayer(p)).get(Stat.SPEED)) {
 						if (this.rng.nextBoolean()) {
 							break;
 						}
@@ -340,10 +383,15 @@ public class Fighting {
 			if (attack.getPriority() > compare.getPriority()) {
 				return i;
 			} else if (attack.getPriority() == compare.getPriority()) {
-				double speedA = this.field.updateFightStats(attack.getSource(), this.isPlayer(attack.getSource()))
-						.get(Stat.SPEED);
-				double speedC = this.field.updateFightStats(attack.getSource(), this.isPlayer(compare.getSource()))
-						.get(Stat.SPEED);
+				if (attack.getSource().getAbility().getId() == Abilities.ZEITSPIEL) {
+					return i;
+				} else if (attack.getSource().getAbility().getId() == Abilities.ZEITSPIEL) {
+					continue;
+				}
+				double speedA = this.field.updateFightStats(attack.getSource().getStats().getFightStats(),
+						this.isPlayer(attack.getSource())).get(Stat.SPEED);
+				double speedC = this.field.updateFightStats(compare.getSource().getStats().getFightStats(),
+						this.isPlayer(compare.getSource())).get(Stat.SPEED);
 				if (speedA > speedC) {
 					return i;
 				} else if (speedA == speedC) {
@@ -357,10 +405,14 @@ public class Fighting {
 	}
 
 	public boolean isPlayer(Pokemon p) {
-		if (p.equals(this.leftPlayerPokemon) || p.equals(this.rightPlayerPokemon)) {
+		if (p != null && (p.equals(this.leftPlayerPokemon) || p.equals(this.rightPlayerPokemon))) {
 			return true;
 		}
 		return false;
+	}
+
+	public boolean isPlayer(int i) {
+		return i == LEFT_PLAYER || i == RIGHT_PLAYER;
 	}
 
 	// public boolean isPlayerStart(Move playerMove, Move enemyMove) {
@@ -384,88 +436,171 @@ public class Fighting {
 	// }
 
 	public void startRound() {
+
+		this.alreadyActed = new ArrayList<>();
+
+		this.activeTurn = true;
 		for (Attack attack : this.getOrder()) {
-			if (attack.getSource().getAilment() != Ailment.FAINTED) {
-				if (attack.getTargets() != null) {
-					for (Pokemon target : attack.getTargets()) {
-						this.attack(attack.getSource(), target, attack.getMove());
+			if (attack.getSource().getAilment() != Ailment.FAINTED && getIndex(attack.getSource()) != -1) {
+				if (attack.getTargets() != null && attack.getItem() == null) {
+					//TODO: Check for disabled move
+					int pp = 1;
+					for (int t : attack.getTargets()) {
+						Pokemon target = getPokemon(t);
+						if (target == null) {
+							switch (attack.getMove().getTarget()) {
+							case ALL_OPPONENTS:
+							case ALL_OTHER_POKEMON:
+							case ALL_POKEMON:
+							case USER_AND_ALLIES:
+								continue;
+							case RANDOM_OPPONENT:
+							case SELECTED_POKEMON:
+							case SELECTED_POKEMON_ME_FIRST:
+							case SPECIFIC_MOVE:
+							case USER_OR_ALLY:
+							case OPPONENTS_FIELD:
+							case USERS_FIELD:
+								target = getPokemon(getPartner(t));
+								break;
+							default:
+								break;
+							}
+						}
+						if (target != null) {
+							switch (target.getAbility().getId()) {
+							case Abilities.ERZWINGER:
+								pp += 1;
+								break;
+							}
+							this.attack(attack.getSource(), target, attack.getMove());
+						}
 					}
-				} else if (attack.getItem() != null) {
-					attack.getSource().useItem(null, attack.getItem()); // TODO: Trainers can have items too
+					for (int i = 0; i < pp; i++) {
+						attack.getMove().reducePP();
+					}
 				} else if (attack.getSwap() != null) {
 					this.swap(attack.getSource(), attack.getSwap());
+				} else {
+					System.out.println(attack.getMove());
 				}
 			}
+			this.alreadyActed.add(this.getIndex(attack.getSource()));
+			while (waiting) {
+				Thread.yield();
+			}
 		}
+		this.activeTurn = false;
 		this.endTurn();
 	}
 
-	private void swap(Pokemon current, Pokemon next) {
-		int position = 0;
-		if (current.equals(this.leftPlayerPokemon)) {
-			position = 1;
-		} else if (current.equals(this.rightPlayerPokemon)) {
-			position = 2;
-		} else if (current.equals(this.leftOpponentPokemon)) {
-			position = 3;
+	public int getPartner(int index) {
+		switch (index) {
+		case Fighting.LEFT_PLAYER:
+			return Fighting.RIGHT_PLAYER;
+		case Fighting.RIGHT_PLAYER:
+			return Fighting.LEFT_PLAYER;
+		case Fighting.LEFT_OPPONENT:
+			return Fighting.RIGHT_OPPONENT;
+		case Fighting.RIGHT_OPPONENT:
+			return Fighting.LEFT_OPPONENT;
+		default:
+			return -1;
+		}
+	}
+
+	public int getPartner(Pokemon pokemon) {
+		return getPartner(this.getIndex(pokemon));
+	}
+
+	public void swap(Pokemon current, Pokemon next) {
+		if (isActiveTurn()) {
+			for (int i = 0; i < 4; i++) {
+				if (getPokemon(i) != null && isPlayer(i) != isPlayer(current)) {
+					switch (getPokemon(i).getAbility().getId()) {
+					case Abilities.WEGSPERRE:
+						if (!current.hasType(Type.GHOST)) {
+							this.gController.getGameFrame().getFightPanel()
+									.addText(current.getName() + " ist gefangen und kann nicht wechseln!", false);
+							return;
+						}
+						break;
+					case Abilities.AUSWEGLOS:
+						if (Type.getEffectiveness(Type.GROUND, getPokemon(i)) > Type.USELESS) {
+							this.gController.getGameFrame().getFightPanel()
+									.addText(current.getName() + " ist gefangen und kann nicht wechseln!", false);
+							return;
+						}
+						break;
+					case Abilities.MAGNETFALLE:
+						if (current.hasType(Type.STEEL)) {
+							this.gController.getGameFrame().getFightPanel()
+									.addText(current.getName() + " ist gefangen und kann nicht wechseln!", false);
+							return;
+						}
+						break;
+					}
+				}
+			}
+			Character trainer = getTrainer(current);
+			switch (getIndex(current)) {
+			case LEFT_OPPONENT:
+				clearParticipants(true);
+				break;
+			case RIGHT_OPPONENT:
+				clearParticipants(false);
+				break;
+			default:
+				break;
+			}
+			
+			trainer.getTeam().swapPokemon(trainer.getTeam().getIndex(current), trainer.getTeam().getIndex(next));
+			
+			this.gController.getGameFrame().getFightPanel()
+					.addText(trainer.getName() + " ruft " + current.getName() + " zurück!");
+			SoundController.getInstance().playSound(SoundController.POKEBALL_CATCHING, false);
+			this.setVisible(current, false);
+			this.setVisible(next, false);
+			this.gController.getGameFrame().getFightPanel().updateFight();
+			this.gController.getGameFrame().getFightPanel()
+					.addText(trainer.getName() + " setzt " + next.getName() + " ein!");
+			this.setVisible(next, true);
+			switch(getIndex(current)) {
+			case Fighting.LEFT_OPPONENT:
+				this.setEnemy(true);
+				break;
+			case Fighting.LEFT_PLAYER:
+				this.setPlayer(true);
+				break;
+			case Fighting.RIGHT_OPPONENT:
+				this.setEnemy(false);
+				break;
+			case Fighting.RIGHT_PLAYER:
+				this.setPlayer(false);
+				break;
+			}
+			this.gController.getGameFrame().getFightPanel().updateFight();
+
+			this.addParticipants(true);
+			this.addParticipants(false);
+
+			// for (Pokemon p : turnAttacks.keySet()) {
+			// turnAttacks.get(p).updateTargets(current, next);
+			// }
 		} else {
-			position = 4;
+			this.registerAttack(new Attack(current, next));
 		}
-		this.sendBack(current, position);
-		this.sendOut(next, position);
+
 	}
 
-	public void sendBack(Pokemon current, int position) {
-		Character c = null;
-		switch (position) {
-		case 1:
-			c = this.leftPlayer;
-			break;
-		case 2:
-			c = this.rightPlayer;
-			break;
-		case 3:
-			c = this.leftOpponent;
-			break;
-		default:
-			c = this.rightOpponent;
-			break;
+	public int getIndex(Pokemon p) {
+		for (int i : new int[] { Fighting.LEFT_PLAYER, Fighting.RIGHT_PLAYER, Fighting.LEFT_OPPONENT,
+				Fighting.RIGHT_OPPONENT }) {
+			if (p.equals(this.getPokemon(i))) {
+				return i;
+			}
 		}
-		if (c == null) {
-			return;
-		}
-		this.gController.getGameFrame().getFightPanel()
-				.addText(c.getName() + " ruft " + current.getName() + " zurück!");
-		SoundController.getInstance().playSound(SoundController.POKEBALL_CATCHING, true);
-	}
-
-	public void sendOut(Pokemon next, int position) {
-		this.setVisible(next, false);
-		Character c = null;
-		switch (position) {
-		case 1:
-			c = this.leftPlayer;
-			this.leftPlayerPokemon = next;
-			break;
-		case 2:
-			c = this.rightPlayer;
-			this.rightPlayerPokemon = next;
-			break;
-		case 3:
-			c = this.leftOpponent;
-			this.leftOpponentPokemon = next;
-			break;
-		default:
-			c = this.rightOpponent;
-			this.rightOpponentPokemon = next;
-			break;
-		}
-		if (c == null) {
-			return;
-		}
-		this.gController.getGameFrame().getFightPanel().addText(c.getName() + " setzt " + next.getName() + " ein!");
-		SoundController.getInstance().playSound(SoundController.POKEBALL_OUT, true);
-		this.setVisible(next, true);
+		return -1;
 	}
 
 	private Character getTrainer(Pokemon p) {
@@ -482,20 +617,25 @@ public class Fighting {
 
 	// public void startRound(Move playerMove, Move enemyMove) {
 	// if (playerMove == null) {
-	// playerMove = this.gController.getInformation().getMoveByName("Verzweifler");
+	// playerMove =
+	// this.gController.getInformation().getMoveByName("Verzweifler");
 	// }
 	// if (enemyMove == null) {
-	// enemyMove = this.gController.getInformation().getMoveByName("Verzweifler");
+	// enemyMove =
+	// this.gController.getInformation().getMoveByName("Verzweifler");
 	// }
-	// boolean playerStarts = this.gController.getFight().isPlayerStart(playerMove,
+	// boolean playerStarts =
+	// this.gController.getFight().isPlayerStart(playerMove,
 	// enemyMove);
 	// if (playerStarts) {
-	// if (this.gController.getFight().attack(this.player, this.enemy, playerMove))
+	// if (this.gController.getFight().attack(this.player, this.enemy,
+	// playerMove))
 	// {
 	// this.gController.getFight().attack(this.enemy, this.player, enemyMove);
 	// }
 	// } else {
-	// if (this.gController.getFight().attack(this.enemy, this.player, enemyMove)) {
+	// if (this.gController.getFight().attack(this.enemy, this.player,
+	// enemyMove)) {
 	// this.gController.getFight().attack(this.player, this.enemy, playerMove);
 	// }
 	// }
@@ -507,19 +647,12 @@ public class Fighting {
 		if (this.gController.isFighting()) {
 			for (Pokemon p : this.getSpeedOrder()) {
 				p.afterTurnDamage();
+	 			this.getField().getWeather().onEndOfTurn(p);
 				if (this.checkDead(p)) {
-					this.gController.getGameFrame().getFightPanel().addText(p.getName() + " wurde besiegt!");
-					this.gController.getGameFrame().getFightPanel().updatePanels();
-					if (this.isPlayer(p)) {
-						this.gController.loseFight();
-					} else {
-						if (!this.gController.winFight()) {
-							this.gController.getGameFrame().getFightPanel().setEnemy();
-							this.gController.getGameFrame().getFightPanel().updatePanels();
-						}
-					}
+					this.onDeath(p);
 				}
 			}
+			this.getField().endOfTurn();
 			this.increaseTurn();
 		}
 	}
@@ -560,30 +693,50 @@ public class Fighting {
 				this.setVisible(attacker, true);
 			}
 		}
+		this.gController.getGameFrame().getFightPanel().updateFight();
 		this.gController.getGameFrame().getFightPanel().updatePanels();
 		boolean dead = false;
 		if (this.checkDead(defender)) {
-			this.gController.getGameFrame().getFightPanel().addText(defender.getName() + " wurde besiegt!");
-			this.gController.getGameFrame().getFightPanel().updatePanels();
-			if (this.isPlayer(defender)) {
-				this.gController.loseFight();
-			} else {
-				if (!this.gController.winFight()) {
-					this.gController.getGameFrame().getFightPanel().setEnemy();
-					this.gController.getGameFrame().getFightPanel().updatePanels();
-				}
-			}
+			onDeath(defender);
 			dead = true;
 		}
 		if (this.checkDead(attacker)) {
-			this.gController.getGameFrame().getFightPanel().addText(attacker.getName() + " wurde besiegt!");
-			if (!this.gController.winFight()) {
-				this.gController.getGameFrame().getFightPanel().setEnemy();
-				this.gController.getGameFrame().getFightPanel().updatePanels();
-			}
+			onDeath(attacker);
 			dead = true;
 		}
 		return !dead;
+	}
+
+	public void onDeath(Pokemon dead) {
+		this.gController.getGameFrame().getFightPanel().addText(dead.getName() + " wurde besiegt!");
+		SoundController.getInstance().playBattlecry(dead.getId());
+		this.setVisible(dead, false);
+		this.gController.getGameFrame().getFightPanel().updatePanels();
+		if (this.isPlayer(dead)) {
+			this.gController.loseFight();
+		} else {
+			if (!this.gController.winFight(dead)) {
+				this.gController.getGameFrame().getFightPanel().updateFight();
+				this.gController.getGameFrame().getFightPanel().updatePanels();
+			}
+		}
+	}
+
+	public void remove(Pokemon p) {
+		switch (getIndex(p)) {
+		case Fighting.LEFT_PLAYER:
+			this.leftOpponentPokemon = null;
+			break;
+		case Fighting.RIGHT_PLAYER:
+			this.rightOpponentPokemon = null;
+			break;
+		case Fighting.LEFT_OPPONENT:
+			this.leftOpponentPokemon = null;
+			break;
+		case Fighting.RIGHT_OPPONENT:
+			this.rightOpponentPokemon = null;
+			break;
+		}
 	}
 
 	public boolean hit(Pokemon attacker, Pokemon defender, Move move) {
@@ -605,10 +758,82 @@ public class Fighting {
 			return true;
 		}
 
-		double hitChance = move.getAccuracy() * (attacker.getStats().getFightStats().get(Stat.ACCURACY)
+		double accuracy = move.getAccuracy();
+		
+		switch (defender.getAbility().getId()) {
+		case Abilities.FUSSANGEL:
+			if (defender.getSecondaryAilments().containsKey(SecondaryAilment.CONFUSION)) {
+				accuracy *= .5;
+			}
+			break;
+		case Abilities.STARTHILFE:
+			if (move.getMoveType(attacker) == Type.ELECTRIC) {
+				defender.getStats().increaseStat(Stat.SPEED, 1);
+				this.gController.getGameFrame().getFightPanel().addText(defender.getAbility().getName() + " "
+						+ "verhindert " + move.getName() + " und erhöht seine Initiative!");
+				return true;
+			}
+			break;
+		case Abilities.SCHILDLOS:
+			accuracy = Double.MAX_VALUE;
+			break;
+		case Abilities.WUNDERHAUT:
+			if (move.getCategory().contains("ailment") && accuracy > 50) {
+				accuracy = 50;
+			}
+		}
+
+		switch (attacker.getAbility().getId()) {
+		case Abilities.FACETTENAUGE:
+			accuracy *= 1.3;
+			break;
+		case Abilities.ÜBEREIFER:
+			accuracy *= 0.8;
+			break;
+		case Abilities.SCHILDLOS:
+			accuracy = Double.MAX_VALUE;
+			break;
+		case Abilities.TRIUMPHSTERN:
+			accuracy *= 1.1;
+			break;
+		}
+		
+		if(this.getPokemon(this.getPartner(attacker)) != null) {
+			switch(this.getPokemon(this.getPartner(attacker)).getAbility().getId()) {
+			case Abilities.TRIUMPHSTERN:
+				accuracy *= 1.1;
+				break;
+			}
+		}
+
+		double hitChance = accuracy * (attacker.getStats().getFightStats().get(Stat.ACCURACY)
 				/ defender.getStats().getFightStats().get(Stat.EVASION));
-		move.reducePP();
 		float p = this.rng.nextFloat() * 100;
+
+		Pokemon[] pokemons = this.getSpeedOrder();
+		for (int i = 0; i < pokemons.length; i++) {
+			if (pokemons[i] != null && this.getIndex(pokemons[i]) != this.getIndex(attacker)) {
+				switch (pokemons[i].getAbility().getId()) {
+				case Abilities.BLITZFÄNGER:
+					if (move.getMoveType(attacker) == Type.ELECTRIC) {
+						this.gController.getGameFrame().getFightPanel()
+								.addText("Blitzfänger von " + pokemons[i].getName() + " wirkt!");
+						pokemons[i].getStats().increaseStat(Stat.SPECIALATTACK, 1);
+						return true;
+					}
+					break;
+				case Abilities.STURMSOG:
+					if (move.getMoveType(attacker) == Type.WATER) {
+						this.gController.getGameFrame().getFightPanel()
+								.addText("Sturmsog von " + pokemons[i].getName() + " wirkt!");
+						pokemons[i].getStats().increaseStat(Stat.SPECIALATTACK, 1);
+						return true;
+					}
+					break;
+				}
+			}
+		}
+
 		if (p < hitChance) {
 			for (String category : move.getCategory().split("\\+")) {
 				if (category.equals("recharge")) {
@@ -618,31 +843,99 @@ public class Fighting {
 					attacker.getStats().loseHP(attacker.getStats().getCurrentHP());
 				}
 			}
-			if (defender.getSecondaryAilments().contains(SecondaryAilment.PROTECTED)) {
+			if (defender.getSecondaryAilments().containsKey(SecondaryAilment.PROTECTED)) {
 				this.gController.getGameFrame().getFightPanel()
 						.addText(SecondaryAilment.PROTECTED.getAffected().replace("@pokemon", defender.getName()));
 				return true;
 			}
-			int hits = this.rng.nextInt(move.getMaxHits() - move.getMinHits() + 1) + move.getMinHits();
-			switch (move.getTarget()) {
-			case ALL:
-				this.damageCalculation(attacker, defender, move, hits);
-				this.damageCalculation(attacker, attacker, move, hits);
-				break;
-			case OPPONENT:
-				this.damageCalculation(attacker, defender, move, hits);
-				break;
-			case USER:
-				this.damageCalculation(attacker, attacker, move, hits);
-				break;
-			default:
-				break;
 
+			int hits = this.rng.nextInt(move.getMaxHits() - move.getMinHits() + 1) + move.getMinHits();
+			switch (attacker.getAbility().getId()) {
+			case Abilities.WERTELINK:
+				hits = move.getMaxHits();
+				break;
 			}
+			this.damageCalculation(attacker, defender, move, hits);
 			this.gController.sleep(150);
+			if (move.getDamageClass() == DamageClass.PHYSICAL) {
+				switch (defender.getAbility().getId()) {
+				case Abilities.TASTFLUCH:
+					if (Main.RNG.nextFloat() < getP(hits, 0.3)) {
+						move.setDisabled(true);
+						attacker.addSecondaryAilment(this.getIndex(defender), SecondaryAilment.DISABLE);
+						this.gController.getGameFrame().getFightPanel().addText(
+								move.getName() + " wurd durch " + defender.getAbility().getName() + " blockiert!");
+					}
+					break;
+				case Abilities.STATIK:
+					if (Main.RNG.nextFloat() < getP(hits, 0.3)) {
+						attacker.setAilment(Ailment.PARALYSIS);
+					}
+					break;
+				case Abilities.GIFTDORN:
+					if (Main.RNG.nextFloat() < getP(hits, 0.3)) {
+						attacker.setAilment(Ailment.POISON);
+					}
+					break;
+				case Abilities.FLAMMKÖRPER:
+					if (Main.RNG.nextFloat() < getP(hits, 0.3)) {
+						attacker.setAilment(Ailment.BURN);
+					}
+					break;
+				case Abilities.SPORENWIRT:
+					if (Main.RNG.nextFloat() < getP(hits, 0.3)
+							&& attacker.getAbility().getId() != Abilities.WETTERFEST) {
+						switch (Main.RNG.nextInt(3)) {
+						case 0:
+							attacker.setAilment(Ailment.PARALYSIS);
+							break;
+						case 1:
+							attacker.setAilment(Ailment.POISON);
+							break;
+						case 2:
+							attacker.setAilment(Ailment.SLEEP);
+							break;
+						}
+					}
+					break;
+				case Abilities.CHARMEBOLZEN:
+					if (Main.RNG.nextFloat() < getP(hits, 0.3)) {
+						attacker.addSecondaryAilment(getIndex(defender), SecondaryAilment.INFATUATION);
+					}
+					break;
+				case Abilities.FINALSCHLAG:
+					if (defender.getStats().getCurrentHP() == 0) {
+						boolean boom = true;
+						for (Pokemon poke : this.getSpeedOrder()) {
+							if (poke != null && poke.getAbility().getId() == Abilities.FEUCHTIGKEIT) {
+								boom = false;
+							}
+						}
+						if (boom) {
+							this.gController.getGameFrame().getFightPanel().addText(attacker.getName()
+									+ " erleidet Schaden durch " + defender.getAbility().getName() + "!");
+							attacker.getStats().loseHP((int) (attacker.getStats().getStats().get(Stat.HP) * 0.25));
+						}
+					}
+					break;
+				}
+				switch (attacker.getAbility().getId()) {
+				case Abilities.GIFTGRIFF:
+					if (Main.RNG.nextFloat() < getP(hits, 0.3)) {
+						this.gController.getGameFrame().getFightPanel()
+								.addText(attacker.getAbility().getName() + " von " + attacker.getName() + " wirkt!");
+						defender.setAilment(Ailment.POISON);
+					}
+					break;
+				}
+			}
 			return true;
 		}
 		return false;
+	}
+
+	private double getP(int hits, double p) {
+		return 1 - Math.pow(1 - p, hits);
 	}
 
 	public void buff(Pokemon pokemon, Move move) {
@@ -653,6 +946,11 @@ public class Fighting {
 			}
 			if (this.gController.isFighting()) {
 				this.playAnimation(pokemon, change < 0 ? "debuff" : "buff");
+			}
+			switch (pokemon.getAbility().getId()) {
+			case Abilities.UMKEHRUNG:
+				change *= -1;
+				break;
 			}
 			if (change < 0) {
 				pokemon.getStats().decreaseStat(s, Math.abs(change));
@@ -686,109 +984,495 @@ public class Fighting {
 	private void damageCalculation(Pokemon attacker, Pokemon defense, Move usedMove, int ammount) {
 		Stats attackerStats = attacker.getStats();
 		Stats defenderStats = defense.getStats();
-		double weakness = Type.getEffectiveness(usedMove.getMoveType(), defense);
-		if (!this.isVisible(defense)) {
+
+		double weakness = Type.getEffectiveness(usedMove.getMoveType(attacker), defense);
+		if (!this.isVisible(defense) || defense == null) {
 			this.gController.getGameFrame().getFightPanel().addText("Es ist kein Gegner zu sehen!", true);
 			return;
 		}
 		if (weakness == Type.USELESS) {
-			this.gController.getGameFrame().getFightPanel().addText("Die Attacke zeigte keine Wirkung!", true);
+			this.gController.getGameFrame().getFightPanel()
+					.addText("Die Attacke zeigt keine Wirkung auf " + defense.getName() + "!", true);
 			return;
 		}
-		double damage = usedMove.getPower() * Type.calcSTAB(attacker, usedMove);
+
+		int power = this.field.getWeather().getPower(attacker, usedMove);
+
+		switch (usedMove.getId()) {
+		case Moves.STRAUCHLER:
+		case Moves.FUSSKICK:
+			if (defense.getWeight() <= 10) {
+				power = 20;
+			} else if (defense.getWeight() <= 25) {
+				power = 40;
+			} else if (defense.getWeight() <= 50) {
+				power = 60;
+			} else if (defense.getWeight() <= 100) {
+				power = 80;
+			} else if (defense.getWeight() <= 200) {
+				power = 100;
+			} else {
+				power = 120;
+			}
+			break;
+		case Moves.RAMMBOSS:
+		case Moves.BRANDSTEMPEL:
+			double ratio = (defense.getWeight() * 1.0) / (attacker.getWeight() * 1.0);
+			if (ratio <= .2) {
+				power = 120;
+			} else if (ratio <= .25) {
+				power = 100;
+			} else if (ratio <= .33) {
+				power = 80;
+			} else if (ratio <= .5) {
+				power = 60;
+			} else {
+				power = 40;
+			}
+			break;
+		}
+
+		switch (defense.getAbility().getId()) {
+		case Abilities.WETTERFEST:
+			switch (usedMove.getId()) {
+			case Moves.BAUMWOLLSAAT:
+			case Moves.GIFTPUDER:
+			case Moves.PILZSPORE:
+			case Moves.SCHLAFPUDER:
+			case Moves.STACHELSPORE:
+			case Moves.WUTPULVER:
+				this.gController.getGameFrame().getFightPanel().addText(defense.getAbility().getName() + " "
+						+ "schützt " + defense.getName() + " vor " + usedMove.getName());
+				return;
+			}
+			break;
+		case Abilities.LÄRMSCHUTZ:
+			switch(usedMove.getId()) {
+			case Moves.ABGESANG:
+			case Moves.AUFRUHR:
+			case Moves.BRÜLLER:
+			case Moves.GESANG:
+			case Moves.GESCHWÄTZ:
+			case Moves.GRASFLÖTE:
+			case Moves.HEULER:
+			case Moves.KÄFERGEBRUMM:
+			case Moves.KANON:
+			case Moves.KREIDESCHREI:
+			case Moves.METALLSOUND:
+			case Moves.SÄUSELSTIMME:
+			case Moves.SCHALLWELLE:
+			case Moves.SCHNARCHER:
+			case Moves.STANDPAUKE:
+			case Moves.SUPERSCHALL:
+			case Moves.ÜBERSCHALLKNALL:
+			case Moves.VERTRAUENSSACHE:
+			case Moves.WIDERHALL:
+				this.gController.getGameFrame().getFightPanel().addText(defense.getAbility().getName() + " "
+						+ "schützt " + defense.getName() + " vor " + usedMove.getName());
+				return;
+			}
+		case Abilities.VEGETARIER:
+			if (usedMove.getMoveType(attacker) == Type.GRASS) {
+				this.gController.getGameFrame().getFightPanel()
+						.addText(usedMove.getName() + " wird durch " + defense.getAbility().getName() + " verhindert!");
+				defense.getStats().increaseStat(Stat.ATTACK, 1);
+				return;
+			}
+			break;
+		}
+
+		double damage = power * Type.calcSTAB(attacker, usedMove);
+		boolean critted = false;
 		if (damage > 0 || usedMove.getDamageClass() != DamageClass.NO_DAMAGE) {
-			double def = 0;
-			double atk = 0;
-			switch (usedMove.getDamageClass()) {
-			case PHYSICAL:
-				def = defenderStats.getFightStats().get(Stat.DEFENSE);
-				atk = attackerStats.getFightStats().get(Stat.ATTACK);
+			switch (defense.getAbility().getId()) {
+			case Abilities.TELEPATHIE:
+				if (this.gController.getFight().isPlayer(attacker) == this.gController.getFight().isPlayer(defense)) {
+					this.gController.getGameFrame().getFightPanel()
+							.addText(defense.getName() + " weicht der Attacke seines Partners aus!");
+					break;
+				}
+			default:
+				for (int i = 0; i < ammount && attacker.getAilment() != Ailment.FAINTED; i++) {
+					damage = usedMove.getPower() * Type.calcSTAB(attacker, usedMove);
+					double def = 0;
+					double atk = 0;
+					switch (usedMove.getDamageClass()) {
+					case PHYSICAL:
+						if (attacker.getAbility().getId() == Abilities.UNKENNTNIS
+								|| defense.getAbility().getId() == Abilities.UNKENNTNIS) {
+							def = defenderStats.getFightStats().get(Stat.DEFENSE);
+							atk = attackerStats.getFightStats().get(Stat.ATTACK);
+						} else {
+							def = defenderStats.getStats().get(Stat.DEFENSE);
+							atk = attackerStats.getStats().get(Stat.ATTACK);
+						}
+						break;
+					case SPECIAL:
+						if (attacker.getAbility().getId() == Abilities.UNKENNTNIS
+								|| defense.getAbility().getId() == Abilities.UNKENNTNIS) {
+							def = defenderStats.getFightStats().get(Stat.SPECIALDEFENSE);
+							atk = attackerStats.getFightStats().get(Stat.SPECIALATTACK);
+						} else {
+							def = defenderStats.getStats().get(Stat.SPECIALDEFENSE);
+							atk = attackerStats.getStats().get(Stat.SPECIALATTACK);
+						}
+						break;
+					default:
+						break;
+					}
+					switch (attacker.getAbility().getId()) {
+					case Abilities.ACHTLOS:
+						if (usedMove.getCategory().contains("recoil")) {
+							damage *= 1.2;
+						}
+						break;
+					case Abilities.ANALYSE:
+						if (this.alreadyActed.contains(this.getIndex(defense))) {
+							damage *= 1.2;
+						}
+						break;
+					case Abilities.DUFTNOTE:
+						if (!this.alreadyActed.contains(this.getIndex(defense))) {
+							if (Main.RNG.nextFloat() < 0.1) {
+								defense.addSecondaryAilment(this.getIndex(attacker), SecondaryAilment.FLINCH);
+							}
+						}
+						break;
+					case Abilities.ÜBEREIFER:
+						if (usedMove.getDamageClass() == DamageClass.PHYSICAL) {
+							damage *= 1.5;
+						}
+						break;
+					case Abilities.NOTDÜNGER:
+						if (usedMove.getMoveType(attacker) == Type.GRASS && attacker.getStats()
+								.getCurrentHP() <= attacker.getStats().getStats().get(Stat.HP) * (1.0 / 3.0)) {
+							damage *= 1.5;
+						}
+						break;
+					case Abilities.GROSSBRAND:
+						if (usedMove.getMoveType(attacker) == Type.FIRE && attacker.getStats()
+								.getCurrentHP() <= attacker.getStats().getStats().get(Stat.HP) * (1.0 / 3.0)) {
+							damage *= 1.5;
+						}
+						break;
+					case Abilities.STURZBACH:
+						if (usedMove.getMoveType(attacker) == Type.WATER && attacker.getStats()
+								.getCurrentHP() <= attacker.getStats().getStats().get(Stat.HP) * (1.0 / 3.0)) {
+							damage *= 1.5;
+						}
+						break;
+					case Abilities.HEXAPLAGA:
+						if (usedMove.getMoveType(attacker) == Type.BUG && attacker.getStats()
+								.getCurrentHP() <= attacker.getStats().getStats().get(Stat.HP) * (1.0 / 3.0)) {
+							damage *= 1.5;
+						}
+						break;
+					case Abilities.RIVALITÄT:
+						switch (attacker.getGender()) {
+						case FEMALE:
+							switch (defense.getGender()) {
+							case FEMALE:
+								damage *= 1.25;
+								break;
+							case MALE:
+								damage *= 0.75;
+								break;
+							default:
+								break;
+							}
+							break;
+						case MALE:
+							switch (defense.getGender()) {
+							case FEMALE:
+								damage *= .75;
+								break;
+							case MALE:
+								damage *= 1.25;
+								break;
+							default:
+								break;
+							}
+							break;
+						default:
+							break;
+						}
+						break;
+					case Abilities.TECHNIKER:
+						if (usedMove.getPower() <= 60) {
+							damage *= 1.5;
+						}
+						break;
+					case Abilities.EISENFAUST:
+						switch (usedMove.getId()) {
+						case Moves.ABLEITHIEB:
+						case Moves.DONNERSCHLAG:
+						case Moves.EISHIEB:
+						case Moves.FEUERSCHLAG:
+						case Moves.FINSTERFAUST:
+						case Moves.HAMMERARM:
+						case Moves.HIMMELHIEB:
+						case Moves.IRRSCHLAG:
+						case Moves.KOMETENHIEB:
+						case Moves.MEGAHIEB:
+						case Moves.PATRONENHIEB:
+						case Moves.POWER_PUNCH:
+						case Moves.STERNENHIEB:
+						case Moves.STEIGERUNGSHIEB:
+						case Moves.TEMPOHIEB:
+						case Moves.WUCHTSCHLAG:
+							damage *= 1.2;
+							break;
+						}
+						break;
+					case Abilities.AUFWERTUNG:
+						if (weakness < Type.DEFAULT) {
+							weakness *= 2;
+						}
+						break;
+					case Abilities.ROHE_GEWALT:
+						if (usedMove.getStatChance() > 0 || usedMove.getAilment() != Ailment.NONE) {
+							damage *= 1.3;
+						}
+					default:
+						break;
+					}
+					if (this.gController.isFighting()) {
+						this.playAnimation(attacker, defense, usedMove);
+					}
+
+					switch (defense.getAbility().getId()) {
+					case Abilities.VOLTABSORBER:
+						if (usedMove.getMoveType(attacker).equals(Type.ELECTRIC)) {
+							defense.getStats().restoreHP((int) (defense.getStats().getStats().get(Stat.HP) * 0.25));
+							continue;
+						}
+						break;
+					case Abilities.H2O_ABSORBER:
+						if (usedMove.getMoveType(attacker).equals(Type.WATER)) {
+							defense.getStats().restoreHP((int) (defense.getStats().getStats().get(Stat.HP) * 0.25));
+							continue;
+						}
+						break;
+					case Abilities.SPECKSCHICHT:
+						if (usedMove.getMoveType(attacker).equals(Type.FIRE)
+								|| usedMove.getMoveType(attacker).equals(Type.ICE)) {
+							damage *= .5;
+						}
+						break;
+					case Abilities.HITZESCHUTZ:
+						if (usedMove.getMoveType(attacker).equals(Type.FIRE)) {
+							damage *= .5;
+						}
+						break;
+					case Abilities.FILTER:
+					case Abilities.FELSKERN:
+						if (weakness > Type.DEFAULT) {
+							weakness *= .75;
+						}
+						break;
+					case Abilities.MULTISCHUPPE:
+						if (defense.getStats().getCurrentHP() == defense.getStats().getStats().get(Stat.HP)) {
+							damage *= .5;
+						}
+					}
+
+					int crit = 1;
+					switch (defense.getAbility().getId()) {
+					case Abilities.KAMPFPANZER:
+					case Abilities.PANZERHAUT:
+						break;
+					default:
+						float pCrit = this.rng.nextFloat();
+						switch (usedMove.getCrit(attacker) + 1) {
+						case 1:
+							crit = pCrit < 0.0625 ? 2 : 1;
+							break;
+						case 2:
+							crit = pCrit < 0.125 ? 2 : 1;
+							break;
+						case 3:
+							crit = pCrit < 0.5 ? 2 : 1;
+							break;
+						default:
+							crit = 2;
+							break;
+						}
+					}
+					if (crit == 2) {
+						this.gController.getGameFrame().getFightPanel().addText("Ein Volltreffer!", true);
+						critted = true;
+						switch (attacker.getAbility().getId()) {
+						case Abilities.SUPERSCHÜTZE:
+							crit *= 1.5;
+						}
+					}
+					damage = (weakness
+							* ((attackerStats.getLevel() * (2 / 5.0) + 2) * damage * (atk / (50.0 * def)) + 2) * crit
+							* ((this.rng.nextFloat() * 0.15f + 0.85) / 1));
+					damage = Math.max(damage, 1);
+
+					if (usedMove.getCategory().contains("ohko")) {
+						if (defense.getAbility().getId() == Abilities.ROBUSTHEIT) {
+							this.gController.getGameFrame().getFightPanel()
+									.addText("Die K.O. Attacke ist wirkungslos gegen " + defense.getName() + "!");
+							return;
+						}
+						damage = defense.getStats().getCurrentHP() * 10000;
+					}
+					switch (defense.getAbility().getId()) {
+					case Abilities.ROBUSTHEIT:
+						if (defense.getStats().getCurrentHP() == defense.getStats().getStats().get(Stat.HP)
+								&& damage >= defense.getStats().getCurrentHP()) {
+							damage = defense.getStats().getCurrentHP() - 1;
+						}
+						break;
+					}
+					damage = defenderStats.loseHP((int) damage);
+					if (weakness >= Type.STRONG) {
+						SoundController.getInstance().playSound(SoundController.SUPER_EFFECTIVE);
+					} else if (weakness <= Type.WEAK && weakness != Type.USELESS) {
+						SoundController.getInstance().playSound(SoundController.NOT_EFFECTIVE);
+					} else if (weakness == 1.0) {
+						SoundController.getInstance().playSound(SoundController.NORMAL_EFFECTIVE);
+					}
+					this.gController.getGameFrame().getFightPanel().updatePanels();
+					this.gController.sleep(150);
+
+					if (usedMove.getDrain() > 0) {
+						switch (defense.getAbility().getId()) {
+						case Abilities.KLOAKENSOSSE:
+							attackerStats.loseHP((int) (damage * (usedMove.getDrain() / 100.0)));
+							this.gController.getGameFrame()
+									.getFightPanel().addText(attacker.getName()
+											+ " verletzt sich durch die Fähigkeit von " + defense.getName() + "!",
+											true);
+							break;
+						default:
+							attackerStats.restoreHP((int) (damage * (usedMove.getDrain() / 100.0)));
+							this.gController.getGameFrame().getFightPanel()
+									.addText(defense.getName() + " wurde Energie abgesaugt!", true);
+							break;
+						}
+					} else if (usedMove.getDrain() < 0) {
+						switch (attacker.getAbility().getId()) {
+						case Abilities.STEINHAUPT:
+						case Abilities.MAGIESCHILD:
+							break;
+						default:
+							if (attackerStats.loseHP((int) Math.abs(damage * (usedMove.getDrain() / 100.0))) > 0) {
+								this.gController.getGameFrame().getFightPanel()
+										.addText(attacker.getName() + " hat sich durch den Rückstoß verletzt!", true);
+							}
+							break;
+						}
+					}
+					this.gController.getGameFrame().getFightPanel().updatePanels();
+					switch (defense.getAbility().getId()) {
+					case Abilities.ROBUSTHEIT:
+						if (damage == defense.getStats().getStats().get(Stat.HP) - 1) {
+							this.gController.getGameFrame().getFightPanel().addText(defense.getName()
+									+ " hält mithilfe von " + defense.getAbility().getName() + " durch!", false);
+						}
+						break;
+					case Abilities.REDLICHKEIT:
+						if (usedMove.getMoveType(attacker) == Type.DARK) {
+							defense.getStats().increaseStat(Stat.ATTACK, 1);
+						}
+						break;
+					case Abilities.HASENFUSS:
+						switch (usedMove.getMoveType(attacker)) {
+						case GHOST:
+						case BUG:
+						case DARK:
+							defense.getStats().increaseStat(Stat.SPEED, 1);
+							break;
+						default:
+							break;
+						}
+					}
+					switch (usedMove.getDamageClass()) {
+					case PHYSICAL:
+						switch (defense.getAbility().getId()) {
+						case Abilities.RAUHAUT:
+						case Abilities.EISENSTACHEL:
+							attacker.getStats().loseHP((int) (attacker.getStats().getStats().get(Stat.HP) * 1.0 / 8));
+							this.gController.getGameFrame().getFightPanel().addText(
+									attacker.getName() + " verletzt sich" + " durch " + defense.getAbility().getName() + " von " + defense.getName());
+							break;
+						case Abilities.BRUCHRÜSTUNG:
+							this.gController.getGameFrame().getFightPanel().addText(defense.getAbility().getName() + " "
+									+ "von " + defense.getName() + " aktiviert sich!");
+							defense.getStats().decreaseStat(Stat.DEFENSE, 1);
+							defense.getStats().increaseStat(Stat.SPEED, 2);
+							break;
+						case Abilities.MUMIE:
+							this.gController.getGameFrame().getFightPanel()
+									.addText(defense.getAbility().getName() + " von " + defense.getName() + " wirkt!");
+							attacker.setFightingAbility(defense.getAbility());
+							break;
+						}
+						break;
+					default:
+						break;
+					}
+
+					// damage = usedMove.getPower() * Type.calcSTAB(attacker,
+					// usedMove);
+				}
+				if (weakness >= Type.STRONG) {
+					this.gController.getGameFrame().getFightPanel().addText("Die Attacke war sehr effektiv!", true);
+				} else if (weakness <= Type.WEAK) {
+					this.gController.getGameFrame().getFightPanel().addText("Die Attacke war nicht sehr effektiv!",
+							true);
+				}
+			}
+
+		} else {
+			switch (defense.getAbility().getId()) {
+			case Abilities.VOLTABSORBER:
+				if (usedMove.getMoveType(attacker).equals(Type.ELECTRIC)) {
+					defense.getStats().restoreHP((int) (defense.getStats().getStats().get(Stat.HP) * 0.25));
+				}
 				break;
-			case SPECIAL:
-				def = defenderStats.getFightStats().get(Stat.SPECIALDEFENSE);
-				atk = attackerStats.getFightStats().get(Stat.SPECIALDEFENSE);
+			case Abilities.H2O_ABSORBER:
+				if (usedMove.getMoveType(attacker).equals(Type.WATER)) {
+					defense.getStats().restoreHP((int) (defense.getStats().getStats().get(Stat.HP) * 0.25));
+				}
 				break;
 			default:
+				this.playAnimation(attacker, defense, usedMove);
+				if (!attacker.equals(defense)
+						&& (usedMove.getAilment() != null || usedMove.getAilment() != Ailment.NONE
+								|| usedMove.getSecondaryAilment() != null)
+						&& defense.getSecondaryAilments().containsKey(SecondaryAilment.MAGICCOAT)) {
+					this.gController.getGameFrame().getFightPanel()
+							.addText(SecondaryAilment.MAGICCOAT.getAffected().replace("@pokemon", defense.getName()));
+					defense = attacker;
+				} else if (usedMove.getCategory().contains("teleport")) {
+					if (this.canEscape()) {
+						this.gController.getGameFrame().getFightPanel()
+								.addText(attacker.getName() + " flieht aus dem Kampf!", true);
+						this.gController.endFight();
+					} else {
+						this.gController.getGameFrame().getFightPanel().addText("Es schlägt fehl!", true);
+					}
+				}
 				break;
 			}
-			for (int i = 0; i < ammount; i++) {
-				if (this.gController.isFighting()) {
-					this.playAnimation(attacker, defense, usedMove);
-				}
-				int crit = 1;
-				float pCrit = this.rng.nextFloat();
-				switch (usedMove.getCrit() + 1) {
-				case 1:
-					crit = pCrit < 0.0625 ? 2 : 1;
-					break;
-				case 2:
-					crit = pCrit < 0.125 ? 2 : 1;
-					break;
-				case 3:
-					crit = pCrit < 0.5 ? 2 : 1;
-					break;
-				default:
-					crit = 2;
-					break;
-				}
-				if (crit == 2) {
-					this.gController.getGameFrame().getFightPanel().addText("Ein Volltreffer!", true);
-				}
-				damage = (weakness * ((attackerStats.getLevel() * (2 / 5.0) + 2) * damage * (atk / (50.0 * def)) + 2)
-						* crit * ((this.rng.nextFloat() * 0.15f + 0.85) / 1));
-				damage = Math.max(damage, 1);
-				if (usedMove.getCategory().contains("ohko")) {
-					damage = defense.getStats().getCurrentHP();
-				}
-				defenderStats.loseHP((int) damage);
-				if (weakness >= Type.STRONG) {
-					SoundController.getInstance().playSound(SoundController.SUPER_EFFECTIVE);
-				} else if (weakness <= Type.WEAK && weakness != Type.USELESS) {
-					SoundController.getInstance().playSound(SoundController.NOT_EFFECTIVE);
-				} else if (weakness == 1.0) {
-					SoundController.getInstance().playSound(SoundController.NORMAL_EFFECTIVE);
-				}
-				this.gController.getGameFrame().getFightPanel().updatePanels();
-				this.gController.sleep(150);
 
-				if (usedMove.getDrain() > 0) {
-					attackerStats.restoreHP((int) (damage * (usedMove.getDrain() / 100.0)));
-					this.gController.getGameFrame().getFightPanel()
-							.addText(defense.getName() + " wurde Energie abgesaugt!", true);
-				} else if (usedMove.getDrain() < 0) {
-					attackerStats.loseHP((int) Math.abs(damage * (usedMove.getDrain() / 100.0)));
-					this.gController.getGameFrame().getFightPanel()
-							.addText(attacker.getName() + " hat sich durch den Rückstoß verletzt!", true);
-				}
-				this.gController.getGameFrame().getFightPanel().updatePanels();
-				damage = usedMove.getPower() * Type.calcSTAB(attacker, usedMove);
-			}
-			if (weakness >= Type.STRONG) {
-				this.gController.getGameFrame().getFightPanel().addText("Die Attacke war sehr effektiv!", true);
-			} else if (weakness <= Type.WEAK) {
-				this.gController.getGameFrame().getFightPanel().addText("Die Attacke war nicht sehr effektiv!", true);
-			}
-		} else {
-			this.playAnimation(attacker, defense, usedMove);
-			if (!attacker.equals(defense)
-					&& (usedMove.getAilment() != null || usedMove.getAilment() != Ailment.NONE
-							|| usedMove.getSecondaryAilment() != null)
-					&& defense.getSecondaryAilments().contains(SecondaryAilment.MAGICCOAT)) {
-				this.gController.getGameFrame().getFightPanel()
-						.addText(SecondaryAilment.MAGICCOAT.getAffected().replace("@pokemon", defense.getName()));
-				defense = attacker;
-			} else if (usedMove.getCategory().contains("teleport")) {
-				if (this.canEscape()) {
-					this.gController.getGameFrame().getFightPanel()
-							.addText(attacker.getName() + " flieht aus dem Kampf!");
-					this.gController.endFight();
-				} else {
-					this.gController.getGameFrame().getFightPanel().addText("Es schlägt fehl!");
-				}
-			}
 		}
 
 		this.gController.getGameFrame().getFightPanel().getTextLabel().waitText();
+
+		if (critted) {
+			switch (defense.getAbility().getId()) {
+			case Abilities.KURZSCHLUSS:
+				this.gController.getGameFrame().getFightPanel()
+						.addText(defense.getName() + " maximiert seinen Angriff!");
+				defense.getStats().increaseStat(Stat.ATTACK, 100);
+				break;
+			}
+		}
 
 		if (usedMove.getHealing() > 0) {
 			attackerStats.restoreHP((int) (attackerStats.getStats().get(Stat.HP) * (usedMove.getHealing() / 100)));
@@ -799,26 +1483,37 @@ public class Fighting {
 
 		this.gController.getGameFrame().getFightPanel().getTextLabel().waitText();
 
-		if (usedMove.checkStatChange()) {
-			if (usedMove.checkUserBuff()) {
-				this.buff(attacker, usedMove);
+		if (defense.getAbility().getId() != Abilities.ROHE_GEWALT) {
+			if (usedMove.checkStatChange(attacker)) {
+				if (usedMove.checkUserBuff()) {
+					this.buff(attacker, usedMove);
+				}
+				if (usedMove.checkEnemyBuff()) {
+					this.buff(defense, usedMove);
+				}
 			}
-			if (usedMove.checkEnemyBuff()) {
-				this.buff(defense, usedMove);
-			}
-		}
 
-		this.gController.getGameFrame().getFightPanel().getTextLabel().waitText();
+			this.gController.getGameFrame().getFightPanel().getTextLabel().waitText();
 
-		if (this.rng.nextFloat() * 100 < usedMove.getAilmentChance() || usedMove.getAilmentChance() == 0) {
-			if (((usedMove.getAilment() != Ailment.NONE && usedMove.getAilment() != null)
-					&& defense.setAilment(usedMove.getAilment()))) {
-				this.gController.getGameFrame().getFightPanel()
-						.addText(defense.getName() + " wurde " + Ailment.getText(usedMove.getAilment()) + "!", true);
-			} else if ((usedMove.getSecondaryAilment() != null)) {
-				defense.addSecondaryAilment(usedMove.getSecondaryAilment());
+			if (this.rng.nextFloat() * 100 < usedMove.getAilmentChance(attacker)
+					|| usedMove.getAilmentChance(attacker) == 0) {
+				if (((usedMove.getAilment() != Ailment.NONE && usedMove.getAilment() != null)
+						&& defense.setAilment(usedMove.getAilment()))
+						&& (damage == 0 || defense.getAbility().getId() != Abilities.PUDERABWEHR)) {
+					this.gController.getGameFrame().getFightPanel().addText(
+							defense.getName() + " wurde " + Ailment.getText(usedMove.getAilment()) + "!", true);
+					switch (defense.getAbility().getId()) {
+					case Abilities.SYNCHRO:
+						this.gController.getGameFrame().getFightPanel()
+								.addText("Synchro von " + defense.getName() + " wirkt!", false);
+						attacker.setAilment(usedMove.getAilment());
+						break;
+					}
+				} else if ((usedMove.getSecondaryAilment() != null)) {
+					defense.addSecondaryAilment(this.getIndex(attacker), usedMove.getSecondaryAilment());
+				}
+				this.gController.getGameFrame().getFightPanel().updatePanels();
 			}
-			this.gController.getGameFrame().getFightPanel().updatePanels();
 		}
 
 		this.gController.getGameFrame().getFightPanel().getTextLabel().waitText();
@@ -883,7 +1578,7 @@ public class Fighting {
 		if (this.chargeMoves.get(user) != null) {
 			return this.chargeMoves.get(user);
 		}
-		if (user.getSecondaryAilments().contains(SecondaryAilment.TORMENT)) {
+		if (user.getSecondaryAilments().containsKey(SecondaryAilment.TORMENT)) {
 			if (move.equals(this.lastMoves.get(user))) {
 				return null;
 			}
@@ -896,20 +1591,32 @@ public class Fighting {
 			if (this.checkDead(this.leftPlayerPokemon)) {
 				this.removeParticipant(this.leftPlayerPokemon);
 			}
+			if (this.leftPlayerPokemon != null) {
+				this.leftPlayerPokemon.getStats().stopFight();
+			}
 			this.leftPlayerPokemon = this.leftPlayerTeam.getTeam()[0];
-			this.leftPlayerPokemon.startFight();
-			this.setVisible(this.leftPlayerPokemon, true);
-		} else {
+			if (this.leftPlayerPokemon != null) {
+				this.leftPlayerPokemon.startFight();
+				this.setVisible(this.leftPlayerPokemon, true);
+			}
+		} else if (isDouble()) {
+			if (this.rightPlayerPokemon != null) {
+				this.rightPlayerPokemon.getStats().stopFight();
+			}
 			if (this.leftPlayerTeam.equals(this.rightPlayerTeam)) {
 				if (this.checkDead(this.rightPlayerPokemon)) {
 					this.removeParticipant(this.rightPlayerPokemon);
 				}
 				this.rightPlayerPokemon = this.leftPlayerTeam.getTeam()[1];
 			} else {
-				this.rightPlayerPokemon = this.rightPlayerTeam.getTeam()[0];
+				if (this.rightPlayerTeam != null) {
+					this.rightPlayerPokemon = this.rightPlayerTeam.getTeam()[0];
+				}
 			}
-			this.rightPlayerPokemon.startFight();
-			this.setVisible(this.rightPlayerPokemon, true);
+			if (this.rightPlayerPokemon != null) {
+				this.rightPlayerPokemon.startFight();
+				this.setVisible(this.rightPlayerPokemon, true);
+			}
 		}
 		this.addParticipants(true);
 		this.addParticipants(false);
@@ -918,17 +1625,31 @@ public class Fighting {
 
 	private void setEnemy(boolean left) {
 		if (left) {
-			this.leftOpponentPokemon = this.leftOpponentTeam.getTeam()[0];
-			this.leftOpponentPokemon.startFight();
-			this.setVisible(this.leftOpponentPokemon, true);
-		} else {
-			if (this.leftOpponentTeam.equals(this.rightOpponentTeam)) {
-				this.rightOpponentPokemon = this.leftOpponentTeam.getTeam()[1];
-			} else {
-				this.rightOpponentPokemon = this.rightOpponentTeam.getTeam()[0];
+			if (this.leftOpponentPokemon != null) {
+				this.leftOpponentPokemon.getStats().stopFight();
 			}
-			this.rightOpponentPokemon.startFight();
-			this.setVisible(this.rightOpponentPokemon, true);
+			if (this.leftOpponentTeam != null) {
+				this.leftOpponentPokemon = this.leftOpponentTeam.getTeam()[0];
+			}
+			if (this.leftOpponentPokemon != null) {
+				this.leftOpponentPokemon.startFight();
+				this.setVisible(this.leftOpponentPokemon, true);
+			}
+		} else {
+			if (this.rightOpponentPokemon != null) {
+				this.rightOpponentPokemon.getStats().stopFight();
+			}
+			if (this.rightOpponentTeam != null) {
+				if (this.leftOpponentTeam.equals(this.rightOpponentTeam)) {
+					this.rightOpponentPokemon = this.leftOpponentTeam.getTeam()[1];
+				} else {
+					this.rightOpponentPokemon = this.rightOpponentTeam.getTeam()[0];
+				}
+			}
+			if (rightOpponentPokemon != null) {
+				this.rightOpponentPokemon.startFight();
+				this.setVisible(this.rightOpponentPokemon, true);
+			}
 		}
 		this.clearParticipants(left);
 		this.addParticipants(left);
@@ -936,6 +1657,7 @@ public class Fighting {
 	}
 
 	private void clearParticipants(boolean left) {
+		System.out.println("clear: " + left);
 		if (left) {
 			this.leftParticipants.clear();
 		} else {
@@ -944,20 +1666,22 @@ public class Fighting {
 	}
 
 	private void addParticipants(boolean left) {
+		System.out.println("add: " + left);
 		if (left) {
 			this.leftParticipants.add(this.leftPlayerPokemon);
-			if (this.isDouble && this.gController.getMainCharacter().equals(this.rightPlayer)) {
+			if (this.isDouble && this.rightPlayer instanceof Player) {
 				this.leftParticipants.add(this.rightPlayerPokemon);
 			}
 		} else {
 			this.rightParticipants.add(this.leftPlayerPokemon);
-			if (this.isDouble && this.gController.getMainCharacter().equals(this.rightPlayer)) {
+			if (this.isDouble && this.rightPlayer instanceof Player) {
 				this.rightParticipants.add(this.rightPlayerPokemon);
 			}
 		}
 	}
 
 	public void removeParticipant(Pokemon p) {
+		System.out.println("remove: " + p);
 		this.leftParticipants.remove(p);
 		this.rightParticipants.remove(p);
 	}
@@ -1003,20 +1727,28 @@ public class Fighting {
 	}
 
 	public boolean enemyDead() {
+		System.out.println("enemyDead");
 		boolean replaceLeft = this.checkDead(this.leftOpponentPokemon);
 		boolean replaceRight = this.checkDead(this.rightOpponentPokemon);
+		System.out.println(replaceLeft + " - " + replaceRight);
 		this.gController.getGameFrame().getFightPanel().removeEnemy();
 		if (this.getFirstNonFightingPokemon(this.leftOpponentTeam) == null
 				&& this.getFirstNonFightingPokemon(this.rightOpponentTeam) == null) {
+			System.out.println("no pokemons left");
 			if ((!this.isDouble && replaceLeft) || (replaceLeft && replaceRight)) {
+				System.out.println("retrun true");
 				return true;
 			}
 		}
 		if (replaceLeft) {
-			this.sendOut(LEFT_OPPONENT, this.getFirstNonFightingPokemon(this.leftOpponentTeam));
+			if (this.getFirstNonFightingPokemon(this.leftOpponentTeam) != null) {
+				this.sendOut(LEFT_OPPONENT, this.getFirstNonFightingPokemon(this.leftOpponentTeam));
+			}
 		}
 		if (replaceRight) {
-			this.sendOut(RIGHT_OPPONENT, this.getFirstNonFightingPokemon(this.rightOpponentTeam));
+			if (this.getFirstNonFightingPokemon(this.rightOpponentTeam) != null) {
+				this.sendOut(RIGHT_OPPONENT, this.getFirstNonFightingPokemon(this.rightOpponentTeam));
+			}
 		}
 		return false;
 	}
@@ -1030,6 +1762,7 @@ public class Fighting {
 	}
 
 	public HashSet<Pokemon> getParticipants(boolean left) {
+		System.out.println("get: " + left + " - " + (left ? this.leftParticipants : this.rightParticipants));
 		return left ? this.leftParticipants : this.rightParticipants;
 	}
 
@@ -1103,7 +1836,9 @@ public class Fighting {
 	}
 
 	public void setVisible(Pokemon p, boolean v) {
-		this.visible.put(p, v);
+		if (p != null) {
+			this.visible.put(p, v);
+		}
 	}
 
 	public boolean isVisible(Pokemon pokemon) {
@@ -1112,6 +1847,10 @@ public class Fighting {
 		}
 		return this.visible.get(pokemon);
 
+	}
+
+	public Pokemon getCurrentPokemon() {
+		return this.getPokemon(this.activePokemon);
 	}
 
 	public void setRecharge(Pokemon p, boolean v) {
@@ -1136,27 +1875,37 @@ public class Fighting {
 		return this.field;
 	}
 
-	public boolean registerAttack(Attack attack) {
+	public void registerAttack(Attack attack) {
+		if (this.activePokemon == LEFT_PLAYER) {
+			this.turnAttacks = new HashMap<>();
+		}
 		this.turnAttacks.put(attack.getSource(), attack);
 		if (this.isDouble) {
-			if (this.activePokemon == LEFT_PLAYER && this.gController.getMainCharacter().equals(this.rightPlayer)) {
-				this.activePokemon = RIGHT_PLAYER;
-				return true;
+			nextPokemon();
+			if (this.activePokemon == RIGHT_PLAYER) {
+				gController.getGameFrame().getFightPanel().showMenu();
+				return;
 			}
+		}
+		gController.getGameFrame().getFightPanel().startRound();
+
+	}
+
+	public boolean cancelAttack() {
+		if (this.activePokemon == RIGHT_PLAYER) {
+			this.turnAttacks.put(this.getPokemon(LEFT_PLAYER), null);
+			return true;
 		}
 		return false;
 	}
 
 	/**
-	 * @return A String object that represents the text that should be displayed at
-	 *         the start of the fight.
+	 * @return A String object that represents the text that should be displayed
+	 *         at the start of the fight.
 	 * @author CutyCupy
 	 */
 	public String getEntryText() {
-		if (this.escapable) {
-			return "Ein wildes " + this.leftOpponentPokemon.getName() + " "
-					+ (this.isDouble ? "und " + this.rightOpponentPokemon.getName() : "") + " erscheint!";
-		} else {
+		if (!this.escapable) {
 			if (this.isDouble && !this.rightOpponent.equals(this.leftOpponent)) {
 				return "Eine Herausforderung von " + this.leftOpponent.getName() + " und "
 						+ this.rightOpponent.getName() + "!";
@@ -1164,8 +1913,9 @@ public class Fighting {
 				return "Eine Herausforderung von " + this.leftOpponent.getName() + "!";
 			}
 		}
+		return null;
 	}
-
+	
 	/**
 	 * @return
 	 * @author CutyCupy
@@ -1173,5 +1923,26 @@ public class Fighting {
 	public int getActivePlayer() {
 		return this.activePokemon;
 	}
-
+	
+	public boolean isActiveTurn() {
+		return this.activeTurn;
+	}
+	
+	public void nextPokemon() {
+		if (this.activePokemon == LEFT_PLAYER && this.gController.getMainCharacter().equals(this.rightPlayer)) {
+			this.activePokemon = RIGHT_PLAYER;
+			gController.getGameFrame().getFightPanel().showMenu();
+		} else {
+			this.activePokemon = LEFT_PLAYER;
+		}
+	}
+	
+	public void createAIAttacks() {
+		for(AI ai : this.ais) {
+			Attack a = ai.getAttack();
+			if(!this.turnAttacks.containsKey(a.getSource())) {
+				this.turnAttacks.put(a.getSource(), a);
+			}
+		}
+	}
 }

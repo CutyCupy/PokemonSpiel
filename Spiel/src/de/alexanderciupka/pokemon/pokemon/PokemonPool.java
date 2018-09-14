@@ -7,6 +7,10 @@ import java.util.Random;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import de.alexanderciupka.pokemon.constants.Abilities;
+import de.alexanderciupka.pokemon.main.Main;
+import de.alexanderciupka.pokemon.map.GameController;
+
 public class PokemonPool {
 	
 	private Random rng;
@@ -29,6 +33,39 @@ public class PokemonPool {
 			return null;
 		}
 		SimpleEntry<Integer, Short> encounter = pokemonPool.get(rng.nextInt(pokemonPool.size()));
+		Pokemon first = GameController.getInstance().getMainCharacter().getTeam().getTeam()[0];
+		switch(first.getAbility().getId()) {
+		case Abilities.MAGNETFALLE:
+			if(Main.RNG.nextFloat() < .5) {
+				ArrayList<SimpleEntry<Integer, Short>> steels = new ArrayList<>();
+				for(SimpleEntry<Integer, Short> p : this.pokemonPool) {
+					Type[] t = GameController.getInstance().getInformation().getTypes(p.getKey());
+					if(t[0] == Type.STEEL || t[1] == Type.STEEL) {
+						steels.add(p);
+					}
+				}
+				if(!steels.isEmpty()) {
+					encounter = steels.get(Main.RNG.nextInt(steels.size()));
+				}
+			}
+			break;
+		case Abilities.ERZWINGER:
+		case Abilities.ÜBEREIFER:
+		case Abilities.MUNTERKEIT:
+		case Abilities.BEDROHER:
+		case Abilities.ADLERAUGE:
+			if(Main.RNG.nextFloat() < .5) {
+				ArrayList<SimpleEntry<Integer, Short>> stronger = new ArrayList<>();
+				for(SimpleEntry<Integer, Short> p : this.pokemonPool) {
+					if(p.getValue() > first.getStats().getLevel()) {
+						stronger.add(p);
+					}
+				}
+				if(!stronger.isEmpty()) {
+					encounter = stronger.get(Main.RNG.nextInt(stronger.size()));
+				}
+			}
+		}
 		Pokemon result = new Pokemon(encounter.getKey());
 		result.getStats().generateStats(encounter.getValue());
 		return result;
