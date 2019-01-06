@@ -14,6 +14,7 @@ import de.alexanderciupka.pokemon.fighting.FightOption;
 import de.alexanderciupka.pokemon.fighting.Fighting;
 import de.alexanderciupka.pokemon.gui.After;
 import de.alexanderciupka.pokemon.gui.panels.NewAttackPanel;
+import de.alexanderciupka.pokemon.main.Main;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.menu.SoundController;
 
@@ -307,8 +308,8 @@ public class Stats {
 		this.currentHP = currentHP;
 	}
 
-	public void restoreFullHP() {
-		this.currentHP = this.stats.get(Stat.HP);
+	public int restoreFullHP() {
+		return restoreHP(this.stats.get(Stat.HP));
 	}
 
 	public int restoreHP(int ammount) {
@@ -332,6 +333,10 @@ public class Stats {
 					.playAnimation("heilung");
 		}
 		return this.currentHP - oldHP;
+	}
+	
+	public int restoreHP(double percent) {
+		return restoreHP((int) this.getStats().get(Stat.HP) * percent);
 	}
 
 	public int loseHP(int ammount) {
@@ -403,6 +408,11 @@ public class Stats {
 	}
 
 	public boolean decreaseStat(Stat s, int value) {
+		if(this.pokemon.getSecondaryAilments().containsKey(SecondaryAilment.MEGABLOCK)) {
+			this.gController.getGameFrame().getFightPanel()
+			.addText(s.getText() + " kann durch die Megablock nicht gesenkt werden!");
+			return false;
+		}
 		switch (this.pokemon.getAbility().getId()) {
 		case Abilities.NEUTRALTORSO:
 			this.gController.getGameFrame().getFightPanel()
@@ -653,16 +663,32 @@ public class Stats {
 
 	public void importSaveData(JsonObject saveData) {
 		if (saveData.get("dvev") != null) {
+			this.dvs.clear();
+			this.evs.clear();
 			for (JsonElement je : saveData.get("dvev").getAsJsonArray()) {
 				JsonObject currentDVEV = je.getAsJsonObject();
 				Stat currentStat = Stat.valueOf(currentDVEV.get("name").getAsString().toUpperCase());
 				this.dvs.put(currentStat, currentDVEV.get("dv").getAsShort());
 				this.evs.put(currentStat, currentDVEV.get("ev").getAsShort());
 			}
+			for(Stat s : Stat.values()) {
+				if(!this.dvs.containsKey(s)) {
+					this.dvs.put(s, (short) Main.RNG.nextInt(32));
+				}
+				if(!this.evs.containsKey(s)) {
+					this.evs.put(s, (short) 0);
+				}
+			}
 		}
 		this.generateStats(saveData.get("level").getAsShort());
-		this.currentXP = saveData.get("current_xp").getAsInt();
-		this.currentHP = saveData.get("current_hp").getAsShort();
+		if(saveData.has("current_xp")) {
+			this.currentXP = saveData.get("current_xp").getAsInt();
+		}
+		if(saveData.has("current_hp")) {
+			this.currentHP = saveData.get("current_hp").getAsShort();
+		} else {
+			this.currentHP = this.stats.get(Stat.HP);
+		}
 		this.nature = saveData.get("nature") != null
 				? Nature.valueOf(saveData.get("nature").getAsString().toUpperCase()) : Nature.getRandomNature();
 	}
@@ -704,5 +730,6 @@ public class Stats {
 	public void setNature(Nature nature) {
 		this.nature = nature;
 	}
+
 
 }

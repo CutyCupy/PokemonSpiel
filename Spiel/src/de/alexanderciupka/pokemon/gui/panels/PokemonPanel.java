@@ -125,7 +125,7 @@ public class PokemonPanel extends JPanel {
 									p.setEnabled(false);
 								}
 								PokemonPanel.this.backButton.setEnabled(false);
-								String result = source.getPokemon().useItem(
+								boolean result = source.getPokemon().useItem(
 										PokemonPanel.this.gController.getMainCharacter(),
 										PokemonPanel.this.currentItem);
 								source.update(true);
@@ -133,6 +133,8 @@ public class PokemonPanel extends JPanel {
 								PokemonPanel.this.gController.waitDialogue();
 								if (PokemonPanel.this.gController.isFighting()) {
 									PokemonPanel.this.gController.getGameFrame().getFightPanel().updatePanels();
+									PokemonPanel.this.gController.getFight().registerAttack(new Attack(PokemonPanel.this.gController.getFight().getCurrentPokemon(), 
+											PokemonPanel.this.currentItem, source.getPokemon()));
 									PokemonPanel.this.gController.getFight().setCurrentFightOption(FightOption.FIGHT);
 								} else {
 									if (!PokemonPanel.this.gController.getGameFrame().getEvolutionPanel().getPokemon()

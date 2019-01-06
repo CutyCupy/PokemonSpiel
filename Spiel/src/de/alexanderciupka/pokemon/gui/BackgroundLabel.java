@@ -136,7 +136,7 @@ public class BackgroundLabel extends JLabel {
 		this.overlayAccess = true;
 	}
 
-	public void spotted(de.alexanderciupka.pokemon.characters.types.Character spotter) {
+	public void spotted(de.alexanderciupka.pokemon.characters.Character spotter) {
 		SoundController.getInstance().playSound(SoundController.ALERT);
 		SpottedOverlay s = new SpottedOverlay(this, spotter);
 		this.addOverlay(s);

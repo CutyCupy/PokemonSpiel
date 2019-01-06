@@ -22,7 +22,7 @@ public class StatLabel extends JLabel {
 	private AilmentLabel ailment;
 	private Pokemon pokemon;
 
-	private static final Font NAME_FONT = new Font(Font.DIALOG, Font.BOLD, 12);
+	public static final Font NAME_FONT = new Font(Font.DIALOG, Font.BOLD, 12);
 
 	public StatLabel() {
 		this.setBorder(BorderFactory.createCompoundBorder(new LineBorder(Color.BLACK), new EmptyBorder(2, 10, 2, 10)));

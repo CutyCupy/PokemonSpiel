@@ -3,7 +3,10 @@
  */
 package de.alexanderciupka.pokemon.fighting;
 
+import java.util.ArrayList;
+
 import de.alexanderciupka.pokemon.constants.Abilities;
+import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.pokemon.Move;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
 
@@ -16,7 +19,7 @@ public class Attack {
 
 	private Pokemon source;
 	private Move move;
-	private int[] targets;
+	private Pokemon[] targets;
 
 	private Integer item;
 	private Pokemon swap;
@@ -27,13 +30,13 @@ public class Attack {
 	public Attack(Pokemon source, Move move, int... targets) {
 		this.source = source;
 		this.move = move;
-		this.targets = targets;
+		setTargets(targets);
 	}
 
-	public Attack(Pokemon source, Integer item, int target) {
+	public Attack(Pokemon source, Integer item, Pokemon target) {
 		this.source = source;
 		this.item = item;
-		this.targets = new int[] { target };
+		this.targets = new Pokemon[] { target };
 	}
 
 	public Attack(Pokemon source, Pokemon swap) {
@@ -57,11 +60,19 @@ public class Attack {
 		this.move = move;
 	}
 
-	public int[] getTargets() {
+	public Pokemon[] getTargets() {
 		return this.targets;
 	}
 
 	public void setTargets(int... targets) {
+		ArrayList<Pokemon> temp = new ArrayList<>();
+		for (int t : targets) {
+			temp.add(GameController.getInstance().getFight().getPokemon(t));
+		}
+		this.targets = temp.toArray(new Pokemon[temp.size()]);
+	}
+
+	public void setTargets(Pokemon... targets) {
 		this.targets = targets;
 	}
 
@@ -79,6 +90,16 @@ public class Attack {
 
 	public void setSwap(Pokemon swap) {
 		this.swap = swap;
+	}
+
+	public void updateTargets(Pokemon oldTarget, Pokemon newTarget) {
+		if (this.targets != null) {
+			for (int i = 0; i < targets.length; i++) {
+				if (oldTarget.equals(targets[i])) {
+					targets[i] = newTarget;
+				}
+			}
+		}
 	}
 
 	public int getPriority() {
@@ -101,14 +122,14 @@ public class Attack {
 	@Override
 	public String toString() {
 		String string = "[source:" + source + ",";
-		if(move != null) {
+		if (move != null) {
 			string += "move:" + move + ",targets:";
-			for(int t : this.targets) {
+			for (Pokemon t : this.targets) {
 				string += t + ",";
 			}
-		} else if(item != null) {
+		} else if (item != null) {
 			string += "item:" + item + ",targets:";
-			for(int t : this.targets) {
+			for (Pokemon t : this.targets) {
 				string += t + ",";
 			}
 		} else {

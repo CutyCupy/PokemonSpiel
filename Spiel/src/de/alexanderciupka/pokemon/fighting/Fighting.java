@@ -5,10 +5,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 
+import de.alexanderciupka.pokemon.characters.Character;
 import de.alexanderciupka.pokemon.characters.Team;
-import de.alexanderciupka.pokemon.characters.ai.AI;
+import de.alexanderciupka.pokemon.characters.ai.IAI;
 import de.alexanderciupka.pokemon.characters.ai.WildPokemonAI;
-import de.alexanderciupka.pokemon.characters.types.Character;
 import de.alexanderciupka.pokemon.characters.types.NPC;
 import de.alexanderciupka.pokemon.characters.types.Player;
 import de.alexanderciupka.pokemon.constants.Abilities;
@@ -81,9 +81,9 @@ public class Fighting {
 	public static boolean waiting = false;
 
 	private ArrayList<Integer> alreadyActed;
-	
-	private ArrayList<AI> ais;
-	
+
+	private ArrayList<IAI> ais;
+
 	/**
 	 * Starts a wild 1v1 Battle.
 	 * 
@@ -236,12 +236,12 @@ public class Fighting {
 
 		this.init();
 	}
-	
+
 	public void init() {
 		this.ais = new ArrayList<>();
-		for(int i = 0; i < 4; i++) {
-			if(this.getCharacter(i) instanceof NPC || this.getPokemon(i) != null) {
-				AI ai = new WildPokemonAI();
+		for (int i = 0; i < 4; i++) {
+			if (this.getCharacter(i) instanceof NPC || this.getPokemon(i) != null) {
+				IAI ai = new WildPokemonAI(this.getCharacter(i));
 				ai.setPosition(i);
 				this.ais.add(ai);
 			}
@@ -443,10 +443,8 @@ public class Fighting {
 		for (Attack attack : this.getOrder()) {
 			if (attack.getSource().getAilment() != Ailment.FAINTED && getIndex(attack.getSource()) != -1) {
 				if (attack.getTargets() != null && attack.getItem() == null) {
-					//TODO: Check for disabled move
 					int pp = 1;
-					for (int t : attack.getTargets()) {
-						Pokemon target = getPokemon(t);
+					for (Pokemon target : attack.getTargets()) {
 						if (target == null) {
 							switch (attack.getMove().getTarget()) {
 							case ALL_OPPONENTS:
@@ -461,7 +459,7 @@ public class Fighting {
 							case USER_OR_ALLY:
 							case OPPONENTS_FIELD:
 							case USERS_FIELD:
-								target = getPokemon(getPartner(t));
+								target = getPokemon(getPartner(target));
 								break;
 							default:
 								break;
@@ -554,8 +552,10 @@ public class Fighting {
 				break;
 			}
 			
+			updateAttackTargets(current, next);
+
 			trainer.getTeam().swapPokemon(trainer.getTeam().getIndex(current), trainer.getTeam().getIndex(next));
-			
+
 			this.gController.getGameFrame().getFightPanel()
 					.addText(trainer.getName() + " ruft " + current.getName() + " zurück!");
 			SoundController.getInstance().playSound(SoundController.POKEBALL_CATCHING, false);
@@ -565,7 +565,7 @@ public class Fighting {
 			this.gController.getGameFrame().getFightPanel()
 					.addText(trainer.getName() + " setzt " + next.getName() + " ein!");
 			this.setVisible(next, true);
-			switch(getIndex(current)) {
+			switch (getIndex(current)) {
 			case Fighting.LEFT_OPPONENT:
 				this.setEnemy(true);
 				break;
@@ -596,7 +596,7 @@ public class Fighting {
 	public int getIndex(Pokemon p) {
 		for (int i : new int[] { Fighting.LEFT_PLAYER, Fighting.RIGHT_PLAYER, Fighting.LEFT_OPPONENT,
 				Fighting.RIGHT_OPPONENT }) {
-			if (p.equals(this.getPokemon(i))) {
+			if (p != null && p.equals(this.getPokemon(i))) {
 				return i;
 			}
 		}
@@ -647,13 +647,16 @@ public class Fighting {
 		if (this.gController.isFighting()) {
 			for (Pokemon p : this.getSpeedOrder()) {
 				p.afterTurnDamage();
-	 			this.getField().getWeather().onEndOfTurn(p);
+				this.getField().getWeather().onEndOfTurn(p);
 				if (this.checkDead(p)) {
 					this.onDeath(p);
 				}
 			}
 			this.getField().endOfTurn();
 			this.increaseTurn();
+		}
+		if(playerDead()) {
+			
 		}
 	}
 
@@ -662,7 +665,7 @@ public class Fighting {
 			p.changeHappiness(-1);
 			return true;
 		}
-		return false;
+		return p == null;
 	}
 
 	public boolean attack(Pokemon attacker, Pokemon defender) {
@@ -713,12 +716,11 @@ public class Fighting {
 		this.setVisible(dead, false);
 		this.gController.getGameFrame().getFightPanel().updatePanels();
 		if (this.isPlayer(dead)) {
-			this.gController.loseFight();
-		} else {
-			if (!this.gController.winFight(dead)) {
-				this.gController.getGameFrame().getFightPanel().updateFight();
-				this.gController.getGameFrame().getFightPanel().updatePanels();
+			if(this.playerDead()) {
+				this.gController.loseFight();
 			}
+		} else {
+			this.gController.winFight(dead);
 		}
 	}
 
@@ -759,7 +761,7 @@ public class Fighting {
 		}
 
 		double accuracy = move.getAccuracy();
-		
+
 		switch (defender.getAbility().getId()) {
 		case Abilities.FUSSANGEL:
 			if (defender.getSecondaryAilments().containsKey(SecondaryAilment.CONFUSION)) {
@@ -797,9 +799,9 @@ public class Fighting {
 			accuracy *= 1.1;
 			break;
 		}
-		
-		if(this.getPokemon(this.getPartner(attacker)) != null) {
-			switch(this.getPokemon(this.getPartner(attacker)).getAbility().getId()) {
+
+		if (this.getPokemon(this.getPartner(attacker)) != null) {
+			switch (this.getPokemon(this.getPartner(attacker)).getAbility().getId()) {
 			case Abilities.TRIUMPHSTERN:
 				accuracy *= 1.1;
 				break;
@@ -1047,7 +1049,7 @@ public class Fighting {
 			}
 			break;
 		case Abilities.LÄRMSCHUTZ:
-			switch(usedMove.getId()) {
+			switch (usedMove.getId()) {
 			case Moves.ABGESANG:
 			case Moves.AUFRUHR:
 			case Moves.BRÜLLER:
@@ -1396,8 +1398,9 @@ public class Fighting {
 						case Abilities.RAUHAUT:
 						case Abilities.EISENSTACHEL:
 							attacker.getStats().loseHP((int) (attacker.getStats().getStats().get(Stat.HP) * 1.0 / 8));
-							this.gController.getGameFrame().getFightPanel().addText(
-									attacker.getName() + " verletzt sich" + " durch " + defense.getAbility().getName() + " von " + defense.getName());
+							this.gController.getGameFrame().getFightPanel()
+									.addText(attacker.getName() + " verletzt sich" + " durch "
+											+ defense.getAbility().getName() + " von " + defense.getName());
 							break;
 						case Abilities.BRUCHRÜSTUNG:
 							this.gController.getGameFrame().getFightPanel().addText(defense.getAbility().getName() + " "
@@ -1523,10 +1526,22 @@ public class Fighting {
 		return !this.checkDead(p) && this.notFighting(p);
 	}
 
+	public void updateAttackTargets(Pokemon oldTarget, Pokemon newTarget) {
+		if(oldTarget != null) {
+			for (Pokemon p : this.turnAttacks.keySet()) {
+				Attack attack = this.turnAttacks.get(p);
+				attack.updateTargets(oldTarget, newTarget);
+				this.turnAttacks.put(p, attack);
+			}
+		}
+	}
+
 	public boolean sendOut(int index, Pokemon replacement) {
 		if (!this.canBeSendOut(replacement)) {
 			return false;
 		}
+		System.out.println("send out:" + this.getPokemon(index));
+		updateAttackTargets(this.getPokemon(index), replacement);
 		switch (index) {
 		case LEFT_PLAYER:
 			this.leftPlayerTeam.swapPokemon(0, this.leftPlayerTeam.getIndex(replacement));
@@ -1686,7 +1701,7 @@ public class Fighting {
 		this.rightParticipants.remove(p);
 	}
 
-	public boolean didPlayerLose() {
+	public boolean playerDead() {
 		boolean replaceLeft = this.checkDead(this.leftPlayerPokemon);
 		boolean replaceRight = this.checkDead(this.rightPlayerPokemon);
 		if (this.getFirstNonFightingPokemon(this.leftPlayerTeam) == null) {
@@ -1700,20 +1715,25 @@ public class Fighting {
 				}
 			}
 		}
-		if (replaceLeft) {
-			this.setCurrentFightOption(FightOption.POKEMON);
-			this.gController.getGameFrame().getPokemonPanel().update(LEFT_PLAYER);
-			while (this.getCurrentFightOption().equals(FightOption.POKEMON)) {
-				Thread.yield();
-			}
+		if (replaceLeft && !replaceRight) {
+			this.updateAttackTargets(this.leftPlayerPokemon, this.rightPlayerPokemon);
+		} else if (!replaceLeft && replaceRight) {
+			this.updateAttackTargets(this.rightPlayerPokemon, this.leftPlayerPokemon);
 		}
-		if (replaceRight) {
-			this.setCurrentFightOption(FightOption.POKEMON);
-			this.gController.getGameFrame().getPokemonPanel().update(RIGHT_PLAYER);
-			while (this.getCurrentFightOption().equals(FightOption.POKEMON)) {
-				Thread.yield();
-			}
-		}
+//		if (replaceLeft) {
+//			this.setCurrentFightOption(FightOption.POKEMON);
+//			this.gController.getGameFrame().getPokemonPanel().update(LEFT_PLAYER);
+//			while (this.getCurrentFightOption().equals(FightOption.POKEMON)) {
+//				Thread.yield();
+//			}
+//		}
+//		if (replaceRight) {
+//			this.setCurrentFightOption(FightOption.POKEMON);
+//			this.gController.getGameFrame().getPokemonPanel().update(RIGHT_PLAYER);
+//			while (this.getCurrentFightOption().equals(FightOption.POKEMON)) {
+//				Thread.yield();
+//			}
+//		}
 		return false;
 	}
 
@@ -1727,29 +1747,30 @@ public class Fighting {
 	}
 
 	public boolean enemyDead() {
-		System.out.println("enemyDead");
 		boolean replaceLeft = this.checkDead(this.leftOpponentPokemon);
 		boolean replaceRight = this.checkDead(this.rightOpponentPokemon);
-		System.out.println(replaceLeft + " - " + replaceRight);
 		this.gController.getGameFrame().getFightPanel().removeEnemy();
 		if (this.getFirstNonFightingPokemon(this.leftOpponentTeam) == null
 				&& this.getFirstNonFightingPokemon(this.rightOpponentTeam) == null) {
-			System.out.println("no pokemons left");
 			if ((!this.isDouble && replaceLeft) || (replaceLeft && replaceRight)) {
-				System.out.println("retrun true");
 				return true;
 			}
 		}
-		if (replaceLeft) {
-			if (this.getFirstNonFightingPokemon(this.leftOpponentTeam) != null) {
-				this.sendOut(LEFT_OPPONENT, this.getFirstNonFightingPokemon(this.leftOpponentTeam));
-			}
+		if (replaceLeft && !replaceRight) {
+			this.updateAttackTargets(this.leftOpponentPokemon, this.rightOpponentPokemon);
+		} else if (!replaceLeft && replaceRight) {
+			this.updateAttackTargets(this.rightOpponentPokemon, this.leftOpponentPokemon);
 		}
-		if (replaceRight) {
-			if (this.getFirstNonFightingPokemon(this.rightOpponentTeam) != null) {
-				this.sendOut(RIGHT_OPPONENT, this.getFirstNonFightingPokemon(this.rightOpponentTeam));
-			}
-		}
+//		if (replaceLeft) {
+//			if (this.getFirstNonFightingPokemon(this.leftOpponentTeam) != null) {
+//				this.sendOut(LEFT_OPPONENT, this.getFirstNonFightingPokemon(this.leftOpponentTeam));
+//			}
+//		}
+//		if (replaceRight) {
+//			if (this.getFirstNonFightingPokemon(this.rightOpponentTeam) != null) {
+//				this.sendOut(RIGHT_OPPONENT, this.getFirstNonFightingPokemon(this.rightOpponentTeam));
+//			}
+//		}
 		return false;
 	}
 
@@ -1915,7 +1936,7 @@ public class Fighting {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * @return
 	 * @author CutyCupy
@@ -1923,11 +1944,11 @@ public class Fighting {
 	public int getActivePlayer() {
 		return this.activePokemon;
 	}
-	
+
 	public boolean isActiveTurn() {
 		return this.activeTurn;
 	}
-	
+
 	public void nextPokemon() {
 		if (this.activePokemon == LEFT_PLAYER && this.gController.getMainCharacter().equals(this.rightPlayer)) {
 			this.activePokemon = RIGHT_PLAYER;
@@ -1936,12 +1957,14 @@ public class Fighting {
 			this.activePokemon = LEFT_PLAYER;
 		}
 	}
-	
+
 	public void createAIAttacks() {
-		for(AI ai : this.ais) {
-			Attack a = ai.getAttack();
-			if(!this.turnAttacks.containsKey(a.getSource())) {
-				this.turnAttacks.put(a.getSource(), a);
+		for (IAI ai : this.ais) {
+			if (this.getPokemon(ai.getPosition()) != null) {
+				Attack a = ai.getAttack();
+				if (!this.turnAttacks.containsKey(a.getSource())) {
+					this.turnAttacks.put(a.getSource(), a);
+				}
 			}
 		}
 	}

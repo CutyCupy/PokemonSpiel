@@ -1,13 +1,18 @@
 package de.alexanderciupka.pokemon.characters.ai;
 
+import de.alexanderciupka.pokemon.characters.Character;
 import de.alexanderciupka.pokemon.fighting.Attack;
 import de.alexanderciupka.pokemon.fighting.Fighting;
 import de.alexanderciupka.pokemon.main.Main;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
 
-public class WildPokemonAI implements AI {
+public class WildPokemonAI extends AI {
 	
+	public WildPokemonAI(Character c) {
+		super(c);
+	}
+
 	private int position;
 
 	@Override
@@ -16,6 +21,7 @@ public class WildPokemonAI implements AI {
 		Attack attack = new Attack();
 		attack.setSource(fight.getPokemon(position));
 		attack.setMove(attack.getSource().getRandomMove());
+		System.out.println(attack.getTargets());
 		switch(attack.getMove().getTarget()) {
 		case ALLY:
 			attack.setTargets(fight.getPartner(this.position));
@@ -54,9 +60,9 @@ public class WildPokemonAI implements AI {
 		case SELECTED_POKEMON:
 		case SPECIFIC_MOVE:
 			if(fight.isPlayer(this.position)) {
-				attack.setTargets(Main.RNG.nextBoolean() ? Fighting.LEFT_OPPONENT : Fighting.RIGHT_OPPONENT);
+				attack.setTargets(Main.RNG.nextBoolean() || !fight.isDouble() ? Fighting.LEFT_OPPONENT : Fighting.RIGHT_OPPONENT);
 			} else {
-				attack.setTargets(Main.RNG.nextBoolean() ? Fighting.LEFT_PLAYER : Fighting.RIGHT_PLAYER);
+				attack.setTargets(Main.RNG.nextBoolean() || !fight.isDouble() ? Fighting.LEFT_PLAYER : Fighting.RIGHT_PLAYER);
 			}
 			break;
 		case USER:
@@ -67,7 +73,7 @@ public class WildPokemonAI implements AI {
 			attack.setTargets(this.position, fight.getPartner(this.position));
 			break;
 		case USER_OR_ALLY:
-			attack.setTargets(Main.RNG.nextBoolean() ? this.position : fight.getPartner(this.position));
+			attack.setTargets(Main.RNG.nextBoolean() || !fight.isDouble() ? this.position : fight.getPartner(this.position));
 			break;
 		}
 		return attack;
@@ -82,6 +88,19 @@ public class WildPokemonAI implements AI {
 	@Override
 	public void setPosition(int position) {
 		this.position = position;
+	}
+	
+	@Override
+	public int getPosition() {
+		return this.position;
+	}
+
+	@Override
+	public Pokemon getNextPokemon() {
+		if(this.trainer != null && this.trainer.getTeam() != null) {
+			return this.trainer.getTeam().getFirstFightPokemon();
+		}
+		return null;
 	}
 
 }

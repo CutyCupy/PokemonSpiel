@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import de.alexanderciupka.pokemon.characters.types.Character;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
 
 public class PC {

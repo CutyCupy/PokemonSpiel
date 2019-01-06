@@ -1,5 +1,7 @@
 package de.alexanderciupka.pokemon.characters.types;
 
+import com.google.gson.JsonObject;
+
 import de.alexanderciupka.pokemon.menu.SoundController;
 
 public class Nurse extends NPC {
@@ -22,7 +24,6 @@ public class Nurse extends NPC {
 	public void onInteraction(Player p) {
 		super.onInteraction(p);
 		p.getTeam().restoreTeam();
-//		if (this.getCurrentRoute().getId().equals("pokemon_center")) {
 		boolean searching = true;
 		for(int x = 0; x < this.getCurrentRoute().getWidth() && searching; x++) {
 			for(int y = 0; y < this.getCurrentRoute().getHeight() && searching; y++) {
@@ -43,5 +44,27 @@ public class Nurse extends NPC {
 		}
 		this.gController.getGameFrame().addDialogue("Deine Pokemon sind nun wieder topfit!");
 		this.gController.waitDialogue();
+	}
+	
+	@Override
+	public JsonObject getSaveData() {
+		JsonObject saveData = super.getSaveData();
+		saveData.addProperty(DIALOGUE_ON_EXIT, this.dialogues.get(DIALOGUE_ON_EXIT));
+		saveData.addProperty(DIALOGUE_ON_ACTION, this.dialogues.get(DIALOGUE_ON_ACTION));
+		
+		return saveData;
+	}
+	
+	@Override
+	public boolean importSaveData(JsonObject saveData) {
+		if(super.importSaveData(saveData)) {
+			this.dialogues.put(DIALOGUE_ON_EXIT, saveData.get(DIALOGUE_ON_EXIT).getAsString());
+			this.dialogues.put(DIALOGUE_ON_ACTION, saveData.get(DIALOGUE_ON_ACTION).getAsString());
+			
+			
+			
+			return true;
+		}
+		return false;
 	}
 }

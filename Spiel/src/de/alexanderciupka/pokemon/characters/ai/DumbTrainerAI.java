@@ -1,10 +1,15 @@
 package de.alexanderciupka.pokemon.characters.ai;
 
+import de.alexanderciupka.pokemon.characters.Character;
 import de.alexanderciupka.pokemon.fighting.Attack;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
 
-public class DumbTrainerAI implements AI {
+public class DumbTrainerAI extends AI {
 	
+	public DumbTrainerAI(Character c) {
+		super(c);
+	}
+
 	private int position;
 
 	@Override
@@ -22,5 +27,16 @@ public class DumbTrainerAI implements AI {
 	@Override
 	public void setPosition(int position) {
 		this.position = position;
+	}
+	
+	@Override
+	public int getPosition() {
+		return this.position;
+	}
+
+	@Override
+	public Pokemon getNextPokemon() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

@@ -2,7 +2,6 @@ package de.alexanderciupka.pokemon.pokemon;
 
 import java.awt.Image;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.UUID;
@@ -12,7 +11,6 @@ import javax.swing.ImageIcon;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import de.alexanderciupka.pokemon.characters.types.Player;
 import de.alexanderciupka.pokemon.constants.Abilities;
 import de.alexanderciupka.pokemon.constants.Items;
 import de.alexanderciupka.pokemon.fighting.Fighting;
@@ -822,22 +820,32 @@ public class Pokemon {
 		data.addProperty("gender", this.gender.name());
 		data.addProperty("happiness", this.happiness);
 		data.addProperty("item", this.getItem());
+		data.addProperty("ability", this.ability.getId());
 		return data;
 	}
 
 	public static Pokemon importSaveData(JsonObject saveData) {
 		Pokemon result = new Pokemon(saveData.get("id").getAsInt());
 		result.getStats().importSaveData(saveData.get("stats").getAsJsonObject());
-		result.setMoves(new Move[4]);
-		for (int i = 0; i < Math.min(result.getMoves().length, saveData.get("moves").getAsJsonArray().size()); i++) {
-			result.addMove(Move.importSaveData(saveData.get("moves").getAsJsonArray().get(i).getAsJsonObject()));
+		if(saveData.has("moves")) {
+			result.setMoves(new Move[4]);
+			for (int i = 0; i < Math.min(result.getMoves().length, saveData.get("moves").getAsJsonArray().size()); i++) {
+				result.addMove(Move.importSaveData(saveData.get("moves").getAsJsonArray().get(i).getAsJsonObject()));
+			}
 		}
-		result.setNameChanged(
-				saveData.get("name_changed") != null ? saveData.get("name_changed").getAsBoolean() : false);
+		if (saveData.has("name")) {
+			result.setNameChanged(saveData.get("name").getAsJsonObject().get("changed").getAsBoolean());
+		}
 		result.setAilment(Ailment.valueOf(saveData.get("ailment").getAsString()));
-		result.setGender(Gender.valueOf(saveData.get("gender").getAsString().toUpperCase()));
-		result.happiness = saveData.get("happiness").getAsInt();
-		result.setItem(saveData.get("item").getAsInt());
+		if(saveData.has("gender")) {
+			result.setGender(Gender.valueOf(saveData.get("gender").getAsString().toUpperCase()));
+		}
+		if(saveData.has("happiness")) {
+			result.happiness = saveData.get("happiness").getAsInt();
+		}
+		if(saveData.has("item")) {
+			result.setItem(saveData.get("item").getAsInt());
+		}
 		result.updateSprites();
 		return result;
 	}
@@ -872,86 +880,11 @@ public class Pokemon {
 		switch (usedBall) {
 		case Items.MEISTERBALL:
 			return 4;
-		case Items.FINSTERBALL:
-			if (this.gController.getMainCharacter().getCurrentRoute().isDark()
-					|| Calendar.getInstance().get(Calendar.HOUR_OF_DAY) <= 3
-					|| Calendar.getInstance().get(Calendar.HOUR_OF_DAY) >= 20) {
-				fangquote = 3.5;
-			}
-			break;
-		case Items.FLOTTBALL:
-			if (this.gController.getFight().getTurn() == 1) {
-				fangquote = 5;
-			}
-			break;
 		case Items.HYPERBALL:
 			fangquote = 2;
 			break;
-		case Items.NESTBALL:
-			fangquote = Math.max((41 - this.getStats().getLevel()) / 10, 1);
-			break;
-		case Items.NETZBALL:
-			if (this.hasType(Type.WATER) || this.hasType(Type.BUG)) {
-				fangquote = 3;
-			}
-			break;
-		case Items.SAFARIBALL:
 		case Items.SUPERBALL:
-		case Items.TURNIERBALL:
 			fangquote = 1.5;
-			break;
-		case Items.TIMERBALL:
-			fangquote = (int) (this.gController.getFight().getTurn() * (1229.0 / 4096) + 1);
-			break;
-		case Items.TAUCHBALL:
-			// TODO: Tauchen
-			break;
-		case Items.WIEDERBALL:
-			Player p = (Player) this.gController.getFight().getCharacter(this.gController.getFight().getActivePlayer());
-			if (p.getPokedex().isCaught(this.getId())) {
-				fangquote = 3;
-			}
-			break;
-		case Items.KÖDERBALL:
-			// TODO: Angeln
-			break;
-		case Items.LEVELBALL:
-			short level = this.gController.getFight().getPokemon(this.gController.getFight().getActivePlayer())
-					.getStats().getLevel();
-			if (level / 4 > this.getStats().getLevel()) {
-				fangquote = 8;
-			} else if (level / 2 > this.getStats().getLevel()) {
-				fangquote = 4;
-			} else if (level >= this.getStats().getLevel()) {
-				fangquote = 2;
-			}
-			break;
-		case Items.MONDBALL:
-			if (this.gController.getInformation().canEvolveWith(this.getId(), Items.MONDSTEIN)) {
-				fangquote = 4;
-			}
-			break;
-		case Items.SCHWERBALL:
-			if (this.getWeight() > 409.6) {
-				fangquote = 40;
-			} else if (this.getWeight() > 307.2) {
-				fangquote = 30;
-			} else if (this.getWeight() > 204.8) {
-				fangquote = 20;
-			} else {
-				fangquote = -20;
-			}
-			break;
-		case Items.SYMPABALL:
-			Pokemon poke = this.gController.getFight().getPokemon(this.gController.getFight().getActivePlayer());
-			if (this.getId() == poke.getId() && this.getGender() != poke.getGender()) {
-				fangquote = 8;
-			}
-			break;
-		case Items.TURBOBALL:
-			if (this.getStats().getBaseStat(Stat.SPEED) >= 100) {
-				fangquote = 4;
-			}
 			break;
 		}
 
@@ -1050,209 +983,142 @@ public class Pokemon {
 	 * 
 	 */
 	public String canBeUsed(Integer item) {
-		if(this.getSecondaryAilments() != null && this.getSecondaryAilments().containsKey(SecondaryAilment.EMBARGO)) {
+		if (this.getSecondaryAilments() != null && this.getSecondaryAilments().containsKey(SecondaryAilment.EMBARGO)) {
 			return SecondaryAilment.EMBARGO.getAffected().replace("@pokemon", this.getName());
 		}
 		PokemonInformation info = this.gController.getInformation();
-		if(gController.isFighting()) {
-			if(!info.hasAttribute(Items.ATTR_USABLE_IN_BATTLE, item)) {
+		if (gController.isFighting()) {
+			if (!info.hasAttribute(Items.ATTR_USABLE_IN_BATTLE, item)) {
 				return Items.CANNOT_BE_USED;
 			}
 		} else {
-			if(!info.hasAttribute(Items.ATTR_USABLE_OVERWORLD, item)) {
+			if (!info.hasAttribute(Items.ATTR_USABLE_OVERWORLD, item)) {
 				return Items.CANNOT_BE_USED;
 			}
 		}
 		return null;
 	}
 
-	public String useItem(de.alexanderciupka.pokemon.characters.types.Character source, Integer i) {
+	public boolean useItem(de.alexanderciupka.pokemon.characters.Character source, Integer i) {
 		PokemonInformation info = this.gController.getPokemonInformation();
-		
+
 		int heal = 0;
-		Ailment toHeal = Ailment.NONE;
+		ArrayList<Ailment> ailmentHeal = new ArrayList<>();
 		int revive = Items.NO_REVIVE;
-		Stat evIncrease = Stat.ACCURACY;
-		
 		ArrayList<String> messages = new ArrayList<String>();
-		
-		switch(i) {
+
+		switch (i) {
 		case Items.TRANK:
-			int healed = this.getStats().restoreHP(20);
-			if(healed > 0) {
-				return this.getName() + " wurden " + healed + " KP aufgefrischt!";
-			}
+			heal = 20;
 			break;
 		case Items.SUPERTRANK:
-			healed = this.getStats().restoreHP(60);
-			if(healed > 0) {
-				return this.getName() + " wurden " + healed + " KP aufgefrischt!";
-			}
+			heal = 50;
 			break;
 		case Items.HYPERTRANK:
-			healed = this.getStats().restoreHP(120);
-			if(healed > 0) {
-				return this.getName() + " wurden " + healed + " KP aufgefrischt!";
-			}
+			heal = (200);
 			break;
 		case Items.TOP_TRANK:
-			healed = this.getStats().restoreHP(20);
-			if(healed > 0) {
-				return this.getName() + " wurden " + healed + " KP aufgefrischt!";
-			}
+			heal = (this.getStats().getStats().get(Stat.HP));
 			break;
 		case Items.TAFELWASSER:
-			healed = this.getStats().restoreHP(30);
-			if(healed > 0) {
-				return this.getName() + " wurden " + healed + " KP aufgefrischt!";
-			}
+			heal = (30);
 			break;
 		case Items.SPRUDEL:
-			healed = this.getStats().restoreHP(50);
-			if(healed > 0) {
-				
+			heal = (50);
+			break;
+		case Items.LIMONADE:
+			heal = (80);
+			break;
+		case Items.KUHMUH_MILCH:
+			heal = (100);
+			break;
+		case Items.GEGENGIFT:
+			ailmentHeal.add(Ailment.POISON);
+			ailmentHeal.add(Ailment.HEAVY_POISON);
+			break;
+		case Items.FEUERHEILER:
+			ailmentHeal.add(Ailment.BURN);
+			break;
+		case Items.EISHEILER:
+			ailmentHeal.add(Ailment.FREEZE);
+			break;
+		case Items.AUFWECKER:
+			ailmentHeal.add(Ailment.SLEEP);
+			break;
+		case Items.PARA_HEILER:
+			ailmentHeal.add(Ailment.PARALYSIS);
+			break;
+		case Items.TOP_GENESUNG:
+			heal = this.getStats().getStats().get(Stat.HP);
+		case Items.HYPERHEILER:
+			for (Ailment a : Ailment.values()) {
+				if (a != Ailment.FAINTED && a != Ailment.NONE) {
+					ailmentHeal.add(a);
+				}
+			}
+			break;
+		case Items.BELEBER:
+			revive = Items.HALF_REVIVE;
+			break;
+		case Items.TOP_BELEBER:
+			revive = Items.FULL_REVIVE;
+			break;
+		case Items.SONDERBONBON:
+			if (this.getStats().levelUP()) {
+				this.getStats().setCurrentXP(0);
+				return true;
+			}
+			break;
+		case Items.SONNENSTEIN:
+		case Items.MONDSTEIN:
+		case Items.FEUERSTEIN:
+		case Items.DONNERSTEIN:
+		case Items.WASSERSTEIN:
+		case Items.BLATTSTEIN:
+		case Items.LEUCHTSTEIN:
+		case Items.FINSTERSTEIN:
+		case Items.FUNKELSTEIN:
+			if (!this.gController.isFighting() && this.evolve(info.checkEvolution(this, i))) {
+				this.gController.getGameFrame().addDialogue(this.getName() + " reagiert auf den Stein!");
+				this.gController.getGameFrame().setCurrentPanel(this.gController.getGameFrame().getEvolutionPanel());
+				this.gController.getGameFrame().getEvolutionPanel().start();
+				return true;
 			}
 			break;
 		}
-		if(heal > 0) {
-			messages.add(this.getName() + " wurden " + heal + " KP aufgefrischt!");
+		if (this.getAilment() == Ailment.FAINTED) {
+			switch (revive) {
+			case Items.HALF_REVIVE:
+				this.getStats().setCurrentHP((short) Math.ceil(this.getStats().getStats().get(Stat.HP) / 2.0));
+				messages.add(this.getName() + " wurden einige KP aufgefrischt!");
+				break;
+			case Items.FULL_REVIVE:
+				this.getStats().setCurrentHP(this.getStats().getStats().get(Stat.HP));
+				messages.add(this.getName() + " wurden alle KP aufgefrischt!");
+				break;
+			}
+		} else {
+			heal = this.getStats().restoreHP(heal);
+			if (heal > 0) {
+				messages.add(this.getName() + " wurden " + heal + " KP aufgefrischt!");
+			}
 		}
-		return Items.USELESS;
-		// TODO: Items on Pokemon
-		// if (this.secondaryAilments != null &&
-		// this.secondaryAilments.containsKey(SecondaryAilment.EMBARGO)) {
-		// this.gController.getGameFrame()
-		// .addDialogue(SecondaryAilment.EMBARGO.getAffected().replace("@pokemon",
-		// this.getName()));
-		// return false;
-		// }
-		// if (i.isUsableOnPokemon()) {
-		// boolean effective = false;
-		// switch (i) {
-		// case REVIVE:
-		// case MAXREVIVE:
-		// if (this.getAilment() == Ailment.FAINTED) {
-		// effective = true;
-		// this.getStats().restoreHP((int)
-		// (this.getStats().getStats().get(Stat.HP) * (i.getValue() / 100.0)));
-		// this.setAilment(Ailment.NONE);
-		// this.gController.getGameFrame().addDialogue(this.getName() + " wurde
-		// wiederbelebt!");
-		// SoundController.getInstance().playSound(SoundController.ITEM_HEAL);
-		// }
-		// break;
-		// case FULLRESTORE:
-		// if (this.getAilment() != Ailment.NONE) {
-		// effective = true;
-		// this.gController.getGameFrame().addDialogue(
-		// this.getName() + " ist nicht mehr " +
-		// Ailment.getText(this.getAilment()) + "!");
-		// this.setAilment(Ailment.NONE);
-		// SoundController.getInstance().playSound(SoundController.ITEM_HEAL);
-		// }
-		// case POTION:
-		// case SUPERPOTION:
-		// case HYPERPOTION:
-		// case FULLHEAL:
-		// int restore = this.stats.restoreHP(i.getValue());
-		// if (restore > 0) {
-		// if (!effective) {
-		// SoundController.getInstance().playSound(SoundController.ITEM_HEAL);
-		// }
-		// effective = true;
-		// this.gController.getGameFrame()
-		// .addDialogue(this.getName() + " wurde um " + restore + " KP
-		// geheilt!");
-		// }
-		// break;
-		// case BURNHEAL:
-		// case PARAHEAL:
-		// case FREEZEHEAL:
-		// case POISONHEAL:
-		// case SLEEPHEAL:
-		// if (this.getAilment() == i.getAilment()) {
-		// effective = true;
-		// this.gController.getGameFrame().addDialogue(
-		// this.getName() + " ist nicht mehr " +
-		// Ailment.getText(this.getAilment()) + "!");
-		// this.setAilment(Ailment.NONE);
-		// SoundController.getInstance().playSound(SoundController.ITEM_HEAL);
-		// }
-		// break;
-		// case HYPERHEAL:
-		// case ZWIEBACKNUTELLA:
-		// if (this.getAilment() != Ailment.NONE) {
-		// effective = true;
-		// this.gController.getGameFrame().addDialogue(
-		// this.getName() + " ist nicht mehr " +
-		// Ailment.getText(this.getAilment()) + "!");
-		// this.setAilment(Ailment.NONE);
-		// SoundController.getInstance().playSound(SoundController.ITEM_HEAL);
-		// }
-		// break;
-		// case RARECANDY:
-		// if (this.getStats().levelUP()) {
-		// effective = true;
-		// this.getStats().setCurrentXP(0);
-		// }
-		// break;
-		//
-		// case DAWNSTONE:
-		// case DUSKSTONE:
-		// case FIRESTONE:
-		// case LEAFSTONE:
-		// case MOONSTONE:
-		// case SHINYSTONE:
-		// case SUNSTONE:
-		// case THUNDERSTONE:
-		// case WATERSTONE:
-		// if
-		// (this.evolve(this.gController.getInformation().checkEvolution(this,
-		// i))) {
-		// effective = true;
-		// this.gController.getGameFrame()
-		// .addDialogue(this.getName() + " reagiert auf den " + i.getName() +
-		// "!");
-		// }
-		// break;
-		// case CALCIUM:
-		// case CARBON:
-		// case HPUP:
-		// case PROTEIN:
-		// case IRON:
-		// case ZINC:
-		// Stat s = i.getIncrease();
-		// if (this.getStats().getEv(s) < 100) {
-		// effective = true;
-		// this.gController.getGameFrame().addDialogue(i.getName() + " hat " +
-		// s.getArticle() + " "
-		// + s.getText() + " von " + this.getName() + " erhöht!");
-		// this.stats.increaseEV(s, (short) 10);
-		// if (this.getHappiness() < 100) {
-		// this.changeHappiness(5);
-		// } else if (this.getHappiness() > 200) {
-		// this.changeHappiness(3);
-		// } else {
-		// this.changeHappiness(2);
-		// }
-		// SoundController.getInstance().playSound(SoundController.ITEM_HEAL);
-		// }
-		// break;
-		// default:
-		// break;
-		// }
-		// if (effective) {
-		// this.getStats().updateStats();
-		// source.removeItem(i);
-		// return true;
-		// }
-		// this.gController.getGameFrame().addDialogue("Es wird keine Wirkung
-		// haben!");
-		// return false;
-		// } else {
-		// throw new IllegalArgumentException("Given Item must be usable on
-		// Pokemon!");
-		// }
+		for (Ailment a : ailmentHeal) {
+			if (this.getAilment() == a) {
+				this.setAilment(Ailment.NONE);
+				messages.add(this.getName() + " ist nicht mehr " + Ailment.getText(a));
+				break;
+			}
+		}
+
+		if (messages.isEmpty()) {
+			gController.getCurrentTextLabel().addText(Items.USELESS);
+			return false;
+		}
+		for (String msg : messages) {
+			gController.getCurrentTextLabel().addText(msg);
+		}
+		return true;
 	}
 
 	public int getEvolves() {

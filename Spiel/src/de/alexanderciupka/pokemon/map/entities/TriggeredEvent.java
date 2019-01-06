@@ -6,8 +6,8 @@ import java.util.ArrayList;
 
 import com.google.gson.JsonObject;
 
+import de.alexanderciupka.pokemon.characters.Character;
 import de.alexanderciupka.pokemon.characters.Direction;
-import de.alexanderciupka.pokemon.characters.types.Character;
 import de.alexanderciupka.pokemon.characters.types.NPC;
 import de.alexanderciupka.pokemon.characters.types.Player;
 import de.alexanderciupka.pokemon.main.Main;
@@ -44,9 +44,9 @@ public class TriggeredEvent {
 	}
 
 	public void startEvent(Player source) {
-		if(!triggered) {
+		if (!triggered) {
 			triggered = true;
-			while(gController.getInteractionPause()) {
+			while (gController.getInteractionPause()) {
 				Thread.yield();
 			}
 			gController.setInteractionPause(true);
@@ -58,22 +58,22 @@ public class TriggeredEvent {
 			ArrayList<String> allOriginalAfterDialoges = new ArrayList<String>();
 			ArrayList<String> allOriginalNoDialoges = new ArrayList<String>();
 			ArrayList<String> allOriginalSprites = new ArrayList<String>();
-			for(int i = 0; i < this.changes.size(); i++) {
+			for (int i = 0; i < this.changes.size(); i++) {
 				Change[] currentChanges = this.changes.get(i);
 				int max = 0;
-				for(int j = 0; j < currentChanges.length; j++) {
+				for (int j = 0; j < currentChanges.length; j++) {
 					currentChanges[j].initiate(source);
 					Character c = currentChanges[j].getCharacter();
-					if(c != null) {
-						if(!allParticipants.contains(c)) {
+					if (c != null) {
+						if (!allParticipants.contains(c)) {
 							c.setEvent(true);
 							allParticipants.add(c);
 							allOriginalPoints.add(new Point(c.getCurrentPosition()));
 							allOriginalDirections.add(c.getCurrentDirection());
-							if(c instanceof NPC) {
-								allOriginalBeforeDialoges.add(((NPC) c).getDialogue(NPC.DIALOGUE_BEFORE_FIGHT));
-								allOriginalAfterDialoges.add(((NPC) c).getDialogue(NPC.DIALOGUE_AFTER_FIGHT));
-								allOriginalNoDialoges.add(((NPC) c).getDialogue(NPC.DIALOGUE_NO_FIGHT));
+							if (c instanceof NPC) {
+								allOriginalBeforeDialoges.add(((NPC) c).getDialogue(NPC.DIALOGUE_BEFORE_ACTION));
+								allOriginalAfterDialoges.add(((NPC) c).getDialogue(NPC.DIALOGUE_AFTER_ACTION));
+								allOriginalNoDialoges.add(((NPC) c).getDialogue(NPC.DIALOGUE_NO_ACTION));
 							}
 							allOriginalSprites.add(c.getSpriteName());
 						}
@@ -83,62 +83,61 @@ public class TriggeredEvent {
 					max = currentChanges[j].getPath().length > max ? currentChanges[j].getPath().length : max;
 				}
 				Character currentChar = null;
-				for(int j = 0; j < currentChanges.length; j++) {
+				for (int j = 0; j < currentChanges.length; j++) {
 					Camera cam = gController.getCurrentBackground().getCamera();
-					if(currentChanges[j].isCenterCharacter()) {
-						cam.setCharacter(currentChanges[j].getCharacter(),
-								currentChanges[j].isCamAnimation());
+					if (currentChanges[j].isCenterCharacter()) {
+						cam.setCharacter(currentChanges[j].getCharacter(), currentChanges[j].isCamAnimation());
 					} else {
 						Point camPosition = currentChanges[j].getCamPosition();
-						if(camPosition.x != -1 && camPosition.y != -1) {
+						if (camPosition.x != -1 && camPosition.y != -1) {
 							cam.moveTowards(camPosition.x, camPosition.y, currentChanges[j].isCamAnimation());
 						}
 					}
 				}
-				for(int j = 0; j < max; j++) {
-					for(int c = 0; c < currentChanges.length; c++) {
+				for (int j = 0; j < max; j++) {
+					for (int c = 0; c < currentChanges.length; c++) {
 						currentChar = currentChanges[c].getCharacter();
-						if(j < currentChanges[c].getPath().length) {
+						if (j < currentChanges[c].getPath().length) {
 							currentChar.changePosition(currentChanges[c].getPath()[j], false);
 						}
 					}
-					for(int c = 0; c < currentChanges.length; c++) {
+					for (int c = 0; c < currentChanges.length; c++) {
 						currentChar = currentChanges[c].getCharacter();
 						currentChar.waiting(true);
-						if(j >= currentChanges[c].getPath().length - 1 && currentChanges[c].getDirection() != null) {
+						if (j >= currentChanges[c].getPath().length - 1 && currentChanges[c].getDirection() != null) {
 							currentChar.setCurrentDirection(currentChanges[c].getDirection());
 						}
 					}
 				}
-				if(max == 0) {
-					for(int c = 0; c < currentChanges.length; c++) {
+				if (max == 0) {
+					for (int c = 0; c < currentChanges.length; c++) {
 						currentChar = currentChanges[c].getCharacter();
 						currentChar.waiting(true);
-						if(c >= currentChanges[c].getPath().length - 1 && currentChanges[c].getDirection() != null) {
+						if (c >= currentChanges[c].getPath().length - 1 && currentChanges[c].getDirection() != null) {
 							currentChar.setCurrentDirection(currentChanges[c].getDirection());
 						}
 					}
 				}
-				for(int j = 0; j < currentChanges.length; j++) {
+				for (int j = 0; j < currentChanges.length; j++) {
 					currentChar = currentChanges[j].getCharacter();
-					if(currentChanges[j].isPositionUpdate()) {
+					if (currentChanges[j].isPositionUpdate()) {
 						currentChar.setOriginalPosition(currentChar.getCurrentPosition());
 						currentChar.setOriginalDirection(currentChar.getCurrentDirection());
 					}
-					if(currentChar instanceof NPC) {
+					if (currentChar instanceof NPC) {
 						NPC currentNPC = (NPC) currentChar;
-						if(currentChanges[j].getAfterFightUpdate() != null) {
-							currentNPC.setDialogue(NPC.DIALOGUE_AFTER_FIGHT, currentChanges[j].getAfterFightUpdate());
+						if (currentChanges[j].getAfterFightUpdate() != null) {
+							currentNPC.setDialogue(NPC.DIALOGUE_AFTER_ACTION, currentChanges[j].getAfterFightUpdate());
 						}
-						if(currentChanges[j].getBeforeFightUpdate() != null) {
-							currentNPC.setDialogue(NPC.DIALOGUE_BEFORE_FIGHT, currentChanges[j].getBeforeFightUpdate());
+						if (currentChanges[j].getBeforeFightUpdate() != null) {
+							currentNPC.setDialogue(NPC.DIALOGUE_BEFORE_ACTION, currentChanges[j].getBeforeFightUpdate());
 						}
-						if(currentChanges[j].getNoFightUpdate() != null) {
-							currentNPC.setDialogue(NPC.DIALOGUE_NO_FIGHT, currentChanges[j].getNoFightUpdate());
+						if (currentChanges[j].getNoFightUpdate() != null) {
+							currentNPC.setDialogue(NPC.DIALOGUE_NO_ACTION, currentChanges[j].getNoFightUpdate());
 						}
 					}
-					if(currentChanges[j].getSpriteUpdate() != null) {
-						switch(currentChar.getCurrentDirection()) {
+					if (currentChanges[j].getSpriteUpdate() != null) {
+						switch (currentChar.getCurrentDirection()) {
 						case DOWN:
 							currentChar.setCharacterImage(currentChanges[j].getSpriteUpdate(), "front");
 							break;
@@ -155,20 +154,22 @@ public class TriggeredEvent {
 							break;
 						}
 					}
-					if(currentChanges[j].isHeal()) {
+					if (currentChanges[j].isHeal()) {
 						currentChar.getTeam().restoreTeam();
 						SoundController.getInstance().playSound(SoundController.ITEM_HEAL, true);
 					}
 				}
 				Main.FORCE_REPAINT = true;
-				while(Main.FORCE_REPAINT) {
+				while (Main.FORCE_REPAINT) {
 					Thread.yield();
 				}
-				for(int j = 0; j < currentChanges.length; j++) {
-					if(currentChanges[j].getDialog() != null) {
+				for (int j = 0; j < currentChanges.length; j++) {
+					if (currentChanges[j].getDialog() != null) {
 						currentChar = currentChanges[j].getCharacter();
-						if(currentChar instanceof NPC) {
-							gController.getGameFrame().addDialogue((currentChanges[j].isUnknown() ? "???: " : currentChar.getName() + ": ") + currentChanges[j].getDialog());
+						if (currentChar instanceof NPC) {
+							gController.getGameFrame().addDialogue(
+									(currentChanges[j].isUnknown() ? "???: " : currentChar.getName() + ": ")
+											+ currentChanges[j].getDialog());
 						} else {
 							gController.getGameFrame().getDialogue().setForeground(new Color(255, 102, 204));
 							gController.getGameFrame().addDialogue(currentChanges[j].getDialog());
@@ -177,22 +178,23 @@ public class TriggeredEvent {
 						gController.getGameFrame().getDialogue().setForeground(Color.BLACK);
 					}
 				}
-				for(int j = 0; j < currentChanges.length; j++) {
+				for (int j = 0; j < currentChanges.length; j++) {
 					currentChar = currentChanges[j].getCharacter();
-					if(currentChanges[j].isFight() && currentChar instanceof NPC && currentChar.isTrainer() && !currentChar.isDefeated()) {
+					if (currentChanges[j].isFight() && currentChar instanceof NPC && currentChar.isTrainer()
+							&& !currentChar.isDefeated()) {
 						NPC enemy = (NPC) currentChar;
 						gController.startFight(enemy);
 						do {
 							Thread.yield();
-						} while(gController.isFighting());
-						if(enemy.isDefeated()) {
+						} while (gController.isFighting());
+						if (enemy.isDefeated()) {
 							defeats.add(enemy);
 						} else {
-							for(NPC current : defeats) {
+							for (NPC current : defeats) {
 								current.getTeam().restoreTeam();
 							}
 							int nonNPCs = 0;
-							for(int k = 0; k < allParticipants.size(); k++) {
+							for (int k = 0; k < allParticipants.size(); k++) {
 								Character c = allParticipants.get(k);
 								Point p = allOriginalPoints.get(k);
 								Direction d = allOriginalDirections.get(k);
@@ -200,7 +202,7 @@ public class TriggeredEvent {
 								c.setOriginalPosition(p);
 								c.setCurrentDirection(d);
 								c.setOriginalDirection(d);
-								switch(d) {
+								switch (d) {
 								case DOWN:
 									c.setCharacterImage(allOriginalSprites.get(k), "front");
 									break;
@@ -216,16 +218,17 @@ public class TriggeredEvent {
 								default:
 									break;
 								}
-								if(c instanceof NPC) {
+								if (c instanceof NPC) {
 									NPC n = (NPC) c;
-									n.setDialogue(NPC.DIALOGUE_AFTER_FIGHT, allOriginalAfterDialoges.get(k-nonNPCs));
-									n.setDialogue(NPC.DIALOGUE_BEFORE_FIGHT, allOriginalBeforeDialoges.get(k-nonNPCs));
-									n.setDialogue(NPC.DIALOGUE_NO_FIGHT		, allOriginalNoDialoges.get(k-nonNPCs));
+									n.setDialogue(NPC.DIALOGUE_AFTER_ACTION, allOriginalAfterDialoges.get(k - nonNPCs));
+									n.setDialogue(NPC.DIALOGUE_BEFORE_ACTION,
+											allOriginalBeforeDialoges.get(k - nonNPCs));
+									n.setDialogue(NPC.DIALOGUE_NO_ACTION, allOriginalNoDialoges.get(k - nonNPCs));
 								} else {
 									nonNPCs++;
 								}
 							}
-							for(Character c : allParticipants) {
+							for (Character c : allParticipants) {
 								c.setEvent(false);
 							}
 							triggered = false;
@@ -239,33 +242,30 @@ public class TriggeredEvent {
 						}
 					}
 				}
-				for(int j = 0; j < currentChanges.length; j++) {
+				for (int j = 0; j < currentChanges.length; j++) {
 					source.earnRewards(currentChanges[j].getItem(), true);
 				}
-				for(int j = 0; j < currentChanges.length; j++) {
-					if(currentChanges[j].getSound() != null) {
-						SoundController.getInstance().playSound(
-								currentChanges[j].getSound(),
-								currentChanges[j].isWaiting(),
-								currentChanges[j].pauseMusic());
+				for (int j = 0; j < currentChanges.length; j++) {
+					if (currentChanges[j].getSound() != null) {
+						SoundController.getInstance().playSound(currentChanges[j].getSound(),
+								currentChanges[j].isWaiting(), currentChanges[j].pauseMusic());
 					}
 				}
-				for(int j = 0; j < currentChanges.length; j++) {
+				for (int j = 0; j < currentChanges.length; j++) {
 					try {
 						Thread.sleep(currentChanges[j].getDelay());
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
-				for(int j = 0; j < currentChanges.length; j++) {
+				for (int j = 0; j < currentChanges.length; j++) {
 					Change c = currentChanges[j];
-					if(c.getRemove() && c.getCharacter() instanceof NPC) {
+					if (c.getRemove() && c.getCharacter() instanceof NPC) {
 						c.getCharacter().getCurrentRoute().removeCharacter(c.getCharacter());
-						c.getCharacter().getCurrentRoute().updateMap(c.getCharacter().getCurrentPosition());
 					}
 				}
 			}
-			for(Character c : allParticipants) {
+			for (Character c : allParticipants) {
 				c.setEvent(false);
 			}
 			gController.setInteractionPause(false);
@@ -274,17 +274,18 @@ public class TriggeredEvent {
 
 	@Override
 	public boolean equals(Object obj) {
-		if(obj instanceof TriggeredEvent) {
+		if (obj instanceof TriggeredEvent) {
 			TriggeredEvent other = (TriggeredEvent) obj;
-			if(other.changes.size() != this.changes.size() || !this.id.equals(other.id) || this.triggered != other.triggered) {
+			if (other.changes.size() != this.changes.size() || !this.id.equals(other.id)
+					|| this.triggered != other.triggered) {
 				return false;
 			}
-			for(int i = 0; i < this.changes.size(); i++) {
-				if(this.changes.get(i).length != other.changes.get(i).length) {
+			for (int i = 0; i < this.changes.size(); i++) {
+				if (this.changes.get(i).length != other.changes.get(i).length) {
 					return false;
 				} else {
-					for(int j = 0; j < this.changes.get(i).length; j++) {
-						if(!this.changes.get(i)[j].equals(other.changes.get(i)[j])) {
+					for (int j = 0; j < this.changes.get(i).length; j++) {
+						if (!this.changes.get(i)[j].equals(other.changes.get(i)[j])) {
 							return false;
 						}
 					}
@@ -295,21 +296,17 @@ public class TriggeredEvent {
 		return false;
 	}
 
-	public JsonObject getSaveData(TriggeredEvent event) {
+	public JsonObject getSaveData() {
 		JsonObject saveData = new JsonObject();
 		saveData.addProperty("id", this.id);
-		if(this.triggered != event.triggered) {
-			saveData.addProperty("triggered", this.triggered);
-		}
+		saveData.addProperty("triggered", this.triggered);
 		return saveData;
 	}
 
-	public boolean importSaveData(JsonObject saveData, TriggeredEvent event) {
-		if(saveData.get("id").getAsString().equals(this.id)) {
-			if(saveData.get("triggered") != null) {
+	public boolean importSaveData(JsonObject saveData) {
+		if (saveData.get("id").getAsString().equals(this.id)) {
+			if (saveData.get("triggered") != null) {
 				this.triggered = saveData.get("triggered").getAsBoolean();
-			} else {
-				this.triggered = event.triggered;
 			}
 			return true;
 		}
@@ -317,12 +314,12 @@ public class TriggeredEvent {
 	}
 
 	@Override
-	protected TriggeredEvent clone() {
+	public TriggeredEvent clone() {
 		TriggeredEvent clone = new TriggeredEvent(this.id);
 		clone.triggered = this.triggered;
-		for(int i = 0; i < changes.size(); i++) {
+		for (int i = 0; i < changes.size(); i++) {
 			Change[] changes = new Change[this.changes.get(i).length];
-			for(int j = 0; j < this.changes.get(i).length; j++) {
+			for (int j = 0; j < this.changes.get(i).length; j++) {
 				changes[j] = this.changes.get(i)[j].clone();
 			}
 			clone.addChanges(changes);

@@ -1,14 +1,17 @@
 package de.alexanderciupka.pokemon.characters.ai;
 
-import de.alexanderciupka.pokemon.fighting.Attack;
-import de.alexanderciupka.pokemon.pokemon.Pokemon;
+import de.alexanderciupka.pokemon.characters.Character;
 
-public interface AI {
-
-	public Attack getAttack();
-
-	public void setPosition(int position);
+public abstract class AI implements IAI {
 	
-	public void updateTeam(int id, Pokemon p);
+	protected Character trainer;
+	
+	public AI(Character c) {
+		this.trainer = c;
+	}
+	
+	public Character getTrainer() {
+		return this.trainer;
+	}
 
 }

@@ -8,27 +8,29 @@ import java.util.HashMap;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
 
+import de.alexanderciupka.pokemon.characters.Character;
 import de.alexanderciupka.pokemon.characters.Direction;
+import de.alexanderciupka.pokemon.gui.GameFrame;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
 
 public class NPC extends Character {
 
-	public static final String DIALOGUE_BEFORE_FIGHT = "before_fight";
-	public static final String DIALOGUE_NO_FIGHT = "no_fight";
-	public static final String DIALOGUE_ON_DEFEAT = "on_defeat";
-	public static final String DIALOGUE_AFTER_FIGHT = "after_fight";
+	public static final String DIALOGUE_BEFORE_ACTION = "before_action";
+	public static final String DIALOGUE_NO_ACTION = "no_action";
+	public static final String DIALOGUE_ON_ACTION = "on_action";
+	public static final String DIALOGUE_ON_EXIT = "on_exit";
+	public static final String DIALOGUE_AFTER_ACTION = "after_action";
 
 	public static final int NO_DOUBLE = 0;
 	public static final int DOUBLE = 1;
 	public static final int FOLLOWER_DOUBLE = 2;
 
-	private HashMap<String, String> dialogues;
-	
+	protected HashMap<String, String> dialogues;
+
 	private String logo;
 
 	private boolean showName = true;
@@ -67,15 +69,27 @@ public class NPC extends Character {
 		if (!this.currentPosition.equals(this.originalPosition)) {
 			this.oldPosition = new Point(this.currentPosition);
 			this.setCurrentPosition(this.originalPosition);
-			this.currentRoute.updateMap(this.oldPosition);
 		}
 		if (this.currentDirection != this.originalDirection) {
 			this.setCurrentDirection(this.originalDirection);
 		}
-		this.currentRoute.updateMap(this.currentPosition);
 	}
 
-	public void faceTowardsCharacter(de.alexanderciupka.pokemon.characters.types.Character c) {
+	public void loadData(JsonObject data) {
+		this.setCurrentPosition(data.get("x").getAsInt(), data.get("y").getAsInt());
+		this.setCharacterImage(data.get("char_sprite").getAsString(),
+				data.get("direction").getAsString().toLowerCase());
+		this.setName(data.get("name").getAsString());
+		this.setLogo(data.has("logo") ? data.get("logo").getAsString() : null);
+		this.setRange(
+				data.has("range") ? data.get("range").getAsInt() : (GameFrame.FRAME_SIZE / GameFrame.GRID_SIZE) / 2);
+
+	}
+
+	public void faceTowardsCharacter(de.alexanderciupka.pokemon.characters.Character c) {
+		if(this instanceof Walkable) {
+			((Walkable) this).lock();
+		}
 		switch (c.getCurrentDirection()) {
 		case UP:
 			this.setCurrentDirection(de.alexanderciupka.pokemon.characters.Direction.DOWN);
@@ -92,7 +106,6 @@ public class NPC extends Character {
 		default:
 			return;
 		}
-		this.currentRoute.updateMap(this.currentPosition);
 	}
 
 	public String getDialogue(String type) {
@@ -103,7 +116,7 @@ public class NPC extends Character {
 		this.dialogues.put(type, dialogue);
 	}
 
-	public boolean moveTowardsCharacter(de.alexanderciupka.pokemon.characters.types.Character c) {
+	public boolean moveTowardsCharacter(de.alexanderciupka.pokemon.characters.Character c) {
 		int mainX = c.getCurrentPosition().x;
 		int mainY = c.getCurrentPosition().y;
 		if (this.currentPosition.x != mainX ^ this.currentPosition.y != mainY) {
@@ -137,13 +150,16 @@ public class NPC extends Character {
 			default:
 				return false;
 			}
-			for (int i = 1; i < 5; i++) {
+			for (int i = 1; i < this.range; i++) {
 				if (this.currentPosition.x + (i * x) == mainX && this.currentPosition.y + (i * y) == mainY) {
 					break;
-				} else if (!this.currentRoute.getEntities()[this.currentPosition.y + (i * y)][this.currentPosition.x
-						+ (i * x)].isAccessible(this)) {
+				} else if (!this.currentRoute.getEntity(this.currentPosition.x + (i * x),
+						this.currentPosition.y + (i * y)).isAccessible(this)) {
 					return false;
 				}
+			}
+			if(this instanceof Walkable) {
+				((Walkable) this).lock();
 			}
 			switch (this.getCurrentDirection()) {
 			case DOWN:
@@ -165,21 +181,11 @@ public class NPC extends Character {
 				this.gController.getGameFrame().getBackgroundLabel().spotted(this);
 			}
 			while (!(this.currentPosition.x + x == mainX && this.currentPosition.y + y == mainY)) {
-				this.currentRoute.updateMap(this.currentPosition);
 				this.changePosition(this.getCurrentDirection(), true);
-				this.currentRoute.updateMap(this.currentPosition);
 			}
 			return true;
 		}
 		return false;
-	}
-
-	@Override
-	public void setCurrentDirection(Direction direction) {
-		super.setCurrentDirection(direction);
-		if (this.currentRoute != null) {
-			this.currentRoute.updateMap(this.currentPosition);
-		}
 	}
 
 	public void importTeam() {
@@ -200,23 +206,21 @@ public class NPC extends Character {
 		}
 	}
 
-	public void importDialogue() {
-		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream(
-					"/characters/dialoge/" + this.currentRoute.getId() + "/" + this.getFileName() + ".char")));
-			JsonObject dialogue = new JsonParser().parse(new JsonReader(reader)).getAsJsonObject();
-
-			for (String s : new String[] { DIALOGUE_AFTER_FIGHT, DIALOGUE_BEFORE_FIGHT, DIALOGUE_NO_FIGHT,
-					DIALOGUE_ON_DEFEAT }) {
-				this.dialogues.put(s, dialogue.get("before") == null ? null : dialogue.get("before").getAsString());
-			}
-			// if (!(dialogue.get("reward") == null)) {
-			// this.importRewards(dialogue.get("reward").getAsString());
-			// }
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+	// public void importDialogue() {
+	// try {
+	// BufferedReader reader = new BufferedReader(new
+	// InputStreamReader(this.getClass().getResourceAsStream(
+	// "/characters/dialoge/" + this.currentRoute.getId() + "/" +
+	// this.getFileName() + ".char")));
+	// JsonObject dialogue = new JsonParser().parse(new
+	// JsonReader(reader)).getAsJsonObject();
+	// // if (!(dialogue.get("reward") == null)) {
+	// // this.importRewards(dialogue.get("reward").getAsString());
+	// // }
+	// } catch (Exception e) {
+	// e.printStackTrace();
+	// }
+	// }
 
 	// private void importRewards(String rewards) {
 	// for (String s : rewards.split("\\+")) {
@@ -270,7 +274,7 @@ public class NPC extends Character {
 	public void onInteraction(Player p) {
 		this.faceTowardsCharacter(p);
 		if (!this.isDefeated()) {
-			this.gController.getGameFrame().addDialogue(this.getDialogue(DIALOGUE_BEFORE_FIGHT), this);
+			this.gController.getGameFrame().addDialogue(this.getDialogue(NPC.DIALOGUE_BEFORE_ACTION), this);
 			switch (this.fightingStyle) {
 			case NO_DOUBLE:
 				this.gController.startFight(this);
@@ -283,7 +287,7 @@ public class NPC extends Character {
 			}
 		} else {
 			System.out.println(this.getName());
-			this.gController.getGameFrame().addDialogue(this.getDialogue(DIALOGUE_NO_FIGHT), this);
+			this.gController.getGameFrame().addDialogue(this.getDialogue(DIALOGUE_NO_ACTION), this);
 		}
 	}
 
@@ -294,8 +298,8 @@ public class NPC extends Character {
 	public boolean checkStartFight(Player p) {
 		if (this.isTrainer() && this.isAggro()) {
 			if (!this.isDefeated()) {
-				int mainX = p.getCurrentPosition().x;
-				int mainY = p.getCurrentPosition().y;
+				double mainX = p.getExactX();
+				double mainY = p.getExactY();
 				if (mainX == this.currentPosition.x || mainY == this.currentPosition.y) {
 					int x = 0;
 					int y = 0;
@@ -328,13 +332,15 @@ public class NPC extends Character {
 						return false;
 					}
 					for (int i = 1; i <= range; i++) {
-						if (this.getCurrentRoute().getEntities()[this.currentPosition.y
-								+ (i * y)][this.currentPosition.x + (i * x)].isAccessible(this)) {
+						if (this.getCurrentRoute()
+								.getEntity(this.currentPosition.x + (i * x), this.currentPosition.y + (i * y))
+								.isAccessible(this)) {
 							if (mainX == this.currentPosition.x + (i * x)
 									&& mainY == this.currentPosition.y + (i * y)) {
 								return true;
-							} else if (!this.currentRoute.getEntities()[this.currentPosition.y
-									+ (i * y)][this.currentPosition.x + (i * x)].isAccessible(this)) {
+							} else if (!this.currentRoute
+									.getEntity(this.currentPosition.x + (i * x), this.currentPosition.y + (i * y))
+									.isAccessible(this)) {
 								return false;
 							}
 						}
@@ -346,53 +352,40 @@ public class NPC extends Character {
 	}
 
 	public void onDefeat(Player p) {
-		this.gController.getGameFrame().getFightPanel().addText(this.getDialogue(DIALOGUE_ON_DEFEAT));
+		this.gController.getGameFrame().getFightPanel().addText(this.getDialogue(DIALOGUE_ON_ACTION));
 		if (this.money > 0) {
 			this.gController.getGameFrame().getFightPanel()
 					.addText(p.getName() + " erhält " + this.money + " Cupydollar!");
 		}
 	}
-	
+
 	public void afterFight(Player p) {
-		this.gController.getGameFrame().addDialogue(this.getDialogue(DIALOGUE_AFTER_FIGHT), this);
+		this.gController.getGameFrame().addDialogue(this.getDialogue(DIALOGUE_AFTER_ACTION), this);
 	}
 
 	@Override
 	public JsonObject getSaveData() {
 		JsonObject saveData = super.getSaveData();
-		for (String s : this.dialogues.keySet()) {
-			saveData.addProperty(s, this.dialogues.get(s));
+		saveData.addProperty(NPC.DIALOGUE_NO_ACTION, this.dialogues.get(NPC.DIALOGUE_NO_ACTION));
+		if (this.isTrainer()) {
+			saveData.addProperty(NPC.DIALOGUE_BEFORE_ACTION, this.dialogues.get(NPC.DIALOGUE_BEFORE_ACTION));
+			saveData.addProperty(NPC.DIALOGUE_AFTER_ACTION, this.dialogues.get(NPC.DIALOGUE_AFTER_ACTION));
+			saveData.addProperty(NPC.DIALOGUE_ON_EXIT, this.dialogues.get(NPC.DIALOGUE_ON_EXIT));
+			saveData.get("trainer_data").getAsJsonObject().addProperty("fighting_style", this.fightingStyle);
 		}
-		saveData.addProperty("fighting_style", this.fightingStyle);
-		// String reward = "";
-		// if (this.rewards != null) {
-		// for (Item i : this.rewards.keySet()) {
-		// if (this.rewards.get(i) != null && this.rewards.get(i) > 0) {
-		// for (int j = 0; j < this.rewards.get(i); j++) {
-		// if (j != 0) {
-		// reward += "+";
-		// }
-		// reward += i.name();
-		// }
-		// }
-		// }
-		// }
-		// saveData.addProperty("reward", reward);
 		return saveData;
 	}
 
 	@Override
 	public boolean importSaveData(JsonObject saveData) {
 		if (super.importSaveData(saveData)) {
-			for (String s : new String[] { DIALOGUE_AFTER_FIGHT, DIALOGUE_BEFORE_FIGHT, DIALOGUE_NO_FIGHT,
-					DIALOGUE_ON_DEFEAT }) {
-				this.dialogues.put(s, saveData.get(s) instanceof JsonNull ? null : saveData.get(s).getAsString());
+			this.dialogues.put(NPC.DIALOGUE_NO_ACTION, saveData.get(NPC.DIALOGUE_NO_ACTION).getAsString());
+			if (this.isTrainer()) {
+				this.dialogues.put(NPC.DIALOGUE_BEFORE_ACTION, saveData.get(NPC.DIALOGUE_BEFORE_ACTION).getAsString());
+				this.dialogues.put(NPC.DIALOGUE_AFTER_ACTION, saveData.get(NPC.DIALOGUE_AFTER_ACTION).getAsString());
+				this.dialogues.put(NPC.DIALOGUE_ON_EXIT, saveData.get(NPC.DIALOGUE_ON_EXIT).getAsString());
+				this.fightingStyle = saveData.get("trainer_data").getAsJsonObject().get("fighting_style").getAsInt();
 			}
-			this.fightingStyle = saveData.get("fighting_style").getAsInt();
-			// this.rewards = new HashMap<>();
-			// if (!(saveData.get("reward") instanceof JsonNull)) {
-			// this.importRewards(saveData.get("reward").getAsString());
-			// }
 			return true;
 		}
 
@@ -402,5 +395,9 @@ public class NPC extends Character {
 	@Override
 	public String toString() {
 		return this.id + " - " + this.name;
+	}
+
+	public int getRange() {
+		return this.range;
 	}
 }

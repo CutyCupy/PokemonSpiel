@@ -13,28 +13,22 @@ import javax.imageio.ImageIO;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 
+import de.alexanderciupka.pokemon.characters.Direction;
 import de.alexanderciupka.pokemon.characters.types.NPC;
 import de.alexanderciupka.pokemon.characters.types.Player;
+import de.alexanderciupka.pokemon.characters.types.Spinner;
 import de.alexanderciupka.pokemon.characters.types.Walkable;
-import de.alexanderciupka.pokemon.exceptions.InvalidEntityDataException;
-import de.alexanderciupka.pokemon.exceptions.InvalidRouteDataException;
 import de.alexanderciupka.pokemon.fighting.Weather;
 import de.alexanderciupka.pokemon.gui.GameFrame;
 import de.alexanderciupka.pokemon.gui.overlay.FogType;
 import de.alexanderciupka.pokemon.gui.overlay.RainType;
 import de.alexanderciupka.pokemon.gui.overlay.SnowType;
 import de.alexanderciupka.pokemon.map.entities.Change;
-import de.alexanderciupka.pokemon.map.entities.Entity;
-import de.alexanderciupka.pokemon.map.entities.ItemEntity;
-import de.alexanderciupka.pokemon.map.entities.PokemonEntity;
-import de.alexanderciupka.pokemon.map.entities.QuestionEntity;
-import de.alexanderciupka.pokemon.map.entities.QuestionType;
-import de.alexanderciupka.pokemon.map.entities.SignEntity;
 import de.alexanderciupka.pokemon.map.entities.TriggeredEvent;
-import de.alexanderciupka.pokemon.pokemon.Pokemon;
+import de.alexanderciupka.pokemon.map.entities.types.Entity;
+import de.alexanderciupka.pokemon.map.entities.types.WaterEntity;
 import de.alexanderciupka.pokemon.pokemon.PokemonPool;
 
 public class Route {
@@ -58,41 +52,11 @@ public class Route {
 	private RouteType type;
 
 	private boolean wait;
-	private Thread spinnerThread;
 
 	public Route() {
 		this.pools = new HashMap<>();
 		this.buildings = new HashMap<>();
 		this.characters = new ArrayList<NPC>();
-
-		this.spinnerThread = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				while (true) {
-					Player p = GameController.getInstance().getMainCharacter();
-					if (p != null && Route.this.equals(p.getCurrentRoute(), false)) {
-						while (GameController.getInstance().getInteractionPause()) {
-							Thread.yield();
-						}
-						for (NPC npc : Route.this.characters) {
-							// TODO: Spinner should turn, when player runs next
-							// to them
-						}
-
-						for (NPC npc : Route.this.characters) {
-							if (npc instanceof Walkable) {
-								((Walkable) npc).move();
-							}
-						}
-					}
-					Thread.yield();
-				}
-			}
-		});
-		this.spinnerThread.setDaemon(true);
-
-		this.spinnerThread.start();
-
 	}
 
 	public String getId() {
@@ -109,7 +73,6 @@ public class Route {
 
 	public void setName(String name) {
 		this.name = name;
-		this.spinnerThread.setName("SPINNER_" + name.toUpperCase());
 	}
 
 	public int getWidth() {
@@ -142,7 +105,9 @@ public class Route {
 
 	public void addEntity(int x, int y, Entity entity) {
 		this.createEntities();
-		this.entities[y][x] = entity;
+		entity.setX(x);
+		entity.setY(y);
+		this.entities[x][y] = entity;
 	}
 
 	public void addEntities(int row, ArrayList<Entity> rowEntities) {
@@ -152,11 +117,50 @@ public class Route {
 		}
 	}
 
+	public void moveCharacters() {
+		Player p = GameController.getInstance().getMainCharacter();
+		if (p != null && Route.this.equals(p.getCurrentRoute(), false)
+				&& !GameController.getInstance().getInteractionPause()) {
+
+			for (NPC npc : Route.this.characters) {
+				if (npc instanceof Walkable) {
+					if (npc instanceof Spinner) {
+						Spinner spinner = (Spinner) npc;
+						if (p.getSpeed() == Player.FAST && p.isMoving()) {
+							Point delta = new Point((int) Math.round(npc.getCurrentPosition().x - p.getExactX()),
+									(int) Math.round(npc.getCurrentPosition().y - p.getExactY()));
+							if (Math.abs(delta.x) < Math.abs(delta.y)) {
+								if (Math.abs(delta.x) <= 1
+										&& spinner.isValidDirection(delta.y < 0 ? Direction.DOWN : Direction.UP)
+										&& Math.abs(delta.y) <= npc.getRange()) {
+									spinner.setLockedDirection((delta.y < 0 ? Direction.DOWN : Direction.UP));
+								} else {
+									spinner.setLockedDirection(Direction.NONE);
+								}
+							} else {
+								if (Math.abs(delta.y) <= 1
+										&& spinner.isValidDirection(delta.x < 0 ? Direction.RIGHT : Direction.LEFT)
+										&& Math.abs(delta.x) <= npc.getRange()) {
+									spinner.setLockedDirection(delta.x < 0 ? Direction.RIGHT : Direction.LEFT);
+								} else {
+									spinner.setLockedDirection(Direction.NONE);
+								}
+							}
+						} else {
+							spinner.setLockedDirection(Direction.NONE);
+						}
+					}
+					((Walkable) npc).move();
+				}
+			}
+		}
+	}
+
 	public void addCharacter(NPC character) {
 		this.characters.add(character);
 	}
 
-	public boolean removeCharacter(de.alexanderciupka.pokemon.characters.types.Character c) {
+	public boolean removeCharacter(de.alexanderciupka.pokemon.characters.Character c) {
 		for (int i = 0; i < this.characters.size(); i++) {
 			if (c.equals(this.characters.get(i))) {
 				this.characters.remove(i);
@@ -167,8 +171,16 @@ public class Route {
 	}
 
 	private void createEntities() {
-		if (this.entities == null || this.invalidSize()) {
-			this.entities = new Entity[this.height][this.width];
+		if (this.entities == null) {
+			this.entities = new Entity[this.width][this.height];
+		} else if (this.invalidSize()) {
+			Entity[][] updated = new Entity[this.width][this.height];
+			for (int x = 0; x < Math.min(this.entities.length, this.width); x++) {
+				for (int y = 0; y < Math.min(this.entities[x].length, this.height); y++) {
+					updated[x][y] = this.entities[x][y];
+				}
+			}
+			this.entities = updated;
 		}
 	}
 
@@ -216,7 +228,6 @@ public class Route {
 				points[x + y * this.width] = new Point(x, y);
 			}
 		}
-		this.updateMap(points);
 		this.saveMap();
 		this.map = this.tempMap;
 	}
@@ -226,7 +237,7 @@ public class Route {
 				BufferedImage.TYPE_4BYTE_ABGR);
 		Graphics g = map.getGraphics();
 		Player mc = GameController.getInstance().getMainCharacter();
-		ArrayList<de.alexanderciupka.pokemon.characters.types.Character> chars = new ArrayList<>(this.characters);
+		ArrayList<de.alexanderciupka.pokemon.characters.Character> chars = new ArrayList<>(this.characters);
 		if (mc != null && this.equals(mc.getCurrentRoute(), false)) {
 			chars.add(mc);
 		}
@@ -235,17 +246,17 @@ public class Route {
 				if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
 					continue;
 				}
-				if (this.entities[y][x] != null) {
+				if (this.getEntity(x, y) != null) {
 					try {
-						g.drawImage(this.entities[y][x].getTerrain(), (x - startX) * GameFrame.GRID_SIZE,
+						g.drawImage(this.getEntity(x, y).getTerrain(), (x - startX) * GameFrame.GRID_SIZE,
 								(y - startY) * GameFrame.GRID_SIZE, null);
-						g.drawImage(this.entities[y][x].getSprite(), (x - startX) * GameFrame.GRID_SIZE,
+						g.drawImage(this.getEntity(x, y).getSprite(), (x - startX) * GameFrame.GRID_SIZE,
 								(y - startY) * GameFrame.GRID_SIZE, null);
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
-				for (de.alexanderciupka.pokemon.characters.types.Character c : chars) {
+				for (de.alexanderciupka.pokemon.characters.Character c : chars) {
 					int deltaX = c.getCharacterImage().getWidth(null) / GameFrame.GRID_SIZE;
 					int deltaY = c.getCharacterImage().getHeight(null) / GameFrame.GRID_SIZE;
 					if (c.getCurrentPosition().x >= x - deltaX && c.getCurrentPosition().x <= x + deltaX
@@ -264,123 +275,9 @@ public class Route {
 		return map;
 	}
 
-	public void updateMap(Point... updatePoint) {
-		// while (this.wait) {
-		// Thread.yield();
-		// }
-		// this.wait = true;
-		// if (this.tempMap != null) {
-		// Player mc = GameController.getInstance().getMainCharacter();
-		// Graphics g = this.tempMap.getGraphics();
-		//
-		// for (Point p : updatePoint) {
-		// if (!(p.x >= 0 && p.x < this.width && p.y >= 0 && p.y < this.height))
-		// {
-		// continue;
-		// }
-		// try {
-		// g.drawImage(this.entities[p.y][p.x].getTerrain(), p.x *
-		// GameFrame.GRID_SIZE,
-		// p.y * GameFrame.GRID_SIZE, null);
-		// g.drawImage(this.entities[p.y][p.x].getSprite(), p.x *
-		// GameFrame.GRID_SIZE,
-		// p.y * GameFrame.GRID_SIZE, null);
-		// if (mc != null && this.equals(mc.getCurrentRoute(), false) &&
-		// p.equals(mc.getCurrentPosition())) {
-		// g.drawImage(mc.getCharacterImage(), (int) (mc.getExactX() *
-		// GameFrame.GRID_SIZE),
-		// (int) (mc.getExactY() * GameFrame.GRID_SIZE), null);
-		// }
-		// } catch (Exception e) {
-		// e.printStackTrace();
-		// }
-		// for (NPC npc : this.characters) {
-		// if (npc.getCurrentPosition().equals(p)) {
-		// g.drawImage(npc.getCharacterImage(), (int) (npc.getExactX() *
-		// GameFrame.GRID_SIZE),
-		// (int) (npc.getExactY() * GameFrame.GRID_SIZE), null);
-		// }
-		// }
-		// if (mc != null && this.equals(mc.getCurrentRoute(), false)) {
-		// if (mc.getCurrentPosition().equals(p)) {
-		// g.drawImage(mc.getCharacterImage(), (int) (mc.getExactX() *
-		// GameFrame.GRID_SIZE),
-		// (int) (mc.getExactY() * GameFrame.GRID_SIZE), null);
-		// }
-		// }
-		// }
-		// // for (String building : this.buildings.keySet()) {
-		// // BufferedImage currentBuilding =
-		// // GameController.getInstance().getRouteAnalyzer()
-		// // .getSpriteByName(building);
-		// // for (Point p : this.buildings.get(building)) {
-		// // g.drawImage(currentBuilding, p.x * 70, p.y * 70, null);
-		// // }
-		// // }
-		// //
-		// // ArrayList<Character> character = new ArrayList<>(this.characters);
-		// // if (mc != null && this.equals(mc.getCurrentRoute(), false)) {
-		// // character.add(mc);
-		// // }
-		// //
-		// // for (int i = 0; i < character.size(); i++) {
-		// // Character c = character.get(i);
-		// // boolean repaint = true;
-		// // for (String building : this.buildings.keySet()) {
-		// // if (!repaint) {
-		// // break;
-		// // }
-		// // BufferedImage currentBuilding =
-		// // GameController.getInstance().getRouteAnalyzer()
-		// // .getSpriteByName(building);
-		// // int buildingWidth = currentBuilding.getWidth() -
-		// (currentBuilding.getWidth()
-		// // % GameFrame.GRID_SIZE);
-		// // int buildingHeight = currentBuilding.getHeight()
-		// // - (currentBuilding.getHeight() % GameFrame.GRID_SIZE);
-		// //
-		// // for (Point p : this.buildings.get(building)) {
-		// // if (!repaint) {
-		// // break;
-		// // }
-		// //
-		// // if (((c.getExactX() * 70 + c.getCharacterImage().getWidth(null) >
-		// p.x * 70
-		// // && c.getExactX() * 70 < p.x * 70 + buildingWidth)
-		// // && (c.getExactY() * 70 + c.getCharacterImage().getHeight(null) >
-		// p.y * 70
-		// // && c.getExactY() * 70 < p.y * 70 + buildingHeight))) {
-		// // repaint = false;
-		// // }
-		// // }
-		// // }
-		// // if (repaint) {
-		// // g.drawImage(c.getCharacterImage(), (int) (c.getExactX() * 70),
-		// (int)
-		// // (c.getExactY() * 70), null);
-		// // }
-		// // }
-		// // if (mc != null && this.equals(mc.getCurrentRoute(), false)
-		// // &&
-		// //
-		// (this.entities[mc.getCurrentPosition().y][mc.getCurrentPosition().x].getWarp()
-		// // != null
-		// // || (mc.getOldPosition().x < this.width && mc.getOldPosition().y <
-		// this.height
-		// // && this.entities[mc.getOldPosition().y][mc.getOldPosition().x]
-		// // .getWarp() != null))) {
-		// // g.drawImage(mc.getCharacterImage(), (int) (mc.getExactX() * 70),
-		// (int)
-		// // (mc.getExactY() * 70), null);
-		// // }
-		// this.map = this.tempMap;
-		// }
-		// this.wait = false;
-	}
-
 	public Entity getEntity(int x, int y) {
 		if (x >= 0 && x < this.width && y >= 0 && y < this.height) {
-			return this.entities[y][x];
+			return this.entities[x][y];
 		}
 		return null;
 	}
@@ -458,8 +355,8 @@ public class Route {
 			}
 			for (int x = 0; x < this.width; x++) {
 				for (int y = 0; y < this.height; y++) {
-					if (this.entities[y][x] == null ? other.entities[y][x] == null
-							: !this.entities[y][x].equals(other.entities[y][x])) {
+					if (this.getEntity(x, y) == null ? other.getEntity(x, y) == null
+							: !this.getEntity(x, y).equals(other.getEntity(x, y))) {
 						return false;
 					}
 				}
@@ -492,357 +389,254 @@ public class Route {
 		return this.equals(obj, true);
 	}
 
-	public void loadRouteData(JsonObject data) throws InvalidRouteDataException {
-		final String[] MUST_HAVES = new String[] { "name", "dark", "type", "rain", "snow", "entities" };
-
-		if (RouteAnalyzer.getWrongMember(data, MUST_HAVES) != null) {
-			throw new InvalidRouteDataException(this, RouteAnalyzer.getWrongMember(data, MUST_HAVES));
+	public void loadRouteData(JsonObject data) {
+		if (data.has("name")) {
+			this.setName(data.get("name").getAsString());
 		}
-
-		this.setName(data.get("name").getAsString());
-		this.setDark(data.get("dark").getAsBoolean());
-		this.setType(RouteType.valueOf(data.get("type").getAsString().toUpperCase()));
-		this.setRain(RainType.valueOf(data.get("rain").getAsString().toUpperCase()));
-		this.setSnow(SnowType.valueOf(data.get("snow").getAsString().toUpperCase()));
-
-		JsonObject entities = data.get("entities").getAsJsonObject();
-
-		this.setHeight(0);
-		this.setWidth(0);
-		for (Entry<String, JsonElement> entry : entities.entrySet()) {
-			this.setWidth(Math.max(Integer.valueOf(entry.getKey().substring(0, entry.getKey().indexOf("."))) + 1,
-					this.getWidth()));
-			this.setHeight(Math.max(Integer.valueOf(entry.getKey().substring(entry.getKey().indexOf(".") + 1)) + 1,
-					this.getHeight()));
+		if (data.has("properties")) {
+			loadProperties(data.get("properties").getAsJsonObject());
 		}
 		this.createEntities();
+		if (data.has("entities")) {
+			loadEntities(data.get("entities").getAsJsonObject());
+		}
+
+	}
+
+	private void loadProperties(JsonObject data) {
+		if (data.has("dark")) {
+			this.setDark(data.get("dark").getAsBoolean());
+		}
+		if (data.has("type")) {
+			this.setType(RouteType.valueOf(data.get("type").getAsString().toUpperCase()));
+		}
+		if (data.has("rain")) {
+			this.setRain(RainType.valueOf(data.get("rain").getAsString().toUpperCase()));
+		}
+		if (data.has("snow")) {
+			this.setSnow(SnowType.valueOf(data.get("snow").getAsString().toUpperCase()));
+		}
+		if (data.has("fog")) {
+			this.setFog(FogType.valueOf(data.get("fog").getAsString().toUpperCase()));
+		}
+	}
+
+	private void loadEntities(JsonObject data) {
+
+		for (Entry<String, JsonElement> entries : data.entrySet()) {
+			String coords = entries.getKey();
+			int x = Integer.parseInt(coords.substring(0, coords.indexOf("."))) + 1;
+			int y = Integer.parseInt(coords.substring(coords.indexOf(".") + 1, coords.length())) + 1;
+
+			this.setHeight(Math.max(y, this.getHeight()));
+			this.setWidth(Math.max(x, this.getWidth()));
+		}
+
+		this.createEntities();
+
 		for (int y = 0; y < this.getHeight(); y++) {
 			for (int x = 0; x < this.getWidth(); x++) {
 				String coordinates = x + "." + y;
-				if (entities.get(coordinates) == null) {
+				if (!data.has(coordinates)) {
 					continue;
 				}
 
-				Entity currentEntity = new Entity(this);
+				JsonObject entity = data.get(coordinates).getAsJsonObject();
+
+				Entity currentEntity = this.getEntity(x, y);
+				if (currentEntity == null) {
+					try {
+						currentEntity = (Entity) Class.forName(
+								"de.alexanderciupka.pokemon.map.entities.types." + entity.get("type").getAsString())
+								.newInstance();
+					} catch (Exception e1) {
+						currentEntity = new Entity();
+					}
+				}
 				try {
-					currentEntity.load(entities.get(coordinates).getAsJsonObject());
+					currentEntity.setParent(this);
+					currentEntity.importSaveData(data.get(coordinates).getAsJsonObject());
 					currentEntity.setX(x);
 					currentEntity.setY(y);
 					this.addEntity(x, y, currentEntity);
-				} catch (InvalidEntityDataException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		}
 	}
 
-	private void loadWarps(JsonObject data) {
-		if (data.get("warps").isJsonArray()) {
-			final String[] MUST_HAVES = new String[] { "id", "new_route", "new_x", "new_y", "x", "y", "direction" };
-			for (JsonElement e : data.get("warps").getAsJsonArray()) {
-				JsonObject warp = e.getAsJsonObject();
-				if (RouteAnalyzer.getWrongMember(warp, MUST_HAVES) != null) {
-					continue;
-				}
-
-				Warp w = new Warp(warp.get("id").getAsString(), this.id);
-				w.setNewRoute(warp.get("new_route").getAsString());
-				w.setNewPosition(new Point(warp.get("new_x").getAsInt(), warp.get("new_y").getAsInt()));
-				w.setNewDirection(warp.get("direction").getAsString());
-
-				this.getEntity(warp.get("x").getAsInt(), warp.get("y").getAsInt()).addWarp(w);
+	private void loadCharacters(JsonArray data) {
+		for (JsonElement e : data) {
+			JsonObject currentChar = e.getAsJsonObject();
+			NPC npc = null;
+			try {
+				npc = (NPC) Class
+						.forName("de.alexanderciupka.pokemon.characters.types." + currentChar.get("type").getAsString())
+						.newInstance();
+			} catch (Exception e1) {
+				System.out.println(currentChar);
+				e1.printStackTrace();
+				continue;
 			}
+			npc.setCurrentRoute(this);
+			npc.importSaveData(currentChar);
+			// npc.loadData(currentChar);
+			npc.setSurfing(this.getEntity((int) npc.getExactX(), (int) npc.getExactY()) instanceof WaterEntity);
+			this.addCharacter(npc);
 		}
 	}
 
-	private void loadCharacters(JsonObject data) {
-		if (data.get("characters").isJsonArray()) {
-			final String[] MUST_HAVES = new String[] { "id", "x", "y", "char_sprite", "name", "direction",
-					"is_trainer" };
-			for (JsonElement e : data.get("characters").getAsJsonArray()) {
-				JsonObject currentChar = e.getAsJsonObject();
-				if (RouteAnalyzer.getWrongMember(currentChar, MUST_HAVES) != null) {
-					continue;
-				}
-				NPC character = new NPC(currentChar.get("id").getAsString());
-				character.setCurrentPosition(currentChar.get("x").getAsInt(), currentChar.get("y").getAsInt());
-				character.setCurrentRoute(this);
-				character.setCharacterImage(currentChar.get("char_sprite").getAsString(),
-						currentChar.get("direction").getAsString().toLowerCase());
-				character.setName(currentChar.get("name").getAsString());
-				// character.setTrainer(currentChar.get("is_trainer").getAsString());
-				character.setLogo(currentChar.has("logo") ? currentChar.get("logo").getAsString() : null);
-				// character.setAggro(currentChar.has("aggro") ?
-				// currentChar.get("aggro").getAsBoolean() : true);
-				character.setRange(currentChar.has("range") ? currentChar.get("range").getAsInt() : 4);
-				character
-						.setSurfing(this.getEntity((int) character.getExactX(), (int) character.getExactY()).isWater());
-				character.importTeam();
-				character.importDialogue();
-				this.addCharacter(character);
+	private void loadEvents(JsonArray data) {
+		// TODO: Review all the keys if needed
+		final String[] MUST_HAVE = new String[] { "character", "route", "target_x", "target_y", "direction", "update",
+				"fight", "heal", "remove", "cam_x", "cam_y", "cam_animation", "cam_center", "wait", "delay", "unknown",
+				"pause" };
+		for (JsonElement e : data) {
+			TriggeredEvent te = new TriggeredEvent("");
+			if (!e.isJsonObject()
+					|| RouteAnalyzer.getWrongMember(e.getAsJsonObject(), new String[] { "loc", "sequences" }) != null) {
+				continue;
 			}
-		}
-	}
-
-	private void loadPokemons(JsonObject data) {
-		if (data.get("pokemons").isJsonArray()) {
-			final String[] MUST_HAVES = new String[] { "x", "y", "name", "level", "shiny", "interaction_message",
-					"no_interaction_message", "required_items" };
-			for (JsonElement e : data.get("pokemons").getAsJsonArray()) {
-				JsonObject currentPokemon = e.getAsJsonObject();
-				if (RouteAnalyzer.getWrongMember(currentPokemon, MUST_HAVES) != null) {
-					continue;
-				}
-				PokemonEntity pokemon = PokemonEntity.convert(
-						this.getEntity(currentPokemon.get("x").getAsInt(), currentPokemon.get("y").getAsInt()));
-				Pokemon p = new Pokemon(
-						GameController.getInstance().getInformation().getID(currentPokemon.get("name").getAsString()));
-				p.getStats().generateStats(currentPokemon.get("level").getAsShort());
-				pokemon.setPokemon(p);
-				pokemon.setInteractionMessage(currentPokemon.get("interaction_message").getAsString());
-				pokemon.setNoInteractionMessage(currentPokemon.get("no_interaction_message").getAsString());
-				pokemon.importRequiredItems(currentPokemon.get("required_items"));
-				this.addEntity(pokemon.getX(), pokemon.getY(), pokemon);
-			}
-		}
-	}
-
-	private void loadItems(JsonObject data) {
-		if (data.get("items").isJsonArray()) {
-			final String[] MUST_HAVES = new String[] { "x", "y", "id", "hidden" };
-			for (JsonElement e : data.get("items").getAsJsonArray()) {
-				JsonObject currentItem = e.getAsJsonObject();
-				if (RouteAnalyzer.getWrongMember(currentItem, MUST_HAVES) != null) {
-					continue;
-				}
-				ItemEntity entity = ItemEntity
-						.convert(this.getEntity(currentItem.get("x").getAsInt(), currentItem.get("y").getAsInt()));
-				entity.setItem(currentItem.get("id").getAsInt());
-				entity.setHidden(currentItem.get("hidden").getAsBoolean());
-				this.addEntity(entity.getX(), entity.getY(), entity);
-			}
-		}
-	}
-
-	private void loadEvents(JsonObject data) {
-		if (data.get("events").isJsonArray()) {
-			final String[] MUST_HAVE = new String[] { "character", "route", "target_x", "target_y", "direction",
-					"update", "fight", "heal", "remove", "cam_x", "cam_y", "cam_animation", "cam_center", "wait",
-					"delay", "unknown", "pause" };
-			for (JsonElement e : data.get("events").getAsJsonArray()) {
-				TriggeredEvent te = new TriggeredEvent("");
-				if (!e.isJsonObject() || RouteAnalyzer.getWrongMember(e.getAsJsonObject(),
-						new String[] { "loc", "sequences" }) != null) {
-					continue;
-				}
-				for (JsonElement sequence : e.getAsJsonObject().get("sequences").getAsJsonArray()) {
-					ArrayList<Change> changes = new ArrayList<Change>();
-					for (JsonElement current : sequence.getAsJsonArray()) {
-						JsonObject move = current.getAsJsonObject();
-						if (RouteAnalyzer.getWrongMember(move, MUST_HAVE) != null) {
-							continue;
-						}
-						Change currentChange = new Change();
-						currentChange.load(move);
-						changes.add(currentChange);
+			for (JsonElement sequence : e.getAsJsonObject().get("sequences").getAsJsonArray()) {
+				ArrayList<Change> changes = new ArrayList<Change>();
+				for (JsonElement current : sequence.getAsJsonArray()) {
+					JsonObject move = current.getAsJsonObject();
+					if (RouteAnalyzer.getWrongMember(move, MUST_HAVE) != null) {
+						continue;
 					}
-					te.addChanges(changes.toArray(new Change[changes.size()]));
+					Change currentChange = new Change();
+					currentChange.load(move);
+					changes.add(currentChange);
 				}
-				for (JsonElement j : e.getAsJsonObject().get("loc").getAsJsonArray()) {
-					this.getEntities()[j.getAsJsonObject().get("x").getAsInt()][j.getAsJsonObject().get("y").getAsInt()]
-							.setEvent(te);
-				}
+				te.addChanges(changes.toArray(new Change[changes.size()]));
 			}
-		}
-	}
-
-	private void loadSigns(JsonObject data) {
-		if (data.get("signs").isJsonArray()) {
-			for (JsonElement e : data.get("signs").getAsJsonArray()) {
-				JsonObject current = e.getAsJsonObject();
-				if (current.has("information")) {
-					SignEntity sign = SignEntity
-							.convert(this.getEntity(current.get("x").getAsInt(), current.get("y").getAsInt()));
-					sign.setInformation(current.get("information").getAsString());
-					this.addEntity(sign.getX(), sign.getY(), sign);
-				}
+			for (JsonElement j : e.getAsJsonObject().get("loc").getAsJsonArray()) {
+				this.getEntity(j.getAsJsonObject().get("x").getAsInt(), j.getAsJsonObject().get("y").getAsInt())
+						.setEvent(te);
 			}
 		}
 	}
 
 	private void loadEncounters(JsonObject data) {
-		if (data.get("encounters").isJsonObject()) {
-			JsonObject allPools = data.get("encounters").getAsJsonObject();
-			for (Entry<String, JsonElement> s : allPools.entrySet()) {
-				PokemonPool current = new PokemonPool(Integer.valueOf(s.getKey()));
-				for (JsonElement e : s.getValue().getAsJsonArray()) {
-					JsonObject encounter = e.getAsJsonObject();
-					int minLevel = encounter.get("min_level").getAsInt();
-					int maxLevel = encounter.get("max_level").getAsInt();
-					for (int i = 0; i < encounter.get("amount").getAsInt(); i++) {
-						current.addPokemon(encounter.get("id").getAsInt(),
-								(short) ThreadLocalRandom.current().nextInt(minLevel, maxLevel + 1));
-					}
+		for (Entry<String, JsonElement> s : data.entrySet()) {
+			PokemonPool current = new PokemonPool(Integer.valueOf(s.getKey()));
+			for (JsonElement e : s.getValue().getAsJsonArray()) {
+				JsonObject encounter = e.getAsJsonObject();
+				int minLevel = encounter.get("min_level").getAsInt();
+				int maxLevel = encounter.get("max_level").getAsInt();
+				for (int i = 0; i < encounter.get("amount").getAsInt(); i++) {
+					current.addPokemon(encounter.get("id").getAsInt(),
+							(short) ThreadLocalRandom.current().nextInt(minLevel, maxLevel + 1));
 				}
-				this.addPool(current.getId(), current);
 			}
+			this.addPool(current.getId(), current);
 		}
 	}
 
-	private void loadQuizzes(JsonObject data) {
-		if (data.get("quizzes").isJsonArray()) {
-			for (JsonElement e : data.get("quizzes").getAsJsonArray()) {
-				JsonObject currentQuiz = e.getAsJsonObject();
-				QuestionEntity q = QuestionEntity
-						.convert(this.getEntity(currentQuiz.get("x").getAsInt(), currentQuiz.get("y").getAsInt()));
-				q.setQuestion(currentQuiz.get("question") == null ? "" : currentQuiz.get("question").getAsString());
-				q.addOptions(currentQuiz.get("options").getAsString().split("\\+"));
-				q.addSolutions(currentQuiz.get("solutions").getAsString().split("\\+"));
-				q.setSource(currentQuiz.get("source") != null ? currentQuiz.get("source").getAsString() : "nothing");
-				q.setNPC(this.getNPC(currentQuiz.get("npc").getAsString()));
-				q.setType(QuestionType.valueOf(currentQuiz.get("type").getAsString().toUpperCase()));
-				for (JsonElement j : currentQuiz.get("gates").getAsJsonArray()) {
-					JsonObject gates = j.getAsJsonObject();
-					q.addGates(GameController.getInstance().getRouteAnalyzer()
-							.getRouteById(gates.get("route").getAsString())
-							.getEntity(gates.get("x").getAsInt(), gates.get("y").getAsInt()));
-				}
-				this.addEntity(q.getX(), q.getY(), q);
-			}
-		}
-	}
+	// private void loadQuizzes(JsonObject data) {
+	// if (data.get("quizzes").isJsonArray()) {
+	// for (JsonElement e : data.get("quizzes").getAsJsonArray()) {
+	// JsonObject currentQuiz = e.getAsJsonObject();
+	// QuestionEntity q = QuestionEntity
+	// .convert(this.getEntity(currentQuiz.get("x").getAsInt(),
+	// currentQuiz.get("y").getAsInt()));
+	// q.setQuestion(currentQuiz.get("question") == null ? "" :
+	// currentQuiz.get("question").getAsString());
+	// q.addOptions(currentQuiz.get("options").getAsString().split("\\+"));
+	// q.addSolutions(currentQuiz.get("solutions").getAsString().split("\\+"));
+	// q.setSource(currentQuiz.get("source") != null ?
+	// currentQuiz.get("source").getAsString() : "nothing");
+	// q.setNPC(this.getNPC(currentQuiz.get("npc").getAsString()));
+	// q.setType(QuestionType.valueOf(currentQuiz.get("type").getAsString().toUpperCase()));
+	// for (JsonElement j : currentQuiz.get("gates").getAsJsonArray()) {
+	// JsonObject gates = j.getAsJsonObject();
+	// q.addGates(GameController.getInstance().getRouteAnalyzer()
+	// .getRouteById(gates.get("route").getAsString())
+	// .getEntity(gates.get("x").getAsInt(), gates.get("y").getAsInt()));
+	// }
+	// this.addEntity(q.getX(), q.getY(), q);
+	// }
+	// }
+	// }
 
-	public void loadExtras(JsonObject data) throws InvalidRouteDataException {
-		if (data.has("warps")) {
-			this.loadWarps(data);
-		}
-		if (data.has("characters")) {
-			this.loadCharacters(data);
-		}
-		if (data.has("pokemons")) {
-			this.loadPokemons(data);
-		}
-		if (data.has("items")) {
-			this.loadItems(data);
-		}
-		if (data.has("events")) {
-			this.loadEvents(data);
-		}
-		if (data.has("signs")) {
-			this.loadSigns(data);
-		}
-		if (data.has("encounters")) {
-			this.loadEncounters(data);
-		}
-		if (data.has("quizzes")) {
-			this.loadQuizzes(data);
-		}
-
-	}
-
-	public boolean importSaveData(JsonObject saveData, Route route) {
+	public boolean importSaveData(JsonObject saveData) {
 		if (this.id.equals(saveData.get("id").getAsString())) {
-			if (saveData.get("name") != null) {
-				this.name = saveData.get("name").getAsString();
-			} else {
-				this.name = route.name;
-			}
-			JsonElement rain = saveData.get("rain");
-			if (rain != null && rain instanceof JsonNull) {
-				this.rain = null;
-			} else if (rain != null) {
-				try {
-					this.setRain(RainType.valueOf(rain.getAsString().toUpperCase()));
-				} catch (Exception e) {
-					this.setRain(route.getRain());
-				}
-			} else {
-				this.setRain(route.getRain());
-			}
-
-			JsonElement snow = saveData.get("snow");
-			if (snow != null && snow instanceof JsonNull) {
-				this.snow = null;
-			} else if (snow != null) {
-				try {
-					this.setSnow(SnowType.valueOf(snow.getAsString().toUpperCase()));
-				} catch (Exception e) {
-					this.setSnow(route.getSnow());
-				}
-			} else {
-				this.setSnow(route.getSnow());
-			}
-
-			JsonElement fog = saveData.get("fog");
-			if (fog != null && fog instanceof JsonNull) {
-				this.fog = null;
-			} else if (fog != null) {
-				try {
-					this.setFog(FogType.valueOf(fog.getAsString().toUpperCase()));
-				} catch (Exception e) {
-					this.setFog(route.getFog());
-				}
-			} else {
-				this.setFog(route.getFog());
-			}
-
-			this.createEntities();
-			if (saveData.get("entities") != null) {
-				for (JsonElement j : saveData.get("entities").getAsJsonArray()) {
-					JsonObject currentEntity = j.getAsJsonObject();
-					int x = currentEntity.get("x").getAsInt();
-					int y = currentEntity.get("y").getAsInt();
-					this.entities[y][x].importSaveData(currentEntity, route.getEntities()[y][x]);
-				}
-			} else {
-				for (int x = 0; x < this.width; x++) {
-					for (int y = 0; y < this.height; y++) {
-						this.entities[y][x] = route.getEntities()[y][x].clone();
-						if (route.getId().equals("wald_von_hamburg")) {
-							this.entities[y][x].getSpriteName();
-						}
-					}
-				}
-			}
+			loadRouteData(saveData.get("route").getAsJsonObject());
+			loadCharacters(saveData.get("characters").getAsJsonArray());
+			loadEncounters(saveData.get("encounters").getAsJsonObject());
+			loadEvents(saveData.get("events").getAsJsonArray());
 			this.createMap();
 			return true;
 		}
 		return false;
 	}
 
-	public JsonObject getSaveData(Route oldRoute) {
-		if (this.equals(oldRoute, false)) {
-			return null;
-		}
+	public JsonObject getSaveData() {
 		JsonObject saveData = new JsonObject();
 		saveData.addProperty("id", this.id);
-		if (!this.name.equals(oldRoute.name)) {
-			saveData.addProperty("name", this.name);
-		}
-		JsonArray entities = null;
+		saveData.add("route", getRouteData());
+		saveData.add("events", getEventsData());
+		saveData.add("characters", getCharactersData());
+		saveData.add("encounters", getEncountersData());
+		return saveData;
+	}
+
+	private JsonObject getRouteData() {
+		JsonObject routeData = new JsonObject();
+		routeData.addProperty("name", this.name);
+		JsonObject entities = null;
 		for (int x = 0; x < this.width; x++) {
 			for (int y = 0; y < this.height; y++) {
-				if (!this.entities[y][x].equals(oldRoute.entities[y][x])) {
-					if (entities == null) {
-						entities = new JsonArray();
-					}
-					entities.add(this.entities[y][x].getSaveData(oldRoute.entities[y][x]));
+				if (entities == null) {
+					entities = new JsonObject();
+				}
+				entities.add(x + "." + y, this.getEntity(x, y).getSaveData());
+			}
+		}
+
+		routeData.add("entities", entities);
+
+		JsonObject properties = getPropertiesData();
+		routeData.add("properties", properties);
+		return routeData;
+	}
+
+	private JsonArray getEventsData() {
+		JsonArray eventsData = new JsonArray();
+		for (int x = 0; x < this.width; x++) {
+			for (int y = 0; y < this.height; y++) {
+				Entity e = getEntity(x, y);
+				if (e != null && e.getEvent() != null) {
+					eventsData.add(e.getEvent().getSaveData());
 				}
 			}
 		}
-		if (entities != null) {
-			saveData.add("entities", entities);
-		}
-		if (this.rain == null ? oldRoute.rain != null : !this.rain.equals(oldRoute.rain)) {
-			saveData.addProperty("rain", this.rain.name());
-		}
-		if (this.snow == null ? oldRoute.snow != null : !this.snow.equals(oldRoute.snow)) {
-			saveData.addProperty("snow", this.snow != null ? this.snow.name() : null);
-		}
-		if (this.fog == null ? oldRoute.fog != null : !this.fog.equals(oldRoute.fog)) {
-			saveData.addProperty("fog", this.fog != null ? this.fog.name() : null);
+		return eventsData;
+	}
+
+	private JsonArray getCharactersData() {
+		JsonArray saveData = new JsonArray();
+		for (NPC npc : this.characters) {
+			saveData.add(npc.getSaveData());
 		}
 		return saveData;
+	}
+
+	private JsonObject getPropertiesData() {
+		JsonObject properties = new JsonObject();
+		properties.addProperty("rain", this.rain != null ? this.rain.name() : RainType.CLEAR.toString());
+		properties.addProperty("snow", this.snow != null ? this.snow.name() : SnowType.CLEAR.toString());
+		properties.addProperty("fog", this.fog != null ? this.fog.name() : FogType.CLEAR.toString());
+		return properties;
+	}
+
+	private JsonObject getEncountersData() {
+		JsonObject encounters = new JsonObject();
+		for (Integer pool : this.pools.keySet()) {
+			encounters.add(String.valueOf(pool), this.pools.get(pool).getSaveData());
+		}
+		return encounters;
 	}
 
 	public void setFog(FogType fog) {
@@ -875,6 +669,20 @@ public class Route {
 		}
 		return Weather.NONE;
 		// TODO: Sandstorm + Sun?
+	}
+
+	public void reset() {
+		for (int x = 0; x < this.width; x++) {
+			for (int y = 0; y < this.height; y++) {
+				Entity entity = this.getEntity(x, y);
+				if (entity != null) {
+					entity.reset();
+				}
+			}
+		}
+		for (NPC c : this.getCharacters()) {
+			c.resetPosition();
+		}
 	}
 
 }

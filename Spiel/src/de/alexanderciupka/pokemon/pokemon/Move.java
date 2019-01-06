@@ -125,6 +125,10 @@ public class Move {
 		this.pp = pp;
 		this.currentPP = pp;
 	}
+	
+	public int restorePP(int ammount) {
+		return Math.min(ammount, this.getPp() - this.getCurrentPP());
+	}
 
 	public int getMinHits() {
 		return this.minHits;

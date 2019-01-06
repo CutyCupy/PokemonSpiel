@@ -610,5 +610,5 @@
 	{"id":677,"name":"Schnäuztuch","cost":0,"fling_effect":null,"description":"Ein Taschentuch, das ein Stammkunde im\nCafé Lagerhaus in Septerna City verloren hat.\nRiecht leicht nach Pokémon.","fling_power":0,"attributes":[],"pocket":"key"},
 	{"id":678,"name":"Achromat","cost":0,"fling_effect":null,"description":"Eine Vorrichtung, die verborgene Kräfte in den\nPokémon weckt. Es handelt sich dabei um einen\nunfertigen Prototyp.","fling_power":0,"attributes":[{"name":"usable-overworld"},{"name":"overworld"}],"pocket":"key"},
 	{"id":679,"name":"Fundsache","cost":0,"fling_effect":null,"description":"Ein Viso-Caster, der im Vergnügungspark von\nRayono City gefunden wurde. Er scheint einem\nJungen zu gehören.","fling_power":0,"attributes":[],"pocket":"key"},
-	{"id":681,"name":"Wahrspiegel","cost":0,"fling_effect":null,"description":"Ein mysteriöser Spiegel, der Pokémon in ihre\neigentliche Form verwandelt, indem er die Wahrheit\nwiderspiegelt.","fling_power":0,"attributes":[],"pocket":"key"},
+	{"id":681,"name":"Wahrspiegel","cost":0,"fling_effect":null,"description":"Ein mysteriöser Spiegel, der Pokémon in ihre\neigentliche Form verwandelt, indem er die Wahrheit\nwiderspiegelt.","fling_power":0,"attributes":[],"pocket":"key"}
 ]

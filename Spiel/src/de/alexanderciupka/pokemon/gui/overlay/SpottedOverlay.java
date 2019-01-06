@@ -10,7 +10,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import de.alexanderciupka.hoverbutton.Main;
-import de.alexanderciupka.pokemon.characters.types.Character;
+import de.alexanderciupka.pokemon.characters.Character;
 import de.alexanderciupka.pokemon.gui.BackgroundLabel;
 import de.alexanderciupka.pokemon.gui.GameFrame;
 import de.alexanderciupka.pokemon.map.Camera;
@@ -39,8 +39,8 @@ public class SpottedOverlay extends Overlay {
 	@Override
 	public void createOverlay() {
 		Camera cam = GameController.getInstance().getCurrentBackground().getCamera();
-		double x = (cam.getX() - 4.5);
-		double y = (cam.getY() - 4.5);
+		double x = (cam.getX() - (GameFrame.FRAME_SIZE / GameFrame.GRID_SIZE) / 2.0);
+		double y = (cam.getY() - (GameFrame.FRAME_SIZE / GameFrame.GRID_SIZE) / 2.0);
 		
 		double w = 9;
 		double h = 9;
@@ -64,10 +64,17 @@ public class SpottedOverlay extends Overlay {
 			h = (gController.getCurrentBackground().getCurrentRoute().getHeight() - y);
 		}
 		
+		double xPos = (spotter.getExactX() - x + xOffset) * GameFrame.GRID_SIZE
+				- (spotter.getCharacterImage().getWidth(null) - GameFrame.GRID_SIZE) / 2.0;
+		double yPos = (spotter.getExactY() - y + yOffset) * GameFrame.GRID_SIZE
+				- (spotter.getCharacterImage().getHeight(null) - GameFrame.GRID_SIZE);
+		
 		this.overlay = new BufferedImage(this.size.width, this.size.height, BufferedImage.TYPE_4BYTE_ABGR);
 		Graphics g = this.overlay.getGraphics();
-		g.drawImage(SPOT_SIGN, (int) ((spotter.getExactX() - x + xOffset) * GameFrame.GRID_SIZE + 10), 
-						(int) ((spotter.getExactY() - y + yOffset) * GameFrame.GRID_SIZE - 50), null);
+//		g.drawImage(SPOT_SIGN, (int) ((spotter.getExactX() - x + xOffset) * GameFrame.GRID_SIZE + 10), 
+//						(int) ((spotter.getExactY() - y + yOffset) * GameFrame.GRID_SIZE - 50), null);
+		g.drawImage(SPOT_SIGN, (int) (xPos + 10), 
+				(int) (yPos - 50), null);
 		
 		created = true;
 		new Thread(new Runnable() {

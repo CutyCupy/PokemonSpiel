@@ -108,7 +108,7 @@ public class PokemonPool {
 		return false;
 	}
 	
-	public JsonObject getSaveData(PokemonPool pool) {
+	public JsonObject getSaveData() {
 		JsonObject saveData = new JsonObject();
 		saveData.addProperty("id", this.id);
 		JsonArray pokemon = new JsonArray();

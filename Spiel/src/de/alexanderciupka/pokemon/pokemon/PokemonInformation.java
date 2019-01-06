@@ -432,6 +432,16 @@ public class PokemonInformation {
 		return null;
 	}
 	
+	public JsonObject getItemData(int id) {
+		for (int i = 0; i < allItemData.size(); i++) {
+			JsonObject item = allItemData.get(i).getAsJsonObject();
+			if (item.get("id").getAsInt() == id) {
+				return item;
+			}
+		}
+		return null;
+	}
+	
 	public boolean hasAttribute(String attribute, int itemId) {
 		for(int i = 0; i < allItemData.size(); i++) {
 			JsonObject item = allItemData.get(i).getAsJsonObject();

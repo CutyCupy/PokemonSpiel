@@ -2,7 +2,6 @@ package de.alexanderciupka.pokemon.characters;
 
 import com.google.gson.JsonArray;
 
-import de.alexanderciupka.pokemon.characters.types.Character;
 import de.alexanderciupka.pokemon.characters.types.NPC;
 import de.alexanderciupka.pokemon.constants.Items;
 import de.alexanderciupka.pokemon.map.GameController;
@@ -102,8 +101,8 @@ public class Team {
 
 	public void restoreTeam() {
 		for (int i = 0; i < this.ammount; i++) {
-			this.pokemon[i].getStats().restoreFullHP();
 			this.pokemon[i].setAilment(Ailment.NONE);
+			this.pokemon[i].getStats().restoreFullHP();
 			this.pokemon[i].restoreMoves();
 		}
 	}

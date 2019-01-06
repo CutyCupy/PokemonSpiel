@@ -65,7 +65,7 @@ public class MainMenuFrame extends JFrame {
 		newGame.setBorder(BorderFactory.createLineBorder(Color.BLACK, 10));
 		newGame.setFont(font);
 		editor = new JButton("Editor");
-		editor.setEnabled(false);
+//		editor.setEnabled(false);
 		editor.setForeground(FOREGROUND);
 		editor.setBackground(BACKGROUND);
 		editor.setBounds(430, 400, 500, 75);

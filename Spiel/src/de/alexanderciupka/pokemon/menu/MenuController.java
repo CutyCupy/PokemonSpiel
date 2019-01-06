@@ -17,6 +17,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import de.alexanderciupka.hoverbutton.Main;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.painting.PaintingController;
+import de.alexanderciupka.pokemonspiel.routecreation.RouteCreatorController;
 
 public class MenuController {
 
@@ -58,6 +59,7 @@ public class MenuController {
 	}
 
 	public void startEditor() {
+		RouteCreatorController.getInstance().show(true);
 	}
 
 	public void openEditor(String pictureName, int width, int height) {

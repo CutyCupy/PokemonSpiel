@@ -17,9 +17,8 @@ import javax.swing.border.EmptyBorder;
 import de.alexanderciupka.pokemon.characters.Direction;
 import de.alexanderciupka.pokemon.characters.types.NPC;
 import de.alexanderciupka.pokemon.characters.types.Player;
-import de.alexanderciupka.pokemon.constants.Items;
 import de.alexanderciupka.pokemon.fighting.FightOption;
-import de.alexanderciupka.pokemon.gui.overlay.DarkOverlay;
+import de.alexanderciupka.pokemon.gui.panels.DecisionPanel;
 import de.alexanderciupka.pokemon.gui.panels.EvolutionPanel;
 import de.alexanderciupka.pokemon.gui.panels.FightPanel;
 import de.alexanderciupka.pokemon.gui.panels.GeneratorPanel;
@@ -28,6 +27,7 @@ import de.alexanderciupka.pokemon.gui.panels.NewAttackPanel;
 import de.alexanderciupka.pokemon.gui.panels.PCPanel;
 import de.alexanderciupka.pokemon.gui.panels.PokemonPanel;
 import de.alexanderciupka.pokemon.gui.panels.ReportPanel;
+import de.alexanderciupka.pokemon.main.Main;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.menu.MenuController;
 import de.alexanderciupka.pokemon.menu.SoundController;
@@ -379,7 +379,9 @@ public class GameFrame extends JFrame {
 					new Thread(new Runnable() {
 						@Override
 						public void run() {
+							gController.setInteractionPause(true);
 							GameFrame.this.gController.checkInteraction();
+							gController.setInteractionPause(false);
 						}
 					}).start();
 				}
@@ -406,7 +408,9 @@ public class GameFrame extends JFrame {
 					new Thread(new Runnable() {
 						@Override
 						public void run() {
+							gController.setInteractionPause(true);
 							GameFrame.this.gController.checkInteraction();
+							gController.setInteractionPause(false);
 						}
 					}).start();
 				}
@@ -508,7 +512,42 @@ public class GameFrame extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (!GameFrame.this.gController.getInteractionPause() && !GameFrame.this.gController.isFighting()) {
-					GameFrame.this.gController.returnToMenu();
+					GameFrame.this.gController.setInteractionPause(true);
+					new Thread(new Runnable() {
+						@Override
+						public void run() {
+							System.out.println("start");
+							JPanel cp = new JPanel();
+							cp.setLayout(null);
+							cp.setBounds(GameFrame.this.getContentPane().getBounds());
+							System.out.println(cp.getBounds());
+							DecisionPanel panel = new DecisionPanel("Pokedex", "Pokemon", "Beutel", "Speichern", "Hauptmenü",
+									"Zurück");
+							panel.setLocation(GameFrame.this.getWidth() - panel.getWidth() - 25, GameFrame.this.getHeight() / 2 - panel.getHeight() / 2);
+							cp.add(panel);
+							cp.add(GameFrame.this.map);
+							GameFrame.this.currentPanel = cp;
+							Main.FORCE_REPAINT = true;
+							switch (panel.getResult()) {
+							case "Pokemon":
+								GameFrame.this.pokemon.update();
+								GameFrame.this.currentPanel = GameFrame.this.pokemon;
+								break;
+							case "Beutel":
+								GameFrame.this.inventory.update(GameFrame.this.gController.getMainCharacter());
+								GameFrame.this.currentPanel = GameFrame.this.inventory;
+								break;
+							case "Hauptmenü":
+								GameFrame.this.gController.returnToMenu();
+								break;
+							case "Speichern":
+								GameFrame.this.gController.saveGame();
+							default:
+								GameFrame.this.currentPanel = null;
+							}
+							GameFrame.this.gController.setInteractionPause(false);
+						};
+					}).start();
 				}
 			}
 		});
@@ -518,7 +557,7 @@ public class GameFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				if (!GameFrame.this.gController.isFighting() && !GameFrame.this.gController.getInteractionPause()) {
 					GameFrame.this.pokemon.update();
-					GameFrame.this.currentPanel = GameFrame.this.pokemon;
+					GameFrame.this.setCurrentPanel(GameFrame.this.pokemon);
 				}
 			}
 		});
@@ -538,9 +577,13 @@ public class GameFrame extends JFrame {
 		this.map.getActionMap().put("flash", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				if (GameFrame.this.gController.getMainCharacter().getTeam().canUseVM(Items.TM70)) {
-					((DarkOverlay) (GameFrame.this.getBackgroundLabel().getOverlay(DarkOverlay.class))).flash();
-				}
+				// TODO: Flash
+				// if
+				// (GameFrame.this.gController.getMainCharacter().getTeam().canUseVM(Items.TM70))
+				// {
+				// ((DarkOverlay)
+				// (GameFrame.this.getBackgroundLabel().getOverlay(DarkOverlay.class))).flash();
+				// }
 				// if
 				// (GameFrame.this.gController.getMainCharacter().hasItem(Items.TM70)
 				// &&

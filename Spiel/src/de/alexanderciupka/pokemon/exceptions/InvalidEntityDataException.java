@@ -1,6 +1,6 @@
 package de.alexanderciupka.pokemon.exceptions;
 
-import de.alexanderciupka.pokemon.map.entities.Entity;
+import de.alexanderciupka.pokemon.map.entities.types.Entity;
 
 public class InvalidEntityDataException extends Throwable {
 

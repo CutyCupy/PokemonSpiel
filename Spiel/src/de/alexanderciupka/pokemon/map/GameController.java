@@ -10,7 +10,7 @@ import de.alexanderciupka.pokemon.characters.Direction;
 import de.alexanderciupka.pokemon.characters.Team;
 import de.alexanderciupka.pokemon.characters.types.NPC;
 import de.alexanderciupka.pokemon.characters.types.Player;
-import de.alexanderciupka.pokemon.constants.Abilities;
+import de.alexanderciupka.pokemon.characters.types.Walkable;
 import de.alexanderciupka.pokemon.constants.Items;
 import de.alexanderciupka.pokemon.fighting.FightOption;
 import de.alexanderciupka.pokemon.fighting.Fighting;
@@ -19,7 +19,6 @@ import de.alexanderciupka.pokemon.gui.TextLabel;
 import de.alexanderciupka.pokemon.gui.panels.ReportPanel;
 import de.alexanderciupka.pokemon.menu.MenuController;
 import de.alexanderciupka.pokemon.menu.SoundController;
-import de.alexanderciupka.pokemon.pokemon.Ability;
 import de.alexanderciupka.pokemon.pokemon.Pokemon;
 import de.alexanderciupka.pokemon.pokemon.PokemonInformation;
 import de.alexanderciupka.pokemon.pokemon.Stat;
@@ -61,7 +60,7 @@ public class GameController {
 	public boolean move(Direction moveDirection) {
 		boolean result = false;
 		if (!this.interactionPause) {
-			this.setInteractionPause(true);
+//			this.setInteractionPause(true);
 			this.gameFrame.setDelay(TextLabel.SLOW);
 			Point possiblePoint = this.mainCharacter.getCurrentPosition();
 			if (this.mainCharacter.getCurrentDirection() == moveDirection) {
@@ -90,7 +89,7 @@ public class GameController {
 					e.printStackTrace();
 				}
 			}
-			this.setInteractionPause(false);
+//			this.setInteractionPause(false);
 		}
 		return result;
 	}
@@ -129,25 +128,23 @@ public class GameController {
 				return false;
 			}
 			boolean changed = false;
-			for (NPC stone : this.mainCharacter.getCurrentRoute().getEntities()[y][x].getCharacters()) {
-				if (stone != null && "strength".equals(stone.getID()) && this.mainCharacter.getTeam().canUseVM((Items.VM04_STRENGTH))) {
-					this.mainCharacter.getCurrentRoute().updateMap(new Point(x, y));
+			for (NPC stone : this.mainCharacter.getCurrentRoute().getEntity(x, y).getCharacters()) {
+				if (stone != null && "strength".equals(stone.getID())
+						&& this.mainCharacter.getTeam().canUseVM((Items.STRENGTH))) {
 					stone.setCurrentDirection(this.mainCharacter.getCurrentDirection());
-					if (this.mainCharacter.getCurrentRoute().getEntities()[stone.getInteractionPoint().y][stone
-							.getInteractionPoint().x].isAccessible(stone)
+					if (this.mainCharacter.getCurrentRoute()
+							.getEntity(stone.getInteractionPoint().x, stone.getInteractionPoint().y).isAccessible(stone)
 							&& (this.currentBackground.getCurrentRoute()
-									.getEntities()[stone.getInteractionPoint().y][stone.getInteractionPoint().x]
-											.getSpriteName().equals("free"))) {
-						this.mainCharacter.getCurrentRoute().updateMap(stone.getCurrentPosition());
+									.getEntity(stone.getInteractionPoint().x, stone.getInteractionPoint().y)
+									.getSpriteName().equals("free"))) {
 						stone.changePosition(stone.getCurrentDirection(), true);
-						this.mainCharacter.getCurrentRoute().updateMap(stone.getCurrentPosition());
 					}
 					changed = true;
 					break;
 				}
 			}
 			if (!changed) {
-				if (this.mainCharacter.getCurrentRoute().getEntities()[y][x].isAccessible(this.mainCharacter)) {
+				if (this.mainCharacter.getCurrentRoute().getEntity(x, y).isAccessible(this.mainCharacter)) {
 					if (this.mainCharacter.isControllable()) {
 						this.mainCharacter.changePosition(this.mainCharacter.getCurrentDirection(), true);
 					} else {
@@ -269,6 +266,7 @@ public class GameController {
 		SoundController.getInstance().startRain(this.mainCharacter.getCurrentRoute().getRain());
 	}
 
+	// TODO: Update Attacks when one enemy is completely defeated
 	public boolean winFight(Pokemon dead) {
 		if (fight.isPlayer(dead)) {
 			return false;
@@ -305,7 +303,7 @@ public class GameController {
 			this.gameFrame.getFightPanel().addText("Du wurdest besiegt!");
 			this.getMainCharacter().decreaseMoney((long) (this.getMainCharacter().getMoney() * 0.1));
 			this.gameFrame.getFightPanel().pause();
-			this.resetCharacterPositions();
+			this.mainCharacter.getCurrentRoute().reset();
 			this.mainCharacter.warpToPokemonCenter();
 			this.endFight();
 			return true;
@@ -352,29 +350,32 @@ public class GameController {
 		}
 	}
 
-	public SimpleEntry<NPC, NPC> checkStartFight(de.alexanderciupka.pokemon.characters.types.Character c) {
-		if(!(c instanceof Player)) {
+	public SimpleEntry<NPC, NPC> checkStartFight(de.alexanderciupka.pokemon.characters.Character c) {
+		if (!(c instanceof Player)) {
 			return null;
 		}
 		NPC left = null;
 		NPC right = null;
 		for (NPC npc : this.currentBackground.getCurrentRoute().getCharacters()) {
-			if(npc.checkStartFight((Player) c)) {
-				switch(npc.getFightingStyle()) {
+			if (npc.checkStartFight((Player) c)) {
+				if(npc instanceof Walkable) {
+					((Walkable) npc).lock();
+				}
+				switch (npc.getFightingStyle()) {
 				case NPC.DOUBLE:
-					if(left == null) {
+					if (left == null) {
 						left = npc;
 						right = npc;
 					}
 					break;
 				case NPC.FOLLOWER_DOUBLE:
-					if(left == null) {
+					if (left == null) {
 						left = npc;
 						right = npc.getFollower();
 					}
 					break;
 				case NPC.NO_DOUBLE:
-					if(left != null) {
+					if (left != null) {
 						right = npc;
 					} else {
 						left = npc;
@@ -383,7 +384,7 @@ public class GameController {
 				}
 			}
 		}
-		if(left != null) {
+		if (left != null) {
 			return new SimpleEntry<NPC, NPC>(left, right);
 		}
 		return null;
@@ -394,12 +395,6 @@ public class GameController {
 			Thread.sleep(millis);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-		}
-	}
-
-	public void resetCharacterPositions() {
-		for (NPC c : this.currentBackground.getCurrentRoute().getCharacters()) {
-			c.resetPosition();
 		}
 	}
 
@@ -414,12 +409,11 @@ public class GameController {
 		this.mainCharacter.setID("999");
 
 		this.mainCharacter.setCurrentRoute(this.routeAnalyzer.getRouteById("pokemon_center"));
-		this.mainCharacter.setCurrentPosition(0, 0);
+		this.mainCharacter.setCurrentPosition(1, 0);
 
 		this.mainCharacter.getItems().put(Items.POKEBALL, 5 * 99);
 		this.mainCharacter.getItems().put(Items.TRANK, 10);
-		
-		
+
 		// mainCharacter.setCurrentRoute(routeAnalyzer.getRouteById("eigenes_zimmer"));
 		// mainCharacter.setCurrentPosition(START.x, START.y);
 
@@ -427,8 +421,6 @@ public class GameController {
 
 		Pokemon player = new Pokemon(25);
 		player.getStats().generateStats((short) 5);
-		player.setAbility(new Ability(Abilities.SANDSTURM, "", ""));
-		
 
 		for (Stat s : Stat.values()) {
 			switch (s) {
@@ -450,14 +442,13 @@ public class GameController {
 			this.gameFrame = new GameFrame();
 		}
 
-		this.routeAnalyzer.updateHatches(this.mainCharacter.getCurrentRoute());
-
 		this.gameFrame.getBackgroundLabel().changeRoute(this.getCurrentBackground().getCurrentRoute());
 
 		this.currentBackground.getCamera().setCharacter(this.getMainCharacter(), false);
 
-		this.mainCharacter.getCurrentRoute().getEntities()[this.mainCharacter.getCurrentPosition().y][this.mainCharacter
-				.getCurrentPosition().x].onStep(this.mainCharacter);
+		this.mainCharacter.getCurrentRoute()
+				.getEntity(this.mainCharacter.getCurrentPosition().x, this.mainCharacter.getCurrentPosition().y)
+				.onStep(this.mainCharacter);
 	}
 
 	public boolean loadGame(String path) {
@@ -478,19 +469,14 @@ public class GameController {
 	}
 
 	public void saveGame() {
-		if (!this.interactionPause) {
+//		if (!this.interactionPause) {
 			this.interactionPause = true;
-			if (!this.mainCharacter.getCurrentRoute().getId().equals("pokemon_center")) {
-				if (!this.routeAnalyzer.saveGame(this.mController.saveGame())) {
-					JOptionPane.showMessageDialog(this.gameFrame, "Das Speichern ist fehlgeschlagen!",
-							"Speichern fehlgeschlagen!", JOptionPane.ERROR_MESSAGE);
-				}
-			} else {
-				JOptionPane.showMessageDialog(this.gameFrame, "Du kannst nicht im Pokemon Center speichern!",
+			if (!this.routeAnalyzer.saveGame(this.mController.saveGame())) {
+				JOptionPane.showMessageDialog(this.gameFrame, "Das Speichern ist fehlgeschlagen!",
 						"Speichern fehlgeschlagen!", JOptionPane.ERROR_MESSAGE);
 			}
 			this.interactionPause = false;
-		}
+//		}
 	}
 
 	public boolean getInteractionPause() {
@@ -530,6 +516,14 @@ public class GameController {
 
 	public void setInteractionPause(boolean b) {
 		this.interactionPause = b;
+	}
+
+	public TextLabel getCurrentTextLabel() {
+		if (this.isFighting()) {
+			return this.getGameFrame().getFightPanel().getTextLabel();
+		} else {
+			return this.getGameFrame().getDialogue();
+		}
 	}
 
 }

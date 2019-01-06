@@ -7,14 +7,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import de.alexanderciupka.pokemon.characters.Character;
 import de.alexanderciupka.pokemon.characters.Direction;
 import de.alexanderciupka.pokemon.characters.PC;
 import de.alexanderciupka.pokemon.constants.Items;
 import de.alexanderciupka.pokemon.map.Route;
-import de.alexanderciupka.pokemon.pokemon.Ailment;
 import de.alexanderciupka.pokemon.pokemon.Pokedex;
-import de.alexanderciupka.pokemon.pokemon.Pokemon;
-import de.alexanderciupka.pokemon.pokemon.Type;
 
 public class Player extends Character {
 
@@ -28,41 +26,41 @@ public class Player extends Character {
 
 		this.pc = new PC(this);
 
-		new Thread(new Runnable() {
-			@Override
-			public void run() {
-				while (true) {
-					NPC follower = Player.this.getFollower();
-					boolean newFollower = follower == null && Player.this.getCurrentRoute() != null;
-					if (newFollower && Player.this.getCurrentRoute() != null) {
-						follower = new NPC("playermon");
-						follower.setCurrentPosition(Player.this.getOldPosition());
-						follower.setCurrentRoute(Player.this.getCurrentRoute());
-						follower.setName(Player.this.getTeam().getTeam()[0].getName());
-						follower.setCurrentDirection(Player.this.getCurrentDirection());
-						follower.setShowName(false);
-					}
-					if (Player.this.getTeam().getTeam()[0] != null
-							&& Player.this.getTeam().getTeam()[0].getAilment() != Ailment.FAINTED) {
-						Pokemon p = Player.this.getTeam().getTeam()[0];
-						follower.setCharacterImage(p.getId() + (p.isShiny() ? "s" : ""));
-						follower.setDialogue(NPC.DIALOGUE_NO_FIGHT, p.getName());
-						follower.setTextColor(Type.getColor(Player.this.getTeam().getTeam()[0].getTypes()[0]));
-					}
-
-					if (newFollower) {
-						follower.getCurrentRoute().addCharacter(follower);
-						Player.this.setFollower(follower);
-					}
-
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		}).start();
+//		new Thread(new Runnable() {
+//			@Override
+//			public void run() {
+//				while (true) {
+//					NPC follower = Player.this.getFollower();
+//					boolean newFollower = follower == null && Player.this.getCurrentRoute() != null;
+//					if (newFollower && Player.this.getCurrentRoute() != null) {
+//						follower = new NPC("playermon");
+//						follower.setCurrentPosition(Player.this.getOldPosition());
+//						follower.setCurrentRoute(Player.this.getCurrentRoute());
+//						follower.setName(Player.this.getTeam().getTeam()[0].getName());
+//						follower.setCurrentDirection(Player.this.getCurrentDirection());
+//						follower.setShowName(false);
+//					}
+//					if (Player.this.getTeam().getTeam()[0] != null
+//							&& Player.this.getTeam().getTeam()[0].getAilment() != Ailment.FAINTED) {
+//						Pokemon p = Player.this.getTeam().getTeam()[0];
+//						follower.setCharacterImage(p.getId() + (p.isShiny() ? "s" : ""));
+//						follower.setDialogue(NPC.DIALOGUE_NO_ACTION, p.getName());
+//						follower.setTextColor(Type.getColor(Player.this.getTeam().getTeam()[0].getTypes()[0]));
+//					}
+//
+//					if (newFollower) {
+//						follower.getCurrentRoute().addCharacter(follower);
+//						Player.this.setFollower(follower);
+//					}
+//
+//					try {
+//						Thread.sleep(1000);
+//					} catch (InterruptedException e) {
+//						e.printStackTrace();
+//					}
+//				}
+//			}
+//		}).start();
 		this.pokedex = new Pokedex();
 	}
 
@@ -173,5 +171,13 @@ public class Player extends Character {
 	public void addItem(Integer reward, int amount) {
 		super.addItem(reward, amount);
 		this.gController.getGameFrame().getInventoryPanel().update(this);
+	}
+
+	public int getSpeed() {
+		return this.speed;
+	}
+	
+	public boolean isMoving() {
+		return this.moving;
 	}
 }

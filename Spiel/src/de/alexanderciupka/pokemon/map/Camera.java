@@ -11,7 +11,7 @@ public class Camera {
 	private double y;
 	private boolean moving;
 
-	private de.alexanderciupka.pokemon.characters.types.Character centered;
+	private de.alexanderciupka.pokemon.characters.Character centered;
 	private GameController gController;
 
 	public Camera(int x, int y) {
@@ -21,7 +21,7 @@ public class Camera {
 		gController = GameController.getInstance();
 	}
 
-	public void setCharacter(de.alexanderciupka.pokemon.characters.types.Character c, boolean animated) {
+	public void setCharacter(de.alexanderciupka.pokemon.characters.Character c, boolean animated) {
 		if (animated) {
 			moveTowards(c.getExactX(), c.getExactY());
 		}
@@ -126,7 +126,7 @@ public class Camera {
 		}
 	}
 
-	public de.alexanderciupka.pokemon.characters.types.Character getCenter() {
+	public de.alexanderciupka.pokemon.characters.Character getCenter() {
 		return this.centered;
 	}
 

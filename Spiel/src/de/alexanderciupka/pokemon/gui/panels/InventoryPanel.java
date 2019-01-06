@@ -1,10 +1,12 @@
 package de.alexanderciupka.pokemon.gui.panels;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -16,6 +18,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 
 import de.alexanderciupka.pokemon.characters.types.Player;
@@ -150,7 +153,8 @@ public class InventoryPanel extends JPanel {
 		this.itemSprites = new HashMap<>();
 		for (int i = 1; i < 682; i++) {
 			try {
-				this.itemSprites.put(i, new ImageIcon(this.gController.getRouteAnalyzer().getItemImage(i)));
+				Image sprite = this.gController.getRouteAnalyzer().getItemImage(i);
+				this.itemSprites.put(i, new ImageIcon(sprite.getScaledInstance(200, 200, Image.SCALE_SMOOTH)));
 			} catch (Exception e) {
 			}
 		}
@@ -164,6 +168,12 @@ public class InventoryPanel extends JPanel {
 	private void updateItems() {
 		this.spriteL.setIcon(null);
 		this.descriptionL.setText(" ");
+
+		this.spriteL.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+		this.descriptionL.setBorder(BorderFactory.createLineBorder(Color.BLACK, 3));
+		
+		this.descriptionL.setHorizontalAlignment(SwingConstants.CENTER);
+		
 		if (this.currentPlayer != null) {
 			GridBagConstraints gbc = new GridBagConstraints();
 
@@ -179,7 +189,9 @@ public class InventoryPanel extends JPanel {
 				int amount = currentItems.get(i);
 				if (amount > 0) {
 					while (amount > 0) {
-						JLabel itemL = new JLabel(String.valueOf(this.gController.getInformation().getItemData(Items.ITEM_NAME, i)));
+						JLabel itemL = new JLabel(
+								String.valueOf(this.gController.getInformation().getItemData(Items.ITEM_NAME, i))
+										.replace("\"", "").replace("\\n", " "));
 						itemL.setOpaque(true);
 						itemL.setFont(FONT);
 
@@ -197,18 +209,23 @@ public class InventoryPanel extends JPanel {
 							public void mouseExited(MouseEvent e) {
 								JLabel source = (JLabel) e.getComponent();
 								source.setBackground(LABEL_BACKGROUND);
-								InventoryPanel.this.descriptionL.setText("");
-								InventoryPanel.this.spriteL.setIcon(null);
+								// InventoryPanel.this.descriptionL.setText("");
+								// InventoryPanel.this.spriteL.setIcon(null);
 							}
 
 							@Override
 							public void mouseEntered(MouseEvent e) {
+								for(Component c : InventoryPanel.this.panel.getComponents()) {
+									c.setBackground(LABEL_BACKGROUND);
+								}
 								JLabel source = (JLabel) e.getComponent();
 								source.setBackground(HOVER_BACKGROUND);
 								Integer item = Integer.parseInt(source.getName());
 								InventoryPanel.this.descriptionL.setFont(FONT.deriveFont(20f));
 								InventoryPanel.this.descriptionL.setText(InventoryPanel.this.formatText(
-										InventoryPanel.this.descriptionL.getWidth(), GameController.getInstance().getInformation().getItemData(Items.ITEM_DESC, item).toString(),
+										InventoryPanel.this.descriptionL.getWidth(),
+										GameController.getInstance().getInformation().getItemData(Items.ITEM_DESC, item)
+												.toString().replace("\"", "").replace("\\n", " "),
 										InventoryPanel.this.getFontMetrics(InventoryPanel.this.descriptionL.getFont()),
 										5));
 								InventoryPanel.this.spriteL.setIcon(InventoryPanel.this.itemSprites.get(item));
@@ -219,29 +236,39 @@ public class InventoryPanel extends JPanel {
 								new Thread(new Runnable() {
 									@Override
 									public void run() {
-										//TODO: Item usage
-//										JLabel source = (JLabel) e.getComponent();
-//										Item i = Item.getItemByName(source.getText());
-//										if (i.isUsableOnPokemon()) {
-//											InventoryPanel.this.gController.getGameFrame().getPokemonPanel().update(i);
-//											InventoryPanel.this.gController.getGameFrame().setCurrentPanel(
-//													InventoryPanel.this.gController.getGameFrame().getPokemonPanel());
-//										} else {
-//											if (InventoryPanel.this.currentPlayer.useItem(i)) {
-//												if (InventoryPanel.this.gController.isFighting()) {
-//													InventoryPanel.this.gController.getFight()
-//															.setCurrentFightOption(FightOption.FIGHT);
-//												} else {
-//													InventoryPanel.this.gController.getGameFrame()
-//															.setCurrentPanel(null);
-//												}
-//											}
-//										}
-//										source.setBackground(LABEL_BACKGROUND);
+										// TODO: Item usage
+										// JLabel source = (JLabel)
+										// e.getComponent();
+										// Item i =
+										// Item.getItemByName(source.getText());
+										// if (i.isUsableOnPokemon()) {
+										// InventoryPanel.this.gController.getGameFrame().getPokemonPanel().update(i);
+										// InventoryPanel.this.gController.getGameFrame().setCurrentPanel(
+										// InventoryPanel.this.gController.getGameFrame().getPokemonPanel());
+										// } else {
+										// if
+										// (InventoryPanel.this.currentPlayer.useItem(i))
+										// {
+										// if
+										// (InventoryPanel.this.gController.isFighting())
+										// {
+										// InventoryPanel.this.gController.getFight()
+										// .setCurrentFightOption(FightOption.FIGHT);
+										// } else {
+										// InventoryPanel.this.gController.getGameFrame()
+										// .setCurrentPanel(null);
+										// }
+										// }
+										// }
+										// source.setBackground(LABEL_BACKGROUND);
 									}
 								}).start();
 							}
 						});
+
+						if (spriteL.getIcon() == null) {
+							itemL.getMouseListeners()[0].mouseEntered(new MouseEvent(itemL, 0, 0, 0, 0, 0, 0, false));
+						}
 
 						this.panel.add(itemL, gbc);
 						JLabel amountL = new JLabel("x" + (amount > 99 ? 99 : amount));
@@ -278,8 +305,9 @@ public class InventoryPanel extends JPanel {
 	public String formatText(int width, String text, FontMetrics fm, int maxRows) {
 		ArrayList<String> rows = new ArrayList<String>();
 		String currentRow = "";
+		System.out.println(text);
 		for (String s : text.split(" ")) {
-			if (fm.stringWidth(currentRow + " " + s) > width) {
+			if (fm.stringWidth(currentRow + " " + s) > width - 10) {
 				rows.add(currentRow);
 				currentRow = s;
 			} else {
@@ -296,7 +324,8 @@ public class InventoryPanel extends JPanel {
 		}
 		String result = "<html>";
 		for (String s : rows) {
-			result += s + "<br>";
+			System.out.println(s);
+			result += s + " <br>";
 		}
 		return result;
 	}

@@ -14,15 +14,16 @@ public enum SecondaryAilment {
 	UNKNOWN("", "", ""),
 	PERISHSONG(3, 3, "", "Irgendwas mit Timer", "Perish Song für @pokemon"),
 	INGRAIN("", "@pokemon nimmt über seine Wurzeln Nährstoffe auf!", "@pokemon pflanzt seine Wurzeln!"),
-	DISABLE("@pokemon kann @move wieder einsetzen!", "@pokemon kann momentan @move nicht einsetzen!", "@move von @pokemon wurde blockiert!"),
+	DISABLE(3, 3, "@pokemon kann @move wieder einsetzen!", "@pokemon kann momentan @move nicht einsetzen!", "@move von @pokemon wurde blockiert!"),
 	TRAP(4, 5, "@pokemon ist nicht mehr gefangen!", "@pokemon erleidet Schaden!", "@pokemon ist gefangen!"),
 	EMBARGO("@pokemon kann wieder Items einsetzen!", "@pokemon kann gerade kein Item einsetzen!", "@pokemon kann keine Items mehr einsetzen!"),
 	CONFUSION("@pokemon ist nicht mehr verwirrt!", "Es hat sich vor Verwirrung selbst verletzt!", "@pokemon ist verwirrt!"),
 	PROTECTED(0, 0, null, "@pokemon schützt sich selbst!", "@pokemon schützt sich selbst!"),
 	FLINCH(0, 0, null, "@pokemon schreckt zurück!", null),
-	MAGICCOAT(0, 0, null, "@pokemon wird von einem Magiemantel geschützt!", "@pokemon schützt sich mit einem Magiemantel!");
-
-
+	MAGICCOAT(0, 0, null, "@pokemon wird von einem Magiemantel geschützt!", "@pokemon schützt sich mit einem Magiemantel!"),
+	MEGABLOCK(null, "Die Statuswerte von @pokemon können nicht mehr gesenkt werden!", "");
+	
+	
 	private int inflictedTurn;
 
 	private boolean wearOff;

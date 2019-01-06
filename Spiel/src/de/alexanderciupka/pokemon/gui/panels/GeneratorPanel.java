@@ -18,7 +18,7 @@ import javax.swing.KeyStroke;
 
 import de.alexanderciupka.hoverbutton.Main;
 import de.alexanderciupka.pokemon.map.GameController;
-import de.alexanderciupka.pokemon.map.entities.GeneratorEntity;
+import de.alexanderciupka.pokemon.map.entities.types.GeneratorEntity;
 import de.alexanderciupka.pokemon.menu.SoundController;
 
 public class GeneratorPanel extends JPanel {
@@ -301,7 +301,6 @@ public class GeneratorPanel extends JPanel {
 		generator.setPercentage(progress.getValue() / 100.0);
 		if(generator.isDone()) {
 			SoundController.getInstance().playSound("generator_finished");
-			GameController.getInstance().getRouteAnalyzer().updateHatches(generator);
 		}
 		GameController.getInstance().getGameFrame().setCurrentPanel(null);
 	}

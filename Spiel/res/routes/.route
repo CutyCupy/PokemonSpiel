@@ -1,0 +1,1 @@
+{"id":"","events":[],"characters":[],"encounters":{},"route":{"name":"","properties":{"dark":false,"type":"ARENA","rain":"CLEAR","snow":"CLEAR","fog":"CLEAR"},"entities":{"13.4":{"terrain":"free","sprite":"grass","encounter_rate":0,"pool":0,"accessibility":{"left":false,"right":false,"top":false,"bottom":false},"type":"Entity"}}}}

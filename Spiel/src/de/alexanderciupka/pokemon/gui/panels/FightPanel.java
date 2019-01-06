@@ -46,6 +46,7 @@ import de.alexanderciupka.pokemon.gui.overlay.SnowType;
 import de.alexanderciupka.pokemon.main.Main;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.map.RouteType;
+import de.alexanderciupka.pokemon.map.entities.types.WaterEntity;
 import de.alexanderciupka.pokemon.menu.SoundController;
 import de.alexanderciupka.pokemon.painting.Painting;
 import de.alexanderciupka.pokemon.pokemon.Ailment;
@@ -197,8 +198,8 @@ public class FightPanel extends JPanel {
 		}
 
 		this.background = new JLabel(new ImageIcon(this.gController.getMainCharacter().getCurrentRoute()
-				.getEntities()[this.gController.getMainCharacter().getCurrentPosition().y][this.gController
-						.getMainCharacter().getCurrentPosition().x].isWater() ? RouteType.WATER.getBattleBackground()
+				.getEntity(this.gController.getMainCharacter().getCurrentPosition().x, 
+						this.gController.getMainCharacter().getCurrentPosition().y) instanceof WaterEntity ? RouteType.WATER.getBattleBackground()
 								: this.gController.getMainCharacter().getCurrentRoute().getType()
 										.getBattleBackground()));
 

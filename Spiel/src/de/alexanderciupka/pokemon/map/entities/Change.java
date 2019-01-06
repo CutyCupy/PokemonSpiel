@@ -6,8 +6,8 @@ import java.util.HashMap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import de.alexanderciupka.pokemon.characters.Character;
 import de.alexanderciupka.pokemon.characters.Direction;
-import de.alexanderciupka.pokemon.characters.types.Character;
 import de.alexanderciupka.pokemon.characters.types.Player;
 import de.alexanderciupka.pokemon.map.GameController;
 import de.alexanderciupka.pokemon.map.Route;
