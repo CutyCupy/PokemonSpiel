@@ -1,5 +1,5 @@
 package ciupka.pokemon.enums;
 
-public enum Gender {
+public enum eGender {
 	FEMALE, MALE, GENDERLESS;
 }

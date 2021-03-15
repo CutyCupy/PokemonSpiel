@@ -1,5 +1,9 @@
 package ciupka.pokemon.pokemon.abilities;
 
+import ciupka.pokemon.fight.Battlefield;
+import ciupka.pokemon.pokemon.Move;
+import ciupka.pokemon.pokemon.Pokemon;
+
 public abstract class Ability {
 	
 	protected int id;
@@ -8,15 +12,14 @@ public abstract class Ability {
 	protected String description;
 	
 	
-	
 	// TODO: think about what should be given as parameter and returned
-	public abstract void onAttack();
-	public abstract void afterAttack();
+	public abstract void onAttack(Move usedMove, Pokemon self, Pokemon[] hitPokemon);
+	public abstract void afterAttack(Move usedMove, Pokemon self, Pokemon[] hitPokemon, int damage, boolean hit);
 	
-	public abstract void onBattleEntry();
-	public abstract void afterBattleEntry();
+	public abstract void onBattleEntry(Pokemon[] opponents, Battlefield field);
+	public abstract void afterBattleEntry(Pokemon[] opponents, Battlefield field);
 	
-	public abstract void onTurnEnd();
+	public abstract void onTurnEnd(Pokemon self, Pokemon[] teammates);
 	
 	public abstract void onAttacked();
 	public abstract void afterAttacked();
@@ -61,6 +64,8 @@ public abstract class Ability {
 	public abstract void getMoveType();
 	public abstract void getMoveStrength();
 	public abstract void getMoveAccuracy();
+	
+	public abstract double getEncounterChanceModifier();
 	
 	// TODO Backentaschen, Schnarchnase, Plus, Minus, Völlerei, Zeitspiel, Schwermetall, Leichtmetall, Reiche Ernte, Trance-Modus
 }
