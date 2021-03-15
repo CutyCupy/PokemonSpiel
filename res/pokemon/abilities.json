@@ -1,1 +1,1162 @@
-[{"name":"Duftnote","description":"Lässt das Ziel beim Angriff eventuell durch Gestank\nzurückschrecken.","id":1},{"name":"Niesel","description":"Ruft bei Kampfantritt Regen herbei.","id":2},{"name":"Temposchub","description":"Erhöht in jeder Runde die Initiative.","id":3},{"name":"Kampfpanzer","description":"Wehrt gegnerische Volltreffer mit einem harten\nPanzer ab.","id":4},{"name":"Robustheit","description":"Bietet Schutz gegen K.O.-Attacken. Bei vollen KP\nübersteht das Pokémon auch K.O.-Treffer.","id":5},{"name":"Feuchtigkeit","description":"Befeuchtet die Umgebung und verhindert so den\nEinsatz von Attacken wie Finale, die Explosionen\nauslösen.","id":6},{"name":"Flexibilität","description":"Der flexible Körper des Pokémon schützt es vor\nParalyse.","id":7},{"name":"Sandschleier","description":"Erhöht in Sandstürmen den Fluchtwert.","id":8},{"name":"Statik","description":"Kann bei Berührung durch statisch aufgeladenen\nKörper paralysieren.","id":9},{"name":"Voltabsorber","description":"Treffer durch Elektro-Attacken verursachen keinen\nSchaden, sondern regenerieren stattdessen KP.","id":10},{"name":"H2O-Absorber","description":"Treffer durch Wasser-Attacken verursachen keinen\nSchaden, sondern regenerieren stattdessen KP.","id":11},{"name":"Dösigkeit","description":"Das Pokémon ist so apathisch, dass es nicht betört\noder provoziert werden kann.","id":12},{"name":"Wolke Sieben","description":"Hebt alle Wetter-Effekte auf.","id":13},{"name":"Facettenauge","description":"Erhöht die Genauigkeit von Attacken.","id":14},{"name":"Insomnia","description":"Verhindert Einschlafen.","id":15},{"name":"Farbwechsel","description":"Ändert seinen Typ zu dem der Attacke des\nAngreifers.","id":16},{"name":"Immunität","description":"Das starke Immunsystem des Pokémon verhindert\nVergiftungen.","id":17},{"name":"Feuerfänger","description":"Verstärkt Feuer-Attacken, wenn es von\nFeuer-Attacken getroffen wird.","id":18},{"name":"Puderabwehr","description":"Blockiert durch Puder die Zusatzeffekte\ngegnerischer Angriffe.","id":19},{"name":"Tempomacher","description":"Das Pokémon lässt sich nicht aus der Ruhe bringen\nund verhindert so Verwirrung.","id":20},{"name":"Saugnapf","description":"Blockt Attacken und Items, die Pokémon\naustauschen, indem es sich mit einem Saugnapf\nam Boden verankert.","id":21},{"name":"Bedroher","description":"Senkt den Angriff der Gegner, indem es sie gleich zu\nKampfantritt bedroht und einschüchtert.","id":22},{"name":"Wegsperre","description":"Hindert den Gegner an der Flucht beziehungsweise\nam Auswechseln, indem es ihm den Weg versperrt.","id":23},{"name":"Rauhaut","description":"Angreifer werden durch die raue Haut des Pokémon\nbei direkten Attacken verletzt.","id":24},{"name":"Wunderwache","description":"Wundersame Kräfte bewirken, dass nur sehr\neffektive Treffer bei ihm Schaden anrichten.","id":25},{"name":"Schwebe","description":"Verleiht volle Immunität gegen alle Boden-Attacken\ndurch Schwebezustand.","id":26},{"name":"Sporenwirt","description":"Wird dieses Pokémon durch eine direkte Attacke\nangegriffen, kann das beim Gegner Paralyse,\nVergiftung oder Schlaf auslösen.","id":27},{"name":"Synchro","description":"Erleidet das Pokémon Verbrennungen, Vergiftungen\noder Paralyse, ereilt das jeweilige Statusproblem\nauch den Verursacher.","id":28},{"name":"Neutraltorso","description":"Verhindert das Senken der Statuswerte durch\nAttacken und Fähigkeiten von Angreifern.","id":29},{"name":"Innere Kraft","description":"Wird das Pokémon ausgewechselt, werden seine\nStatusprobleme geheilt.","id":30},{"name":"Blitzfänger","description":"Zieht Elektro-Attacken an. Statt durch diese\nSchaden zu nehmen, erhöht es den eigenen\nSpezial-Angriff.","id":31},{"name":"Edelmut","description":"Erhöht die Wahrscheinlichkeit, dass Zusatzeffekte\nvon Attacken auftreten.","id":32},{"name":"Wassertempo","description":"Erhöht bei Regen die Initiative.","id":33},{"name":"Chlorophyll","description":"Erhöht bei Sonnenschein die Initiative.","id":34},{"name":"Erleuchtung","description":"Erhellt die Umgebung und erhöht dadurch die\nWahrscheinlichkeit, wilden Pokémon zu begegnen.","id":35},{"name":"Fährte","description":"Kopiert bei Kampfantritt die Fähigkeit eines Gegners.","id":36},{"name":"Kraftkoloss","description":"Verdoppelt die Stärke von physischen Attacken.","id":37},{"name":"Giftdorn","description":"Vergiftet den Angreifer bei Berührung eventuell.","id":38},{"name":"Konzentrator","description":"Verhindert durch erhöhte Konzentrationsfähigkeit\nZurückschrecken.","id":39},{"name":"Magmapanzer","description":"Dank eines Panzers aus Magma kann dieses\nPokémon nicht eingefroren werden.","id":40},{"name":"Aquahülle","description":"Verhindert durch eine Hülle aus Wasser\nVerbrennungen.","id":41},{"name":"Magnetfalle","description":"Hindert Stahl-Pokémon durch Magnetismus an der\nFlucht.","id":42},{"name":"Lärmschutz","description":"Bietet durch Schalldämmung volle Immunität gegen\nalle Lärm-Attacken.","id":43},{"name":"Regengenuss","description":"Stellt bei Regen langsam und stetig KP wieder her.","id":44},{"name":"Sandsturm","description":"Erzeugt bei Kampfantritt Sandstürme.","id":45},{"name":"Erzwinger","description":"Zwingt den Gegner dazu, beim Einsatz von Attacken\nmehr AP zu verbrauchen.","id":46},{"name":"Speckschicht","description":"Das Pokémon wird von einer dicken Fettschicht\ngeschützt, was den durch Feuer- und Eis-Attacken\nerlittenen Schaden halbiert.","id":47},{"name":"Frühwecker","description":"Wenn es eingeschlafen ist, kann es doppelt so\nschnell wieder aufwachen wie andere Pokémon.","id":48},{"name":"Flammkörper","description":"Fügt dem Angreifer bei Berührung eventuell\nVerbrennungen zu.","id":49},{"name":"Angsthase","description":"Die Flucht vor wilden Pokémon gelingt immer.","id":50},{"name":"Adlerauge","description":"Sein scharfer Blick hindert Angreifer daran,\nseine Genauigkeit zu senken.","id":51},{"name":"Scherenmacht","description":"Hindert Angreifer durch mächtige Scheren daran,\nden Angriffs-Wert zu senken.","id":52},{"name":"Mitnahme","description":"Hebt gelegentlich von Gegnern benutzte Items auf.\nDies geschieht nicht nur während Kämpfen, sondern\nauch unterwegs.","id":53},{"name":"Schnarchnase","description":"Das Pokémon muss nach Einsatz einer Attacke\neine Runde lang aussetzen.","id":54},{"name":"Übereifer","description":"Erhöht den Angriffs-Wert, aber senkt die\nGenauigkeit.","id":55},{"name":"Charmebolzen","description":"Wird dieses Pokémon durch eine direkte Attacke\nangegriffen, verliebt sich der Gegner in es.","id":56},{"name":"Plus","description":"Erhöht den Spezial-Angriff, wenn das Pokémon einen\nMitstreiter mit der Fähigkeit Plus oder Minus hat.","id":57},{"name":"Minus","description":"Erhöht den Spezial-Angriff, wenn das Pokémon einen\nMitstreiter mit der Fähigkeit Plus oder Minus hat.","id":58},{"name":"Prognose","description":"Nimmt je nach Wetter entweder den Typ Wasser,\nFeuer oder Eis an.","id":59},{"name":"Wertehalter","description":"Trägt es ein Item, bleibt dieses an seinem klebrigen\nKörper haften, wodurch Item-Diebstahl verhindert\nwird.","id":60},{"name":"Expidermis","description":"Das Pokémon befreit sich eventuell von\nStatusproblemen, indem es seine Haut abstreift.","id":61},{"name":"Adrenalin","description":"Bei Statusproblemen setzt es Adrenalin frei und\nerhöht so seinen Angriffs-Wert.","id":62},{"name":"Notschutz","description":"Bei Statusproblemen schützt es sich mit mysteriösen\nSchuppen und erhöht so seine Verteidigung.","id":63},{"name":"Kloakensoße","description":"Angreifer, die durch Saug-Attacken Kloakensoße\nin sich aufgenommen haben, nehmen durch deren\nwiderwärtigen Gestank Schaden.","id":64},{"name":"Notdünger","description":"Erhöht die Stärke von Pflanzen-Attacken,\nwenn die KP auf einen gewissen Wert fallen.","id":65},{"name":"Großbrand","description":"Erhöht die Stärke von Feuer-Attacken,\nwenn die KP auf einen gewissen Wert fallen.","id":66},{"name":"Sturzbach","description":"Erhöht die Stärke von Wasser-Attacken,\nwenn die KP auf einen gewissen Wert fallen.","id":67},{"name":"Hexaplaga","description":"Erhöht die Stärke von Käfer-Attacken,\nwenn die KP auf einen gewissen Wert fallen.","id":68},{"name":"Steinhaupt","description":"Verhindert Schaden, der durch Rückstoß entstehen\nwürde.","id":69},{"name":"Dürre","description":"Erzeugt bei Kampfantritt gleißendes Sonnenlicht.","id":70},{"name":"Ausweglos","description":"Hindert den Gegner im Kampf an der Flucht.","id":71},{"name":"Munterkeit","description":"Das Pokémon ist so munter, dass es nicht\neinschlafen kann.","id":72},{"name":"Pulverrauch","description":"Indem es sich mit pulvrigem Rauch umhüllt, hindert\nes Angreifer daran, seine Statuswerte zu senken.","id":73},{"name":"Mentalkraft","description":"Verdoppelt mit reiner Willenskraft die Stärke seiner\nphysischen Attacken.","id":74},{"name":"Panzerhaut","description":"Wehrt gegnerische Volltreffer mit einem harten\nPanzer ab.","id":75},{"name":"Klimaschutz","description":"Hebt alle Wetter-Effekte auf.","id":76},{"name":"Fußangel","description":"Erhöht den Fluchtwert, wenn das Pokémon\nverwirrt ist.","id":77},{"name":"Starthilfe","description":"Treffer durch Elektro-Attacken verursachen keinen\nSchaden, sondern geben dem Pokémon eine\nStarthilfe und erhöhen so seine Initiative.","id":78},{"name":"Rivalität","description":"Greift es einen Rivalen desselben Geschlechts an,\nwird es stärker. Greift es ein Ziel des anderen\nGeschlechts an, wird es schwächer.","id":79},{"name":"Felsenfest","description":"Sein eiserner Wille erhöht die Initiative, wann immer\ndas Pokémon zurückschreckt.","id":80},{"name":"Schneemantel","description":"Erhöht bei Hagel den Fluchtwert.","id":81},{"name":"Völlerei","description":"Setzt bestimmte Beeren nicht erst in einer Notlage\nein, sondern bereits dann, wenn seine KP auf die\nHälfte des Maximalwerts fallen.","id":82},{"name":"Kurzschluss","description":"Wird nach Einstecken eines Volltreffers wütend und\nmaximiert dabei seinen Angriffs-Wert.","id":83},{"name":"Entlastung","description":"Wenn das von ihm getragene Item verwendet wird\noder verloren geht, erhöht dies seine Initiative.","id":84},{"name":"Hitzeschutz","description":"Sein Hitze abweisender Körper halbiert den durch\nFeuer-Attacken erlittenen Schaden.","id":85},{"name":"Wankelmut","description":"Verdoppelt die Wirkung eigener\nStatusveränderungen.","id":86},{"name":"Trockenheit","description":"Bei Sonnenschein verliert das Pokémon KP und der\nSchaden durch Feuer-Attacken steigt. Bei Regen und\nTreffern durch Wasser-Attacken regeneriert es KP.","id":87},{"name":"Download","description":"Ist die Spezial-Verteidigung des Gegners höher als\nseine Verteidigung, wird der eigene Spezial-Angriff\nerhöht. Ist die Verteidigung höher, steigt der Angriff.","id":88},{"name":"Eisenfaust","description":"Erhöht die Stärke von Hieb-, Punch-, Faust- und\nSchlag-Attacken.","id":89},{"name":"Aufheber","description":"Das Pokémon erleidet keinen Schaden durch\nVergiftung, sondern regeneriert KP.","id":90},{"name":"Anpassung","description":"Erhöht die Stärke von Attacken, die dem Typ des\nPokémon entsprechen.","id":91},{"name":"Wertelink","description":"Landet mit Serien-Attacken immer die maximale\nAnzahl an Treffern.","id":92},{"name":"Hydration","description":"Heilt bei Regen Statusprobleme.","id":93},{"name":"Solarkraft","description":"Führt bei Sonnenschein in jeder Runde zu\nKP-Verlusten, erhöht aber den Spezial-Angriff.","id":94},{"name":"Rasanz","description":"Erhöht bei Statusproblemen die Initiative.","id":95},{"name":"Regulierung","description":"Alle Attacken des Pokémon nehmen den Typ Normal\nan und ihre Stärke erhöht sich ein wenig.","id":96},{"name":"Superschütze","description":"Erhöht bei Volltreffern die Stärke der Attacke noch\nweiter.","id":97},{"name":"Magieschild","description":"Das Pokémon nimmt nur durch Offensiv-Attacken\nSchaden.","id":98},{"name":"Schildlos","description":"Alle Attacken des oder auf das Pokémon gelingen\naufgrund seiner deckungslosen Kampftaktik.","id":99},{"name":"Zeitspiel","description":"Handelt auch mit Initiative-Vorteil stets nach dem\nGegner.","id":100},{"name":"Techniker","description":"Erhöht die Stärke von schwächeren Attacken.","id":101},{"name":"Floraschild","description":"Verhindert bei Sonnenschein Statusprobleme.","id":102},{"name":"Tollpatsch","description":"Das Pokémon kann keine getragenen Items\nverwenden.","id":103},{"name":"Überbrückung","description":"Attacken können ungeachtet der Fähigkeiten des\nZieles verwendet werden.","id":104},{"name":"Glückspilz","description":"Großes Glück erhöht die Wahrscheinlichkeit,\neinen Volltreffer zu landen.","id":105},{"name":"Finalschlag","description":"Wird das Pokémon durch eine direkte Attacke\nbesiegt, fügt es dem Angreifer Schaden zu.","id":106},{"name":"Vorahnung","description":"Kann gefährliche Attacken des Gegners erahnen.","id":107},{"name":"Vorwarnung","description":"Gibt bei Kampfantritt Auskunft über eine Attacke\naus dem Repertoire des Gegners.","id":108},{"name":"Unkenntnis","description":"Greift das Pokémon an, ignoriert es sämtliche\nStatusveränderungen des Zieles.","id":109},{"name":"Aufwertung","description":"Bewirkt, dass nicht sehr effektive Attacken dem Ziel\ntrotz des Typennachteils normalen Schaden zufügen.","id":110},{"name":"Filter","description":"Reduziert die Stärke von sehr effektiven Attacken\nund verringert damit den Schaden, den das Pokémon\ndurch sie erleidet.","id":111},{"name":"Saumselig","description":"Halbiert fünf Runden lang den Angriffs-Wert und die\nInitiative des Pokémon.","id":112},{"name":"Rauflust","description":"Bewirkt, dass Normal- und Kampf-Attacken auch\nPokémon vom Typ Geist treffen können.","id":113},{"name":"Sturmsog","description":"Zieht Wasser-Attacken an. Statt durch diese\nSchaden zu nehmen, erhöht es den eigenen\nSpezial-Angriff.","id":114},{"name":"Eishaut","description":"Regeneriert bei Hagel nach und nach KP.","id":115},{"name":"Felskern","description":"Reduziert die Stärke von sehr effektiven Attacken\nund verringert damit den Schaden, den das Pokémon\ndurch sie erleidet.","id":116},{"name":"Hagelalarm","description":"Löst bei Kampfantritt Hagel aus.","id":117},{"name":"Honigmaul","description":"Das Pokémon sammelt nach Kämpfen eventuell\nHonig auf.","id":118},{"name":"Schnüffler","description":"Kann bei Kampfantritt Auskunft über das vom\nGegner getragene Item geben.","id":119},{"name":"Achtlos","description":"Erhöht die Stärke von Attacken mit\nRückstoßschaden.","id":120},{"name":"Variabilität","description":"Das Pokémon passt seinen Typ dem der getragenen\nTafel bzw. des getragenen Z-Kristalls an.","id":121},{"name":"Pflanzengabe","description":"Erhöht bei Sonnenschein den Angriff und die\nSpezial-Verteidigung aller Team-Pokémon.","id":122},{"name":"Alptraum","description":"Fügt schlafenden Gegnern Schaden zu.","id":123},{"name":"Langfinger","description":"Stiehlt das Item des Angreifers bei Berührung.","id":124},{"name":"Rohe Gewalt","description":"Erhöht die Stärke von Attacken, aber hebt dafür ihre\nZusatzeffekte auf.","id":125},{"name":"Umkehrung","description":"Statusveränderungen werden umgekehrt:\nStatuswerte, die eigentlich erhöht werden sollten,\nsinken und umgekehrt.","id":126},{"name":"Anspannung","description":"Erzeugt beim Gegner Stress und hindert ihn so\ndaran, Beeren zu konsumieren.","id":127},{"name":"Siegeswille","description":"Werden die Statuswerte des Pokémon gesenkt,\nsteigt sein Angriff stark.","id":128},{"name":"Schwächling","description":"Fallen seine KP auf die Hälfte des Maximalwerts oder\nweniger, bekommt es Angst. Dadurch wird die Stärke\nseines Angriffs und Spezial-Angriffs halbiert.","id":129},{"name":"Tastfluch","description":"Blockiert eventuell die Attacke, mit welcher der\nAngreifer es getroffen hat.","id":130},{"name":"Heilherz","description":"Befreit Mitstreiter gelegentlich von Statusproblemen.","id":131},{"name":"Freundeshut","description":"Kann den Schaden, den Mitstreiter erleiden,\nverringern.","id":132},{"name":"Bruchrüstung","description":"Senkt bei erlittenem Treffer durch eine physische\nAttacke die Verteidigung des Pokémon, aber erhöht\ndafür seine Initiative stark.","id":133},{"name":"Schwermetall","description":"Verdoppelt das eigene Gewicht.","id":134},{"name":"Leichtmetall","description":"Halbiert das eigene Gewicht.","id":135},{"name":"Multischuppe","description":"Verringert den erlittenen Schaden bei vollen KP.","id":136},{"name":"Giftwahn","description":"Erhöht bei Vergiftungen die Stärke von physischen\nAttacken.","id":137},{"name":"Hitzewahn","description":"Erhöht bei Verbrennungen die Stärke von\nSpezial-Attacken.","id":138},{"name":"Reiche Ernte","description":"Dieselbe Beere kann mehrmals verwendet werden.","id":139},{"name":"Telepathie","description":"Erkennt und pariert Attacken von Mitstreitern.","id":140},{"name":"Gefühlswippe","description":"Erhöht in jeder Runde aufs Neue einen Statuswert\nstark und senkt einen anderen.","id":141},{"name":"Wetterfest","description":"Nimmt weder durch Wetterlagen wie Sandsturm oder\nHagel noch durch Pulver oder Puder Schaden.","id":142},{"name":"Giftgriff","description":"Kann das Ziel durch bloßes Berühren vergiften.","id":143},{"name":"Belebekraft","description":"Wird das Pokémon ausgewechselt, regeneriert es\neine kleine Menge an KP.","id":144},{"name":"Brustbieter","description":"Hindert Angreifer daran, die Verteidigung des\nPokémon zu senken.","id":145},{"name":"Sandscharrer","description":"Erhöht in Sandstürmen die Initiative.","id":146},{"name":"Wunderhaut","description":"Wehrt mit robustem Körper viele Status-Attacken ab.","id":147},{"name":"Analyse","description":"Greift das Pokémon zuletzt an, erhöht sich die\nStärke der Attacke, die es einsetzt.","id":148},{"name":"Trugbild","description":"Führt den Gegner hinters Licht, indem es bei\nKampfantritt die Gestalt des Pokémon an der\nletzten Stelle im Team annimmt.","id":149},{"name":"Doppelgänger","description":"Kämpft als Kopie seines Gegenübers.","id":150},{"name":"Schwebedurch","description":"Überwindet gegnerische Schilde sowie Delegatoren\nund greift an.","id":151},{"name":"Mumie","description":"Überträgt bei Berührung die Fähigkeit Mumie auf den\nAngreifer.","id":152},{"name":"Hochmut","description":"Besiegt es ein Pokémon, steigt sein Selbstvertrauen\nund somit auch sein Angriff.","id":153},{"name":"Redlichkeit","description":"Wird es von einer Unlicht-Attacke getroffen, meldet\nsich sein Sinn für Gerechtigkeit zu Wort und sein\nAngriff steigt.","id":154},{"name":"Hasenfuß","description":"Wird es von einer Unlicht-, Geister- oder Käfer-\nAttacke getroffen, bekommt es Angst und seine\nInitiative steigt.","id":155},{"name":"Magiespiegel","description":"Lenkt Status-Attacken auf den Angreifer um,\nohne selbst von ihnen getroffen zu werden.","id":156},{"name":"Vegetarier","description":"Wird es von einer Pflanzen-Attacke getroffen,\nerleidet es keinerlei Schaden und sein Angriff\nsteigt.","id":157},{"name":"Strolch","description":"Ermöglicht einen Erstschlag mit Status-Attacken.","id":158},{"name":"Sandgewalt","description":"Erhöht in Sandstürmen die Stärke von Gesteins-,\nBoden- und Stahl-Attacken.","id":159},{"name":"Eisenstachel","description":"Fügt dem Angreifer bei Berührung mit eisernen\nStacheln Schaden zu.","id":160},{"name":"Trance-Modus","description":"Fallen seine KP auf die Hälfte des Maximalwerts oder\nweniger, wechselt es seine Gestalt.","id":161},{"name":"Triumphstern","description":"Erhöht die Genauigkeit aller Team-Pokémon.","id":162},{"name":"Turbobrand","description":"Attacken können ungeachtet der Fähigkeit des Zieles\neingesetzt werden.","id":163},{"name":"Teravolt","description":"Attacken können ungeachtet der Fähigkeit des Zieles\neingesetzt werden.","id":164},{"name":"Dufthülle","description":"Kann alle Team-Pokémon vor mentalen Angriffen\nschützen.","id":165},{"name":"Blütenhülle","description":"Schützt Mitstreiter vom Typ Pflanze vor dem Senken\nihrer Statuswerte sowie vor Statusproblemen.","id":166},{"name":"Backentaschen","description":"Regeneriert beim Konsum von Beeren ungeachtet\nder Beerensorte KP.","id":167},{"name":"Wandlungskunst","description":"Das Pokémon nimmt bei Einsatz einer Attacke deren\nTyp an.","id":168},{"name":"Fellkleid","description":"Halbiert den Schaden, den das Pokémon durch\nphysische Attacken erleidet.","id":169},{"name":"Zauberer","description":"Trifft das Pokémon ein Ziel mit einer Attacke, kann es\nihm dabei sein Item stehlen.","id":170},{"name":"Kugelsicher","description":"Kann das Pokémon vor geworfenen kugelförmigen\nObjekten, wie zum Beispiel Bomben, schützen.","id":171},{"name":"Unbeugsamkeit","description":"Erhöht den Spezial-Angriff stark, wenn ein\nStatuswert gesenkt wurde.","id":172},{"name":"Titankiefer","description":"Der kräftige Kiefer des Pokémon erhöht die Stärke\nvon Biss-Attacken.","id":173},{"name":"Frostschicht","description":"Attacken vom Typ Normal nehmen den Typ Eis an\nund ihre Stärke erhöht sich ein wenig.","id":174},{"name":"Zuckerhülle","description":"Alle Team-Pokémon können nicht einschlafen.","id":175},{"name":"Taktikwechsel","description":"Setzt das Pokémon eine Offensiv-Attacke ein, nimmt\nes die Klingenform an. Setzt es danach die Attacke\nKönigsschild ein, nimmt es die Schildform an.","id":176},{"name":"Orkanschwingen","description":"Kann bei vollen KP Flug-Attacken vor dem Gegner\neinsetzen.","id":177},{"name":"Megawumme","description":"Erhöht die Stärke einiger Wellen-, Aura- und\nPuls-Attacken.","id":178},{"name":"Pflanzenpelz","description":"Erhöht die Verteidigung, wenn Grasfeld aktiv ist.","id":179},{"name":"Nutznießer","description":"Gibt Mitstreitern, die ihr Item aufgebraucht haben,\nsein eigenes Item.","id":180},{"name":"Krallenwucht","description":"Erhöht die Stärke von direkten Attacken.","id":181},{"name":"Feenschicht","description":"Attacken vom Typ Normal nehmen den Typ Fee an\nund ihre Stärke erhöht sich ein wenig.","id":182},{"name":"Viskosität","description":"Senkt bei Berührung im Zuge eines Angriffs die\nInitiative des Angreifers.","id":183},{"name":"Zenithaut","description":"Attacken vom Typ Normal nehmen den Typ Flug an\nund ihre Stärke erhöht sich ein wenig.","id":184},{"name":"Familienbande","description":"Zwei Generationen setzen jeweils ein Mal zum\nAngriff an.","id":185},{"name":"Dunkelaura","description":"Erhöht die Stärke aller Attacken des Typs Unlicht.","id":186},{"name":"Feenaura","description":"Erhöht die Stärke aller Attacken des Typs Fee.","id":187},{"name":"Aura-Umkehr","description":"Kehrt die Wirkung von Auren um und senkt so die\nStärke bestimmter Attacken, anstatt sie zu erhöhen.","id":188},{"name":"Urmeer","description":"Ändert das Wetter, um Feuer-Attacken wirkungslos\nzu machen.","id":189},{"name":"Endland","description":"Ändert das Wetter, um Wasser-Attacken wirkungslos\nzu machen.","id":190},{"name":"Delta-Wind","description":"Ändert das Wetter, um die Schwächen des Typs Flug\nzu beseitigen.","id":191},{"name":"Zähigkeit","description":"Wird es von einer Attacke getroffen, steigt seine\nVerteidigung.","id":192},{"name":"Reißaus","description":"Fallen seine KP auf die Hälfte des Maximalwerts oder\nweniger, zieht es sich ängstlich zurück.","id":193},{"name":"Rückzug","description":"Fallen seine KP auf die Hälfte des Maximalwerts oder\nweniger, bringt es sich in Sicherheit.","id":194},{"name":"Verklumpen","description":"Wird es von einer Wasser-Attacke getroffen,\nsteigt seine Verteidigung stark.","id":195},{"name":"Quälerei","description":"Sorgt bei Angriffen auf vergiftete Ziele für\nVolltreffergarantie.","id":196},{"name":"Limitschild","description":"Fallen seine KP auf die Hälfte des Maximalwerts oder\nweniger, zerbricht die Panzerung des Pokémon und\nes wird aggressiver.","id":197},{"name":"Beschattung","description":"Bewirkt bei Angriffen auf neu eingewechselte Ziele\ndoppelten Schaden.","id":198},{"name":"Wasserblase","description":"Feuer-Attacken fügen dem Pokémon weniger\nSchaden zu. Verhindert Verbrennungen.","id":199},{"name":"Stahlprofi","description":"Erhöht die Stärke von Stahl-Attacken.","id":200},{"name":"Wutausbruch","description":"Fallen seine KP nach einem Angriff auf die Hälfte\ndes Maximalwerts oder weniger, steigt sein\nSpezial-Angriff.","id":201},{"name":"Schneescharrer","description":"Erhöht bei Hagel die Initiative.","id":202},{"name":"Langstrecke","description":"Ermöglicht dem Pokémon den Einsatz aller seiner\nAttacken, ohne das Ziel dabei direkt zu berühren.","id":203},{"name":"Plätscherstimme","description":"Bewirkt, dass alle Lärm-Attacken des Pokémon den\nTyp Wasser annehmen.","id":204},{"name":"Heilwandel","description":"Ermöglicht einen Erstschlag mit Attacken, welche die\nKP des Anwenders direkt regenerieren.","id":205},{"name":"Elektrohaut","description":"Attacken vom Typ Normal nehmen den Typ Elektro an\nund ihre Stärke erhöht sich ein wenig.","id":206},{"name":"Surf-Schweif","description":"Verdoppelt die Initiative, wenn zuvor ein Elektrofeld\nerzeugt wurde.","id":207},{"name":"Fischschwarm","description":"Verfügt es über einen hohen KP-Wert, wird es zu\neinem Schwarm und gewinnt an Stärke. Ist der\nKP-Wert niedrig, löst sich der Schwarm wieder auf.","id":208},{"name":"Kostümspuk","description":"Kann ein Mal pro Kampf mit seinem gruseligen\nKostüm einen Angriff abwehren.","id":209},{"name":"Freundschaftsakt","description":"Besiegt es ein Ziel, vertieft dies die Freundschaft zu\nseinem Trainer, wodurch es die Ash-Form annimmt\nund sein Wasser-Shuriken stärker wird.","id":210},{"name":"Scharwandel","description":"Fallen seine KP auf die Hälfte des Maximalwerts oder\nweniger, eilen ihm weitere Zellen zu Hilfe und es\nnimmt die Optimumform an.","id":211},{"name":"Korrosion","description":"Kann selbst Pokémon vom Typ Stahl oder Gift\nvergiften.","id":212},{"name":"Dauerschlaf","description":"Das Pokémon befindet sich ununterbrochen im\nHalbschlaf und wacht nie vollständig auf. Es kann\njedoch im Schlaf angreifen.","id":213},{"name":"Majestät","description":"Schüchtert den Gegner ein und hindert ihn so daran,\nAttacken mit hoher Erstschlagquote einzusetzen.","id":214},{"name":"Magenkrempler","description":"Wird es durch eine Attacke besiegt, fügt es dem\nAngreifer Schaden in Höhe des KP-Werts zu,\nden es besaß, bevor es kampfunfähig wurde.","id":215},{"name":"Tänzer","description":"Kann direkt im Anschluss an die Tanz-Attacke\neines anderen Pokémon ebenfalls eine solche\neinsetzen.","id":216},{"name":"Batterie","description":"Erhöht die Stärke der Spezial-Attacken seiner\nMitstreiter.","id":217},{"name":"Flauschigkeit","description":"Halbiert den Schaden, den es durch direkte Attacken\nnimmt, aber verdoppelt dafür den durch\nFeuer-Attacken erlittenen Schaden.","id":218},{"name":"Buntkörper","description":"Überrascht den Gegner und hindert ihn so daran,\nAttacken mit hoher Erstschlagquote einzusetzen.","id":219},{"name":"Seelenherz","description":"Erhöht jedes Mal, wenn ein Pokémon besiegt wird,\nden eigenen Spezial-Angriff.","id":220},{"name":"Lockenkopf","description":"Senkt bei Berührung im Zuge eines Angriffs die\nInitiative des Angreifers.","id":221},{"name":"Receiver","description":"Wird einer seiner Mitstreiter besiegt, erhält es\ndessen Fähigkeit.","id":222},{"name":"Chemiekraft","description":"Wechselt seine Fähigkeit zu der eines kampfunfähig\ngewordenen Mitstreiters.","id":223},{"name":"Bestien-Boost","description":"Erhöht in jeder Runde, in der es ein anderes\nPokémon besiegt, seinen höchsten Statuswert.","id":224},{"name":"Alpha-System","description":"Das Pokémon passt seinen Typ der getragenen\nDisc an.","id":225},{"name":"Elektro-Erzeuger","description":"Erzeugt bei Kampfantritt ein Elektrofeld.","id":226},{"name":"Psycho-Erzeuger","description":"Erzeugt bei Kampfantritt ein Psychofeld.","id":227},{"name":"Nebel-Erzeuger","description":"Erzeugt bei Kampfantritt ein Nebelfeld.","id":228},{"name":"Gras-Erzeuger","description":"Erzeugt bei Kampfantritt ein Grasfeld.","id":229},{"name":"Metallprotektor","description":"Verhindert das Senken der Statuswerte durch\nAttacken und Fähigkeiten von Angreifern.","id":230},{"name":"Phantomschutz","description":"Verringert den erlittenen Schaden bei vollen KP.","id":231},{"name":"Prismarüstung","description":"Reduziert die Stärke von sehr effektiven Attacken\nund verringert damit den Schaden, den das Pokémon\ndurch sie erleidet.","id":232}]
+[
+    {
+        "name": "Duftnote",
+        "description": "Lässt das Ziel beim Angriff eventuell durch Gestank\nzurückschrecken.",
+        "id": 1
+    },
+    {
+        "name": "Niesel",
+        "description": "Ruft bei Kampfantritt Regen herbei.",
+        "id": 2
+    },
+    {
+        "name": "Temposchub",
+        "description": "Erhöht in jeder Runde die Initiative.",
+        "id": 3
+    },
+    {
+        "name": "Kampfpanzer",
+        "description": "Wehrt gegnerische Volltreffer mit einem harten\nPanzer ab.",
+        "id": 4
+    },
+    {
+        "name": "Robustheit",
+        "description": "Bietet Schutz gegen K.O.-Attacken. Bei vollen KP\nübersteht das Pokémon auch K.O.-Treffer.",
+        "id": 5
+    },
+    {
+        "name": "Feuchtigkeit",
+        "description": "Befeuchtet die Umgebung und verhindert so den\nEinsatz von Attacken wie Finale, die Explosionen\nauslösen.",
+        "id": 6
+    },
+    {
+        "name": "Flexibilität",
+        "description": "Der flexible Körper des Pokémon schützt es vor\nParalyse.",
+        "id": 7
+    },
+    {
+        "name": "Sandschleier",
+        "description": "Erhöht in Sandstürmen den Fluchtwert.",
+        "id": 8
+    },
+    {
+        "name": "Statik",
+        "description": "Kann bei Berührung durch statisch aufgeladenen\nKörper paralysieren.",
+        "id": 9
+    },
+    {
+        "name": "Voltabsorber",
+        "description": "Treffer durch Elektro-Attacken verursachen keinen\nSchaden, sondern regenerieren stattdessen KP.",
+        "id": 10
+    },
+    {
+        "name": "H2O-Absorber",
+        "description": "Treffer durch Wasser-Attacken verursachen keinen\nSchaden, sondern regenerieren stattdessen KP.",
+        "id": 11
+    },
+    {
+        "name": "Dösigkeit",
+        "description": "Das Pokémon ist so apathisch, dass es nicht betört\noder provoziert werden kann.",
+        "id": 12
+    },
+    {
+        "name": "Wolke Sieben",
+        "description": "Hebt alle Wetter-Effekte auf.",
+        "id": 13
+    },
+    {
+        "name": "Facettenauge",
+        "description": "Erhöht die Genauigkeit von Attacken.",
+        "id": 14
+    },
+    {
+        "name": "Insomnia",
+        "description": "Verhindert Einschlafen.",
+        "id": 15
+    },
+    {
+        "name": "Farbwechsel",
+        "description": "Ändert seinen Typ zu dem der Attacke des\nAngreifers.",
+        "id": 16
+    },
+    {
+        "name": "Immunität",
+        "description": "Das starke Immunsystem des Pokémon verhindert\nVergiftungen.",
+        "id": 17
+    },
+    {
+        "name": "Feuerfänger",
+        "description": "Verstärkt Feuer-Attacken, wenn es von\nFeuer-Attacken getroffen wird.",
+        "id": 18
+    },
+    {
+        "name": "Puderabwehr",
+        "description": "Blockiert durch Puder die Zusatzeffekte\ngegnerischer Angriffe.",
+        "id": 19
+    },
+    {
+        "name": "Tempomacher",
+        "description": "Das Pokémon lässt sich nicht aus der Ruhe bringen\nund verhindert so Verwirrung.",
+        "id": 20
+    },
+    {
+        "name": "Saugnapf",
+        "description": "Blockt Attacken und Items, die Pokémon\naustauschen, indem es sich mit einem Saugnapf\nam Boden verankert.",
+        "id": 21
+    },
+    {
+        "name": "Bedroher",
+        "description": "Senkt den Angriff der Gegner, indem es sie gleich zu\nKampfantritt bedroht und einschüchtert.",
+        "id": 22
+    },
+    {
+        "name": "Wegsperre",
+        "description": "Hindert den Gegner an der Flucht beziehungsweise\nam Auswechseln, indem es ihm den Weg versperrt.",
+        "id": 23
+    },
+    {
+        "name": "Rauhaut",
+        "description": "Angreifer werden durch die raue Haut des Pokémon\nbei direkten Attacken verletzt.",
+        "id": 24
+    },
+    {
+        "name": "Wunderwache",
+        "description": "Wundersame Kräfte bewirken, dass nur sehr\neffektive Treffer bei ihm Schaden anrichten.",
+        "id": 25
+    },
+    {
+        "name": "Schwebe",
+        "description": "Verleiht volle Immunität gegen alle Boden-Attacken\ndurch Schwebezustand.",
+        "id": 26
+    },
+    {
+        "name": "Sporenwirt",
+        "description": "Wird dieses Pokémon durch eine direkte Attacke\nangegriffen, kann das beim Gegner Paralyse,\nVergiftung oder Schlaf auslösen.",
+        "id": 27
+    },
+    {
+        "name": "Synchro",
+        "description": "Erleidet das Pokémon Verbrennungen, Vergiftungen\noder Paralyse, ereilt das jeweilige Statusproblem\nauch den Verursacher.",
+        "id": 28
+    },
+    {
+        "name": "Neutraltorso",
+        "description": "Verhindert das Senken der Statuswerte durch\nAttacken und Fähigkeiten von Angreifern.",
+        "id": 29
+    },
+    {
+        "name": "Innere Kraft",
+        "description": "Wird das Pokémon ausgewechselt, werden seine\nStatusprobleme geheilt.",
+        "id": 30
+    },
+    {
+        "name": "Blitzfänger",
+        "description": "Zieht Elektro-Attacken an. Statt durch diese\nSchaden zu nehmen, erhöht es den eigenen\nSpezial-Angriff.",
+        "id": 31
+    },
+    {
+        "name": "Edelmut",
+        "description": "Erhöht die Wahrscheinlichkeit, dass Zusatzeffekte\nvon Attacken auftreten.",
+        "id": 32
+    },
+    {
+        "name": "Wassertempo",
+        "description": "Erhöht bei Regen die Initiative.",
+        "id": 33
+    },
+    {
+        "name": "Chlorophyll",
+        "description": "Erhöht bei Sonnenschein die Initiative.",
+        "id": 34
+    },
+    {
+        "name": "Erleuchtung",
+        "description": "Erhellt die Umgebung und erhöht dadurch die\nWahrscheinlichkeit, wilden Pokémon zu begegnen.",
+        "id": 35
+    },
+    {
+        "name": "Fährte",
+        "description": "Kopiert bei Kampfantritt die Fähigkeit eines Gegners.",
+        "id": 36
+    },
+    {
+        "name": "Kraftkoloss",
+        "description": "Verdoppelt die Stärke von physischen Attacken.",
+        "id": 37
+    },
+    {
+        "name": "Giftdorn",
+        "description": "Vergiftet den Angreifer bei Berührung eventuell.",
+        "id": 38
+    },
+    {
+        "name": "Konzentrator",
+        "description": "Verhindert durch erhöhte Konzentrationsfähigkeit\nZurückschrecken.",
+        "id": 39
+    },
+    {
+        "name": "Magmapanzer",
+        "description": "Dank eines Panzers aus Magma kann dieses\nPokémon nicht eingefroren werden.",
+        "id": 40
+    },
+    {
+        "name": "Aquahülle",
+        "description": "Verhindert durch eine Hülle aus Wasser\nVerbrennungen.",
+        "id": 41
+    },
+    {
+        "name": "Magnetfalle",
+        "description": "Hindert Stahl-Pokémon durch Magnetismus an der\nFlucht.",
+        "id": 42
+    },
+    {
+        "name": "Lärmschutz",
+        "description": "Bietet durch Schalldämmung volle Immunität gegen\nalle Lärm-Attacken.",
+        "id": 43
+    },
+    {
+        "name": "Regengenuss",
+        "description": "Stellt bei Regen langsam und stetig KP wieder her.",
+        "id": 44
+    },
+    {
+        "name": "Sandsturm",
+        "description": "Erzeugt bei Kampfantritt Sandstürme.",
+        "id": 45
+    },
+    {
+        "name": "Erzwinger",
+        "description": "Zwingt den Gegner dazu, beim Einsatz von Attacken\nmehr AP zu verbrauchen.",
+        "id": 46
+    },
+    {
+        "name": "Speckschicht",
+        "description": "Das Pokémon wird von einer dicken Fettschicht\ngeschützt, was den durch Feuer- und Eis-Attacken\nerlittenen Schaden halbiert.",
+        "id": 47
+    },
+    {
+        "name": "Frühwecker",
+        "description": "Wenn es eingeschlafen ist, kann es doppelt so\nschnell wieder aufwachen wie andere Pokémon.",
+        "id": 48
+    },
+    {
+        "name": "Flammkörper",
+        "description": "Fügt dem Angreifer bei Berührung eventuell\nVerbrennungen zu.",
+        "id": 49
+    },
+    {
+        "name": "Angsthase",
+        "description": "Die Flucht vor wilden Pokémon gelingt immer.",
+        "id": 50
+    },
+    {
+        "name": "Adlerauge",
+        "description": "Sein scharfer Blick hindert Angreifer daran,\nseine Genauigkeit zu senken.",
+        "id": 51
+    },
+    {
+        "name": "Scherenmacht",
+        "description": "Hindert Angreifer durch mächtige Scheren daran,\nden Angriffs-Wert zu senken.",
+        "id": 52
+    },
+    {
+        "name": "Mitnahme",
+        "description": "Hebt gelegentlich von Gegnern benutzte Items auf.\nDies geschieht nicht nur während Kämpfen, sondern\nauch unterwegs.",
+        "id": 53
+    },
+    {
+        "name": "Schnarchnase",
+        "description": "Das Pokémon muss nach Einsatz einer Attacke\neine Runde lang aussetzen.",
+        "id": 54
+    },
+    {
+        "name": "Übereifer",
+        "description": "Erhöht den Angriffs-Wert, aber senkt die\nGenauigkeit.",
+        "id": 55
+    },
+    {
+        "name": "Charmebolzen",
+        "description": "Wird dieses Pokémon durch eine direkte Attacke\nangegriffen, verliebt sich der Gegner in es.",
+        "id": 56
+    },
+    {
+        "name": "Plus",
+        "description": "Erhöht den Spezial-Angriff, wenn das Pokémon einen\nMitstreiter mit der Fähigkeit Plus oder Minus hat.",
+        "id": 57
+    },
+    {
+        "name": "Minus",
+        "description": "Erhöht den Spezial-Angriff, wenn das Pokémon einen\nMitstreiter mit der Fähigkeit Plus oder Minus hat.",
+        "id": 58
+    },
+    {
+        "name": "Prognose",
+        "description": "Nimmt je nach Wetter entweder den Typ Wasser,\nFeuer oder Eis an.",
+        "id": 59
+    },
+    {
+        "name": "Wertehalter",
+        "description": "Trägt es ein Item, bleibt dieses an seinem klebrigen\nKörper haften, wodurch Item-Diebstahl verhindert\nwird.",
+        "id": 60
+    },
+    {
+        "name": "Expidermis",
+        "description": "Das Pokémon befreit sich eventuell von\nStatusproblemen, indem es seine Haut abstreift.",
+        "id": 61
+    },
+    {
+        "name": "Adrenalin",
+        "description": "Bei Statusproblemen setzt es Adrenalin frei und\nerhöht so seinen Angriffs-Wert.",
+        "id": 62
+    },
+    {
+        "name": "Notschutz",
+        "description": "Bei Statusproblemen schützt es sich mit mysteriösen\nSchuppen und erhöht so seine Verteidigung.",
+        "id": 63
+    },
+    {
+        "name": "Kloakensoße",
+        "description": "Angreifer, die durch Saug-Attacken Kloakensoße\nin sich aufgenommen haben, nehmen durch deren\nwiderwärtigen Gestank Schaden.",
+        "id": 64
+    },
+    {
+        "name": "Notdünger",
+        "description": "Erhöht die Stärke von Pflanzen-Attacken,\nwenn die KP auf einen gewissen Wert fallen.",
+        "id": 65
+    },
+    {
+        "name": "Großbrand",
+        "description": "Erhöht die Stärke von Feuer-Attacken,\nwenn die KP auf einen gewissen Wert fallen.",
+        "id": 66
+    },
+    {
+        "name": "Sturzbach",
+        "description": "Erhöht die Stärke von Wasser-Attacken,\nwenn die KP auf einen gewissen Wert fallen.",
+        "id": 67
+    },
+    {
+        "name": "Hexaplaga",
+        "description": "Erhöht die Stärke von Käfer-Attacken,\nwenn die KP auf einen gewissen Wert fallen.",
+        "id": 68
+    },
+    {
+        "name": "Steinhaupt",
+        "description": "Verhindert Schaden, der durch Rückstoß entstehen\nwürde.",
+        "id": 69
+    },
+    {
+        "name": "Dürre",
+        "description": "Erzeugt bei Kampfantritt gleißendes Sonnenlicht.",
+        "id": 70
+    },
+    {
+        "name": "Ausweglos",
+        "description": "Hindert den Gegner im Kampf an der Flucht.",
+        "id": 71
+    },
+    {
+        "name": "Munterkeit",
+        "description": "Das Pokémon ist so munter, dass es nicht\neinschlafen kann.",
+        "id": 72
+    },
+    {
+        "name": "Pulverrauch",
+        "description": "Indem es sich mit pulvrigem Rauch umhüllt, hindert\nes Angreifer daran, seine Statuswerte zu senken.",
+        "id": 73
+    },
+    {
+        "name": "Mentalkraft",
+        "description": "Verdoppelt mit reiner Willenskraft die Stärke seiner\nphysischen Attacken.",
+        "id": 74
+    },
+    {
+        "name": "Panzerhaut",
+        "description": "Wehrt gegnerische Volltreffer mit einem harten\nPanzer ab.",
+        "id": 75
+    },
+    {
+        "name": "Klimaschutz",
+        "description": "Hebt alle Wetter-Effekte auf.",
+        "id": 76
+    },
+    {
+        "name": "Fußangel",
+        "description": "Erhöht den Fluchtwert, wenn das Pokémon\nverwirrt ist.",
+        "id": 77
+    },
+    {
+        "name": "Starthilfe",
+        "description": "Treffer durch Elektro-Attacken verursachen keinen\nSchaden, sondern geben dem Pokémon eine\nStarthilfe und erhöhen so seine Initiative.",
+        "id": 78
+    },
+    {
+        "name": "Rivalität",
+        "description": "Greift es einen Rivalen desselben Geschlechts an,\nwird es stärker. Greift es ein Ziel des anderen\nGeschlechts an, wird es schwächer.",
+        "id": 79
+    },
+    {
+        "name": "Felsenfest",
+        "description": "Sein eiserner Wille erhöht die Initiative, wann immer\ndas Pokémon zurückschreckt.",
+        "id": 80
+    },
+    {
+        "name": "Schneemantel",
+        "description": "Erhöht bei Hagel den Fluchtwert.",
+        "id": 81
+    },
+    {
+        "name": "Völlerei",
+        "description": "Setzt bestimmte Beeren nicht erst in einer Notlage\nein, sondern bereits dann, wenn seine KP auf die\nHälfte des Maximalwerts fallen.",
+        "id": 82
+    },
+    {
+        "name": "Kurzschluss",
+        "description": "Wird nach Einstecken eines Volltreffers wütend und\nmaximiert dabei seinen Angriffs-Wert.",
+        "id": 83
+    },
+    {
+        "name": "Entlastung",
+        "description": "Wenn das von ihm getragene Item verwendet wird\noder verloren geht, erhöht dies seine Initiative.",
+        "id": 84
+    },
+    {
+        "name": "Hitzeschutz",
+        "description": "Sein Hitze abweisender Körper halbiert den durch\nFeuer-Attacken erlittenen Schaden.",
+        "id": 85
+    },
+    {
+        "name": "Wankelmut",
+        "description": "Verdoppelt die Wirkung eigener\nStatusveränderungen.",
+        "id": 86
+    },
+    {
+        "name": "Trockenheit",
+        "description": "Bei Sonnenschein verliert das Pokémon KP und der\nSchaden durch Feuer-Attacken steigt. Bei Regen und\nTreffern durch Wasser-Attacken regeneriert es KP.",
+        "id": 87
+    },
+    {
+        "name": "Download",
+        "description": "Ist die Spezial-Verteidigung des Gegners höher als\nseine Verteidigung, wird der eigene Spezial-Angriff\nerhöht. Ist die Verteidigung höher, steigt der Angriff.",
+        "id": 88
+    },
+    {
+        "name": "Eisenfaust",
+        "description": "Erhöht die Stärke von Hieb-, Punch-, Faust- und\nSchlag-Attacken.",
+        "id": 89
+    },
+    {
+        "name": "Aufheber",
+        "description": "Das Pokémon erleidet keinen Schaden durch\nVergiftung, sondern regeneriert KP.",
+        "id": 90
+    },
+    {
+        "name": "Anpassung",
+        "description": "Erhöht die Stärke von Attacken, die dem Typ des\nPokémon entsprechen.",
+        "id": 91
+    },
+    {
+        "name": "Wertelink",
+        "description": "Landet mit Serien-Attacken immer die maximale\nAnzahl an Treffern.",
+        "id": 92
+    },
+    {
+        "name": "Hydration",
+        "description": "Heilt bei Regen Statusprobleme.",
+        "id": 93
+    },
+    {
+        "name": "Solarkraft",
+        "description": "Führt bei Sonnenschein in jeder Runde zu\nKP-Verlusten, erhöht aber den Spezial-Angriff.",
+        "id": 94
+    },
+    {
+        "name": "Rasanz",
+        "description": "Erhöht bei Statusproblemen die Initiative.",
+        "id": 95
+    },
+    {
+        "name": "Regulierung",
+        "description": "Alle Attacken des Pokémon nehmen den Typ Normal\nan und ihre Stärke erhöht sich ein wenig.",
+        "id": 96
+    },
+    {
+        "name": "Superschütze",
+        "description": "Erhöht bei Volltreffern die Stärke der Attacke noch\nweiter.",
+        "id": 97
+    },
+    {
+        "name": "Magieschild",
+        "description": "Das Pokémon nimmt nur durch Offensiv-Attacken\nSchaden.",
+        "id": 98
+    },
+    {
+        "name": "Schildlos",
+        "description": "Alle Attacken des oder auf das Pokémon gelingen\naufgrund seiner deckungslosen Kampftaktik.",
+        "id": 99
+    },
+    {
+        "name": "Zeitspiel",
+        "description": "Handelt auch mit Initiative-Vorteil stets nach dem\nGegner.",
+        "id": 100
+    },
+    {
+        "name": "Techniker",
+        "description": "Erhöht die Stärke von schwächeren Attacken.",
+        "id": 101
+    },
+    {
+        "name": "Floraschild",
+        "description": "Verhindert bei Sonnenschein Statusprobleme.",
+        "id": 102
+    },
+    {
+        "name": "Tollpatsch",
+        "description": "Das Pokémon kann keine getragenen Items\nverwenden.",
+        "id": 103
+    },
+    {
+        "name": "Überbrückung",
+        "description": "Attacken können ungeachtet der Fähigkeiten des\nZieles verwendet werden.",
+        "id": 104
+    },
+    {
+        "name": "Glückspilz",
+        "description": "Großes Glück erhöht die Wahrscheinlichkeit,\neinen Volltreffer zu landen.",
+        "id": 105
+    },
+    {
+        "name": "Finalschlag",
+        "description": "Wird das Pokémon durch eine direkte Attacke\nbesiegt, fügt es dem Angreifer Schaden zu.",
+        "id": 106
+    },
+    {
+        "name": "Vorahnung",
+        "description": "Kann gefährliche Attacken des Gegners erahnen.",
+        "id": 107
+    },
+    {
+        "name": "Vorwarnung",
+        "description": "Gibt bei Kampfantritt Auskunft über eine Attacke\naus dem Repertoire des Gegners.",
+        "id": 108
+    },
+    {
+        "name": "Unkenntnis",
+        "description": "Greift das Pokémon an, ignoriert es sämtliche\nStatusveränderungen des Zieles.",
+        "id": 109
+    },
+    {
+        "name": "Aufwertung",
+        "description": "Bewirkt, dass nicht sehr effektive Attacken dem Ziel\ntrotz des Typennachteils normalen Schaden zufügen.",
+        "id": 110
+    },
+    {
+        "name": "Filter",
+        "description": "Reduziert die Stärke von sehr effektiven Attacken\nund verringert damit den Schaden, den das Pokémon\ndurch sie erleidet.",
+        "id": 111
+    },
+    {
+        "name": "Saumselig",
+        "description": "Halbiert fünf Runden lang den Angriffs-Wert und die\nInitiative des Pokémon.",
+        "id": 112
+    },
+    {
+        "name": "Rauflust",
+        "description": "Bewirkt, dass Normal- und Kampf-Attacken auch\nPokémon vom Typ Geist treffen können.",
+        "id": 113
+    },
+    {
+        "name": "Sturmsog",
+        "description": "Zieht Wasser-Attacken an. Statt durch diese\nSchaden zu nehmen, erhöht es den eigenen\nSpezial-Angriff.",
+        "id": 114
+    },
+    {
+        "name": "Eishaut",
+        "description": "Regeneriert bei Hagel nach und nach KP.",
+        "id": 115
+    },
+    {
+        "name": "Felskern",
+        "description": "Reduziert die Stärke von sehr effektiven Attacken\nund verringert damit den Schaden, den das Pokémon\ndurch sie erleidet.",
+        "id": 116
+    },
+    {
+        "name": "Hagelalarm",
+        "description": "Löst bei Kampfantritt Hagel aus.",
+        "id": 117
+    },
+    {
+        "name": "Honigmaul",
+        "description": "Das Pokémon sammelt nach Kämpfen eventuell\nHonig auf.",
+        "id": 118
+    },
+    {
+        "name": "Schnüffler",
+        "description": "Kann bei Kampfantritt Auskunft über das vom\nGegner getragene Item geben.",
+        "id": 119
+    },
+    {
+        "name": "Achtlos",
+        "description": "Erhöht die Stärke von Attacken mit\nRückstoßschaden.",
+        "id": 120
+    },
+    {
+        "name": "Variabilität",
+        "description": "Das Pokémon passt seinen Typ dem der getragenen\nTafel bzw. des getragenen Z-Kristalls an.",
+        "id": 121
+    },
+    {
+        "name": "Pflanzengabe",
+        "description": "Erhöht bei Sonnenschein den Angriff und die\nSpezial-Verteidigung aller Team-Pokémon.",
+        "id": 122
+    },
+    {
+        "name": "Alptraum",
+        "description": "Fügt schlafenden Gegnern Schaden zu.",
+        "id": 123
+    },
+    {
+        "name": "Langfinger",
+        "description": "Stiehlt das Item des Angreifers bei Berührung.",
+        "id": 124
+    },
+    {
+        "name": "Rohe Gewalt",
+        "description": "Erhöht die Stärke von Attacken, aber hebt dafür ihre\nZusatzeffekte auf.",
+        "id": 125
+    },
+    {
+        "name": "Umkehrung",
+        "description": "Statusveränderungen werden umgekehrt:\nStatuswerte, die eigentlich erhöht werden sollten,\nsinken und umgekehrt.",
+        "id": 126
+    },
+    {
+        "name": "Anspannung",
+        "description": "Erzeugt beim Gegner Stress und hindert ihn so\ndaran, Beeren zu konsumieren.",
+        "id": 127
+    },
+    {
+        "name": "Siegeswille",
+        "description": "Werden die Statuswerte des Pokémon gesenkt,\nsteigt sein Angriff stark.",
+        "id": 128
+    },
+    {
+        "name": "Schwächling",
+        "description": "Fallen seine KP auf die Hälfte des Maximalwerts oder\nweniger, bekommt es Angst. Dadurch wird die Stärke\nseines Angriffs und Spezial-Angriffs halbiert.",
+        "id": 129
+    },
+    {
+        "name": "Tastfluch",
+        "description": "Blockiert eventuell die Attacke, mit welcher der\nAngreifer es getroffen hat.",
+        "id": 130
+    },
+    {
+        "name": "Heilherz",
+        "description": "Befreit Mitstreiter gelegentlich von Statusproblemen.",
+        "id": 131
+    },
+    {
+        "name": "Freundeshut",
+        "description": "Kann den Schaden, den Mitstreiter erleiden,\nverringern.",
+        "id": 132
+    },
+    {
+        "name": "Bruchrüstung",
+        "description": "Senkt bei erlittenem Treffer durch eine physische\nAttacke die Verteidigung des Pokémon, aber erhöht\ndafür seine Initiative stark.",
+        "id": 133
+    },
+    {
+        "name": "Schwermetall",
+        "description": "Verdoppelt das eigene Gewicht.",
+        "id": 134
+    },
+    {
+        "name": "Leichtmetall",
+        "description": "Halbiert das eigene Gewicht.",
+        "id": 135
+    },
+    {
+        "name": "Multischuppe",
+        "description": "Verringert den erlittenen Schaden bei vollen KP.",
+        "id": 136
+    },
+    {
+        "name": "Giftwahn",
+        "description": "Erhöht bei Vergiftungen die Stärke von physischen\nAttacken.",
+        "id": 137
+    },
+    {
+        "name": "Hitzewahn",
+        "description": "Erhöht bei Verbrennungen die Stärke von\nSpezial-Attacken.",
+        "id": 138
+    },
+    {
+        "name": "Reiche Ernte",
+        "description": "Dieselbe Beere kann mehrmals verwendet werden.",
+        "id": 139
+    },
+    {
+        "name": "Telepathie",
+        "description": "Erkennt und pariert Attacken von Mitstreitern.",
+        "id": 140
+    },
+    {
+        "name": "Gefühlswippe",
+        "description": "Erhöht in jeder Runde aufs Neue einen Statuswert\nstark und senkt einen anderen.",
+        "id": 141
+    },
+    {
+        "name": "Wetterfest",
+        "description": "Nimmt weder durch Wetterlagen wie Sandsturm oder\nHagel noch durch Pulver oder Puder Schaden.",
+        "id": 142
+    },
+    {
+        "name": "Giftgriff",
+        "description": "Kann das Ziel durch bloßes Berühren vergiften.",
+        "id": 143
+    },
+    {
+        "name": "Belebekraft",
+        "description": "Wird das Pokémon ausgewechselt, regeneriert es\neine kleine Menge an KP.",
+        "id": 144
+    },
+    {
+        "name": "Brustbieter",
+        "description": "Hindert Angreifer daran, die Verteidigung des\nPokémon zu senken.",
+        "id": 145
+    },
+    {
+        "name": "Sandscharrer",
+        "description": "Erhöht in Sandstürmen die Initiative.",
+        "id": 146
+    },
+    {
+        "name": "Wunderhaut",
+        "description": "Wehrt mit robustem Körper viele Status-Attacken ab.",
+        "id": 147
+    },
+    {
+        "name": "Analyse",
+        "description": "Greift das Pokémon zuletzt an, erhöht sich die\nStärke der Attacke, die es einsetzt.",
+        "id": 148
+    },
+    {
+        "name": "Trugbild",
+        "description": "Führt den Gegner hinters Licht, indem es bei\nKampfantritt die Gestalt des Pokémon an der\nletzten Stelle im Team annimmt.",
+        "id": 149
+    },
+    {
+        "name": "Doppelgänger",
+        "description": "Kämpft als Kopie seines Gegenübers.",
+        "id": 150
+    },
+    {
+        "name": "Schwebedurch",
+        "description": "Überwindet gegnerische Schilde sowie Delegatoren\nund greift an.",
+        "id": 151
+    },
+    {
+        "name": "Mumie",
+        "description": "Überträgt bei Berührung die Fähigkeit Mumie auf den\nAngreifer.",
+        "id": 152
+    },
+    {
+        "name": "Hochmut",
+        "description": "Besiegt es ein Pokémon, steigt sein Selbstvertrauen\nund somit auch sein Angriff.",
+        "id": 153
+    },
+    {
+        "name": "Redlichkeit",
+        "description": "Wird es von einer Unlicht-Attacke getroffen, meldet\nsich sein Sinn für Gerechtigkeit zu Wort und sein\nAngriff steigt.",
+        "id": 154
+    },
+    {
+        "name": "Hasenfuß",
+        "description": "Wird es von einer Unlicht-, Geister- oder Käfer-\nAttacke getroffen, bekommt es Angst und seine\nInitiative steigt.",
+        "id": 155
+    },
+    {
+        "name": "Magiespiegel",
+        "description": "Lenkt Status-Attacken auf den Angreifer um,\nohne selbst von ihnen getroffen zu werden.",
+        "id": 156
+    },
+    {
+        "name": "Vegetarier",
+        "description": "Wird es von einer Pflanzen-Attacke getroffen,\nerleidet es keinerlei Schaden und sein Angriff\nsteigt.",
+        "id": 157
+    },
+    {
+        "name": "Strolch",
+        "description": "Ermöglicht einen Erstschlag mit Status-Attacken.",
+        "id": 158
+    },
+    {
+        "name": "Sandgewalt",
+        "description": "Erhöht in Sandstürmen die Stärke von Gesteins-,\nBoden- und Stahl-Attacken.",
+        "id": 159
+    },
+    {
+        "name": "Eisenstachel",
+        "description": "Fügt dem Angreifer bei Berührung mit eisernen\nStacheln Schaden zu.",
+        "id": 160
+    },
+    {
+        "name": "Trance-Modus",
+        "description": "Fallen seine KP auf die Hälfte des Maximalwerts oder\nweniger, wechselt es seine Gestalt.",
+        "id": 161
+    },
+    {
+        "name": "Triumphstern",
+        "description": "Erhöht die Genauigkeit aller Team-Pokémon.",
+        "id": 162
+    },
+    {
+        "name": "Turbobrand",
+        "description": "Attacken können ungeachtet der Fähigkeit des Zieles\neingesetzt werden.",
+        "id": 163
+    },
+    {
+        "name": "Teravolt",
+        "description": "Attacken können ungeachtet der Fähigkeit des Zieles\neingesetzt werden.",
+        "id": 164
+    },
+    {
+        "name": "Dufthülle",
+        "description": "Kann alle Team-Pokémon vor mentalen Angriffen\nschützen.",
+        "id": 165
+    },
+    {
+        "name": "Blütenhülle",
+        "description": "Schützt Mitstreiter vom Typ Pflanze vor dem Senken\nihrer Statuswerte sowie vor Statusproblemen.",
+        "id": 166
+    },
+    {
+        "name": "Backentaschen",
+        "description": "Regeneriert beim Konsum von Beeren ungeachtet\nder Beerensorte KP.",
+        "id": 167
+    },
+    {
+        "name": "Wandlungskunst",
+        "description": "Das Pokémon nimmt bei Einsatz einer Attacke deren\nTyp an.",
+        "id": 168
+    },
+    {
+        "name": "Fellkleid",
+        "description": "Halbiert den Schaden, den das Pokémon durch\nphysische Attacken erleidet.",
+        "id": 169
+    },
+    {
+        "name": "Zauberer",
+        "description": "Trifft das Pokémon ein Ziel mit einer Attacke, kann es\nihm dabei sein Item stehlen.",
+        "id": 170
+    },
+    {
+        "name": "Kugelsicher",
+        "description": "Kann das Pokémon vor geworfenen kugelförmigen\nObjekten, wie zum Beispiel Bomben, schützen.",
+        "id": 171
+    },
+    {
+        "name": "Unbeugsamkeit",
+        "description": "Erhöht den Spezial-Angriff stark, wenn ein\nStatuswert gesenkt wurde.",
+        "id": 172
+    },
+    {
+        "name": "Titankiefer",
+        "description": "Der kräftige Kiefer des Pokémon erhöht die Stärke\nvon Biss-Attacken.",
+        "id": 173
+    },
+    {
+        "name": "Frostschicht",
+        "description": "Attacken vom Typ Normal nehmen den Typ Eis an\nund ihre Stärke erhöht sich ein wenig.",
+        "id": 174
+    },
+    {
+        "name": "Zuckerhülle",
+        "description": "Alle Team-Pokémon können nicht einschlafen.",
+        "id": 175
+    },
+    {
+        "name": "Taktikwechsel",
+        "description": "Setzt das Pokémon eine Offensiv-Attacke ein, nimmt\nes die Klingenform an. Setzt es danach die Attacke\nKönigsschild ein, nimmt es die Schildform an.",
+        "id": 176
+    },
+    {
+        "name": "Orkanschwingen",
+        "description": "Kann bei vollen KP Flug-Attacken vor dem Gegner\neinsetzen.",
+        "id": 177
+    },
+    {
+        "name": "Megawumme",
+        "description": "Erhöht die Stärke einiger Wellen-, Aura- und\nPuls-Attacken.",
+        "id": 178
+    },
+    {
+        "name": "Pflanzenpelz",
+        "description": "Erhöht die Verteidigung, wenn Grasfeld aktiv ist.",
+        "id": 179
+    },
+    {
+        "name": "Nutznießer",
+        "description": "Gibt Mitstreitern, die ihr Item aufgebraucht haben,\nsein eigenes Item.",
+        "id": 180
+    },
+    {
+        "name": "Krallenwucht",
+        "description": "Erhöht die Stärke von direkten Attacken.",
+        "id": 181
+    },
+    {
+        "name": "Feenschicht",
+        "description": "Attacken vom Typ Normal nehmen den Typ Fee an\nund ihre Stärke erhöht sich ein wenig.",
+        "id": 182
+    },
+    {
+        "name": "Viskosität",
+        "description": "Senkt bei Berührung im Zuge eines Angriffs die\nInitiative des Angreifers.",
+        "id": 183
+    },
+    {
+        "name": "Zenithaut",
+        "description": "Attacken vom Typ Normal nehmen den Typ Flug an\nund ihre Stärke erhöht sich ein wenig.",
+        "id": 184
+    },
+    {
+        "name": "Familienbande",
+        "description": "Zwei Generationen setzen jeweils ein Mal zum\nAngriff an.",
+        "id": 185
+    },
+    {
+        "name": "Dunkelaura",
+        "description": "Erhöht die Stärke aller Attacken des Typs Unlicht.",
+        "id": 186
+    },
+    {
+        "name": "Feenaura",
+        "description": "Erhöht die Stärke aller Attacken des Typs Fee.",
+        "id": 187
+    },
+    {
+        "name": "Aura-Umkehr",
+        "description": "Kehrt die Wirkung von Auren um und senkt so die\nStärke bestimmter Attacken, anstatt sie zu erhöhen.",
+        "id": 188
+    },
+    {
+        "name": "Urmeer",
+        "description": "Ändert das Wetter, um Feuer-Attacken wirkungslos\nzu machen.",
+        "id": 189
+    },
+    {
+        "name": "Endland",
+        "description": "Ändert das Wetter, um Wasser-Attacken wirkungslos\nzu machen.",
+        "id": 190
+    },
+    {
+        "name": "Delta-Wind",
+        "description": "Ändert das Wetter, um die Schwächen des Typs Flug\nzu beseitigen.",
+        "id": 191
+    },
+    {
+        "name": "Zähigkeit",
+        "description": "Wird es von einer Attacke getroffen, steigt seine\nVerteidigung.",
+        "id": 192
+    },
+    {
+        "name": "Reißaus",
+        "description": "Fallen seine KP auf die Hälfte des Maximalwerts oder\nweniger, zieht es sich ängstlich zurück.",
+        "id": 193
+    },
+    {
+        "name": "Rückzug",
+        "description": "Fallen seine KP auf die Hälfte des Maximalwerts oder\nweniger, bringt es sich in Sicherheit.",
+        "id": 194
+    },
+    {
+        "name": "Verklumpen",
+        "description": "Wird es von einer Wasser-Attacke getroffen,\nsteigt seine Verteidigung stark.",
+        "id": 195
+    },
+    {
+        "name": "Quälerei",
+        "description": "Sorgt bei Angriffen auf vergiftete Ziele für\nVolltreffergarantie.",
+        "id": 196
+    },
+    {
+        "name": "Limitschild",
+        "description": "Fallen seine KP auf die Hälfte des Maximalwerts oder\nweniger, zerbricht die Panzerung des Pokémon und\nes wird aggressiver.",
+        "id": 197
+    },
+    {
+        "name": "Beschattung",
+        "description": "Bewirkt bei Angriffen auf neu eingewechselte Ziele\ndoppelten Schaden.",
+        "id": 198
+    },
+    {
+        "name": "Wasserblase",
+        "description": "Feuer-Attacken fügen dem Pokémon weniger\nSchaden zu. Verhindert Verbrennungen.",
+        "id": 199
+    },
+    {
+        "name": "Stahlprofi",
+        "description": "Erhöht die Stärke von Stahl-Attacken.",
+        "id": 200
+    },
+    {
+        "name": "Wutausbruch",
+        "description": "Fallen seine KP nach einem Angriff auf die Hälfte\ndes Maximalwerts oder weniger, steigt sein\nSpezial-Angriff.",
+        "id": 201
+    },
+    {
+        "name": "Schneescharrer",
+        "description": "Erhöht bei Hagel die Initiative.",
+        "id": 202
+    },
+    {
+        "name": "Langstrecke",
+        "description": "Ermöglicht dem Pokémon den Einsatz aller seiner\nAttacken, ohne das Ziel dabei direkt zu berühren.",
+        "id": 203
+    },
+    {
+        "name": "Plätscherstimme",
+        "description": "Bewirkt, dass alle Lärm-Attacken des Pokémon den\nTyp Wasser annehmen.",
+        "id": 204
+    },
+    {
+        "name": "Heilwandel",
+        "description": "Ermöglicht einen Erstschlag mit Attacken, welche die\nKP des Anwenders direkt regenerieren.",
+        "id": 205
+    },
+    {
+        "name": "Elektrohaut",
+        "description": "Attacken vom Typ Normal nehmen den Typ Elektro an\nund ihre Stärke erhöht sich ein wenig.",
+        "id": 206
+    },
+    {
+        "name": "Surf-Schweif",
+        "description": "Verdoppelt die Initiative, wenn zuvor ein Elektrofeld\nerzeugt wurde.",
+        "id": 207
+    },
+    {
+        "name": "Fischschwarm",
+        "description": "Verfügt es über einen hohen KP-Wert, wird es zu\neinem Schwarm und gewinnt an Stärke. Ist der\nKP-Wert niedrig, löst sich der Schwarm wieder auf.",
+        "id": 208
+    },
+    {
+        "name": "Kostümspuk",
+        "description": "Kann ein Mal pro Kampf mit seinem gruseligen\nKostüm einen Angriff abwehren.",
+        "id": 209
+    },
+    {
+        "name": "Freundschaftsakt",
+        "description": "Besiegt es ein Ziel, vertieft dies die Freundschaft zu\nseinem Trainer, wodurch es die Ash-Form annimmt\nund sein Wasser-Shuriken stärker wird.",
+        "id": 210
+    },
+    {
+        "name": "Scharwandel",
+        "description": "Fallen seine KP auf die Hälfte des Maximalwerts oder\nweniger, eilen ihm weitere Zellen zu Hilfe und es\nnimmt die Optimumform an.",
+        "id": 211
+    },
+    {
+        "name": "Korrosion",
+        "description": "Kann selbst Pokémon vom Typ Stahl oder Gift\nvergiften.",
+        "id": 212
+    },
+    {
+        "name": "Dauerschlaf",
+        "description": "Das Pokémon befindet sich ununterbrochen im\nHalbschlaf und wacht nie vollständig auf. Es kann\njedoch im Schlaf angreifen.",
+        "id": 213
+    },
+    {
+        "name": "Majestät",
+        "description": "Schüchtert den Gegner ein und hindert ihn so daran,\nAttacken mit hoher Erstschlagquote einzusetzen.",
+        "id": 214
+    },
+    {
+        "name": "Magenkrempler",
+        "description": "Wird es durch eine Attacke besiegt, fügt es dem\nAngreifer Schaden in Höhe des KP-Werts zu,\nden es besaß, bevor es kampfunfähig wurde.",
+        "id": 215
+    },
+    {
+        "name": "Tänzer",
+        "description": "Kann direkt im Anschluss an die Tanz-Attacke\neines anderen Pokémon ebenfalls eine solche\neinsetzen.",
+        "id": 216
+    },
+    {
+        "name": "Batterie",
+        "description": "Erhöht die Stärke der Spezial-Attacken seiner\nMitstreiter.",
+        "id": 217
+    },
+    {
+        "name": "Flauschigkeit",
+        "description": "Halbiert den Schaden, den es durch direkte Attacken\nnimmt, aber verdoppelt dafür den durch\nFeuer-Attacken erlittenen Schaden.",
+        "id": 218
+    },
+    {
+        "name": "Buntkörper",
+        "description": "Überrascht den Gegner und hindert ihn so daran,\nAttacken mit hoher Erstschlagquote einzusetzen.",
+        "id": 219
+    },
+    {
+        "name": "Seelenherz",
+        "description": "Erhöht jedes Mal, wenn ein Pokémon besiegt wird,\nden eigenen Spezial-Angriff.",
+        "id": 220
+    },
+    {
+        "name": "Lockenkopf",
+        "description": "Senkt bei Berührung im Zuge eines Angriffs die\nInitiative des Angreifers.",
+        "id": 221
+    },
+    {
+        "name": "Receiver",
+        "description": "Wird einer seiner Mitstreiter besiegt, erhält es\ndessen Fähigkeit.",
+        "id": 222
+    },
+    {
+        "name": "Chemiekraft",
+        "description": "Wechselt seine Fähigkeit zu der eines kampfunfähig\ngewordenen Mitstreiters.",
+        "id": 223
+    },
+    {
+        "name": "Bestien-Boost",
+        "description": "Erhöht in jeder Runde, in der es ein anderes\nPokémon besiegt, seinen höchsten Statuswert.",
+        "id": 224
+    },
+    {
+        "name": "Alpha-System",
+        "description": "Das Pokémon passt seinen Typ der getragenen\nDisc an.",
+        "id": 225
+    },
+    {
+        "name": "Elektro-Erzeuger",
+        "description": "Erzeugt bei Kampfantritt ein Elektrofeld.",
+        "id": 226
+    },
+    {
+        "name": "Psycho-Erzeuger",
+        "description": "Erzeugt bei Kampfantritt ein Psychofeld.",
+        "id": 227
+    },
+    {
+        "name": "Nebel-Erzeuger",
+        "description": "Erzeugt bei Kampfantritt ein Nebelfeld.",
+        "id": 228
+    },
+    {
+        "name": "Gras-Erzeuger",
+        "description": "Erzeugt bei Kampfantritt ein Grasfeld.",
+        "id": 229
+    },
+    {
+        "name": "Metallprotektor",
+        "description": "Verhindert das Senken der Statuswerte durch\nAttacken und Fähigkeiten von Angreifern.",
+        "id": 230
+    },
+    {
+        "name": "Phantomschutz",
+        "description": "Verringert den erlittenen Schaden bei vollen KP.",
+        "id": 231
+    },
+    {
+        "name": "Prismarüstung",
+        "description": "Reduziert die Stärke von sehr effektiven Attacken\nund verringert damit den Schaden, den das Pokémon\ndurch sie erleidet.",
+        "id": 232
+    }
+]
