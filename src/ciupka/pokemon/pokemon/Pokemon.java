@@ -1,6 +1,7 @@
 package ciupka.pokemon.pokemon;
 
 import ciupka.pokemon.enums.Gender;
+import ciupka.pokemon.pokemon.stats.BaseStats;
 
 public class Pokemon {
 
